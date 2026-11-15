@@ -376,6 +376,8 @@ export interface VisualElementNode {
   tagName: string;
   label: string;
   textContent: string;
+  className?: string;
+  line?: number | null;
   styles: {
     color?: string;
     backgroundColor?: string;

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-SOVEREIGN",
-  "lastPersisted": "2026-11-15T10:07:12.994Z",
+  "lastPersisted": "2026-11-15T10:16:19.699Z",
   "verified_knowledge": {
     "architecture": "ZYNTHEOR Q+ Native Target 41.53M (41,527,808 parameters; 10L · 8H · 512D)",
     "sovereignty_rule": "Online-first Native neural inference on the Sovereign Cloud runtime",
@@ -1420,6 +1420,35 @@
           "version": 1,
           "updatedAt": "2026-11-15T10:07:12.994Z",
           "digest": "6541a3373c53008c35dd7a2d5bf0c8bf7ea21c558c1c2a12330215ae162f3409"
+        }
+      ]
+    },
+    "eng_project_proj_mwhoj964_f128aa": {
+      "key": "eng_project_proj_mwhoj964_f128aa",
+      "value": {
+        "name": "AST Visual Component App",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhoj964_f128aa",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T10:16:19.699Z",
+      "updatedAt": "2026-11-15T10:16:19.699Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-ast",
+        "ownerUserId": "dev-tester"
+      },
+      "contentDigest": "f63df3df7f46e85f9249ccbf7751dda9d59c8c527b56ff7747e9c4f197261691",
+      "tenantId": "test-tenant-ast",
+      "ownerUserId": "dev-tester",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T10:16:19.699Z",
+          "digest": "f63df3df7f46e85f9249ccbf7751dda9d59c8c527b56ff7747e9c4f197261691"
         }
       ]
     }

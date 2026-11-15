@@ -83,6 +83,12 @@ import {
 } from './lib/ActionDrivenEngine.ts';
 import { SoftwareProjectManager } from './lib/SoftwareProjectManager.ts';
 import { InternetIntegrationEngine } from './lib/InternetIntegrationEngine.ts';
+import {
+  applyDirectWorkspaceVisualEdit,
+  inspectJsxVisualElements,
+  isJsxOrTsxPath,
+  listWorkspaceVisualRevisions,
+} from './lib/VisualAstEditor.ts';
 import { buildTruthDashboardSnapshot } from './lib/DashboardTruth.ts';
 import { LedgerService, type LedgerCategorySort } from './src/services/LedgerService.ts';
 
@@ -1229,6 +1235,202 @@ app.post('/api/workspace/run', requireRole(['Administrator']), async (req: Reque
     res.json({ success: true, result });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/workspace/visual-elements', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const projectId = typeof req.query.projectId === 'string' ? req.query.projectId.trim() : '';
+    const filePath = typeof req.query.filePath === 'string'
+      ? req.query.filePath.trim()
+      : typeof req.query.path === 'string'
+        ? req.query.path.trim()
+        : '';
+
+    if (projectId) {
+      const scope = resolveEngineeringScope(req);
+      if (filePath && !isJsxOrTsxPath(filePath)) {
+        const htmlElements = SoftwareProjectManager.getInstance().inspectVisualElements(projectId, scope);
+        return res.json({ success: true, mode: 'project', projectId, filePath, elements: htmlElements });
+      }
+      const inspected = SoftwareProjectManager.getInstance().inspectProjectJsxElements(
+        projectId,
+        filePath || undefined,
+        scope
+      );
+      return res.json({ success: true, mode: 'project', projectId, ...inspected });
+    }
+
+    if (!filePath) {
+      return res.status(400).json({ success: false, error: 'filePath (or projectId) query parameter is required.' });
+    }
+    if (!isJsxOrTsxPath(filePath)) {
+      return res.status(400).json({ success: false, error: `UNSUPPORTED_SOURCE_TYPE: '${filePath}' must be a JSX/TSX/JS/TS file.` });
+    }
+    const content = ToolGateway.readFile(filePath);
+    const elements = inspectJsxVisualElements(content, filePath);
+    return res.json({ success: true, mode: 'workspace', filePath, elements });
+  } catch (err: any) {
+    const msg = String(err?.message || 'Failed to inspect visual elements');
+    const status = msg.includes('SECURITY_VIOLATION')
+      ? 403
+      : msg.includes('NOT_FOUND')
+        ? 404
+        : 400;
+    return res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.get('/api/workspace/visual-revisions', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const filePath = typeof req.query.filePath === 'string'
+      ? req.query.filePath.trim()
+      : typeof req.query.path === 'string'
+        ? req.query.path.trim()
+        : undefined;
+    const tenantId = req.sovereignTenantId || 'default';
+    const revisions = listWorkspaceVisualRevisions(filePath).filter((r) => r.tenantId === tenantId);
+    return res.json({ success: true, revisions });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/workspace/visual-edit', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const body = req.body;
+    if (
+      !body ||
+      typeof body !== 'object' ||
+      hasUnsafePrototypeKeys(body) ||
+      hasUnsafePrototypeKeys(body.styles) ||
+      hasUnsafePrototypeKeys(body.props) ||
+      hasUnsafePrototypeKeys(body.attributes) ||
+      hasUnsafePrototypeKeys(body.loc)
+    ) {
+      return res.status(400).json({ success: false, error: 'INVALID_PAYLOAD: disallowed prototype key or malformed body' });
+    }
+
+    const projectId = typeof body.projectId === 'string' ? body.projectId.trim() : '';
+    const filePath =
+      typeof body.filePath === 'string'
+        ? body.filePath.trim()
+        : typeof body.path === 'string'
+          ? body.path.trim()
+          : '';
+
+    const astPayload = {
+      targetId: typeof body.targetId === 'string' ? body.targetId.trim() : undefined,
+      tagName: typeof body.tagName === 'string' ? body.tagName.trim() : undefined,
+      componentName: typeof body.componentName === 'string' ? body.componentName.trim() : undefined,
+      elementIndex: typeof body.elementIndex === 'number' ? body.elementIndex : undefined,
+      loc:
+        body.loc && typeof body.loc === 'object' && typeof body.loc.line === 'number'
+          ? {
+              line: body.loc.line,
+              ...(typeof body.loc.column === 'number' ? { column: body.loc.column } : {}),
+            }
+          : undefined,
+      textContent: typeof body.textContent === 'string' ? body.textContent : undefined,
+      color: typeof body.color === 'string' ? body.color : undefined,
+      backgroundColor: typeof body.backgroundColor === 'string' ? body.backgroundColor : undefined,
+      padding: typeof body.padding === 'string' ? body.padding : undefined,
+      fontSize: typeof body.fontSize === 'string' ? body.fontSize : undefined,
+      className:
+        body.className === null || typeof body.className === 'string'
+          ? body.className
+          : undefined,
+      styles:
+        body.styles && typeof body.styles === 'object' && !Array.isArray(body.styles)
+          ? body.styles
+          : undefined,
+      props:
+        body.props && typeof body.props === 'object' && !Array.isArray(body.props)
+          ? body.props
+          : undefined,
+      attributes:
+        body.attributes && typeof body.attributes === 'object' && !Array.isArray(body.attributes)
+          ? body.attributes
+          : undefined,
+      removeProps: Array.isArray(body.removeProps)
+        ? body.removeProps.filter((p: unknown): p is string => typeof p === 'string')
+        : undefined,
+      message: typeof body.message === 'string' ? sanitizeCognitiveText(body.message, 200) : undefined,
+      runChecks: body.runChecks === true,
+    };
+
+    if (projectId) {
+      const scope = resolveEngineeringScope(req);
+      if (filePath && !isJsxOrTsxPath(filePath)) {
+        if (filePath === 'public/index.html') {
+          const out = await SoftwareProjectManager.getInstance().applyVisualPropertyPatch(
+            projectId,
+            {
+              targetId: astPayload.targetId || '',
+              textContent: astPayload.textContent,
+              color: astPayload.color,
+              backgroundColor: astPayload.backgroundColor,
+              padding: astPayload.padding,
+              fontSize: astPayload.fontSize,
+              message: astPayload.message,
+              runChecks: body.runChecks !== false,
+            },
+            scope
+          );
+          return res.json({
+            success: true,
+            mode: 'project',
+            projectId,
+            filePath,
+            revisionId: out.revision.revisionId,
+            treeSha256: out.revision.treeSha256,
+            evidenceHash: out.revision.treeSha256,
+            ...out,
+          });
+        }
+        return res.status(400).json({
+          success: false,
+          error: `UNSUPPORTED_SOURCE_TYPE: '${filePath}' must be a JSX/TSX component source file.`,
+        });
+      }
+
+      const result = await SoftwareProjectManager.getInstance().applyProjectAstVisualEdit(
+        projectId,
+        {
+          ...astPayload,
+          filePath: filePath || undefined,
+        },
+        scope
+      );
+      return res.json({ success: true, ...result });
+    }
+
+    if (!filePath) {
+      return res.status(400).json({
+        success: false,
+        error: 'filePath (or projectId) is required for /api/workspace/visual-edit.',
+      });
+    }
+
+    const result = applyDirectWorkspaceVisualEdit(
+      {
+        ...astPayload,
+        filePath,
+      },
+      {
+        userId: req.sovereignUserId || 'developer',
+        tenantId: req.sovereignTenantId || 'default',
+      }
+    );
+    return res.json({ success: true, ...result });
+  } catch (err: any) {
+    const msg = String(err?.message || 'AST visual edit failed');
+    const status = msg.includes('SECURITY_VIOLATION')
+      ? 403
+      : msg.includes('NOT_FOUND')
+        ? 404
+        : 400;
+    return res.status(status).json({ success: false, error: msg });
   }
 });
 

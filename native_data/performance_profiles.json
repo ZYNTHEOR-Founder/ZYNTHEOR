@@ -1,6 +1,6 @@
 {
   "version": "ZYNTHEOR_PERF_V1",
-  "updatedAt": "2026-11-15T10:07:12.692Z",
+  "updatedAt": "2026-11-15T10:16:19.229Z",
   "config": {
     "retrievalLimit": 5,
     "contextMaxChars": 1200,
@@ -498,6 +498,18 @@
       "tenantId": "test-tenant-sec10",
       "durationMs": 85.93,
       "heapDeltaKb": 133.52,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1794737779229_faf0",
+      "timestamp": "2026-11-15T10:16:19.229Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-ast",
+      "durationMs": 103.422,
+      "heapDeltaKb": 236.3,
       "cacheHit": false,
       "succeeded": true,
       "accuracyScore": 0.94

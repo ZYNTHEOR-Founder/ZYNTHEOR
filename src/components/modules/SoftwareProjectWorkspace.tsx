@@ -207,7 +207,12 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
   const [visualBgColor, setVisualBgColor] = useState<string>('');
   const [visualPadding, setVisualPadding] = useState<string>('');
   const [visualFontSize, setVisualFontSize] = useState<string>('');
+  const [visualClassName, setVisualClassName] = useState<string>('');
   const [visualCommitMsg, setVisualCommitMsg] = useState<string>('');
+  const [lastVisualEvidence, setLastVisualEvidence] = useState<{
+    revisionId: string;
+    evidenceHash: string;
+  } | null>(null);
   const [isApplyingVisual, setIsApplyingVisual] = useState(false);
 
   // Debug & Auto-Repair state
@@ -297,6 +302,8 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
     [visualElements, selectedVisualId]
   );
 
+  const isJsxSourceSelected = /\.(tsx|jsx)$/i.test(selectedRelPath);
+
   const syncVisualFormFromNode = (node: VisualElementNode | null) => {
     if (!node) {
       setVisualText('');
@@ -304,6 +311,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
       setVisualBgColor('');
       setVisualPadding('');
       setVisualFontSize('');
+      setVisualClassName('');
       return;
     }
     setVisualText(node.textContent || '');
@@ -311,6 +319,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
     setVisualBgColor(node.styles.backgroundColor || '');
     setVisualPadding(node.styles.padding || '');
     setVisualFontSize(node.styles.fontSize || '');
+    setVisualClassName(node.className || '');
   };
 
   // Validate postMessage events strictly against our sandboxed preview iframe instance
@@ -427,6 +436,29 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
       setSelectedRelPath(relPath);
       setEditorContent(json.content ?? '');
       setOriginalEditorContent(json.content ?? '');
+      if (/\.(tsx|jsx)$/i.test(relPath)) {
+        try {
+          const elRes = await fetch(
+            apiUrl(
+              `/api/workspace/visual-elements?projectId=${encodeURIComponent(projectId)}&filePath=${encodeURIComponent(relPath)}`
+            ),
+            { headers: authHeaders() }
+          );
+          const elJson = await elRes.json();
+          if (elRes.ok && elJson.success && Array.isArray(elJson.elements)) {
+            setVisualElements(elJson.elements);
+            if (elJson.elements.length > 0) {
+              setSelectedVisualId(elJson.elements[0].zId);
+              syncVisualFormFromNode(elJson.elements[0]);
+            } else {
+              setSelectedVisualId('');
+              syncVisualFormFromNode(null);
+            }
+          }
+        } catch {
+          // noop
+        }
+      }
       if (openCodeTab) {
         setSubTab('code');
       }
@@ -448,17 +480,19 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
       if (res.ok && json.success) {
         setPreviewHtml(json.html || '');
         setPreviewEndpoints(json.endpoints || []);
-        const elements: VisualElementNode[] = Array.isArray(json.visualElements)
-          ? json.visualElements
-          : [];
-        setVisualElements(elements);
-        if (elements.length > 0) {
-          const keep = elements.find((el) => el.zId === selectedVisualId) || elements[0];
-          setSelectedVisualId(keep.zId);
-          syncVisualFormFromNode(keep);
-        } else {
-          setSelectedVisualId('');
-          syncVisualFormFromNode(null);
+        if (!isJsxSourceSelected) {
+          const elements: VisualElementNode[] = Array.isArray(json.visualElements)
+            ? json.visualElements
+            : [];
+          setVisualElements(elements);
+          if (elements.length > 0) {
+            const keep = elements.find((el) => el.zId === selectedVisualId) || elements[0];
+            setSelectedVisualId(keep.zId);
+            syncVisualFormFromNode(keep);
+          } else {
+            setSelectedVisualId('');
+            syncVisualFormFromNode(null);
+          }
         }
       }
     } catch {
@@ -656,48 +690,105 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
     setIsApplyingVisual(true);
     setErrorMessage(null);
     try {
-      const res = await fetch(
-        apiUrl(
-          `/api/engineering/projects/${encodeURIComponent(selectedProject.projectId)}/visual-patch`
-        ),
-        {
+      if (isJsxSourceSelected) {
+        const res = await fetch(apiUrl('/api/workspace/visual-edit'), {
           method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify({
+            projectId: selectedProject.projectId,
+            filePath: selectedRelPath,
             targetId: selectedVisualId,
-            textContent: selectedVisualNode?.textContent ? visualText : undefined,
+            textContent: selectedVisualNode?.textContent !== undefined ? visualText : undefined,
             color: visualColor,
             backgroundColor: visualBgColor,
             padding: visualPadding,
             fontSize: visualFontSize,
-            message: visualCommitMsg.trim() || `Visual Edit: ${selectedVisualId}`,
-            runChecks: true,
+            ...(visualClassName !== (selectedVisualNode?.className || '')
+              ? { className: visualClassName }
+              : {}),
+            message: visualCommitMsg.trim() || `AST Visual Edit: ${selectedVisualId}`,
+            runChecks: false,
           }),
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(json.error || 'Failed to apply Babel AST visual edit');
         }
-      );
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Failed to apply visual patch to source');
-      }
-      if (json.project) {
-        setProjects((prev) =>
-          prev.map((p) => (p.projectId === selectedProject.projectId ? json.project : p))
+        if (json.project) {
+          setProjects((prev) =>
+            prev.map((p) => (p.projectId === selectedProject.projectId ? json.project : p))
+          );
+        }
+        if (Array.isArray(json.visualElements)) {
+          setVisualElements(json.visualElements);
+        }
+        if (typeof json.updatedCode === 'string') {
+          setEditorContent(json.updatedCode);
+          setOriginalEditorContent(json.updatedCode);
+        }
+        setLastVisualEvidence({
+          revisionId: json.revisionId,
+          evidenceHash: json.evidenceHash,
+        });
+        setVisualCommitMsg('');
+        onAuditUpdated?.();
+        showToast({
+          variant: 'success',
+          title: 'Babel AST Visual Edit Committed',
+          message: `${selectedVisualId} saved at ${json.revisionId} (${String(json.evidenceHash || '').slice(0, 12)}…)`,
+        });
+      } else {
+        const res = await fetch(
+          apiUrl(
+            `/api/engineering/projects/${encodeURIComponent(selectedProject.projectId)}/visual-patch`
+          ),
+          {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({
+              targetId: selectedVisualId,
+              textContent: selectedVisualNode?.textContent ? visualText : undefined,
+              color: visualColor,
+              backgroundColor: visualBgColor,
+              padding: visualPadding,
+              fontSize: visualFontSize,
+              message: visualCommitMsg.trim() || `Visual Edit: ${selectedVisualId}`,
+              runChecks: true,
+            }),
+          }
         );
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(json.error || 'Failed to apply visual patch to source');
+        }
+        if (json.project) {
+          setProjects((prev) =>
+            prev.map((p) => (p.projectId === selectedProject.projectId ? json.project : p))
+          );
+        }
+        if (Array.isArray(json.visualElements)) {
+          setVisualElements(json.visualElements);
+        }
+        setLastVisualEvidence(
+          json.revision
+            ? {
+                revisionId: json.revision.revisionId,
+                evidenceHash: json.revision.treeSha256,
+              }
+            : null
+        );
+        setVisualCommitMsg('');
+        await loadPreviewAndVisuals(selectedProject.projectId);
+        if (selectedRelPath === 'public/index.html') {
+          await loadFile(selectedProject.projectId, 'public/index.html');
+        }
+        onAuditUpdated?.();
+        showToast({
+          variant: 'success',
+          title: 'Visual Patch Committed',
+          message: `${selectedVisualId} saved at ${json.revision?.revisionId || 'latest revision'}`,
+        });
       }
-      if (Array.isArray(json.visualElements)) {
-        setVisualElements(json.visualElements);
-      }
-      setVisualCommitMsg('');
-      await loadPreviewAndVisuals(selectedProject.projectId);
-      if (selectedRelPath === 'public/index.html') {
-        await loadFile(selectedProject.projectId, 'public/index.html');
-      }
-      onAuditUpdated?.();
-      showToast({
-        variant: 'success',
-        title: 'Visual Patch Committed',
-        message: `${selectedVisualId} saved at ${json.revision?.revisionId || 'latest revision'}`,
-      });
     } catch (err: any) {
       setErrorMessage(err.message);
     } finally {
@@ -2606,8 +2697,10 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                 <Sliders className="w-3.5 h-3.5 text-[#00F0FF]" />
                 <span>Visual Inspector</span>
               </div>
-              <div className="text-[11px] font-mono text-[#9AA8C7]">
-                Real Source Patcher · public/index.html
+              <div className="text-[11px] font-mono text-[#9AA8C7] truncate">
+                {isJsxSourceSelected
+                  ? `Babel AST Patcher · ${selectedRelPath}`
+                  : 'Real Source Patcher · public/index.html'}
               </div>
             </div>
             <span className="text-[10px] font-mono text-[#9AA8C7] tabular-nums">
@@ -2722,6 +2815,21 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     </div>
                   </div>
 
+                  {isJsxSourceSelected && (
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                        className (JSX Prop)
+                      </label>
+                      <input
+                        type="text"
+                        value={visualClassName}
+                        onChange={(e) => setVisualClassName(e.target.value)}
+                        placeholder="px-4 py-2 rounded-lg"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                      />
+                    </div>
+                  )}
+
                   <div className="space-y-1">
                     <label className="block text-[11px] font-semibold text-[#9AA8C7]">
                       Revision Message (optional)
@@ -2744,9 +2852,22 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     <span>
                       {isApplyingVisual
                         ? 'Patching & Re-Verifying...'
-                        : 'Apply to Source & Commit Revision'}
+                        : isJsxSourceSelected
+                          ? 'Patch JSX/TSX AST & Commit'
+                          : 'Apply to Source & Commit Revision'}
                     </span>
                   </button>
+
+                  {lastVisualEvidence && (
+                    <div className="p-2.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[10px] font-mono text-[#9AA8C7] space-y-0.5 tabular-nums">
+                      <div>
+                        Revision: <span className="text-[#CCFF00] font-bold">{lastVisualEvidence.revisionId}</span>
+                      </div>
+                      <div className="truncate" title={lastVisualEvidence.evidenceHash}>
+                        SHA-256: <span className="text-[#00F0FF]">{lastVisualEvidence.evidenceHash}</span>
+                      </div>
+                    </div>
+                  )}
                 </form>
               )}
             </div>

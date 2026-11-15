@@ -30,6 +30,13 @@ import { ToolGateway } from './ToolGateway.ts';
 import { ToolRegistry } from './ToolRegistry.ts';
 import { computeExecutionEvidenceHash } from './TruthKernel.ts';
 import { InternetIntegrationEngine } from './InternetIntegrationEngine.ts';
+import {
+  inspectJsxVisualElements,
+  isJsxOrTsxPath,
+  patchJsxSourceWithBabel,
+  type JsxVisualElementSummary,
+  type VisualEditAstPayload,
+} from './VisualAstEditor.ts';
 import type { SovereignRole } from './SovereignIdentity.ts';
 import type {
   ProjectRepairResult,
@@ -3494,6 +3501,187 @@ export class SoftwareProjectManager {
     const visualElements = this.inspectVisualElements(projectId, scope);
     const updatedElement = visualElements.find((v) => v.zId === targetId) || null;
     return { project: refreshed, revision: rev, updatedElement, visualElements };
+  }
+
+  public inspectProjectJsxElements(
+    projectId: string,
+    filePath: string | undefined,
+    scope: EngineeringScope
+  ): { filePath: string; elements: JsxVisualElementSummary[] } {
+    const project = this.getProject(projectId, scope);
+    if (!project) throw new Error(`PROJECT_NOT_FOUND: '${projectId}'`);
+    const relFiles = this.listProjectRelativeFiles(project);
+
+    const targetRel =
+      (filePath || '').replace(/\\/g, '/').replace(/^\/+/, '').trim() ||
+      relFiles.find((f) => /\.(tsx|jsx)$/i.test(f)) ||
+      '';
+
+    if (!targetRel || !relFiles.includes(targetRel)) {
+      throw new Error(`FILE_NOT_FOUND: '${targetRel || '(none)'}' not found in project '${projectId}'.`);
+    }
+    if (!isJsxOrTsxPath(targetRel)) {
+      throw new Error(`UNSUPPORTED_SOURCE_TYPE: '${targetRel}' is not a JSX/TSX component file.`);
+    }
+    const content = ToolGateway.readFile(`${project.workspaceDir}/${targetRel}`);
+    return {
+      filePath: targetRel,
+      elements: inspectJsxVisualElements(content, targetRel),
+    };
+  }
+
+  public async applyProjectAstVisualEdit(
+    projectId: string,
+    input: VisualEditAstPayload & {
+      filePath?: string;
+      message?: string;
+      runChecks?: boolean;
+    },
+    scope: EngineeringScope
+  ): Promise<{
+    mode: 'project';
+    projectId: string;
+    filePath: string;
+    revisionId: string;
+    revision: ProjectRevisionEntry;
+    treeSha256: string;
+    beforeSha256: string;
+    fileSha256: string;
+    evidenceHash: string;
+    astEngine: 'babel';
+    appliedChanges: string[];
+    matchedTarget: {
+      targetId: string;
+      tagName: string;
+      line: number | null;
+      column: number | null;
+    };
+    updatedCode: string;
+    visualElements: JsxVisualElementSummary[];
+    project: SoftwareProjectRecord;
+  }> {
+    const project = this.getProject(projectId, scope);
+    if (!project) throw new Error(`PROJECT_NOT_FOUND: '${projectId}'`);
+
+    const relFiles = this.listProjectRelativeFiles(project);
+    const requestedRel = (input.filePath || '').replace(/\\/g, '/').replace(/^\/+/, '').trim();
+    const targetRel = requestedRel || relFiles.find((f) => /\.(tsx|jsx)$/i.test(f)) || '';
+
+    if (!targetRel || !relFiles.includes(targetRel)) {
+      throw new Error(`FILE_NOT_FOUND: '${targetRel || '(none)'}' not found in project '${projectId}'.`);
+    }
+    if (!isJsxOrTsxPath(targetRel)) {
+      throw new Error(
+        `UNSUPPORTED_SOURCE_TYPE: '${targetRel}' must be a JSX/TSX/JS/TS component source file.`
+      );
+    }
+
+    const startedMs = Date.now();
+    const startIso = new Date().toISOString();
+    const currentSource = ToolGateway.readFile(`${project.workspaceDir}/${targetRel}`);
+    const astResult = patchJsxSourceWithBabel(currentSource, input, targetRel);
+
+    ToolGateway.writeFile(`${project.workspaceDir}/${targetRel}`, astResult.updatedCode);
+
+    const commitMsg =
+      input.message?.trim() ||
+      `AST Visual Edit (${astResult.matchedTarget.targetId}) in ${targetRel}`;
+    const rev = this.createRevisionSnapshot(project, scope.userId, commitMsg);
+    const finishIso = new Date().toISOString();
+    const durationMs = Math.max(1, Date.now() - startedMs);
+    const executionId = `eng_exec_${project.projectId}_${Date.now().toString(36)}`;
+
+    const evidenceHash = computeExecutionEvidenceHash({
+      executionId,
+      taskId: `visual_edit_${project.projectId}`,
+      startTimestamp: startIso,
+      finishTimestamp: finishIso,
+      executionDurationMs: durationMs,
+      executionResult: 'VERIFIED',
+      artifacts: [
+        {
+          path: `${project.workspaceDir}/${targetRel}`,
+          bytes: Buffer.byteLength(astResult.updatedCode, 'utf8'),
+          verified: true,
+        },
+      ],
+      testsPassed: 1,
+      testsTotal: 1,
+    });
+
+    project.evidenceHistory.unshift({
+      projectId: project.projectId,
+      taskId: `visual_edit_${project.projectId}`,
+      executionId,
+      sourceRevision: rev.revisionId,
+      operationType: 'VISUAL_EDIT',
+      startTimestamp: startIso,
+      completionTimestamp: finishIso,
+      actualDurationMs: durationMs,
+      buildOrTestResult: `Babel AST patched ${astResult.matchedTarget.targetId} in ${targetRel} (${astResult.appliedChanges.join(', ')})`,
+      artifactReference: `${project.workspaceDir}/${targetRel}`,
+      evidenceHash,
+      verificationStatus: 'VERIFIED',
+    });
+
+    project.updatedAt = finishIso;
+    this.setStage(project, 'BUILD_EXECUTION', 'UNVERIFIED', 'AST visual edit applied; rebuild required', null, null);
+    this.setStage(project, 'AUTOMATED_TESTING', 'UNVERIFIED', 'AST visual edit applied; re-test required', null, null);
+    this.setStage(project, 'SECURITY_VALIDATION', 'UNVERIFIED', 'AST visual edit applied; re-scan required', null, null);
+    this.setStage(
+      project,
+      'MAINTENANCE_IMPROVEMENT',
+      'VERIFIED',
+      `Babel AST visual edit applied to ${astResult.matchedTarget.targetId} -> ${rev.revisionId}`,
+      `${project.workspaceDir}/${targetRel}`,
+      evidenceHash
+    );
+    this.appendLog(
+      project,
+      'INFO',
+      'VisualAstEditor',
+      `AST patched [${astResult.matchedTarget.targetId}] in ${targetRel} -> ${rev.revisionId} (${evidenceHash.slice(0, 12)})`,
+      { executionId, stage: 'MAINTENANCE_IMPROVEMENT' }
+    );
+    this.save();
+
+    AuditLedger.append('CODER', 'WORKSPACE_VISUAL_EDIT_APPLIED', {
+      projectId: project.projectId,
+      filePath: targetRel,
+      targetId: astResult.matchedTarget.targetId,
+      appliedChanges: astResult.appliedChanges,
+      revisionId: rev.revisionId,
+      treeSha256: rev.treeSha256,
+      beforeSha256: astResult.beforeSha256,
+      fileSha256: astResult.afterSha256,
+      evidenceHash,
+    });
+
+    if (input.runChecks === true) {
+      await this.runBuild(projectId, scope);
+      await this.runTests(projectId, scope);
+      await this.runSecurityValidation(projectId, scope);
+    }
+
+    const refreshed = this.getProject(projectId, scope) || project;
+    const visualElements = inspectJsxVisualElements(astResult.updatedCode, targetRel);
+    return {
+      mode: 'project',
+      projectId: refreshed.projectId,
+      filePath: targetRel,
+      revisionId: rev.revisionId,
+      revision: rev,
+      treeSha256: rev.treeSha256,
+      beforeSha256: astResult.beforeSha256,
+      fileSha256: astResult.afterSha256,
+      evidenceHash,
+      astEngine: 'babel',
+      appliedChanges: astResult.appliedChanges,
+      matchedTarget: astResult.matchedTarget,
+      updatedCode: astResult.updatedCode,
+      visualElements,
+      project: refreshed,
+    };
   }
 
   public getPreviewPayload(

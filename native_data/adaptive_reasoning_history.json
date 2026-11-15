@@ -1,5 +1,87 @@
 [
   {
+    "reasoningId": "rsn_1794737779231_bbf1d0",
+    "timestamp": "2026-11-15T10:16:19.231Z",
+    "problemClass": "constraint_csp",
+    "selectedStrategy": "csp_dependency_solver",
+    "contextAnalysis": {
+      "contextId": "ctx_1794737779121_bb644f",
+      "intent": "planning",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_csp_1",
+      "strategy": "csp_dependency_solver",
+      "summary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "max_total_cost=100"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Tight budget counterexample cleanly rejected as unsatisfiable.",
+      "verifierPassed": true,
+      "score": 0.94
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.94,
+      "epistemicUncertainty": 0.06,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "deterministic_csp_scheduler",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 103.422
+    },
+    "answerSummary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_2fc6f25bab",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_csp_1' passed verifier 'deterministic_csp_scheduler' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=deterministic_csp_scheduler; counterexamplePassed=true",
+        "evidenceRefs": [
+          "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        ],
+        "evidenceHash": "2fc6f25bab22465dc6d5c1960a921e7eb47e9029a692d9760c5e1efbaa027097",
+        "timestamp": "2026-11-15T10:16:19.231Z"
+      },
+      {
+        "claimId": "claim_adapti_5c899b7257",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.94 (uncertainty=0.06)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "5c899b725759fbafe587df4282ecdde2972ec8d4d560eeb6be725a0292283eec",
+        "timestamp": "2026-11-15T10:16:19.231Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
     "reasoningId": "rsn_1794737232692_6bd58d",
     "timestamp": "2026-11-15T10:07:12.692Z",
     "problemClass": "constraint_csp",
