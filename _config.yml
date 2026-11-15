@@ -1,0 +1,36 @@
+# GitHub Pages (Jekyll) configuration for ZYNTHEOR.
+# url and baseurl are injected by actions/configure-pages, so they are not hardcoded here.
+title: ZYNTHEOR
+description: Local-first Thai & English language model stack
+
+plugins:
+  - jekyll-readme-index
+
+# Render README.md as the site index even though it has no front matter.
+readme_index:
+  with_frontmatter: true
+
+# Keep application code, datasets, backups and tooling out of the published site.
+exclude:
+  - node_modules
+  - src
+  - lib
+  - tests
+  - scripts
+  - qplus_native
+  - workspace
+  - backups
+  - artifacts
+  - public
+  - .codesight
+  - .vscode
+  - .github
+  - "*.ts"
+  - "*.tsx"
+  - "*.py"
+  - "*.json"
+  - "*.tgz"
+  - package.json
+  - package-lock.json
+  - docker-compose.yml
+  - requirements-native.txt

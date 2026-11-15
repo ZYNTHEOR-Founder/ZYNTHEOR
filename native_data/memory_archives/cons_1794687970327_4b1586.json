@@ -1,0 +1,57 @@
+{
+  "consolidationId": "cons_1794687970327_4b1586",
+  "createdAt": "2026-11-14T20:26:10.327Z",
+  "targetKey": "b29_unit_sem_1794687970308",
+  "tenantId": "b29_tenant_alpha",
+  "ownerUserId": "b29_dev_a",
+  "sourceItems": [
+    {
+      "key": "b29_unit_ep1_1794687970308",
+      "value": "Always enforce constant-time HMAC verification and fail closed on tamper",
+      "category": "episodic",
+      "createdAt": "2026-11-14T20:26:10.312Z",
+      "updatedAt": "2026-11-14T20:26:10.312Z",
+      "readCount": 0,
+      "metadata": {
+        "tenantId": "b29_tenant_alpha",
+        "ownerUserId": "b29_dev_a"
+      },
+      "contentDigest": "8fc7192b702b82d0530e100a0755924bca584332e5a3a22f73233cb40e13beba",
+      "tenantId": "b29_tenant_alpha",
+      "ownerUserId": "b29_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-14T20:26:10.312Z",
+          "digest": "8fc7192b702b82d0530e100a0755924bca584332e5a3a22f73233cb40e13beba"
+        }
+      ]
+    },
+    {
+      "key": "b29_unit_ep2_1794687970308",
+      "value": "Always enforce constant-time HMAC verification and fail closed on tamper",
+      "category": "episodic",
+      "createdAt": "2026-11-14T20:26:10.315Z",
+      "updatedAt": "2026-11-14T20:26:10.315Z",
+      "readCount": 0,
+      "metadata": {
+        "tenantId": "b29_tenant_alpha",
+        "ownerUserId": "b29_dev_a"
+      },
+      "contentDigest": "8fc7192b702b82d0530e100a0755924bca584332e5a3a22f73233cb40e13beba",
+      "tenantId": "b29_tenant_alpha",
+      "ownerUserId": "b29_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-14T20:26:10.315Z",
+          "digest": "8fc7192b702b82d0530e100a0755924bca584332e5a3a22f73233cb40e13beba"
+        }
+      ]
+    }
+  ],
+  "rolledBack": true,
+  "rolledBackAt": "2026-11-14T20:26:10.369Z"
+}

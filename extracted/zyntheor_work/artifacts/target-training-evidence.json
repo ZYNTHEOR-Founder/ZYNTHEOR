@@ -1,0 +1,27 @@
+{
+  "timestamp": 1794558110,
+  "checkpoint": "/app/applet/native_data/model_checkpoint_target_41m.pt",
+  "params": 41527808,
+  "target_params": 41527808,
+  "best_val_loss": 7.177161455154419,
+  "history": [
+    {
+      "step": 6,
+      "train_loss": 7.861087322235107,
+      "val_loss": 7.661925315856934,
+      "grad_norm": 6.0377230406757,
+      "lr": 0.000165,
+      "elapsed_s": 79.33856678009033
+    },
+    {
+      "step": 12,
+      "train_loss": 7.463860511779785,
+      "val_loss": 7.177161455154419,
+      "grad_norm": 5.365955532704823,
+      "lr": 2.9999999999999997e-05,
+      "elapsed_s": 157.82671213150024
+    }
+  ],
+  "corpus_sha256": "8f4748b73a9d8e408e1cdfd0116fcdb6cf56cfe77abffd4bff1ca1a3fabd0a4e",
+  "checkpoint_sha256": "260df2012c4cb66eedcfca363524ebcbb35c86b0ac13bdcffb5bb7f8e8289e38"
+}

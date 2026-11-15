@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0-SOVEREIGN",
+  "lastPersisted": "2026-11-14T20:29:10.420Z",
+  "verified_knowledge": {
+    "architecture": "ZYNTHEOR Q+ Native Target 41.53M (41,527,808 parameters; 10L · 8H · 512D)",
+    "sovereignty_rule": "Online-first Native neural inference on the Sovereign Cloud runtime",
+    "sandbox_root": "/workspace",
+    "multilingual_engine": "Thai-English Dual Native Vocabulary & Code-Switching"
+  },
+  "sessions": [],
+  "episodic": {}
+}

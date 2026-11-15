@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-11-11T20:50:50.220Z",
+  "finishedAt": "2026-11-11T20:51:00.973Z",
+  "base": "http://127.0.0.1:3000",
+  "status": "VERIFIED",
+  "policy": "Training step executed against native runtime; no checkpoint export performed.",
+  "health": {
+    "sovereign": true,
+    "version": "1.0.0"
+  },
+  "checkpoint": {
+    "beforeHash": "70058acbacb87fa32778ac7cc4e147065614d0c769de8da842daef7a20c0e5af",
+    "afterHash": "70058acbacb87fa32778ac7cc4e147065614d0c769de8da842daef7a20c0e5af",
+    "sha256Before": true,
+    "sha256After": true,
+    "weightsLoadedBefore": true,
+    "weightsLoadedAfter": true
+  },
+  "training": {
+    "trainingStep": 52,
+    "epochs": 2,
+    "tokensProcessed": 26,
+    "lossBefore": 2.1556,
+    "lossAfter": 1.8783,
+    "lossReductionPct": 12.86,
+    "paramMutationDelta": 0.616714,
+    "gradientCoverage": {
+      "total_tensors": 18,
+      "active_grad_tensors": 18,
+      "coverage_pct": 100,
+      "all_covered": true
+    },
+    "numericalGradientCheck": {
+      "layer_name": "transformer.lm_head",
+      "max_relative_error": 0.000066,
+      "passed": true,
+      "checked_samples": 20
+    },
+    "forwardGraph": "Embedding -> MultiHeadAttention -> RMSNorm1 -> SwiGLU -> RMSNorm2 -> LMHead"
+  }
+}

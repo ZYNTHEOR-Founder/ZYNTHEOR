@@ -1,0 +1,66 @@
+{
+  "checkpoint": "native_data/model_checkpoint_target_41m.pt",
+  "model_params": 41527808,
+  "metadata_total_params": 41527808,
+  "pos_emb_present": true,
+  "pos_emb_shape": [
+    64,
+    512
+  ],
+  "pos_emb_std": 0.02426917034105854,
+  "pos_emb_mean_norm": 0.5485857491412148,
+  "positional_addition_in_forward": true,
+  "forward_source_equivalent": "x = tok_emb[tokens] + pos_emb[:T][None]",
+  "positional_contribution_l2": 1.2446880253401265,
+  "embedding_output_tied": true,
+  "output_head_expression": "nf @ tok_emb.T",
+  "tied_logits_max_abs_error": 0.0,
+  "token_ids": [
+    {
+      "id": 114,
+      "token": "e",
+      "repr": "'e'"
+    },
+    {
+      "id": 123,
+      "token": "n",
+      "repr": "'n'"
+    },
+    {
+      "id": 116,
+      "token": "g",
+      "repr": "'g'"
+    },
+    {
+      "id": 127,
+      "token": "r",
+      "repr": "'r'"
+    },
+    {
+      "id": 129,
+      "token": "t",
+      "repr": "'t'"
+    },
+    {
+      "id": 128,
+      "token": "s",
+      "repr": "'s'"
+    },
+    {
+      "id": 113,
+      "token": "d",
+      "repr": "'d'"
+    },
+    {
+      "id": 124,
+      "token": "o",
+      "repr": "'o'"
+    },
+    {
+      "id": 131,
+      "token": "v",
+      "repr": "'v'"
+    }
+  ],
+  "filler_ids_ge_532": 0
+}

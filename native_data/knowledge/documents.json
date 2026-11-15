@@ -1,0 +1,138 @@
+[
+  {
+    "id": "doc_1794679634569_4tn2c",
+    "title": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+    "content": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nTarget architecture specification: 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).\nTarget parameter budget is 41,527,808 Float32 parameters (~166.1 MB decimal / 158.4 MiB). This is NOT the active runtime checkpoint. The currently serialized active subgraph contains 231,168 Float32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).\n\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.\n- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.\n- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.\n- Memory Isolation: Episodic memory persisted separately from static model weights.",
+    "source": "docs/architecture_manifest.md",
+    "format": "markdown",
+    "collection": "Architecture",
+    "tags": [
+      "architecture",
+      "transformer",
+      "rope",
+      "swiglu",
+      "sovereign"
+    ],
+    "language": "mixed",
+    "version": 1,
+    "createdAt": "2026-11-14T18:07:14.570Z",
+    "updatedAt": "2026-11-14T18:07:14.570Z",
+    "contentHash": "e8162067d9b3dba51f940517ab7930fd00a392e832f1738e66267dc7502c3ee5",
+    "status": "indexed",
+    "chunksCount": 2,
+    "byteSize": 924,
+    "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+    "curatedForTraining": true,
+    "parsedMetadata": {
+      "headingCount": 3
+    }
+  },
+  {
+    "id": "doc_1794679634571_qdvqf",
+    "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+    "content": "# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR Sovereign Tokenizer\n\n## 1. ขอบเขตพจนานุกรม (Vocabulary Scope)\nพจนานุกรมขนาด 16,384 โทเค็น ครอบคลุมชุดอักขระภาษาไทยทุกตัวตั้งแต่ U+0E01 (ก) ถึง U+0E5B (๙) รวมสระ วรรณยุกต์ และเครื่องหมายวรรคตอน\nรับประกัน 0% UNK Loss (อัตราการหลุดเป็น [UNK] เท่ากับศูนย์)\n\n## 2. การตัดคำและการสลับภาษา (Code-Switching)\nรองรับการประมวลผลประโยคที่ผสมผสานระหว่างภาษาไทยและภาษาอังกฤษ เช่น \"รัน Docker container ด้วยคำสั่ง compose up\" โดยไม่ทำลายโครงสร้างไวยากรณ์",
+    "source": "docs/bilingual_tokenizer.md",
+    "format": "markdown",
+    "collection": "Bilingual Language",
+    "tags": [
+      "tokenizer",
+      "thai",
+      "english",
+      "unicode",
+      "vocab"
+    ],
+    "language": "th",
+    "version": 1,
+    "createdAt": "2026-11-14T18:07:14.571Z",
+    "updatedAt": "2026-11-14T18:07:14.571Z",
+    "contentHash": "cf040279ee6302f9c62b41809364c233cdde1283191ed31197806e1bbbb7a27a",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 1097,
+    "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+    "curatedForTraining": true,
+    "parsedMetadata": {
+      "headingCount": 3
+    }
+  },
+  {
+    "id": "doc_1794679634572_js1vf",
+    "title": "Sovereign Token Verification & Constant-Time Security Specification",
+    "content": "# Sovereign HMAC Token Verification Standard\n\n## 1. Timing-Attack Defense\nToken verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks.\nUnder no circumstances may plain string equality (===) be used on HMAC signatures.\n\n## 2. Minimum Entropy & Tenant Isolation\nSecret keys must have at least 32 bytes of cryptographic entropy loaded from environment variables.\nEach token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits.",
+    "source": "docs/security_token_verification.md",
+    "format": "markdown",
+    "collection": "Security Invariants",
+    "tags": [
+      "security",
+      "hmac",
+      "timing-attack",
+      "tenant-isolation",
+      "sha256"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-14T18:07:14.572Z",
+    "updatedAt": "2026-11-14T18:07:14.572Z",
+    "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 526,
+    "provenance": "Hardened cryptographic authentication protocol specification",
+    "curatedForTraining": true,
+    "parsedMetadata": {
+      "headingCount": 3
+    }
+  },
+  {
+    "id": "doc_1794679634573_utvpq",
+    "title": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+    "content": "# รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard\n\n## 1. กฎเหล็ก 7 ข้อ\n1. ห้ามสร้างโมเดลจำลองหรือรายงานผล benchmark เท็จ\n2. แยกแยะอย่างชัดเจนระหว่าง INITIALIZED WEIGHTS (ค่าน้ำหนักเริ่มต้น/สัญลักษณ์) และ LEARNED WEIGHTS (ค่าน้ำหนักที่ผ่านการฝึกจริง)\n3. การอัปโหลดเอกสารเข้า Knowledge Workspace ไม่ถือว่าเป็นการฝึก Model Weights\n4. จำแนกสถานะตามความเป็นจริง: VERIFIED, IMPLEMENTED, PARTIAL, BLOCKED, NOT IMPLEMENTED, MOCK\n5. ทุกการเปลี่ยนแปลงต้องตรวจสอบผ่านหลักฐานจริงใน Filesystem และ Runtime Logs",
+    "source": "docs/zero_fake_constitution.md",
+    "format": "markdown",
+    "collection": "Governance",
+    "tags": [
+      "governance",
+      "zero-fake",
+      "evidence",
+      "audit"
+    ],
+    "language": "mixed",
+    "version": 1,
+    "createdAt": "2026-11-14T18:07:14.573Z",
+    "updatedAt": "2026-11-14T18:07:14.573Z",
+    "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 1011,
+    "provenance": "Foundational operating charter of the ZYNTHEOR project",
+    "curatedForTraining": true,
+    "parsedMetadata": {
+      "headingCount": 2
+    }
+  },
+  {
+    "id": "doc_1794680967598_3el9u",
+    "title": "TenantA Secret 1794680967587",
+    "content": "cross-tenant isolation probe content unique e742adf7",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-14T18:29:27.598Z",
+    "updatedAt": "2026-11-14T18:29:27.598Z",
+    "contentHash": "e9f7bfea4b76b2d500e6cb1e9cb717a4f9139ccdb4b1b86b836879f86077cca3",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  }
+]

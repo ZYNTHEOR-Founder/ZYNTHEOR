@@ -1,0 +1,92 @@
+# Build and deploy the ZYNTHEOR Jekyll site to GitHub Pages.
+# Deployment only runs after validation and build both succeed.
+name: Deploy Jekyll site to Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Least privilege by default; jobs raise only what they need.
+permissions:
+  contents: read
+
+# One Pages deployment at a time; never cancel a deployment already in progress.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check that README local links and images exist
+        shell: python
+        run: |
+          import re, sys, pathlib
+          text = pathlib.Path("README.md").read_text(encoding="utf-8")
+          refs = re.findall(r'(?:src|href)="(\./[^"#?]+)"', text)
+          refs += re.findall(r'\]\((\./[^)#?\s]+)\)', text)
+          missing = sorted({r for r in refs if not pathlib.Path(r[2:]).exists()})
+          for r in missing:
+              print(f"::error::README references a missing file: {r}")
+          print(f"checked {len(set(refs))} local references, {len(missing)} missing")
+          sys.exit(1 if missing else 0)
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Verify built site contains the index page and README assets
+        shell: python
+        run: |
+          import re, sys, pathlib
+          site = pathlib.Path("_site")
+          problems = []
+          if not (site / "index.html").is_file():
+              problems.append("_site/index.html was not generated")
+          text = pathlib.Path("README.md").read_text(encoding="utf-8")
+          refs = set(re.findall(r'src="\./(assets/[^"#?]+)"', text))
+          for r in sorted(refs):
+              if not (site / r).is_file():
+                  problems.append(f"asset missing from built site: {r}")
+          for p in problems:
+              print(f"::error::{p}")
+          print(f"verified index.html and {len(refs)} README assets")
+          sys.exit(1 if problems else 0)
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

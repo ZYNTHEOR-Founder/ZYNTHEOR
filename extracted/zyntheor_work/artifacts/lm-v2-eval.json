@@ -1,0 +1,58 @@
+{
+  "timestamp": 1794488988,
+  "checkpoint_sha256": "b9410f12e9e92036b1b1c80ab35ee2d3e6562f5eaa61356d740d20edbc35c387",
+  "total_params": 502912,
+  "training_steps_total": 2500,
+  "val_positions": 183104,
+  "val_documents": 16,
+  "manifest_docs_changed_since_training_skipped": 0,
+  "corpus_sha256": "6e6635f043a753a5d29311707aeb723c0af3db93ee12c3d51e5bb019977fb969",
+  "perplexity": {
+    "model": 4.740403646839119,
+    "bigram_baseline": 18.408735545696878,
+    "unigram_baseline": 57.9555127238395,
+    "uniform_random": 532.0
+  },
+  "accuracy": {
+    "top1": 0.6052680443900734,
+    "top5": 0.8249574012583013
+  },
+  "thai_target_positions": {
+    "count": 2180,
+    "model_ppl": 47.481385477215554,
+    "bigram_ppl": 143.8777049108645
+  },
+  "beats_bigram_baseline": true,
+  "generation_samples": [
+    {
+      "prompt": "function verifyToken(",
+      "greedy": "'application/json');\nconst [selectedDatasetId, setContention, setIsRearch",
+      "sampled_t0.8": "'gos', 'utf8'), error: 'govereignTenantId, expection Content"
+    },
+    {
+      "prompt": "class LRUCache {",
+      "greedy": "\n              setSelection('all');\n                                          }}\n                      onClick={() => setActi",
+      "sampled_t0.8": "\n      action: 'bg-zinc-900/30 text-[11px] font-semibold border-"
+    },
+    {
+      "prompt": "def forward(self,",
+      "greedy": " d_features):\n                                                                                                                                                                                        ",
+      "sampled_t0.8": " goadin)], data = new Date.now(), required.istances: ${Date.now()}.joi"
+    },
+    {
+      "prompt": "## Executive result\n",
+      "greedy": "                                                                                                                                                                                                                                                ",
+      "sampled_t0.8": "            </p>\n                    </span>\n                    <span className=\"p-2 rounded-xl text-["
+    },
+    {
+      "prompt": "การตรวจสอบ",
+      "greedy": "', en: 'Transformer to the before st the be with be and a and a ",
+      "sampled_t0.8": "', en: 'Transformer token execution' },\n  'badge_chat': 'tenant"
+    }
+  ],
+  "train_val_gap": {
+    "train_ppl_sample": 3.157422017817555,
+    "val_ppl": 4.740403646839119
+  },
+  "greedy_distinct_bigram_ratio_mean": 0.4779661016949152
+}

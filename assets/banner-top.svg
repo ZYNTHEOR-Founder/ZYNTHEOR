@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">ZYNTHEOR — Vivid Intelligence</title>
+  <desc id="desc">A glowing emerald and violet neural core with orbiting lights, connecting nodes, and the ZYNTHEOR wordmark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#070914"/><stop offset=".52" stop-color="#11132b"/><stop offset="1" stop-color="#07151a"/></linearGradient>
+    <linearGradient id="aurora" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00f5a0" stop-opacity="0"/><stop offset=".45" stop-color="#00f5a0" stop-opacity=".36"/><stop offset=".72" stop-color="#9b5cff" stop-opacity=".32"/><stop offset="1" stop-color="#9b5cff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#e4fff5"/><stop offset=".52" stop-color="#7dffd2"/><stop offset="1" stop-color="#c6a4ff"/></linearGradient>
+    <radialGradient id="core"><stop stop-color="#d5fff2"/><stop offset=".12" stop-color="#68ffd0"/><stop offset=".42" stop-color="#00d98a" stop-opacity=".72"/><stop offset="1" stop-color="#00d98a" stop-opacity="0"/></radialGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#a8ffe1" stroke-opacity=".055" stroke-width="1"/></pattern>
+    <clipPath id="clip"><rect width="1200" height="340" rx="26"/></clipPath>
+  </defs>
+  <style>
+    .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 3.2s ease-in-out infinite}
+    .float{animation:float 8s ease-in-out infinite alternate}
+    .orbit{transform-box:fill-box;transform-origin:center;animation:spin 24s linear infinite}
+    .twinkle{animation:twinkle 2.8s ease-in-out infinite alternate}
+    .beam{animation:beam 6s ease-in-out infinite alternate}
+    @keyframes pulse{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+    @keyframes float{from{transform:translateY(-7px)}to{transform:translateY(8px)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes twinkle{from{opacity:.18}to{opacity:.95}}
+    @keyframes beam{from{opacity:.25;transform:translateX(-22px)}to{opacity:.8;transform:translateX(22px)}}
+    @media(prefers-reduced-motion:reduce){.pulse,.float,.orbit,.twinkle,.beam{animation:none!important}}
+  </style>
+  <g clip-path="url(#clip)">
+    <rect width="1200" height="340" fill="url(#bg)"/>
+    <rect width="1200" height="340" fill="url(#grid)"/>
+    <ellipse cx="595" cy="188" rx="500" ry="155" fill="url(#aurora)" filter="url(#soft)" class="beam"/>
+    <path d="M0 274C190 216 300 325 495 258s290-78 438-28 190 44 267-9v119H0Z" fill="#00d98a" opacity=".055"/>
+    <path d="M0 295c180-54 300 31 474-17s289-85 435-35 208 38 291-17" fill="none" stroke="#77ffce" stroke-opacity=".22" stroke-width="1.5"/>
+    <g fill="none" stroke="#72ffd0" stroke-opacity=".32" stroke-width="1.2">
+      <path d="M100 92 214 126 302 76 389 116"/><path d="M790 74 872 118 977 82 1094 137"/>
+      <path d="M154 228 253 193 337 242 423 207"/><path d="M796 228 877 193 971 239 1070 200"/>
+      <path d="M214 126 253 193M302 76 337 242M872 118 877 193M977 82 971 239" stroke-opacity=".18"/>
+    </g>
+    <g fill="#a9ffe0" filter="url(#glow)">
+      <circle cx="100" cy="92" r="2.6" class="twinkle"/><circle cx="214" cy="126" r="2" class="twinkle"/>
+      <circle cx="302" cy="76" r="2.4" class="twinkle"/><circle cx="389" cy="116" r="1.8" class="twinkle"/>
+      <circle cx="790" cy="74" r="2" class="twinkle"/><circle cx="872" cy="118" r="2.5" class="twinkle"/>
+      <circle cx="977" cy="82" r="2" class="twinkle"/><circle cx="1094" cy="137" r="2.6" class="twinkle"/>
+      <circle cx="154" cy="228" r="2" class="twinkle"/><circle cx="253" cy="193" r="2.5" class="twinkle"/>
+      <circle cx="337" cy="242" r="2" class="twinkle"/><circle cx="423" cy="207" r="2.5" class="twinkle"/>
+      <circle cx="796" cy="228" r="2" class="twinkle"/><circle cx="877" cy="193" r="2.5" class="twinkle"/>
+      <circle cx="971" cy="239" r="2" class="twinkle"/><circle cx="1070" cy="200" r="2.5" class="twinkle"/>
+    </g>
+    <g class="orbit" fill="none" stroke-width="1.4">
+      <ellipse cx="600" cy="170" rx="110" ry="48" stroke="#6bffd0" stroke-opacity=".38"/>
+      <ellipse cx="600" cy="170" rx="92" ry="66" stroke="#b08aff" stroke-opacity=".35" transform="rotate(58 600 170)"/>
+      <ellipse cx="600" cy="170" rx="92" ry="66" stroke="#5dffe0" stroke-opacity=".24" transform="rotate(-58 600 170)"/>
+      <circle cx="710" cy="170" r="4" fill="#c7fff0" stroke="none" filter="url(#glow)"/>
+      <circle cx="600" cy="104" r="3" fill="#d5b7ff" stroke="none" filter="url(#glow)"/>
+    </g>
+    <g class="float">
+      <circle cx="600" cy="170" r="61" fill="#00efaa" opacity=".14" filter="url(#soft)"/>
+      <circle cx="600" cy="170" r="47" fill="url(#core)" class="pulse"/>
+      <circle cx="600" cy="170" r="23" fill="#0a1520" stroke="#9affdd" stroke-opacity=".8" stroke-width="1.4"/>
+      <path d="M585 170h11l6-12 8 24 6-12h9" fill="none" stroke="#c7fff0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" filter="url(#glow)"/>
+      <circle cx="600" cy="170" r="4" fill="#d7fff1" class="pulse" filter="url(#glow)"/>
+    </g>
+    <g text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif">
+      <text x="600" y="273" fill="url(#word)" font-size="37" font-weight="800" letter-spacing="9">ZYNTHEOR</text>
+      <text x="600" y="301" fill="#d4e9e4" fill-opacity=".8" font-size="11" font-weight="600" letter-spacing="4">VIVID INTELLIGENCE · INTELLIGENCE WITHOUT BOUNDARIES</text>
+    </g>
+    <g fill="#d9fff3" filter="url(#glow)"><circle cx="48" cy="50" r="1.5" class="twinkle"/><circle cx="1150" cy="56" r="1.6" class="twinkle"/><circle cx="70" cy="292" r="1.3" class="twinkle"/><circle cx="1130" cy="285" r="1.5" class="twinkle"/><circle cx="492" cy="49" r="1.3" class="twinkle"/><circle cx="725" cy="45" r="1.5" class="twinkle"/></g>
+    <rect x=".75" y=".75" width="1198.5" height="338.5" rx="25.25" fill="none" stroke="#8dffe1" stroke-opacity=".24" stroke-width="1.5"/>
+  </g>
+</svg>

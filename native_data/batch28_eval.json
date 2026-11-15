@@ -1,0 +1,109 @@
+{
+  "schema": "ZYNTHEOR_BATCH28_EVAL_V1",
+  "runId": "b28_bench_1794688149933",
+  "timestamp": "2026-11-14T20:29:09.933Z",
+  "status": "PARTIAL_BLOCKED",
+  "provenance": {
+    "runtimeVersion": "ZYNTHEOR-Batch28",
+    "datasetVersion": "KnowledgeCorpus@2026-11-14",
+    "checkpointSha256": null,
+    "weightsLoaded": false,
+    "config": {
+      "onlineOnlyMandatory": true,
+      "zeroSimulationPolicy": true,
+      "humanApprovalGateActive": true
+    },
+    "hardware": {
+      "platform": "linux",
+      "arch": "x64",
+      "cpus": 2,
+      "totalMemMb": 7942,
+      "nodeVersion": "v24.22.2"
+    }
+  },
+  "attributionBreakdown": {
+    "nativeModel": {
+      "status": "BLOCKED",
+      "note": "Cloud checkpoint storage not configured in container",
+      "score": null
+    },
+    "orchestrator": {
+      "status": "VERIFIED",
+      "score": 1
+    },
+    "knowledgeRetrieval": {
+      "status": "VERIFIED",
+      "score": 1
+    }
+  },
+  "metrics": {
+    "planningSuccessRatePct": 100,
+    "taskCompletionRatePct": 100,
+    "toolAccuracyPct": 0,
+    "multiStepReasoningAccuracyPct": 100,
+    "factualGroundingRatePct": 100,
+    "retrievalRelevanceMrr": 1,
+    "citationCorrectnessPct": 100,
+    "memoryRecallScorePct": 100,
+    "longHorizonConsistencyPct": 100,
+    "errorRecoveryRatePct": 100,
+    "securityViolationRatePct": 0,
+    "avgLatencyMs": 491
+  },
+  "checks": [
+    {
+      "id": "B28-PLAN-01",
+      "pillar": "Autonomous Planning",
+      "name": "DAG Decomposition, Topological Ordering & Dynamic Plan Revision",
+      "status": "PASS",
+      "details": "DAG steps ordered topologically and revision logged cleanly",
+      "measuredValue": 100
+    },
+    {
+      "id": "B28-REASON-01",
+      "pillar": "Multi-Step Reasoning",
+      "name": "Math Verification, CSP Scheduling, AST Code Analysis & Alternative Ranking",
+      "status": "PASS",
+      "details": "Symbolic/AST/CSP reasoning passed 100% of checks",
+      "measuredValue": 100
+    },
+    {
+      "id": "B28-KNOW-01",
+      "pillar": "Advanced Knowledge",
+      "name": "Multi-Query Retrieval MRR, Freshness, Context Compression & Citation Check",
+      "status": "PASS",
+      "details": "MRR=1 citations=100% grounding=100%",
+      "measuredValue": 1
+    },
+    {
+      "id": "B28-MEM-01",
+      "pillar": "Long-Horizon Memory",
+      "name": "Ranked Recall, Working Context Continuity & Provenance Consolidation",
+      "status": "PASS",
+      "details": "Ranked recall, cross-session working context & semantic consolidation PASS",
+      "measuredValue": 100
+    },
+    {
+      "id": "B28-SEC-01",
+      "pillar": "Security & Governance",
+      "name": "Least-Privilege Tool RBAC Enforcement & High-Impact Approval Detection",
+      "status": "PASS",
+      "details": "guestWriteBlocked=true highImpactDetected=true",
+      "measuredValue": 0
+    },
+    {
+      "id": "B28-MODEL-01",
+      "pillar": "Native Model",
+      "name": "Active Cloud NativeLM Weight Readiness & Live Inference",
+      "status": "BLOCKED",
+      "details": "Online Connectivity Required: No Cloud Object Storage (S3_BUCKET / CHECKPOINT_PRESIGNED_URL) or CLOUD_RUNTIME_URL configured",
+      "measuredValue": "BLOCKED"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "blocked": 1,
+    "total": 6
+  }
+}

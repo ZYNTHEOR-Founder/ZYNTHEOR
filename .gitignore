@@ -1,0 +1,6 @@
+node_modules/
+*.pt.backup-*
+*.backup*
+*.zip
+__pycache__/
+*.log

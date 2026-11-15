@@ -1,0 +1,16 @@
+[
+  {
+    "id": "session-default",
+    "title": "Welcome to ZYNTHEOR Sovereign Intelligence",
+    "createdAt": "2026-11-14T18:07:30.313Z",
+    "updatedAt": "2026-11-14T18:07:30.313Z",
+    "messages": [
+      {
+        "id": "msg-0",
+        "sender": "assistant",
+        "content": "สวัสดีครับ! ผมคือ **ZYNTHEOR Native Target 41.53M** ขับเคลื่อนด้วยโมเดล NativeLM (41,527,808 parameters · 10L · 8H · 512D · Base LM Continuation) โดยสถานะความพร้อมแสดงตามหลักฐาน Runtime\n\nพร้อมทำงานร่วมกับคุณทั้งการวิเคราะห์สถาปัตยกรรม, ตรวจโค้ด, รัน Sandbox และบันทึก Audit Ledger ครับ",
+        "timestamp": "2026-11-14T18:07:30.313Z"
+      }
+    ]
+  }
+]

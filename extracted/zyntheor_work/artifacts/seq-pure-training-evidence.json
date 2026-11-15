@@ -1,0 +1,69 @@
+{
+  "model_kind": "PureSeqLM",
+  "storage_mode": "LEARNED_WEIGHTS_SEQ_PURE_PY",
+  "checkpoint_path": "native_data/model_checkpoint_seq_pure.pt",
+  "checkpoint_sha256": "7f0fdc7b6af7bcb0d80b0d1669a9d7e948e6f0f05f84e0634bca854fee93d95d",
+  "resumed_from_checkpoint": false,
+  "total_params": 51296,
+  "config": {
+    "vocab": 942,
+    "d_model": 32,
+    "n_layers": 2,
+    "n_heads": 4,
+    "d_ffn": 64,
+    "ctx": 16
+  },
+  "tokenizer": {
+    "profile": "bilingual_bpe",
+    "real_vocab_size": 942,
+    "bpe_merges_learned": 48,
+    "bpe_compression_gain_pct": 23.17
+  },
+  "corpus": {
+    "corpus_sha256": "94cff909b70a9f7a6b0c2b084a7ceaf9f74cf1e9676edc9cdf58ea7b0947e2ad",
+    "train_docs_used": 24,
+    "val_docs_used": 10,
+    "val_positions": 160
+  },
+  "training": {
+    "steps": 28,
+    "lr": 0.008,
+    "tokens_processed": 448,
+    "train_loss_first": 6.8211,
+    "train_loss_last": 4.947
+  },
+  "eval_before": {
+    "positions": 160,
+    "bytes": 273,
+    "nll": 6.8547,
+    "ppl": 948.3157,
+    "bpb": 5.7959,
+    "top1_accuracy": 0.025,
+    "top5_accuracy": 0.025,
+    "bigram_nll": 3.9456,
+    "bigram_ppl": 51.707,
+    "bigram_bpb": 3.3361,
+    "beats_bigram": false
+  },
+  "eval_after": {
+    "positions": 160,
+    "bytes": 273,
+    "nll": 5.2344,
+    "ppl": 187.625,
+    "bpb": 4.4259,
+    "top1_accuracy": 0.0,
+    "top5_accuracy": 0.0875,
+    "bigram_nll": 3.9456,
+    "bigram_ppl": 51.707,
+    "bigram_bpb": 3.3361,
+    "beats_bigram": false
+  },
+  "delta": {
+    "val_nll": -1.6203,
+    "val_ppl": -760.6907,
+    "top1_accuracy": -0.025
+  },
+  "gate_decision": "ACCEPTED",
+  "duration_s": 23.77,
+  "recorded_at": "2026-11-13T13:00:57Z"
+}

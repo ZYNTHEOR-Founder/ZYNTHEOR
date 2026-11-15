@@ -1,0 +1,9 @@
+node_modules/
+build/
+dist/
+native_data/
+*.pt
+*.zip
+*.pyc
+__pycache__/
+.env
