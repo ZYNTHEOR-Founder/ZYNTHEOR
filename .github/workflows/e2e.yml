@@ -1,28 +1,106 @@
-# STATUS: BLOCKED
-# Reason: Playwright is not a project dependency. No playwright.config.* or e2e test files.
-# "npx playwright test" would fail. Keep disabled until real E2E suite and deps are added.
-name: ZYNTHEOR E2E Acceptance
+name: ZYNTHEOR End-to-End Tests
 
 on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
-    # Explicitly disabled for push/PR until real suites exist.
 
 permissions:
   contents: read
 
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
-    name: E2E Acceptance (BLOCKED)
+    name: Native Intelligence E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 45
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      ZYNTHEOR_ENV: test
+      ZYNTHEOR_E2E: "1"
+
     steps:
-      - name: Report BLOCKED status
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Python dependencies
         run: |
-          echo "=== ZYNTHEOR E2E Workflow ==="
-          echo "Status: BLOCKED"
-          echo "Reasons:"
-          echo "  - Playwright not listed in package.json dependencies or devDependencies"
-          echo "  - No playwright.config.ts / e2e test directory present"
-          echo "  - npm run build exists, but no verified browser test suite"
-          echo "Do not install Playwright ad-hoc or use --if-present to fake success."
-          exit 0
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          pip install pytest
+
+      - name: Install frontend dependencies
+        if: hashFiles('package.json') != ''
+        run: npm ci
+
+      - name: Validate source syntax
+        run: python -m compileall -q qplus_native
+
+      - name: Test tokenizer
+        run: |
+          if [ -f tests/test_tokenizer.py ]; then
+            pytest -q tests/test_tokenizer.py
+          else
+            echo "BLOCKED: tokenizer tests not found"
+            exit 1
+          fi
+
+      - name: Test native model
+        run: |
+          if [ -d tests ]; then
+            pytest -q tests -k "model or inference or checkpoint"
+          else
+            exit 1
+          fi
+
+      - name: Run integration tests
+        run: |
+          if [ -d tests/e2e ]; then
+            pytest -q tests/e2e
+          elif [ -d tests/integration ]; then
+            pytest -q tests/integration
+          else
+            echo "BLOCKED: E2E/integration test suite not found"
+            exit 1
+          fi
+
+      - name: Build frontend
+        if: hashFiles('package.json') != ''
+        run: npm run build --if-present
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyntheor-e2e-results
+          path: |
+            test-results/
+            reports/
+            pytest.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Final result
+        if: success()
+        run: echo "PASS: E2E workflow completed"
