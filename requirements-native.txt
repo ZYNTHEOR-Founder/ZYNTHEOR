@@ -6,4 +6,4 @@
 # - eval_lm.py
 
 # Numerical computation
-numpy>=1.26
+numpy>=2.5.4
