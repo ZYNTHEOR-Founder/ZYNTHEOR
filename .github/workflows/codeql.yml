@@ -1,21 +1,23 @@
-name: ZYNTHEOR CodeQL Security
+
+name: ZYNTHEOR CodeQL Security Analysis
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
+
   pull_request:
-    branches: [main]
+    branches: [main, master]
+
   schedule:
-    - cron: "30 2 * * 1"
+    - cron: "30 3 * * 1"
+
   workflow_dispatch:
 
 permissions:
   contents: read
-  security-events: write
-  actions: read
 
 concurrency:
-  group: codeql-${{ github.ref }}
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,18 +26,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - python
+          - javascript-typescript
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript
-          queries: security-extended
+          languages: ${{ matrix.language }}
+          build-mode: none
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Analyze
+      - name: Analyze source code
         uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
