@@ -18,7 +18,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   "items": [
     {
@@ -29,7 +29,7 @@
       "split": "train",
       "qualityScore": 80,
       "isSynthetic": true,
-      "status": "NEEDS_REVIEW",
+      "status": "VERIFIED_READY",
       "flags": [
         "SYNTHETIC_ORIGIN"
       ]

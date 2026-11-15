@@ -1,5 +1,898 @@
 [
   {
+    "datasetId": "ds_1794773568901",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:12:48.901Z",
+    "sourceDocIds": [
+      "doc_1794773568899_k30t6"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "1cd9621ab2210f0e5342875147e4945a1a2943ca84c5bfbb2d754780638c3e68",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773568839",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:12:48.840Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "100a9f8042e29b4de004bb1cda8ddec538b3c6abc4ec5fc8db218e84d6f33815",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773510531",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:11:50.533Z",
+    "sourceDocIds": [
+      "doc_1794773510525_0vxhf"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "3271f3e65f6cb6e63de202fbd6bc31265cbe45c02d97a35d49276eaa4b22aa8c",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773510320",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:11:50.323Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "734a2a1ffefec0d3de8fb9b8d871b1644f4b2b5e7c1782d26df3549f170ec36f",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773338690",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:08:58.690Z",
+    "sourceDocIds": [
+      "doc_1794773338688_xfzpg"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "5722a551c803a4ac3538e57b58c878711a6923509afa80f48c31d11495be79cb",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773338685",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:08:58.685Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "5245c9992096ead720a895c927a64c302e185ea3132273149e2dbd8dfa39bad0",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773305108",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:08:25.109Z",
+    "sourceDocIds": [
+      "doc_1794773305106_ymg93"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "80dfcefc55ae2cd9ca56ff071c29a3196587f39e9499e337a9a331f21ebf0f86",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773305101",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:08:25.102Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "e6b63441d7acb8a18ebdd1f2cda9e3bfd0ecec318ddcb3031d8caf6b3f6c5170",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773274290",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:07:54.290Z",
+    "sourceDocIds": [
+      "doc_1794773274288_08bub"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "c024bd9131c10a050800965d629d3cded806ce3f8e1b664f8c34a981d44f21e8",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773274281",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:07:54.284Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "357f2aaa6fb1e41fb9927417ab0b0f77309a79b3a9b6ad29df4f0c352adfad83",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794773187576",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:06:27.576Z",
+    "sourceDocIds": [
+      "doc_1794773187573_eh0gv"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "87b9dccce0e7e6bf0765bf4c990b2982c55e116a4a028730e25c71e80ceaf373",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794773187569",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:06:27.570Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "403f3d157c038118763f8854f1641631141b18e0ea14871456088fb487637327",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794773083673",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:04:43.673Z",
+    "sourceDocIds": [
+      "doc_1794773083671_kwgdx"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "8b13060bff2566cbad3df8298568913d595535347beccafa5ca6257f6874988d",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794773083669",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:04:43.669Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "e1b6e70af8e8f6eaf4007de31aa7c186ae7eb25cfd07fec328988401d14fb26c",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794773019301",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:03:39.301Z",
+    "sourceDocIds": [
+      "doc_1794773019298_rn36m"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "020785caac1df0d1141cce27ca7dfd7ee61793a39913290bbcf3dcd9dec91209",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794773019292",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:03:39.293Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "facdc0a7f02d7ba2236d871060c58996b3dd0c0057d28aeb6ceecdca8ecbecf1",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772960542",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:02:40.542Z",
+    "sourceDocIds": [
+      "doc_1794772960539_x7jys"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "cce9f2f1c66479e4a12c443115a8f61b095a75b342467090e897cde51cdeee75",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772960533",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:02:40.534Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "9bcae6d938b50684f01dfbf692e55cc73e70ab296e8db6030890366d28295855",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772929480",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:02:09.480Z",
+    "sourceDocIds": [
+      "doc_1794772929477_numwt"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "a978166bc6b61a3701dd503c5ddc170f8655c6ebbaa75de5f836593f96d1ce22",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772929469",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:02:09.470Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "3b9ff13d5d4a83c1d1707a26da057062f4cdef2b09be47a24c197c3a0d4a9872",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772892130",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:01:32.130Z",
+    "sourceDocIds": [
+      "doc_1794772892128_znev9"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "1ee0acae84855c4eef0dc9eefc19d0bc174f2a4234d5352197e789e8e90854d3",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772892124",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:01:32.125Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "fdd3708427feff7dc6ec2396a5b5cedcf3eca656978e04ccc02b2bc8abb5b595",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772847659",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:00:47.659Z",
+    "sourceDocIds": [
+      "doc_1794772847647_ktnl3"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "a5b057d0f081a157b9d3dc2a72e6847046972532a689a1980e4d9c1ac7883dfa",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772847629",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:00:47.637Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "d33da993d4ff56164414dbb6e49764826964e10eb72edc96cd4aef61c7beaf45",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772817150",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:00:17.150Z",
+    "sourceDocIds": [
+      "doc_1794772817146_ql03i"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "b0ccd0d442fe0fda30b35dc24fee408ee99e0f1e8c1d79c875c5b71b26849ddc",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772817140",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T20:00:17.140Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "3b735fc520d4e772850c59cadcbeb8f8b2154b3ba131d2ef214072371c015b54",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772737412",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:58:57.412Z",
+    "sourceDocIds": [
+      "doc_1794772737408_lgfmd"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "f1a44c79c0267c387bdd213feaa598bdb53d179369f3083516ca05e8651b2345",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772737394",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:58:57.395Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "560963bf43b00717cd885a9100fffcd5030c33e7a92215c83033a1e6285e1e99",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772660478",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:57:40.478Z",
+    "sourceDocIds": [
+      "doc_1794772660475_6hcwo"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "9483c174975e373f0b7307b889c71d6bf85588fd4bfadffb56a3de3b9b709520",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772660471",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:57:40.472Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "b881c0036e420437d4bb9fce01fe095f5e8c3d9d2ca4b97986fa00f18765f449",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772475515",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:54:35.515Z",
+    "sourceDocIds": [
+      "doc_1794772475512_xny1a"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "5f644094f8e22077a9b71141610327131d9a7c74d8380a2ad33b857b87b194a1",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772475506",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:54:35.507Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "7c98ec8e9e1c5178a7cab1ec7837f4352be3e9720accb00b7c5585d23a8918aa",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772392821",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:53:12.821Z",
+    "sourceDocIds": [
+      "doc_1794772392815_9m9wh"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "70d733e746f7b47b5c45c9ab9c019a5cf5bac4e8ebb29ad6a4c8fbb620f2b417",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772392805",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:53:12.806Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "ee07f48baa72a76cdb63ad50963376aafb7a6937207850b42ba314987f04aa49",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772370117",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:52:50.117Z",
+    "sourceDocIds": [
+      "doc_1794772370112_qc2zq"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "10d17bd643c52e3c679637290b4e036c659519bf6caa221a7ea658060899b7a4",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772370107",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:52:50.108Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "464eabb1ccc6dad7d310dcc4856eebcb68e1aea3e721ac74cbfccde845e18e03",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772332643",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:52:12.643Z",
+    "sourceDocIds": [
+      "doc_1794772332638_jwyd5"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "3dc3fe27c733c1dec11b9f3cb3187c601453148376ed2af8807c017b3c96d8f0",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
+    "datasetId": "ds_1794772332628",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:52:12.629Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "9255a50c013636943000c8faa086d8186fdedd51ab2b73429b48948bc0601688",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  {
     "datasetId": "ds_1794771215250",
     "name": "Contaminated Test Corpus",
     "version": "1.0.0",
@@ -18,7 +911,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794771215242",
@@ -44,7 +937,7 @@
     "syntheticCount": 0,
     "originalCount": 7,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794771075200",
@@ -65,7 +958,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794771075188",
@@ -91,7 +984,7 @@
     "syntheticCount": 0,
     "originalCount": 7,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794770457307",
@@ -112,7 +1005,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794770457262",
@@ -138,7 +1031,7 @@
     "syntheticCount": 0,
     "originalCount": 7,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794430310771",
@@ -159,7 +1052,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794430310763",
@@ -206,7 +1099,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794429292838",
@@ -253,7 +1146,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794405923998",
@@ -298,7 +1191,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794401912403",
@@ -343,7 +1236,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794401856017",
@@ -388,7 +1281,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794400809711",
@@ -433,7 +1326,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794400668034",
@@ -478,7 +1371,7 @@
     "syntheticCount": 1,
     "originalCount": 0,
     "qualityScoreAvg": 80,
-    "status": "NEEDS_REVIEW"
+    "status": "VERIFIED_READY"
   },
   {
     "datasetId": "ds_1794400643126",
