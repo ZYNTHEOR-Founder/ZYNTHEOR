@@ -1,6 +1,6 @@
 {
   "suite": "security-rbac-integrity",
-  "timestamp": "2026-11-14T18:29:27.754Z",
+  "timestamp": "2026-11-15T08:01:24.949Z",
   "passed": 39,
   "failed": 0,
   "blocked": 0,
@@ -35,12 +35,12 @@
     "PASS:unauth denied /api/model/train|status=401",
     "PASS:User denied /api/audit|status=403",
     "PASS:Developer allowed /api/audit",
-    "PASS:create doc tenant A|doc_1794680967598_3el9u",
+    "PASS:create doc tenant A|doc_1794729684868_xswfo",
     "PASS:cross-tenant list isolation",
     "PASS:seal logs|215a1852ac75",
     "PASS:restore without confirm denied|400",
     "PASS:restore without tamper evidence denied|409",
-    "PASS:restore with tamper evidence|backup_before_restore_user_rbac_1794680967704.json",
+    "PASS:restore with tamper evidence|backup_before_restore_user_rbac_1794729684919.json",
     "PASS:restore replay blocked|409",
     "PASS:logout revokes token",
     "PASS:revoked token rejected"

@@ -1,0 +1,89 @@
+{
+  "manifest": {
+    "datasetId": "ds_1794729683518",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T08:01:23.519Z",
+    "sourceDocIds": [
+      "doc_1794680967598_3el9u",
+      "doc_1794679634573_utvpq",
+      "doc_1794679634572_js1vf",
+      "doc_1794679634571_qdvqf",
+      "doc_1794679634569_4tn2c"
+    ],
+    "totalSamples": 6,
+    "trainSamples": 3,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 642,
+    "thaiScriptRatio": 0.277,
+    "englishScriptRatio": 0.723,
+    "datasetHash": "407e1ca15dbb8539f385e5ed74eed622ecd29f940c3b08aaf77de161246072f2",
+    "syntheticCount": 0,
+    "originalCount": 6,
+    "qualityScoreAvg": 80,
+    "status": "VERIFIED_READY"
+  },
+  "items": [
+    {
+      "id": "item_ds_1794729683518_0",
+      "sourceDocId": "doc_1794680967598_3el9u",
+      "text": "cross-tenant isolation probe content unique e742adf7",
+      "tokenCount": 13,
+      "split": "eval",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "VERIFIED_READY"
+    },
+    {
+      "id": "item_ds_1794729683518_1",
+      "sourceDocId": "doc_1794679634573_utvpq",
+      "text": "# รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard\n\n## 1. กฎเหล็ก 7 ข้อ\n1. ห้ามสร้างโมเดลจำลองหรือรายงานผล benchmark เท็จ\n2. แยกแยะอย่างชัดเจนระหว่าง INITIALIZED WEIGHTS (ค่าน้ำหนักเริ่มต้น/สัญลักษณ์) และ LEARNED WEIGHTS (ค่าน้ำหนักที่ผ่านการฝึกจริง)\n3. การอัปโหลดเอกสารเข้า Knowledge Workspace ไม่ถือว่าเป็นการฝึก Model Weights\n4. จำแนกสถานะตามความเป็นจริง: VERIFIED, IMPLEMENTED, PARTIAL, BLOCKED, NOT IMPLEMENTED, MOCK\n5. ทุกการเปลี่ยนแปลงต้องตรวจสอบผ่านหลักฐานจริงใน Filesystem และ Runtime Logs",
+      "tokenCount": 125,
+      "split": "eval",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "VERIFIED_READY"
+    },
+    {
+      "id": "item_ds_1794729683518_2",
+      "sourceDocId": "doc_1794679634572_js1vf",
+      "text": "# Sovereign HMAC Token Verification Standard\n\n## 1. Timing-Attack Defense\nToken verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks.\nUnder no circumstances may plain string equality (===) be used on HMAC signatures.\n\n## 2. Minimum Entropy & Tenant Isolation\nSecret keys must have at least 32 bytes of cryptographic entropy loaded from environment variables.\nEach token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits.",
+      "tokenCount": 132,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "VERIFIED_READY"
+    },
+    {
+      "id": "item_ds_1794729683518_3",
+      "sourceDocId": "doc_1794679634571_qdvqf",
+      "text": "# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR Sovereign Tokenizer\n\n## 1. ขอบเขตพจนานุกรม (Vocabulary Scope)\nพจนานุกรมขนาด 16,384 โทเค็น ครอบคลุมชุดอักขระภาษาไทยทุกตัวตั้งแต่ U+0E01 (ก) ถึง U+0E5B (๙) รวมสระ วรรณยุกต์ และเครื่องหมายวรรคตอน\nรับประกัน 0% UNK Loss (อัตราการหลุดเป็น [UNK] เท่ากับศูนย์)\n\n## 2. การตัดคำและการสลับภาษา (Code-Switching)\nรองรับการประมวลผลประโยคที่ผสมผสานระหว่างภาษาไทยและภาษาอังกฤษ เช่น \"รัน Docker container ด้วยคำสั่ง compose up\" โดยไม่ทำลายโครงสร้างไวยากรณ์",
+      "tokenCount": 121,
+      "split": "val",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "VERIFIED_READY"
+    },
+    {
+      "id": "item_ds_1794729683518_4",
+      "sourceDocId": "doc_1794679634569_4tn2c",
+      "text": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nTarget architecture specification: 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).\nTarget parameter budget is 41,527,808 Float32 parameters (~166.1 MB decimal / 158.4 MiB). This is NOT the active runtime checkpoint. The currently serialized active subgraph contains 231,168 Float32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).",
+      "tokenCount": 134,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "VERIFIED_READY"
+    },
+    {
+      "id": "item_ds_1794729683518_5",
+      "sourceDocId": "doc_1794679634569_4tn2c",
+      "text": "loat32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.\n- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.\n- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.\n- Memory Isolation: Episodic memory persisted separately from static model weights.",
+      "tokenCount": 117,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "VERIFIED_READY"
+    }
+  ]
+}

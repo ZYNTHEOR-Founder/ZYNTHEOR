@@ -58,5 +58,15 @@
     "text": "cross-tenant isolation probe content unique e742adf7",
     "language": "en",
     "hash": "e9f7bfea4b76b2d500e6cb1e9cb717a4f9139ccdb4b1b86b836879f86077cca3"
+  },
+  {
+    "id": "chk_doc_1794729684868_xswfo_0",
+    "documentId": "doc_1794729684868_xswfo",
+    "documentTitle": "TenantA Secret 1794729684860",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 9d8a28f6",
+    "language": "en",
+    "hash": "f6ca13d4b8a0755fc4461e40d43999cfea2ef909d62d5cbf916103b7a796b1fb"
   }
 ]
