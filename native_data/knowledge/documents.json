@@ -337,5 +337,53 @@
     "parsedMetadata": {
       "headingCount": 0
     }
+  },
+  {
+    "id": "doc_1794770457301_t2qsi",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-15T19:20:57.301Z",
+    "updatedAt": "2026-11-15T19:20:57.301Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794771075196_doj9m",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-15T19:31:15.196Z",
+    "updatedAt": "2026-11-15T19:31:15.196Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
   }
 ]
