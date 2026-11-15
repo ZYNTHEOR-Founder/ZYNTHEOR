@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">ZYNTHEOR Vivid Intelligence — Aurora Neural Core</title>
+  <desc id="desc">A flowing rainbow aurora surrounding an intelligent neural core on a midnight navy field.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#070B19"/><stop offset=".55" stop-color="#11142C"/><stop offset="1" stop-color="#081B2A"/></linearGradient>
+    <linearGradient id="rainbow" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00F0FF"/><stop offset=".18" stop-color="#397BFF"/><stop offset=".38" stop-color="#7B2CBF"/><stop offset=".58" stop-color="#FF007F"/><stop offset=".78" stop-color="#FF5E3A"/><stop offset="1" stop-color="#CCFF00"/></linearGradient>
+    <linearGradient id="rainbow2" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#CCFF00"/><stop offset=".22" stop-color="#00F0FF"/><stop offset=".46" stop-color="#397BFF"/><stop offset=".68" stop-color="#7B2CBF"/><stop offset=".84" stop-color="#FF007F"/><stop offset="1" stop-color="#FF5E3A"/></linearGradient>
+    <radialGradient id="core"><stop stop-color="#fff"/><stop offset=".13" stop-color="#d8ffff"/><stop offset=".34" stop-color="#00F0FF" stop-opacity=".95"/><stop offset=".66" stop-color="#7B2CBF" stop-opacity=".58"/><stop offset="1" stop-color="#FF007F" stop-opacity="0"/></radialGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00F0FF"/><stop offset=".3" stop-color="#8BAAFF"/><stop offset=".58" stop-color="#FF72BD"/><stop offset=".82" stop-color="#FF9C70"/><stop offset="1" stop-color="#D9FF79"/></linearGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="haze" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="27"/></filter>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M42 0H0V42" fill="none" stroke="#9AB7FF" stroke-opacity=".055" stroke-width="1"/></pattern>
+    <clipPath id="clip"><rect width="1200" height="420" rx="30"/></clipPath>
+  </defs>
+  <style>
+    .aurora{animation:aurora 12s ease-in-out infinite alternate;transform-origin:center}
+    .orbit{transform-box:fill-box;transform-origin:center;animation:orbit 26s linear infinite}
+    .orbit.reverse{animation-direction:reverse;animation-duration:34s}
+    .core-pulse{transform-box:fill-box;transform-origin:center;animation:core 4s ease-in-out infinite}
+    .float{animation:float 9s ease-in-out infinite alternate}
+    .twinkle{animation:twinkle 2.6s ease-in-out infinite alternate}
+    .sweep{stroke-dasharray:90 820;animation:sweep 9s linear infinite}
+    @keyframes aurora{0%{transform:translate(-24px,9px) scale(.96);opacity:.42}100%{transform:translate(28px,-8px) scale(1.06);opacity:.9}}
+    @keyframes orbit{to{transform:rotate(360deg)}}
+    @keyframes core{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.09);opacity:1}}
+    @keyframes float{from{transform:translateY(-8px)}to{transform:translateY(9px)}}
+    @keyframes twinkle{from{opacity:.2}to{opacity:1}}
+    @keyframes sweep{to{stroke-dashoffset:-910}}
+    @media(prefers-reduced-motion:reduce){.aurora,.orbit,.core-pulse,.float,.twinkle,.sweep{animation:none!important}}
+  </style>
+  <g clip-path="url(#clip)">
+    <rect width="1200" height="420" fill="url(#bg)"/>
+    <rect width="1200" height="420" fill="url(#grid)"/>
+    <ellipse class="aurora" cx="600" cy="196" rx="520" ry="170" fill="url(#rainbow)" opacity=".18" filter="url(#haze)"/>
+    <ellipse class="aurora" cx="600" cy="210" rx="360" ry="112" fill="url(#rainbow2)" opacity=".15" filter="url(#haze)"/>
+    <g fill="none" stroke-linecap="round">
+      <path d="M-40 276C124 145 246 336 407 227S697 106 846 229s237 94 394-30" stroke="url(#rainbow)" stroke-width="2.6" opacity=".52" filter="url(#glow)"/>
+      <path d="M-30 308C140 185 264 359 428 255S704 137 854 255s237 82 390-36" stroke="url(#rainbow2)" stroke-width="1.7" opacity=".35"/>
+      <path d="M-40 98C132 216 256 32 410 136s280 158 438 39 225-92 390 26" stroke="url(#rainbow2)" stroke-width="1.5" opacity=".27"/>
+      <path class="sweep" d="M-40 276C124 145 246 336 407 227S697 106 846 229s237 94 394-30" stroke="#fff" stroke-width="1.8" opacity=".85"/>
+    </g>
+    <g fill="none" stroke="url(#rainbow)" stroke-width="1.3" opacity=".34">
+      <path d="M118 130 218 172 316 112 400 154M800 118 884 162 992 109 1090 158"/>
+      <path d="M156 282 251 242 345 295 426 257M777 278 872 239 968 293 1061 254"/>
+      <path d="M218 172 251 242M316 112 345 295M884 162 872 239M992 109 968 293" opacity=".55"/>
+    </g>
+    <g fill="#fff" filter="url(#glow)">
+      <circle cx="118" cy="130" r="2.5" class="twinkle"/><circle cx="218" cy="172" r="2" class="twinkle"/><circle cx="316" cy="112" r="2.7" class="twinkle"/>
+      <circle cx="400" cy="154" r="2" class="twinkle"/><circle cx="800" cy="118" r="2" class="twinkle"/><circle cx="884" cy="162" r="2.5" class="twinkle"/>
+      <circle cx="992" cy="109" r="2.2" class="twinkle"/><circle cx="1090" cy="158" r="2.5" class="twinkle"/>
+      <circle cx="156" cy="282" r="2" class="twinkle"/><circle cx="251" cy="242" r="2.5" class="twinkle"/><circle cx="345" cy="295" r="2" class="twinkle"/>
+      <circle cx="426" cy="257" r="2.5" class="twinkle"/><circle cx="777" cy="278" r="2" class="twinkle"/><circle cx="872" cy="239" r="2.5" class="twinkle"/>
+      <circle cx="968" cy="293" r="2" class="twinkle"/><circle cx="1061" cy="254" r="2.5" class="twinkle"/>
+    </g>
+    <g class="orbit" fill="none" stroke-width="1.5">
+      <ellipse cx="600" cy="185" rx="129" ry="55" stroke="#00F0FF" stroke-opacity=".55"/>
+      <ellipse cx="600" cy="185" rx="104" ry="75" stroke="#FF007F" stroke-opacity=".46" transform="rotate(57 600 185)"/>
+      <ellipse cx="600" cy="185" rx="104" ry="75" stroke="#CCFF00" stroke-opacity=".38" transform="rotate(-57 600 185)"/>
+      <circle cx="729" cy="185" r="4" fill="#CCFF00" stroke="none" filter="url(#glow)"/>
+    </g>
+    <g class="orbit reverse" fill="none" stroke="url(#rainbow2)" stroke-width="1" opacity=".5">
+      <ellipse cx="600" cy="185" rx="156" ry="89" stroke-dasharray="3 9"/>
+    </g>
+    <g class="float">
+      <circle cx="600" cy="185" r="77" fill="url(#core)" class="core-pulse" filter="url(#glow)"/>
+      <circle cx="600" cy="185" r="35" fill="#0A1128" stroke="url(#rainbow)" stroke-width="1.8"/>
+      <path d="M578 187h13l8-18 10 34 8-16h16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+      <circle cx="600" cy="185" r="4" fill="#fff" filter="url(#glow)" class="core-pulse"/>
+    </g>
+    <g text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif">
+      <text x="600" y="340" fill="url(#word)" font-size="46" font-weight="850" letter-spacing="11">ZYNTHEOR</text>
+      <text x="600" y="372" fill="#E7EDFF" fill-opacity=".83" font-size="12" font-weight="700" letter-spacing="5">VIVID INTELLIGENCE</text>
+      <text x="600" y="395" fill="#AFC0E8" fill-opacity=".75" font-size="9" font-weight="600" letter-spacing="3">INTELLIGENCE WITHOUT BOUNDARIES</text>
+    </g>
+    <rect x="1" y="1" width="1198" height="418" rx="29" fill="none" stroke="url(#rainbow)" stroke-opacity=".38" stroke-width="1.5"/>
+  </g>
+</svg>
