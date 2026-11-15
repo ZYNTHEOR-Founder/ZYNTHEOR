@@ -49,34 +49,32 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Upgrade pip
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install dependencies
-        run: |
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
+          fi
+
+          if [ -f requirements-native.txt ]; then
+            pip install -r requirements-native.txt
           fi
 
           pip install pytest pytest-cov ruff mypy
 
       - name: Compile Python source
-        run: |
-          python -m compileall -q qplus_native
+        run: python -m compileall -q qplus_native
 
       - name: Ruff lint
-        run: |
-          ruff check qplus_native
+        run: ruff check qplus_native
 
       - name: Python formatting check
-        run: |
-          ruff format --check qplus_native
+        run: ruff format --check qplus_native
 
       - name: Static type analysis
         continue-on-error: true
-        run: |
-          mypy qplus_native
+        run: mypy qplus_native
 
       - name: Run unit tests
         run: |
@@ -87,21 +85,9 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml
 
-      - name: Verify native module imports
+      - name: Verify native package import
         run: |
-          python - <<'PY'
-          import importlib.util
-
-          modules = [
-              "qplus_native",
-          ]
-
-          for module in modules:
-              if importlib.util.find_spec(module) is None:
-                  raise SystemExit(f"FAIL: Missing module {module}")
-              print(f"VERIFIED: {module}")
-
-          PY
+          python -c "import qplus_native; print('VERIFIED: qplus_native import')"
 
       - name: Upload coverage report
         if: always()
