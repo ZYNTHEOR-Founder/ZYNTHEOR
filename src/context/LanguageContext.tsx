@@ -52,16 +52,16 @@ export const DICTIONARY: Translations = {
   'btn.search': { th: 'ค้นหา', en: 'Search' },
 
   // Header badges & status
-  'badge.sovereign': { th: 'สถาปัตยกรรม Native 33.7M', en: 'Native 33.7M Architecture' },
+  'badge.sovereign': { th: 'Native Intelligence · Cloud Runtime', en: 'Native Intelligence · Cloud Runtime' },
   'badge.verified': { th: 'ผ่านการพิสูจน์แล้ว', en: 'Verified' },
   'badge.private_beta': { th: 'ทดสอบเบต้าส่วนตัว (Private Beta)', en: 'Private Beta' },
   'badge.public_beta': { th: 'ทดสอบเบต้าสาธารณะ (Public Beta)', en: 'Public Beta' },
   'badge.commercial_launch': { th: 'เปิดตัวเชิงพาณิชย์ (Commercial)', en: 'Commercial Launch' },
-  'footer.sovereign_desc': { th: 'โมเดลในเครื่อง · ไร้ Cloud AI API ภายนอก · ป้องกันสิทธิ์แบบ Fail-Closed', en: 'First-Party Local Model · Zero External Cloud AI · Fail-Closed Sandbox' },
+  'footer.sovereign_desc': { th: 'Native Core · Online Cloud Runtime · Fail-Closed Governance', en: 'Native Core · Online Cloud Runtime · Fail-Closed Governance' },
 
   // Conversational Intelligence
   'chat.title': { th: 'ระบบสนทนาและให้เหตุผลสองภาษา', en: 'Bilingual Conversational & Reasoning Core' },
-  'chat.subtitle': { th: 'ประมวลผลด้วย Native Model 33.7M ไม่พึ่งพาคลาวด์ภายนอก แสดงขั้นตอนคิดที่ตรวจสอบได้', en: 'Powered by Sovereign 33.7M Local Model with verifiable reasoning steps and dual-engine language flow' },
+  'chat.subtitle': { th: 'ใช้ Native Cloud Runtime เมื่อ checkpoint ผ่านการตรวจสอบ และแสดงสถานะจากระบบจริง', en: 'Uses the Native Cloud Runtime after checkpoint verification; status is reported from live system evidence.' },
   'chat.input_placeholder': { th: 'พิมพ์คำถามหรือคำสั่งภาษาไทย หรือ English... (เช่น สร้างฟังก์ชันตรวจสอบสิทธิ์, อธิบายขั้นตอน)', en: 'Type prompt in Thai or English... (e.g. Write an auth validator, explain architecture)' },
   'chat.thinking': { th: 'โมเดลกำลังวิเคราะห์และประมวลผล...', en: 'Model is analyzing and generating tokens...' },
   'chat.thought_process': { th: 'ขั้นตอนการให้เหตุผลที่ตรวจสอบได้ (Verifiable Reasoning)', en: 'Verifiable Reasoning Process' },

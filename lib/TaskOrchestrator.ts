@@ -2,9 +2,10 @@
  * ZYNTHEOR Sovereign Task Orchestrator
  * Strict 4-Role Multi-Agent State Machine:
  * 1. PLANNER -> 2. CODER -> 3. REVIEWER -> 4. TESTER
- * Zero mock responses. Real execution traces in AuditLedger and ToolGateway sandbox.
+ * Zero mock responses. Real execution traces in AuditLedger and workspace-scoped ToolGateway.
  */
 
+import crypto from 'node:crypto';
 import { NativeNeuralLMProvider } from './providers';
 import { ToolGateway, type CommandResult } from './ToolGateway';
 import { AuditLedger } from './AuditLedger';
@@ -23,6 +24,7 @@ export interface TaskExecutionResult {
   taskId: string;
   goal: string;
   success: boolean;
+  executionStatus: 'BLOCKED_CLOUD_RUNNER' | 'FAILED_STATIC_CHECK';
   finalCode: string;
   plan: string;
   reviewStatus: 'APPROVED' | 'REJECTED';
@@ -45,9 +47,19 @@ export class TaskOrchestrator {
 
   public async executeTask(
     goal: string,
-    onEvent: (event: OrchestrationEvent) => void
+    onEvent: (event: OrchestrationEvent) => void,
+    owner: { userId: string; tenantId: string }
   ): Promise<TaskExecutionResult> {
-    const taskId = `TASK-${Date.now()}`;
+    if (!owner?.userId?.trim() || !owner?.tenantId?.trim()) {
+      throw new Error('VERIFIED_TASK_OWNER_REQUIRED');
+    }
+    const taskId = `TASK-${crypto.randomUUID()}`;
+    const ownerScope = crypto.createHash('sha256').update(`${owner.tenantId}\0${owner.userId}`).digest('hex').slice(0, 32);
+    const taskWorkspace = `tenants/${ownerScope}/tasks/${taskId}`;
+    const solutionPath = `${taskWorkspace}/solution.js`;
+    if (typeof goal !== 'string' || !goal.trim() || goal.length > 8000) {
+      throw new Error('INVALID_TASK_GOAL: goal must contain 1–8000 characters.');
+    }
     const startTime = Date.now();
 
     const emit = (event: Omit<OrchestrationEvent, 'timestamp'>) => {
@@ -63,7 +75,7 @@ export class TaskOrchestrator {
       data: { taskId, goal }
     });
 
-    AuditLedger.append('SYSTEM', 'TASK_DISPATCHED', { taskId, goal });
+    AuditLedger.append('SYSTEM', 'TASK_DISPATCHED', { taskId, goal, ownerUserId: owner.userId, tenantId: owner.tenantId, ownerScope });
 
     let plan = '';
     let code = '';
@@ -91,7 +103,7 @@ export class TaskOrchestrator {
       plan = plannerRes.text;
 
       AuditLedger.append('PLANNER', 'PLAN_FORMULATED', {
-        taskId,
+        taskId, ownerUserId: owner.userId, tenantId: owner.tenantId,
         plan,
         tokens: plannerRes.output_tokens_count,
         latency_ms: plannerRes.latency_ms
@@ -100,7 +112,7 @@ export class TaskOrchestrator {
       emit({
         type: 'step',
         role: 'PLANNER',
-        message: 'PLANNER: Plan ready and verified against sovereign invariants.',
+        message: 'PLANNER: Plan drafted. Independent verification has not yet run.',
         data: { plan, tokens: plannerRes.output_tokens_count }
       });
 
@@ -143,19 +155,19 @@ export class TaskOrchestrator {
         }
 
         // Write directly to sandbox via ToolGateway
-        ToolGateway.writeFile('solution.js', code);
+        ToolGateway.writeFile(solutionPath, code);
 
         AuditLedger.append('CODER', 'CODE_COMMITTED', {
-          taskId,
+          taskId, ownerUserId: owner.userId, tenantId: owner.tenantId,
           attempt: retryCount,
-          filePath: '/workspace/solution.js',
+          filePath: `/workspace/${solutionPath}`, 
           bytes: Buffer.byteLength(code, 'utf8')
         });
 
         emit({
           type: 'step',
           role: 'CODER',
-          message: 'CODER: Code written to /workspace/solution.js. Transferring to REVIEWER...',
+          message: `CODER: Code written to /workspace/${solutionPath}. Transferring to REVIEWER...`,
           data: { code }
         });
 
@@ -177,7 +189,7 @@ export class TaskOrchestrator {
           reviewApproved = true;
           reviewStatus = 'APPROVED';
           AuditLedger.append('REVIEWER', 'REVIEW_APPROVED', {
-            taskId,
+            taskId, ownerUserId: owner.userId, tenantId: owner.tenantId,
             attempt: retryCount,
             feedback: reviewFeedback
           });
@@ -185,7 +197,7 @@ export class TaskOrchestrator {
           emit({
             type: 'review',
             role: 'REVIEWER',
-            message: 'REVIEWER: Code APPROVED. Passed all sovereign invariants.',
+            message: 'REVIEWER: Advisory review approved the draft; this is not a security verification.',
             data: { reviewStatus: 'APPROVED', feedback: reviewFeedback }
           });
           break;
@@ -193,7 +205,7 @@ export class TaskOrchestrator {
           reviewStatus = 'REJECTED';
           retryCount++;
           AuditLedger.append('REVIEWER', 'REVIEW_REJECTED', {
-            taskId,
+            taskId, ownerUserId: owner.userId, tenantId: owner.tenantId,
             attempt: retryCount,
             feedback: reviewFeedback
           });
@@ -217,15 +229,15 @@ export class TaskOrchestrator {
       emit({
         type: 'step',
         role: 'TESTER',
-        message: 'TESTER: Executing /workspace/solution.js inside isolated Sandbox via ToolGateway...'
+        message: `TESTER: Checking JavaScript syntax for /workspace/${solutionPath}. Runtime execution requires the isolated Cloud Runner.`
       });
 
-      testResult = await ToolGateway.runCommand('node', ['solution.js']);
+      testResult = await ToolGateway.runCommand('node', ['--check', solutionPath]);
 
-      const testPassed = testResult.exitCode === 0;
+      const syntaxCheckPassed = testResult.exitCode === 0;
 
-      AuditLedger.append('TESTER', testPassed ? 'TEST_PASSED' : 'TEST_FAILED', {
-        taskId,
+      AuditLedger.append('TESTER', syntaxCheckPassed ? 'STATIC_SYNTAX_CHECK_PASSED' : 'STATIC_SYNTAX_CHECK_FAILED', {
+        taskId, ownerUserId: owner.userId, tenantId: owner.tenantId,
         exitCode: testResult.exitCode,
         durationMs: testResult.durationMs,
         stdoutSnippet: testResult.stdout.slice(0, 200)
@@ -234,14 +246,16 @@ export class TaskOrchestrator {
       emit({
         type: 'test',
         role: 'TESTER',
-        message: testPassed
-          ? `TESTER: Execution PASSED with exitCode 0 in ${testResult.durationMs}ms.`
-          : `TESTER: Execution FAILED with exitCode ${testResult.exitCode}.`,
+        message: syntaxCheckPassed
+          ? `TESTER: Static syntax check PASSED in ${testResult.durationMs}ms. Runtime execution remains BLOCKED until a dedicated isolated Cloud Runner is configured.`
+          : `TESTER: Static syntax check FAILED with exitCode ${testResult.exitCode}.`,
         data: {
           exitCode: testResult.exitCode,
           stdout: testResult.stdout,
           stderr: testResult.stderr,
-          durationMs: testResult.durationMs
+          durationMs: testResult.durationMs,
+          executionStatus: syntaxCheckPassed ? 'BLOCKED_CLOUD_RUNNER' : 'FAILED_STATIC_CHECK',
+          runtimeExecuted: false
         }
       });
 
@@ -249,12 +263,13 @@ export class TaskOrchestrator {
 
       emit({
         type: 'done',
-        message: testPassed
-          ? `All 4 Agent Roles successfully verified task "${goal}"!`
-          : `Task finished with test execution failure.`,
+        message: syntaxCheckPassed
+          ? `Draft and static syntax check completed for "${goal}". Runtime execution is BLOCKED pending the isolated Cloud Runner.`
+          : `Draft static syntax check failed for "${goal}".`,
         data: {
           taskId,
-          success: testPassed,
+          success: false,
+          executionStatus: syntaxCheckPassed ? 'BLOCKED_CLOUD_RUNNER' : 'FAILED_STATIC_CHECK',
           durationMs: totalDuration
         }
       });
@@ -262,7 +277,8 @@ export class TaskOrchestrator {
       return {
         taskId,
         goal,
-        success: testPassed,
+        success: false,
+        executionStatus: syntaxCheckPassed ? 'BLOCKED_CLOUD_RUNNER' : 'FAILED_STATIC_CHECK',
         finalCode: code,
         plan,
         reviewStatus,
@@ -274,7 +290,7 @@ export class TaskOrchestrator {
 
     } catch (err: any) {
       AuditLedger.append('SYSTEM', 'TASK_ERROR', {
-        taskId,
+        taskId, ownerUserId: owner.userId, tenantId: owner.tenantId,
         error: err.message
       });
 

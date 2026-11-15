@@ -95,6 +95,7 @@ export interface CuratedDatasetManifest {
   originalCount: number;
   qualityScoreAvg: number;
   status: 'VERIFIED_READY' | 'NEEDS_REVIEW' | 'FLAGGED';
+  humanApproval?: { approvedBy: string; approvedAt: string; evidenceHash?: string };
 }
 
 export interface ParsedDocumentResult {
@@ -322,25 +323,27 @@ export class KnowledgeWorkspace {
   private seedInitialKnowledge(): void {
     const seeds: Array<Omit<KnowledgeDocument, 'id' | 'createdAt' | 'updatedAt' | 'contentHash' | 'chunksCount' | 'byteSize' | 'version' | 'status'>> = [
       {
-        title: 'ZYNTHEOR Architecture Manifest & 33.7M Parameter Model Specification',
+        title: 'ZYNTHEOR Native Architecture & Checkpoint Evidence',
         collection: 'Architecture',
         source: 'docs/architecture_manifest.md',
         format: 'markdown',
         tags: ['architecture', 'transformer', 'rope', 'swiglu', 'sovereign'],
         language: 'mixed',
         provenance: 'First-party engineering specification authored by ZYNTHEOR Core Team',
-        curatedForTraining: true,
-        content: `# ZYNTHEOR Q+ Sovereign AI Architecture Manifest
+        curatedForTraining: false,
+        content: `# ZYNTHEOR Native Architecture & Checkpoint Evidence
 
-## 1. Core Model Topology
-ZYNTHEOR runs a 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).
-Total parameter count is 33,958,400 Float32 parameters (~135.8 MB).
+## 1. Architecture target
+The source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof of loaded model weights.
 
-## 2. Invariants & Fail-Closed Standard
-- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.
-- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.
-- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.
-- Memory Isolation: Episodic memory persisted separately from static model weights.`
+## 2. Measured checkpoint evidence (2026-11-15)
+The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized payload. The 41,527,808 parameter target is a specification; target checkpoint files in this archive are descriptors, not full tensor payloads. Native Cloud inference remains blocked until a compatible checkpoint is fetched and verified by the Cloud Runtime.
+
+## 3. Evidence and training policy
+- Knowledge retrieval is distinct from weight training.
+- New datasets require explicit human approval and provenance evidence before training.
+- Checkpoint integrity, training quality, and inference readiness are separate claims.
+- A status is reported only when supported by recorded runtime/test evidence.`
       },
       {
         title: 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol',
@@ -350,15 +353,14 @@ Total parameter count is 33,958,400 Float32 parameters (~135.8 MB).
         tags: ['tokenizer', 'thai', 'english', 'unicode', 'vocab'],
         language: 'th',
         provenance: 'Internal linguistic standard for zero-loss Thai character encoding',
-        curatedForTraining: true,
-        content: `# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR Sovereign Tokenizer
+        curatedForTraining: false,
+        content: `# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR
 
-## 1. ขอบเขตพจนานุกรม (Vocabulary Scope)
-พจนานุกรมขนาด 16,384 โทเค็น ครอบคลุมชุดอักขระภาษาไทยทุกตัวตั้งแต่ U+0E01 (ก) ถึง U+0E5B (๙) รวมสระ วรรณยุกต์ และเครื่องหมายวรรคตอน
-รับประกัน 0% UNK Loss (อัตราการหลุดเป็น [UNK] เท่ากับศูนย์)
+## 1. ขอบเขต
+Tokenizer source defines vocabulary construction and Thai Unicode handling. Vocabulary size, effective vocabulary count, unknown-token rate, and round-trip fidelity must be reported from the actual runtime test result; this document does not assert fixed performance numbers.
 
-## 2. การตัดคำและการสลับภาษา (Code-Switching)
-รองรับการประมวลผลประโยคที่ผสมผสานระหว่างภาษาไทยและภาษาอังกฤษ เช่น "รัน Docker container ด้วยคำสั่ง compose up" โดยไม่ทำลายโครงสร้างไวยากรณ์`
+## 2. การตรวจสอบภาษา
+การรองรับข้อความไทย อังกฤษ และการสลับภาษาต้องพิสูจน์ด้วยผลทดสอบที่บันทึกจริงก่อนจัดสถานะ VERIFIED.`
       },
       {
         title: 'Sovereign Token Verification & Constant-Time Security Specification',
@@ -368,7 +370,7 @@ Total parameter count is 33,958,400 Float32 parameters (~135.8 MB).
         tags: ['security', 'hmac', 'timing-attack', 'tenant-isolation', 'sha256'],
         language: 'en',
         provenance: 'Hardened cryptographic authentication protocol specification',
-        curatedForTraining: true,
+        curatedForTraining: false,
         content: `# Sovereign HMAC Token Verification Standard
 
 ## 1. Timing-Attack Defense
@@ -387,7 +389,7 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
         tags: ['governance', 'zero-fake', 'evidence', 'audit'],
         language: 'mixed',
         provenance: 'Foundational operating charter of the ZYNTHEOR project',
-        curatedForTraining: true,
+        curatedForTraining: false,
         content: `# รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard
 
 ## 1. กฎเหล็ก 7 ข้อ
@@ -682,7 +684,7 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
         }
 
         // Determine item Quality Gate status
-        let itemStatus: CuratedDatasetItem['status'] = 'VERIFIED_READY';
+        let itemStatus: CuratedDatasetItem['status'] = 'NEEDS_REVIEW';
         if (isDocSynthetic || qualityScore < 70) {
           itemStatus = 'NEEDS_REVIEW';
         }
@@ -732,10 +734,9 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     const datasetDigest = crypto.createHash('sha256').update(JSON.stringify(items)).digest('hex');
 
     // Quality Gate: If synthetic samples exist or average quality < 75, requires review
-    const manifestStatus: CuratedDatasetManifest['status'] =
-      syntheticCount > 0 || qualityScoreAvg < 75 || items.some((i) => i.status === 'NEEDS_REVIEW')
-        ? 'NEEDS_REVIEW'
-        : 'VERIFIED_READY';
+    // Quality heuristics are triage signals, not human approval. A newly curated
+    // dataset must remain gated until an explicit approval workflow records evidence.
+    const manifestStatus: CuratedDatasetManifest['status'] = 'NEEDS_REVIEW';
 
     const manifest: CuratedDatasetManifest = {
       datasetId,
@@ -773,21 +774,34 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
       syntheticCount,
       qualityScoreAvg,
       status: manifest.status,
-      datasetHash: manifest.datasetHash
+      datasetHash: manifest.datasetHash,
+      requiresHumanApproval: true
     });
 
     return manifest;
   }
 
   public getDatasets(): CuratedDatasetManifest[] {
-    return [...this.datasets];
+    // Legacy VERIFIED_READY labels have no stored human-approval evidence.
+    // Present them as review-required without mutating persisted user data.
+    return this.datasets.map((dataset) => dataset.humanApproval?.approvedBy && dataset.humanApproval?.approvedAt && dataset.humanApproval?.evidenceHash
+      ? { ...dataset }
+      : { ...dataset, status: 'NEEDS_REVIEW' });
   }
 
   public getDatasetDetail(datasetId: string): any {
     const datasetFile = path.join(this.datasetDir, `${datasetId}.json`);
     if (fs.existsSync(datasetFile)) {
       try {
-        return JSON.parse(fs.readFileSync(datasetFile, 'utf8'));
+        const detail = JSON.parse(fs.readFileSync(datasetFile, 'utf8'));
+        const approved = Boolean(detail?.manifest?.humanApproval?.approvedBy && detail?.manifest?.humanApproval?.approvedAt && detail?.manifest?.humanApproval?.evidenceHash);
+        if (detail?.manifest && !approved) {
+          detail.manifest.status = 'NEEDS_REVIEW';
+          if (Array.isArray(detail.items)) {
+            detail.items = detail.items.map((item: any) => ({ ...item, status: item.status === 'FLAGGED' ? 'FLAGGED' : 'NEEDS_REVIEW' }));
+          }
+        }
+        return detail;
       } catch (err) {
         return null;
       }

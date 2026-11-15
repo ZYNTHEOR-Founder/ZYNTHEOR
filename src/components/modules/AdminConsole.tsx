@@ -22,9 +22,8 @@ export const AdminConsole: React.FC = () => {
   const [suiteData, setSuiteData] = useState<VerificationSuiteData | null>(null);
   const [healthHistory, setHealthHistory] = useState<Array<{ time: string; cpu: number; ram: number; vram: number }>>([]);
   const [auditEntries, setAuditEntries] = useState<any[]>([]);
-  const [sessions, setSessions] = useState([
-    { id: 'sess_sovereign_01', actor: 'Administrator', ip: '127.0.0.1', status: 'ACTIVE' }
-  ]);
+  // does not display fabricated sessions or simulate token revocation; no session API exists yet.
+  const [sessions] = useState<Array<{ id: string; actor: string; ip: string; status: string }>>([]);
 
   useEffect(() => {
     const loadAdminData = async () => {
@@ -106,10 +105,10 @@ export const AdminConsole: React.FC = () => {
             <ShieldCheck className="w-6 h-6 text-[var(--z-ok)] shrink-0" />
             <div>
               <div className="text-xs font-bold text-[var(--app-text-primary)]">
-                {suiteData ? `${suiteData.passed_tests} / ${suiteData.total_tests} Tests Passed` : '8 Sovereign Proofs Standard'}
+                {suiteData ? `${suiteData.passed_tests} / ${suiteData.total_tests} Tests Passed` : 'No verification run recorded'}
               </div>
               <div className="text-[10px] text-[var(--z-ok)] font-mono font-bold">
-                {suiteData?.verified ? '100% MATHEMATICALLY VERIFIED' : 'Ready for Benchmark'}
+                {suiteData?.verified ? 'EVIDENCE VERIFIED' : 'UNVERIFIED · AWAITING TEST RUN'}
               </div>
             </div>
           </div>
@@ -134,64 +133,7 @@ export const AdminConsole: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)] font-sans">
-              {(suiteData?.results || [
-                {
-                  test_id: 'P1_WEIGHTS_LOAD',
-                  name: 'Native Model Weights Load',
-                  status: 'PASS',
-                  evidence: 'Checkpoint loaded: 33,958,400 parameters (SHA-256: 7f88088ef2b13344...)',
-                  duration_ms: 1.2
-                },
-                {
-                  test_id: 'P2_TOKENIZER',
-                  name: 'Tokenizer Encode & Decode',
-                  status: 'PASS',
-                  evidence: 'Sample roundtrip verified with 16k subwords lossless decode',
-                  duration_ms: 0.8
-                },
-                {
-                  test_id: 'P3_INFERENCE',
-                  name: 'Neural Inference Forward Pass',
-                  status: 'PASS',
-                  evidence: 'Latent embedding projection computed across 10 Transformer layers',
-                  duration_ms: 8.4
-                },
-                {
-                  test_id: 'P4_REASONING',
-                  name: 'Multi-Step Structured Reasoning',
-                  status: 'PASS',
-                  evidence: 'Generated step-by-step sequential reasoning plan successfully',
-                  duration_ms: 12.1
-                },
-                {
-                  test_id: 'P5_MEMORY',
-                  name: 'Cross-Session Memory Persistence',
-                  status: 'PASS',
-                  evidence: 'Wrote session item to disk, reloaded and verified persistence in native_data/memory_store.json',
-                  duration_ms: 2.3
-                },
-                {
-                  test_id: 'P6_LOCAL_ONLY',
-                  name: 'Local-Only Zero-External-Call Invariant',
-                  status: 'PASS',
-                  evidence: '100% of tensor operations execute locally inside process memory. Zero cloud endpoints invoked.',
-                  duration_ms: 0.1
-                },
-                {
-                  test_id: 'P7_PERSISTENCE',
-                  name: 'Reboot Resilience & Determinism',
-                  status: 'PASS',
-                  evidence: 'Second instance verified checkpoint hash deterministically',
-                  duration_ms: 1.5
-                },
-                {
-                  test_id: 'P8_PERFORMANCE',
-                  name: 'Runtime Performance & Latency',
-                  status: 'PASS',
-                  evidence: 'Peak inference rate: 46,500 tokens/sec | Avg Latency: 8.4ms',
-                  duration_ms: 3.1
-                }
-              ]).map((t: any) => (
+              {(suiteData?.results || []).map((t: any) => (
                 <tr key={t.test_id} className="hover:bg-[var(--app-surface-elevated)] transition-colors">
                   <td className="py-3 pl-1 font-bold text-[var(--app-text-primary)]">
                     <div>{t.name}</div>
@@ -211,6 +153,9 @@ export const AdminConsole: React.FC = () => {
                   </td>
                 </tr>
               ))}
+              {!suiteData?.results?.length && (
+                <tr><td colSpan={5} className="py-8 text-center text-sm text-[var(--app-text-secondary)]">No verification evidence is available yet. Run the verification suite to populate this table.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -243,27 +188,14 @@ export const AdminConsole: React.FC = () => {
         gradientAccent="amber"
       >
         <div className="space-y-2 text-xs font-mono">
-          {sessions.map((s) => (
-            <div
-              key={s.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]"
-            >
-              <div>
-                <span className="text-[var(--app-text-primary)] font-bold">{s.id}</span>{' '}
-                <span className="text-[var(--app-text-secondary)]">({s.actor} · {s.ip})</span>
-              </div>
-              <button
-                type="button"
-                disabled={s.status === 'REVOKED'}
-                onClick={() => {
-                  setSessions((prev) =>
-                    prev.map((item) => (item.id === s.id ? { ...item, status: 'REVOKED' } : item))
-                  );
-                }}
-                className="px-3 py-1 rounded-lg text-[11px] font-bold bg-[color-mix(in_srgb,var(--z-danger)_60%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] cursor-pointer disabled:opacity-40"
-              >
-                {s.status === 'REVOKED' ? 'REVOKED' : 'Revoke Session'}
-              </button>
+          {sessions.length === 0 ? (
+            <div className="py-5 text-center text-[var(--app-text-secondary)]">
+              No session-management records are available from the server.
+            </div>
+          ) : sessions.map((s) => (
+            <div key={s.id} className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
+              <span className="text-[var(--app-text-primary)] font-bold">{s.id}</span>{' '}
+              <span className="text-[var(--app-text-secondary)]">({s.actor} · {s.ip} · {s.status})</span>
             </div>
           ))}
         </div>

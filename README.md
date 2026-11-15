@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="./assets/banner-top.gif" alt="ZYNTHEOR — Vivid Intelligence. Animated banner: a Thai water buffalo walks across a dusk paddy while emerald neural-network pulses travel through its silhouette and amber particles drift upward." width="100%" />
+  <img src="./public/assets/banner-top.svg" alt="ZYNTHEOR Vivid Intelligence rainbow aurora neural banner" width="100%" />
 </p>
 
 # ZYNTHEOR — VIVID INTELLIGENCE
 
 <p align="center">
   <b>Intelligence Without Boundaries.</b><br />
-  Local-first · Native Transformer core (architecture spec) · No external AI APIs in the intended core path · Evidence-labelled claims
+  Native Multi-Domain Intelligence · Online Cloud Runtime · Native model core · Evidence-labelled capabilities
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Architecture-~34M_params_(reported)-8B5CF6?style=flat" alt="Architecture ~34M parameters (reported)" />
-  <img src="https://img.shields.io/badge/Training-PARTIAL-F59E0B?style=flat" alt="Training status PARTIAL" />
-  <img src="https://img.shields.io/badge/Runtime-Local--first-06B6D4?style=flat" alt="Local-first runtime" />
+  <img src="https://img.shields.io/badge/Target_Architecture-41.5M_params-7B2CBF?style=flat" alt="Target architecture 41.5 million parameters" />
+  <img src="https://img.shields.io/badge/Training-BLOCKED-FF5E3A?style=flat" alt="Training blocked pending approval and cloud runner" />
+  <img src="https://img.shields.io/badge/Runtime-Online_Cloud-00F0FF?style=flat" alt="Online Cloud Runtime" />
   <img src="https://img.shields.io/badge/Tokenizer-Thai_%26_English-10B981?style=flat" alt="Thai and English tokenizer" />
   <img src="https://img.shields.io/badge/Audit_Log-SHA--256_hash_chain-F59E0B?style=flat" alt="SHA-256 hash-chained audit log" />
   <img src="https://img.shields.io/badge/External_AI_APIs-none_in_core_path_(PARTIAL)-rose?style=flat" alt="No external AI APIs in core path, status PARTIAL" />
@@ -22,9 +22,9 @@
 
 ## Overview
 
-**ZYNTHEOR** is a first-party **native intelligence system**. Rather than wrapping a hosted API, it is designed to run its own decoder Transformer locally, with persistent episodic memory, a Thai/English tokenizer, structured reasoning traces, a path-confined tool sandbox, and a SHA-256 hash-chained audit log.
+**ZYNTHEOR** is a first-party **Native Multi-Domain Intelligence system**. Its own model architecture, tokenizer, weights, training and reasoning pipeline form the intelligence core; the model is served through the designated online Cloud Runtime. Internet research and external service integrations remain separate capabilities, not substitutes for the Native Core. The platform also includes persistent memory, a Thai/English tokenizer, structured planning/execution, a project workspace, and a SHA-256 hash-chained audit log.
 
-> **Reading this document.** Every capability carries a status. **`VERIFIED`** means a reproducible command *and* its recorded output are attached to this repository. **`PARTIAL`** means the feature is implemented or specified but its evidence is missing, incomplete, or covers only a narrower claim than the one a reader might assume. See [§13](#13-evidence-based-verification-status) and the [claims audit](./docs/CLAIMS_AUDIT.md). Architecture numbers describe the **model's shape**, not the quality of its **learned weights**.
+> **Reading this document.** Every capability carries a status. **`VERIFIED`** means a reproducible command *and* its recorded output are attached to this repository. **`PARTIAL`** means the feature is implemented or specified but its evidence is missing, incomplete, or covers only a narrower claim than the one a reader might assume. See [§13](#13-evidence-based-verification-status) for the checks and limitations of this source archive. Architecture numbers describe the **model's shape**, not the quality of its **learned weights**.
 
 ---
 
@@ -51,25 +51,25 @@
 
 ## 1. Intelligence Mission & Vision
 
-ZYNTHEOR avoids thin wrappers, placeholder mocks, and third-party API dependencies in its core reasoning path.
+ZYNTHEOR is designed so its Native Core owns model reasoning and generation. Internet retrieval and online integrations are separate from the model runtime; no third-party AI model is promoted as the Native Core.
 
 | Principle | Engineering Standard | Status |
 |---|---|---|
-| **No external AI APIs in the core path** | The core reasoning path is intended to contain no OpenAI, Google Gemini, Anthropic Claude, or other hosted inference endpoints. *Scope: AI inference only — `npm install` and `git clone` still need network access, and a source scan has not been published.* | `PARTIAL` |
-| **Native neural core** | Reasoning, code generation, and conversation are intended to originate from the local Transformer via `qplus_native.bridge`. | `PARTIAL` |
+| **No external AI APIs in the core path** | The Native Core is not delegated to a third-party AI model. Internet retrieval and online service integrations are separate paths. A complete dependency and egress audit remains pending. | `PARTIAL` |
+| **Native neural core** | Reasoning and generation must originate from the Native Transformer loaded by the designated Cloud Runtime via `qplus_native.bridge`; current inference readiness is blocked until a compatible checkpoint is fetched and verified. | `BLOCKED` |
 | **Fail-closed checkpoint loading** | A missing or corrupted checkpoint should halt execution (`FAIL_CLOSED`) instead of simulating success. | `PARTIAL` |
-| **Bilingual script fidelity** | Thai and English text is tokenized with no unknown tokens (`[UNK]`) **on the project's test corpora**. Arbitrary Unicode (emoji, CJK, other scripts) is not covered by that claim. | `PARTIAL` |
+| **Bilingual script fidelity** | The tokenizer contains Thai/English vocabulary and code paths. Unknown-token rate and round-trip fidelity still require recorded runtime evidence. | `PARTIAL` |
 | **Tamper-evident accountability** | State transitions, inference checks, and memory mutations are appended to a SHA-256 hash-chained log (`native_data/audit_log.jsonl`). A hash chain is *tamper-evident*, not tamper-proof — see [§6](#6-persistent-episodic-memory). | `PARTIAL` |
 
 ---
 
 ## 2. Native Model Architecture
 
-ZYNTHEOR specifies a first-party decoder Transformer intended for local execution:
+ZYNTHEOR specifies a first-party Native decoder Transformer whose weights are served by the online Cloud Runtime:
 
 ```
                   ┌─────────────────────────────────────┐
-                  │    Token Embedding (16,384 Vocab)   │
+                  │  Token Embedding (16,384 capacity)  │
                   └──────────────────┬──────────────────┘
                                      ▼
                   ┌─────────────────────────────────────┐
@@ -102,13 +102,15 @@ ZYNTHEOR specifies a first-party decoder Transformer intended for local executio
 | **Attention heads** | `8` | $d_k = 64$, $d_{model} = 512$ |
 | **Hidden dimension ($d_{model}$)** | `512` | |
 | **FFN intermediate dimension** | `1,472` | SwiGLU gated network |
-| **Vocabulary size** | `16,384` | Subwords for Thai Unicode + English + technical code |
-| **Reported parameter count** | `33,958,400` | From the checkpoint metadata; **see reconciliation note below** |
-| **Reported weight size** | `135.8 MB` | 33,958,400 × 4 bytes (Float32); weights only, excluding activations/KV cache |
+| **Configured vocabulary capacity** | `16,384` | Base `v2_base` tokenizer reports 532 non-reserved vocabulary entries before reserved/padding IDs; profile-specific builds must report their own count. |
+| **Measured active checkpoint payload** | `231,168` Float32 values | Byte-count and tensor-manifest inspection; not the 41.5M target graph |
+| **Primary checkpoint payload size** | `924,672` bytes | 231,168 × 4 bytes; the container includes a metadata header |
+| **Legacy metadata declaration** | `33,958,400` | Does not match the serialized payload; do not use as active parameter count |
+| **Target architecture specification** | `41,527,808` parameters | Design target only; not instantiated by the available target artifacts |
 | **Checkpoint file** | `native_data/model_checkpoint.pt` | Container with magic header `ZYNTHEOR_QPLUS_PT` |
-| **Checkpoint integrity check** | SHA-256 at startup | Detects corruption; proves authenticity only if the expected hash is pinned or signed separately |
+| **Checkpoint integrity check** | SHA-256 + payload count + tensor manifest + finite-value check | Integrity of this checkpoint is verified; this does not prove full target architecture or model quality |
 
-> **Parameter-count reconciliation (open item, `PARTIAL`).** The earlier 33.7-million label disagreed with the stated 33,958,400 (≈34.0M). Separately, a standard layout at the dimensions above (separate Q/K/V/O projections, 3-matrix SwiGLU, two RMSNorms per block, 16,384×512 embedding) works out to **41,495,040** parameters with a tied output head and **49,883,648** with an untied one. One of the published dimensions, the layout, or the reported count therefore needs correcting. Resolve it by printing the parameter count from the loaded model and updating this table.
+> **Current evidence (`2026-11-15`).** The primary checkpoint has 231,168 Float32 payload values; its payload SHA-256 is `70058acbacb87fa32778ac7cc4e147065614d0c769de8da842daef7a20c0e5af`. The container metadata's `total_params=33,958,400` is inconsistent with the payload; `trained_subgraph_params=231,168` matches the payload and manifest. The `model_checkpoint_target_41m*.pt` files in this archive are 134-byte descriptors, not a 41,527,808-value tensor checkpoint. Cloud inference remains `BLOCKED` until a compatible checkpoint is fetched and verified by the Native Cloud Runtime.
 
 ### Learned parameters vs. architecture
 
@@ -124,11 +126,11 @@ A float32 file of the right size says nothing about whether those weights encode
 
 ## 3. Neural Inference Engine
 
-The inference engine bridges the Node.js/TypeScript runtime and the native Python tensor model over standard I/O JSON-RPC:
+When configured, the online Cloud Runtime supplies Native model checkpoint bytes; the Node.js/TypeScript server communicates with the Python bridge over standard I/O JSON-RPC. In the inspected archive, required cloud checkpoint configuration was absent, so inference is blocked:
 
 - **Entry point**: `python3 -m qplus_native.bridge`
 - **Controller**: `NativeNeuralLMProvider` in `lib/providers.ts`
-- **Local IPC**: stdio instead of a network socket (no port exhaustion, no network exposure). Latency is not published.
+- **Bridge IPC**: stdio is used between the server and Python process; the model checkpoint itself must come from Cloud Object Storage / the configured Cloud Runtime. Latency is not published.
 - **Fail-closed invariant**: checkpoint magic bytes and parameter counts are validated before inference commands are accepted.
 - **Memory-grounded context**: entries from `native_data/memory_store.json` are supplied as context. This can reduce unsupported output but **does not eliminate hallucination**; no hallucination-rate measurement is published.
 
@@ -143,33 +145,17 @@ Responses include a structured **reasoning trace** summarising the pipeline stag
 3. **Memory context & sandbox invariant validation** — `native_data/memory_store.json` is queried and security constraints are evaluated.
 4. **Dual-language synthesis** — the answer is generated in the user's selected language.
 
-The trace describes the *pipeline*. It is a rendered summary, not evidence of the model's internal computation, and it should not be treated as a faithful explanation of why a particular answer was produced.
+The trace describes an intended pipeline. It is a rendered summary, not evidence of the model's internal computation. Native Cloud inference is currently `BLOCKED`, so this section describes the target execution architecture rather than a verified live model run.
 
 ---
 
-## 5. Learning & Continuous Model Evolution
+## 5. Learning & Continuous Model Improvement
 
-An automated 5-stage self-evolution loop is exposed at `POST /api/self-evolve/run` (`PARTIAL`):
+Native model training and self-improvement are currently `BLOCKED` / `NOT IMPLEMENTED` at the runtime boundary. This source archive does not establish that an autonomous loop can modify model weights or improve model quality.
 
-```
- 1. LEARN          Harvests runtime performance and error logs from AuditLedger.
-      │
-      ▼
- 2. ANALYZE        Identifies computational bottlenecks and algorithmic variances.
-      │
-      ▼
- 3. SELF-DEVELOP   Proposes internal adjustments and optimized code templates.
-      │
-      ▼
- 4. EVALUATE       Runs automated benchmarks in the isolated sandbox.
-      │
-      ▼
- 5. IMPROVE        Commits adjustments that pass evaluation into persistent memory.
-```
-
-- **Scope**: bottleneck analysis, token-validation efficiency, and sandbox-confinement checks.
-- **Audit**: each cycle writes an audit record with before/after benchmark scores.
-- **Caveat**: before/after scores are only meaningful against a fixed baseline and a held-out evaluation set. Evidence that this loop changes *model weights* and improves *model quality* is not attached.
+- `POST /api/model/train` returns `409 BLOCKED` until dataset provenance, explicit human approval, and a tested Native Cloud training runner are connected.
+- `POST /api/model/export` returns `409 BLOCKED`; synthetic target-sized tensors are prohibited.
+- `POST /api/self-evolve/run` must not be treated as proof of weight updates. Any future training run must record dataset identity, approval evidence, exact checkpoint hashes, optimizer/configuration, training logs, and held-out evaluation results.
 
 ---
 
@@ -188,13 +174,13 @@ First-party memory is managed by `NativeMemoryController` (`src/services/NativeM
 
 ## 7. Real-Time Conversational Intelligence
 
-The conversational core (`src/components/modules/ConversationalIntelligence.tsx`) provides an interactive local dialog:
+The conversational interface (`src/components/modules/ConversationalIntelligence.tsx`) is an operational surface for the Native Cloud Runtime:
 
-- **Token streaming** from the native Transformer forward pass.
+- **Token streaming** only when the Native Cloud Runtime reports inference readiness.
 - **Live telemetry bar**: token count, throughput (tokens/sec), time-to-first-token (TTFT).
 - **Persistent sessions** in `native_data/chat_sessions.json`, restored automatically.
 - **Code-block highlighting** for JavaScript, TypeScript, Python, and shell, with one-click copy.
-- **Local storage of conversations**: chat data is written to the host's disk by the application; no cloud upload is intended. Treat as `PARTIAL` until a network-egress test is attached.
+- **Session persistence**: session records are stored by the application in `native_data/chat_sessions.json`; persistence and retention depend on the configured deployment storage. No cross-device sync is claimed.
 
 ---
 
@@ -203,13 +189,13 @@ The conversational core (`src/components/modules/ConversationalIntelligence.tsx`
 Language is treated as a core model capability rather than an interface translation layer.
 
 ### A. Dual-script tokenizer
-`qplus_native/tokenizer.py` integrates:
+`qplus_native/tokenizer.py` implements:
 - The Thai Unicode block (`U+0E01` to `U+0E5B`): consonants, vowels, tone marks, digits.
 - High-frequency Thai syntactic particles, technical terms, and architectural keywords.
-- Longest-prefix matching intended to give `[UNK] = 0` **on the tested bilingual corpora**.
-- Round-trip `decode(encode(text)) === text` **on the tested strings**.
+- Longest-prefix matching, byte/character fallback, and profile-specific vocabulary expansion.
+- The default `v2_base` profile currently reports 532 non-reserved vocabulary entries in the inspected source.
 
-Characters outside the covered ranges are not guaranteed to round-trip.
+Unknown-token rate and full Thai/English round-trip fidelity are **not VERIFIED** by this review; consult a recorded runtime test result before making a quality claim.
 
 ### B. Language integrity test suite
 In Governance & Security (`src/components/modules/GovernanceSecurity.tsx`):
@@ -254,23 +240,15 @@ Operating-system interaction goes through `lib/ToolGateway.ts` (`PARTIAL`):
 - **Hard timeout**: 5,000 ms with `SIGKILL`.
 - **Runtime tamper probe**: a no-op probe compares environment state against a Genesis SHA-256 digest (`POST /api/sandbox/tamper-verify`).
 
-**Limits to be aware of.** Path checks govern the *arguments the gateway accepts*. `node` and `python3` can themselves open files, spawn processes, and use the network, so path confinement alone is not an isolation boundary. OS-level isolation (container, namespaces, seccomp, or a dedicated unprivileged user with no network) is not documented here and is recommended before running untrusted input.
+**Limits to be aware of.** Path checks govern the *arguments the gateway accepts*. `node` and `python3` can themselves open files, spawn processes, and use the network, so path confinement alone is not an isolation boundary. OS-level isolation and resource controls are not established by path checks alone. Before accepting untrusted tasks, use a dedicated unprivileged identity, strict filesystem boundaries, resource quotas, and an allowlist of required Cloud Runtime/service egress destinations.
 
 ---
 
 ## 11. Performance & Runtime Telemetry
 
-Metrics come from OS and process counters inside the running app. **No benchmark methodology is published with this revision**, so earlier headline figures are retained only as unverified reference points.
+The interface reads telemetry from the running application and reports throughput/latency only when measurements are returned by an actual execution. This source review does not certify any inference rate, time-to-first-token, or model memory benchmark.
 
-| Metric | Measurement method | Previously reported (unverified) | Status |
-|---|---|---|---|
-| **Inference rate** | Tokens emitted over elapsed time | 38,000 – 45,000 tokens/sec (hardware, batch size, and prompt not stated) | `PARTIAL` |
-| **Weight memory** | Float32 weight size | 135.8 MB (weights only; unspecified whether GPU or CPU heap) | `PARTIAL` |
-| **Time to first token** | Request-to-stream latency | 12 – 18 ms | `PARTIAL` |
-| **Sandbox timeout** | Child-process OS timer | 5,000 ms max | `PARTIAL` |
-| **Hash-chain cost** | SHA-256 block calculation | < 1 ms per record | `PARTIAL` |
-
-The Command Center charts timestamped telemetry samples (CPU, RAM, model memory, token throughput). To publish a benchmark, record: CPU/GPU model, OS, Python and Node versions, prompt length, generation length, batch size, warm-up policy, and the number of runs.
+To publish a benchmark, record the Cloud Runtime identity, hardware profile, model/checkpoint hash, prompt and output sizes, batch size, warm-up policy, concurrency, duration, and repeated-run statistics. A missing measurement must remain `—`, not be replaced with a sample figure.
 
 ---
 
@@ -282,33 +260,31 @@ Managed by `lib/SovereignIdentity.ts` (`PARTIAL`):
 - **Constant-time verification** via `crypto.timingSafeEqual`.
 - **Tenant isolation**: namespace boundary checks between tenants.
 - **Expiry checks**: `exp` and `iat` are validated. This bounds a stolen token's lifetime; it is not full replay protection, which additionally needs a one-time identifier (`jti`/nonce) store.
-- **Automated security suite**: a 6-vector simulation covering signature tampering, token replay, untrusted keys, `alg:none` injection, tenant escalation, and role escalation. Simulated results are not a substitute for an independent security review.
+- **Security validation**: the source includes security validation routes, but this review did not run a complete live security suite. No overall security certification is claimed.
 
 ---
 
 ## 13. Evidence-Based Verification Status
 
-**Legend** — `VERIFIED`: reproducible command and recorded output attached to the repository. `PARTIAL`: implemented or specified, but evidence is absent, incomplete, or narrower than the headline claim.
+Statuses below are limited to the checks actually run against this source archive. A UI label or architecture specification is not evidence that the corresponding runtime capability is ready.
 
-This revision of the document was prepared without access to the running project, so no runtime claim below could be re-executed. Statuses were therefore downgraded from the previous revision rather than assumed. Original wording, the reason for each change, and the exact evidence to attach are in [docs/CLAIMS_AUDIT.md](./docs/CLAIMS_AUDIT.md).
+| Area | Status | Evidence / boundary |
+|---|---|---|
+| **Primary checkpoint integrity** | `VERIFIED` | Container SHA-256, payload SHA-256, Float32 count, manifest sum, and finite-value checks pass for `native_data/model_checkpoint.pt`. |
+| **Primary checkpoint active size** | `PARTIAL` | The serialized payload contains 231,168 Float32 values. Legacy `total_params=33,958,400` metadata does not match the payload and is not accepted as the active count. |
+| **41.5M target checkpoint artifacts** | `BLOCKED` | Files present in this archive are 134-byte descriptors, not target-sized tensor payloads. The 41,527,808 value is a target architecture specification only. |
+| **Native Cloud inference** | `BLOCKED` | The bridge now requires a verified checkpoint fetched through configured Cloud Runtime / Cloud Object Storage. No compatible cloud checkpoint or runtime credentials were present for this verification. |
+| **Synthetic checkpoint export** | `BLOCKED` | Target-sized tensor fabrication is disabled; the export path fails closed instead of writing invented weights. |
+| **Native training** | `BLOCKED` | Training requires dataset provenance, explicit human approval, and a verified Cloud training runner. The UI and API do not claim training succeeded. |
+| **Dataset curation** | `PARTIAL` | Deduplication and heuristic quality scoring are present. New datasets and legacy manifests without approval evidence are presented as `NEEDS_REVIEW`; human approval evidence is not yet implemented end-to-end. |
+| **Tokenizer integration** | `PARTIAL` | Restored tokenizer source compiles with the Native Python modules. Full bilingual behavioral regression and Cloud inference were not run in this environment. |
+| **Checkpoint integrity regression suite** | `VERIFIED` | `python3 tests/native-parameter-integrity.test.py -v` completed 5/5 tests successfully. |
+| **Python source compilation** | `VERIFIED` | `python3 -m py_compile qplus_native/*.py` completed successfully. |
+| **Animated SVG assets** | `VERIFIED` | The icon, rainbow neural hero, and banner SVGs parse as XML, include animation, and provide reduced-motion handling. |
+| **TypeScript / React build** | `BLOCKED` | Full `tsc` type-check and Vite build could not run because dependencies (including `vite/client`) are absent from this archive environment. |
+| **Live Cloud E2E** | `NOT RUN` | No Cloud Runtime endpoint or credentials were supplied to this session; deployment and live connectivity are not claimed. |
 
-| Subsystem | Status | What is claimed | Evidence to attach to reach `VERIFIED` |
-|---|---|---|---|
-| **Checkpoint (architecture + reported size)** | `PARTIAL` | File loads; reported size 135.8 MB; tensor count reported as 74. Parameter count does not reconcile with the published dimensions. | Printed parameter and tensor counts from the loaded model; reconciled table in §2. |
-| **Trained-weight quality** | `PARTIAL` | Not claimed. | Training log, final loss, held-out eval set and score. |
-| **Tokenizer** | `PARTIAL` | 16,384 entries; round-trip on tested Thai/English strings. | Test output for `LANG-01…05`; a random-Unicode round-trip fuzz result. |
-| **Inference forward pass** | `PARTIAL` | Local forward pass produces tokens without external API calls. | A recorded run with network disabled. |
-| **Reasoning trace** | `PARTIAL` | A 4-stage trace is emitted and rendered. | UI capture; note that the trace is descriptive, not a faithfulness guarantee. |
-| **Episodic memory controller** | `PARTIAL` | CRUD persists to disk and is logged. | Test run showing create/read/update/delete plus matching ledger entries. |
-| **Dual-script integrity** | `PARTIAL` | 5/5 tests, 0 UNK, via `/api/verify/language-integrity`. | Saved JSON response from that endpoint. |
-| **Multi-theme engine** | `PARTIAL` | 6 themes, accent picker, no reload. | Screenshots or a UI test per theme. |
-| **ToolGateway sandbox** | `PARTIAL` | Path confinement and 5 s timeout. Not an OS-level isolation boundary. | Test showing traversal and symlink attempts blocked and the timeout firing. |
-| **Audit ledger hash chain** | `PARTIAL` | Continuous SHA-256 chain from genesis to tip (`chainValid: true`). Tamper-evident only. | Verification output plus a deliberate-tamper test that is detected. |
-| **No external AI API calls** | `PARTIAL` | None in the core path. | Dependency/source scan and a packet capture or firewall-denied run. |
-| **Air-gapped operation** | `PARTIAL` | Not claimed. Local-first is the accurate description. | A run on a host with no network at all, from install artifacts. |
-| **README banners (animated GIF)** | `VERIFIED` | Two animated, looping GIFs referenced by this file. | [docs/BANNER_EVIDENCE.md](./docs/BANNER_EVIDENCE.md), reproducible with `python3 scripts/verify_readme.py`. |
-
----
+**Checkpoint evidence (`2026-11-15`).** Primary container SHA-256: `cb0263040f2e064ab317c1f45654f9ce9842d00a0637a98e36de9dd774e0ab82`. Payload SHA-256: `70058acbacb87fa32778ac7cc4e147065614d0c769de8da842daef7a20c0e5af`. The original memory store SHA-256 remains `b67206bdd28a2f896a403345b7a405845de2dc25a19467486199d2f77d0eed80`. Checkpoint and memory files were preserved and rechecked after the changes.
 
 ## 14. Quickstart & Deployment
 
@@ -322,13 +298,16 @@ This revision of the document was prepared without access to the running project
 git clone https://github.com/yutthaphum-phakphian/zyntheor.git
 cd zyntheor
 npm install
+cp .env.example .env
 ```
+
+Configure `.env` with the designated Cloud Runtime endpoint or Cloud Object Storage settings (`CHECKPOINT_PRESIGNED_URL`, or `S3_BUCKET` plus its credentials, region and endpoint). Do not commit secrets. Without a compatible remote checkpoint and credentials, Native inference remains `BLOCKED`.
 
 ### 2. Launch the development server
 ```bash
 npm run dev
 ```
-The server starts on `http://localhost:3000`.
+The development web server starts on `http://localhost:3000`. This is the application development endpoint only; Native model inference still requires the configured online Cloud Runtime.
 
 ### 3. Verify the codebase
 ```bash
@@ -355,7 +334,7 @@ curl -s -X POST http://localhost:3000/api/verify/language-integrity
 - **Model Laboratory**:
   - `HardwareMonitor`: CPU, process RSS, and heap/tensor-buffer utilization against the memory budget.
   - `TrainingProgress`: cross-entropy loss, optimizer delta, and epoch/shard status.
-  - `MemoryShardMap`: 12-shard coverage map for the reported 33,958,400 parameters. **Status `PARTIAL` until full-model training is verified.**
+  - Target architecture and measured active checkpoint are shown separately. The measured payload currently contains 231,168 Float32 values; the 41,527,808 target remains a design specification, not active weights.
   - `GradientNormOverlay`: per-layer gradient-norm inspector for vanishing or exploding gradients.
 
 ---
@@ -367,5 +346,5 @@ Distributed under the **AGPL-3.0 License**.
 ---
 
 <p align="center">
-  <img src="./assets/banner-bottom.gif" alt="Intelligence Without Boundaries. Animated banner: a Thai water buffalo walks away through reeds at dusk, with emerald neural pulses in its silhouette, amber particles rising, and a scrolling stream of hexadecimal hash fragments along the bottom edge." width="100%" />
+  <img src="./public/assets/banner-bottom.svg" alt="ZYNTHEOR rainbow aurora neural banner" width="100%" />
 </p>

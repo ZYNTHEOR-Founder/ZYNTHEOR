@@ -1,6 +1,12 @@
 {
-  "name": "ZYNTHEOR Q+ Sovereign AI Engine",
-  "description": "First-Party Sovereign AI Engine with 33.7M Native Neural Model, Multi-Agent Orchestrator, Self-Evolving Loop, SHA-256 Audit Ledger, and Commercial Launch Cockpit.",
+  "name": "ZYNTHEOR VIVID INTELLIGENCE",
+  "description": "Native multi-domain intelligence platform with a first-party sequence-model pipeline, cloud-connected runtime, knowledge workspace, planning, execution, verification, and governance. Runtime capability is reported from verified evidence rather than target architecture claims.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "NATIVE_MULTI_DOMAIN_INTELLIGENCE",
+    "ONLINE_CLOUD_RUNTIME",
+    "KNOWLEDGE_WORKSPACE",
+    "GOVERNED_EXECUTION",
+    "EVIDENCE_BASED_VERIFICATION"
+  ]
 }

@@ -31,13 +31,12 @@ class NativeParameterIntegrityTests(unittest.TestCase):
         from qplus_native.model import TARGET_CHECKPOINT_PATH
         if os.path.exists(TARGET_CHECKPOINT_PATH):
             target_result = CheckpointManager.inspect_checkpoint(TARGET_CHECKPOINT_PATH)
-            self.assertEqual(target_result["status"], "ACTIVE_TENSORS_VERIFIED")
-            self.assertEqual(target_result["payload_float32_count"], 41527808)
-            self.assertTrue(target_result["sha256_match"])
-            self.assertTrue(target_result["parameter_count_match"])
-            self.assertTrue(target_result["manifest_count_match"])
+            # Existing target artifacts in this source are 134-byte descriptors, not tensor checkpoints.
+            # They must remain explicitly unverified until a real 41,527,808-Float32 payload exists.
+            self.assertNotEqual(target_result["status"], "ACTIVE_TENSORS_VERIFIED")
+            self.assertFalse(target_result.get("is_full_tensor", False))
 
-    def test_runtime_graph_fails_closed_offline_and_matches_cloud_bytes(self):
+    def test_runtime_graph_requires_verified_cloud_bytes(self):
         # 1. Without Cloud Object Storage configured, NativeNeuralModel MUST fail closed
         saved_url = os.environ.pop("CHECKPOINT_PRESIGNED_URL", None)
         saved_bucket = os.environ.pop("S3_BUCKET", None)
@@ -60,22 +59,12 @@ class NativeParameterIntegrityTests(unittest.TestCase):
         self.assertTrue(v1_model.learned_weights_loaded)
         self.assertEqual(sum(p.size for p in trainer.parameters), 231168)
 
-        # 3. When 41.53M checkpoint and numpy are present, verify Target 41.53M cloud bytes too
+        # 3. Existing 41.53M files are metadata-only 134-byte stubs, not tensor payloads.
         from qplus_native.model import TARGET_CHECKPOINT_PATH
-        try:
-            import numpy as _np  # noqa: F401
-            has_numpy = True
-        except Exception:
-            has_numpy = False
-        if has_numpy and os.path.exists(TARGET_CHECKPOINT_PATH):
-            with open(TARGET_CHECKPOINT_PATH, "rb") as fh:
-                target_bytes = fh.read()
-            model = NativeNeuralModel(checkpoint_path="s3://cloud-test/target_41m.pt", cloud_bytes=target_bytes)
-            self.assertEqual(model.config.total_params, 41527808)
-            self.assertTrue(model.learned_weights_loaded)
-            self.assertEqual(model.config.d_model, 512)
-            self.assertEqual(model.config.n_layers, 10)
-            self.assertEqual(model.config.n_heads, 8)
+        if os.path.exists(TARGET_CHECKPOINT_PATH):
+            target_result = CheckpointManager.inspect_checkpoint(TARGET_CHECKPOINT_PATH)
+            self.assertNotEqual(target_result.get("status"), "ACTIVE_TENSORS_VERIFIED")
+            self.assertFalse(target_result.get("is_full_tensor", False))
 
     def test_legacy_subgraph_does_not_claim_target_size(self):
         result = CheckpointManager.inspect_checkpoint()

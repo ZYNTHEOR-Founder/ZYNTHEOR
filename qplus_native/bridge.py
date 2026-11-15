@@ -1,418 +1,258 @@
 # -*- coding: utf-8 -*-
-"""
-ZYNTHEOR Q+ Python Bridge
-Communicates with Node.js NativeNeuralLMProvider via stdin/stdout JSON-RPC protocol.
-Fails closed if model checkpoint is missing or corrupted.
+"""ZYNTHEOR cloud-native inference bridge.
+
+The bridge accepts only a complete, checksum-verified PureSeqLM checkpoint loaded
+from the configured Cloud Runtime. It never instantiates the legacy local model.
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import time
-import socket
-from typing import Dict, Any
+import traceback
+from typing import Any, Dict, Optional, Tuple
 
-# Ensure project root is in sys.path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
 
-from qplus_native.model import NativeNeuralModel, MODEL_CHECKPOINT_PATH, MEMORY_STORE_PATH
-from qplus_native.trainer import NativeTrainer
-from qplus_native.checkpoint import CheckpointManager
+from qplus_native.cloud_storage import load_checkpoint_container_from_cloud, validate_cloud_url
+from qplus_native.seq_lm import PureSeqLM
+from qplus_native.tokenizer import SovereignTokenizer
 
-# Initialize shared trainer instance for online gradient descent
-shared_trainer = NativeTrainer()
+runtime_model: Optional[PureSeqLM] = None
+runtime_tokenizer: Optional[SovereignTokenizer] = None
+runtime_metadata: Dict[str, Any] = {}
+runtime_sha256 = ""
+runtime_source_uri = ""
+runtime_error = "FAIL_CLOSED: Online Connectivity Required — Cloud Runtime is not configured."
+runtime_loaded_at: Optional[float] = None
 
-def run_verification_suite(model: NativeNeuralModel) -> Dict[str, Any]:
-    """Runs the 8 mandatory Real-World Execution Verification tests."""
-    results = []
 
-    # 1. Native Model Weights Check
-    t0 = time.time()
-    try:
-        model.load_checkpoint()
-        results.append({
-            "test_id": "P1_WEIGHTS_LOAD",
-            "name": "Native Model Weights Load",
-            "status": "PASS",
-            "evidence": f"Checkpoint loaded: {model.config.total_params:,} parameters (SHA-256: {model.checkpoint_hash[:16]}...)",
-            "duration_ms": round((time.time() - t0) * 1000, 2)
-        })
-    except Exception as e:
-        results.append({
-            "test_id": "P1_WEIGHTS_LOAD",
-            "name": "Native Model Weights Load",
-            "status": "FAIL",
-            "evidence": str(e),
-            "duration_ms": round((time.time() - t0) * 1000, 2)
-        })
+def emit(payload: Dict[str, Any]) -> None:
+    sys.stdout.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n")
+    sys.stdout.flush()
 
-    # 2. Tokenizer Roundtrip
-    t0 = time.time()
-    sample_text = "const zyntheor = new SovereignAI({ layers: 10, memory: true });"
-    encoded = model.tokenizer.encode(sample_text)
-    decoded = model.tokenizer.decode(encoded)
-    tok_pass = len(encoded) > 0 and ("zyntheor" in decoded.lower() or "sovereign" in decoded.lower())
-    results.append({
-        "test_id": "P2_TOKENIZER",
-        "name": "Tokenizer Encode & Decode",
-        "status": "PASS" if tok_pass else "FAIL",
-        "evidence": f"Sample: '{sample_text}' -> {len(encoded)} tokens -> '{decoded[:40]}...'",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
 
-    # 3. Real Inference Forward Pass
-    t0 = time.time()
-    inf_res = model.generate("Synthesize hash validator function", role="coder", max_tokens=256)
-    results.append({
-        "test_id": "P3_INFERENCE",
-        "name": "Neural Inference Forward Pass",
-        "status": "PASS",
-        "evidence": f"{inf_res['output_tokens_count']} tokens generated at {inf_res['tokens_per_sec']} tok/s (Latency: {inf_res['latency_ms']}ms)",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
+def load_runtime(presigned_url: Optional[str] = None) -> Dict[str, Any]:
+    """Load a fully validated native sequence model directly from Cloud Runtime memory."""
+    global runtime_model, runtime_tokenizer, runtime_metadata
+    global runtime_sha256, runtime_source_uri, runtime_error, runtime_loaded_at
 
-    # 4. Multi-Step Reasoning
-    t0 = time.time()
-    reason_res = model.generate("Design multi-stage build pipeline", role="planner")
-    has_steps = "1." in reason_res["text"] and "2." in reason_res["text"]
-    results.append({
-        "test_id": "P4_REASONING",
-        "name": "Multi-Step Structured Reasoning",
-        "status": "PASS" if has_steps else "FAIL",
-        "evidence": "Generated step-by-step sequential reasoning plan successfully",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
+    if presigned_url:
+        ok, reason = validate_cloud_url(str(presigned_url))
+        if not ok:
+            raise RuntimeError(reason or "FAIL_CLOSED: Cloud Runtime URL rejected")
+        os.environ["CHECKPOINT_PRESIGNED_URL"] = str(presigned_url)
 
-    # 5. Associative Memory Persistence
-    t0 = time.time()
-    test_key = f"proof_key_{int(time.time())}"
-    model.memory_cache["sessions"].append({"key": test_key, "val": "verified_sovereign_state"})
-    model.save_memory()
-    # Reload from disk
-    model.load_memory()
-    mem_found = any(s.get("key") == test_key for s in model.memory_cache.get("sessions", []))
-    results.append({
-        "test_id": "P5_MEMORY",
-        "name": "Cross-Session Memory Persistence",
-        "status": "PASS" if mem_found else "FAIL",
-        "evidence": f"Wrote session item to disk, reloaded and verified persistence in {MEMORY_STORE_PATH}",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
+    timeout_s = float(os.environ.get("ZYNTHEOR_CLOUD_CONNECT_TIMEOUT", "8"))
+    meta, _payload, payload_sha, raw, source_uri = load_checkpoint_container_from_cloud(
+        timeout_s=max(1.0, min(timeout_s, 30.0))
+    )
+    model, decoded_meta = PureSeqLM.from_bytes(raw, tok=None)
+    profile = decoded_meta.get("tokenizer_profile", "v2_base")
+    merges = decoded_meta.get("bpe_merges") or []
+    tokenizer = SovereignTokenizer(
+        vocab_size=max(16384, model.cfg.vocab),
+        profile=profile,
+        bpe_merges=merges,
+    )
+    if decoded_meta.get("total_params") != model.num_params():
+        raise RuntimeError("FAIL_CLOSED: Native graph parameter count differs from verified checkpoint")
+    if not payload_sha or payload_sha != decoded_meta.get("sha256"):
+        raise RuntimeError("FAIL_CLOSED: Cloud payload checksum metadata mismatch")
 
-    # 6. Local-Only Offline Invariant
-    t0 = time.time()
-    # Verify no open external sockets created by our process
-    results.append({
-        "test_id": "P6_LOCAL_ONLY",
-        "name": "Local-Only Zero-External-Call Invariant",
-        "status": "PASS",
-        "evidence": "100% of tensor operations execute locally inside process memory. Zero cloud endpoints invoked.",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
+    runtime_model = model
+    runtime_tokenizer = tokenizer
+    runtime_metadata = decoded_meta
+    runtime_sha256 = payload_sha
+    runtime_source_uri = source_uri
+    runtime_error = ""
+    runtime_loaded_at = time.time()
+    return runtime_status()
 
-    # 7. Persistence & Re-initialization
-    t0 = time.time()
-    m2 = NativeNeuralModel(model.checkpoint_path)
-    results.append({
-        "test_id": "P7_PERSISTENCE",
-        "name": "Reboot Resilience & Determinism",
-        "status": "PASS" if m2.weights_loaded else "FAIL",
-        "evidence": f"Second instance successfully verified checkpoint hash {m2.checkpoint_hash[:16]}...",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
 
-    # 8. Real Performance Telemetry
-    t0 = time.time()
-    t_count = 100
-    perf_rate = round(inf_res["tokens_per_sec"], 2)
-    results.append({
-        "test_id": "P8_PERFORMANCE",
-        "name": "Runtime Performance & Latency",
-        "status": "PASS",
-        "evidence": f"Peak inference rate: {perf_rate} tokens/sec | Avg Latency: {inf_res['latency_ms']}ms",
-        "duration_ms": round((time.time() - t0) * 1000, 2)
-    })
-
-    all_passed = all(r["status"] == "PASS" for r in results)
-    return {
-        "verified": all_passed,
-        "total_tests": len(results),
-        "passed_tests": sum(1 for r in results if r["status"] == "PASS"),
-        "results": results,
-        "checkpoint_hash": model.checkpoint_hash,
-        "timestamp": int(time.time())
-    }
-
-def run_language_integrity_suite(model: NativeNeuralModel) -> Dict[str, Any]:
-    """Runs rigorous Language Integrity verification for Thai, English, and Code-Switching scripts."""
-    tests = [
-        {
-            "id": "LANG-01",
-            "name": "Thai Pure Script Tokenization & Detokenization",
-            "text": "ปัญญาประดิษฐ์สถาปัตยกรรม Sovereign Transformer ทำงานแบบออฟไลน์ 100% โดยไม่พึ่งพาคลาวด์ภายนอก",
-            "type": "thai_pure"
-        },
-        {
-            "id": "LANG-02",
-            "name": "English Technical Script & Architecture Tokenization",
-            "text": "Native Neural LM with 33.7M parameters, 10 layers, 8 attention heads, and SHA-256 chained audit ledger.",
-            "type": "english_tech"
-        },
-        {
-            "id": "LANG-03",
-            "name": "Thai-English Code-Switching & Dual Vocabulary",
-            "text": "สร้างฟังก์ชัน HMAC-SHA256 Token Validator พร้อม timingSafeEqual ใน sandbox /workspace/solution.js",
-            "type": "code_switching"
-        },
-        {
-            "id": "LANG-04",
-            "name": "Thai Complex Vowels, Tone Marks & Unicode Orthography",
-            "text": "ผู้เชี่ยวชาญ ค้นคว้า ปัญหาการจัดเก็บข้อมูล ความจำระยะยาว กฎเกณฑ์สถิติ ประสิทธิภาพสูงล้ำ",
-            "type": "orthography"
-        },
-        {
-            "id": "LANG-05",
-            "name": "Zero UNK Token Guarantee Across Bilingual Corpi",
-            "text": "ระบบ ZYNTHEOR ประมวลผลคำสั่งภาษาไทยและอังกฤษได้อย่างราบรื่น ไม่สูญเสียความหมายหรือสลับตำแหน่งอักขระ",
-            "type": "zero_unk"
+def runtime_status() -> Dict[str, Any]:
+    if runtime_model is None or runtime_tokenizer is None:
+        return {
+            "status": "fail_closed",
+            "model_name": "ZYNTHEOR Native Core",
+            "architecture": "UNAVAILABLE",
+            "total_params": 0,
+            "active_params": 0,
+            "target_params": runtime_metadata.get("target_total_params"),
+            "checkpoint_hash": "",
+            "weights_loaded": False,
+            "inference_ready": False,
+            "online_connectivity_required": True,
+            "runtime_state": "BLOCKED",
+            "readiness_reason": runtime_error or "FAIL_CLOSED: Online Connectivity Required",
+            "source_uri": None,
         }
-    ]
-
-    results = []
-    unk_id = model.tokenizer.token_to_id.get("[UNK]", 3)
-
-    for tc in tests:
-        t0 = time.time()
-        orig = tc["text"]
-        tokens = model.tokenizer.encode(orig)
-        decoded = model.tokenizer.decode(tokens)
-        unk_count = sum(1 for tok in tokens if tok == unk_id)
-        is_exact = (orig == decoded)
-        duration_ms = round((time.time() - t0) * 1000, 2)
-
-        status = "PASS" if (is_exact and unk_count == 0) else "FAIL"
-        results.append({
-            "test_id": tc["id"],
-            "name": tc["name"],
-            "script_type": tc["type"],
-            "sample_length": len(orig),
-            "token_count": len(tokens),
-            "unk_count": unk_count,
-            "roundtrip_exact": is_exact,
-            "status": status,
-            "evidence": f"{len(tokens)} tokens, 0 UNKs, 100% character roundtrip match.",
-            "duration_ms": duration_ms
-        })
-
-    all_passed = all(r["status"] == "PASS" for r in results)
     return {
-        "verified": all_passed,
-        "total_tests": len(results),
-        "passed_tests": sum(1 for r in results if r["status"] == "PASS"),
-        "results": results,
-        "checkpoint_hash": model.checkpoint_hash,
-        "timestamp": int(time.time())
+        "status": "ok",
+        "model_name": runtime_metadata.get("model_name", "ZYNTHEOR Native Core"),
+        "architecture": runtime_metadata.get("architecture", "PureSeqLM"),
+        "total_params": runtime_model.num_params(),
+        "active_params": runtime_model.num_params(),
+        "target_params": runtime_metadata.get("target_total_params"),
+        "checkpoint_hash": runtime_sha256,
+        "weights_loaded": True,
+        "inference_ready": True,
+        "online_connectivity_required": True,
+        "runtime_state": "READY",
+        "readiness_reason": "Complete checksum-verified PureSeqLM loaded from Cloud Runtime.",
+        "source_uri": runtime_source_uri,
+        "loaded_at": runtime_loaded_at,
+        "training_steps": runtime_metadata.get("training_steps"),
     }
 
-def run_self_evolve_cycle(model: NativeNeuralModel, target_domain: str = "algorithm_resilience") -> Dict[str, Any]:
-    """Executes the 5-step Self-Evolving Native Intelligence loop."""
-    cycle_id = f"EVO-{int(time.time())}"
-    stages = []
 
-    # Stage 1: LEARN (เรียนรู้)
-    stages.append({
-        "stage": "LEARN",
-        "action": "Harvesting execution logs, runtime errors, and performance traces from AuditLedger.",
-        "findings": "Identified edge case in unbounded recursion and cache eviction latency under stress."
-    })
+def fail_closed(req_id: Any, action: str) -> Dict[str, Any]:
+    reason = runtime_error or "FAIL_CLOSED: Online Connectivity Required"
+    return {"id": req_id, "error": f"FAIL_CLOSED: Online Connectivity Required — {action} blocked. {reason}"}
 
-    # Stage 2: ANALYZE (วิเคราะห์จุดอ่อน)
-    stages.append({
-        "stage": "ANALYZE",
-        "action": "Deconstructing computational bottleneck and token variance in complex algorithms.",
-        "findings": "Detected suboptimal O(N) lookup in old token validator; refactoring to O(1) hash map."
-    })
 
-    # Stage 3: SELF-DEVELOP (พัฒนาตัวเอง)
-    stages.append({
-        "stage": "SELF-DEVELOP",
-        "action": "Generating internal architecture weight adjustments and refined heuristic code templates.",
-        "findings": "Synthesized hardened LRU Cache & Cryptographic Validator template with mathematical proof."
-    })
+def generate_ids(prompt: str, max_tokens: int, temperature: float) -> Tuple[str, int, int, float, float]:
+    if runtime_model is None or runtime_tokenizer is None:
+        raise RuntimeError(runtime_error or "FAIL_CLOSED: Online Connectivity Required")
+    prompt_ids = runtime_tokenizer.encode(prompt)
+    if not prompt_ids:
+        prompt_ids = [1]
+    prompt_ids = prompt_ids[-runtime_model.cfg.ctx:]
+    limit = max(1, min(int(max_tokens), 512))
+    temp = max(0.0, min(float(temperature), 1.5))
+    start = time.perf_counter()
+    output_ids = list(runtime_model.generate_ids_stream(
+        prompt_ids,
+        max_new_tokens=limit,
+        temperature=temp,
+        stop_ids={runtime_tokenizer.token_to_id.get("[EOS]", 2)},
+    ))
+    elapsed = max(time.perf_counter() - start, 1e-9)
+    text = runtime_tokenizer.decode(output_ids, skip_instruction_markers=True)
+    rate = len(output_ids) / elapsed
+    return text, len(prompt_ids), len(output_ids), elapsed * 1000, rate
 
-    # Stage 4: EVALUATE (ทดสอบจริง)
-    bench_before = 84.5
-    bench_after = 96.8
-    stages.append({
-        "stage": "EVALUATE",
-        "action": "Executing automated sandbox stress tests before vs after self-development.",
-        "score_before": f"{bench_before}%",
-        "score_after": f"{bench_after}%",
-        "delta": f"+{round(bench_after - bench_before, 1)}%"
-    })
 
-    # Stage 5: IMPROVE (ยกระดับความสามารถ)
-    stages.append({
-        "stage": "IMPROVE",
-        "action": "Committing optimized weights delta and registering new capability to persistent memory.",
-        "status": "COMMITTED",
-        "evidence": f"Cycle {cycle_id} validated. Native capability score elevated to {bench_after}%."
-    })
-
-    # Record to memory cache
-    if "evolution_cycles" not in model.memory_cache:
-        model.memory_cache["evolution_cycles"] = []
-    
-    evo_record = {
-        "cycle_id": cycle_id,
-        "timestamp": int(time.time()),
-        "domain": target_domain,
-        "score_before": bench_before,
-        "score_after": bench_after,
-        "improvement_pct": round(bench_after - bench_before, 1),
-        "stages": stages
-    }
-    model.memory_cache["evolution_cycles"].append(evo_record)
-    model.save_memory()
-
-    return evo_record
-
-def main():
+def main() -> None:
+    global runtime_error
     try:
-        model = NativeNeuralModel()
-    except Exception as e:
-        sys.stderr.write(f"FATAL: {str(e)}\n")
+        load_runtime()
+    except Exception as exc:
+        runtime_error = str(exc)
+        if "FAIL_CLOSED" not in runtime_error:
+            runtime_error = f"FAIL_CLOSED: Online Connectivity Required — {runtime_error}"
+        sys.stderr.write(runtime_error + "\n")
         sys.stderr.flush()
-        sys.exit(1)
 
-    # Listen on stdin for JSON-RPC lines
     for line in sys.stdin:
         line = line.strip()
         if not line:
             continue
+        req: Dict[str, Any] = {}
         try:
             req = json.loads(line)
             req_id = req.get("id")
             cmd = req.get("cmd")
-            params = req.get("params", {})
+            params = req.get("params") or {}
 
             if cmd == "ping":
-                resp = {
+                emit({"id": req_id, **runtime_status()})
+            elif cmd == "connectivity_check":
+                emit({
                     "id": req_id,
-                    "status": "ok",
-                    "model_name": model.metadata.get("model_name"),
-                    "architecture": model.metadata.get("architecture"),
-                    "total_params": model.config.total_params,
-                    "checkpoint_hash": model.checkpoint_hash,
-                    "weights_loaded": model.weights_loaded
-                }
-                sys.stdout.write(json.dumps(resp) + "\n")
-                sys.stdout.flush()
-
+                    "online": bool(runtime_model is not None),
+                    "online_connectivity_required": True,
+                    "weights_loaded": bool(runtime_model is not None),
+                    "runtime_state": "READY" if runtime_model is not None else "BLOCKED",
+                    "reason": runtime_error or None,
+                    "source_uri": runtime_source_uri or None,
+                })
+            elif cmd in ("connectivity_reconnect", "reload_cloud_checkpoint"):
+                try:
+                    result = load_runtime(params.get("presignedUrl") or params.get("presigned_url"))
+                    emit({"id": req_id, "success": True, "online": True, "weightsLoaded": True, **result})
+                except Exception as exc:
+                    runtime_error = str(exc)
+                    if "FAIL_CLOSED" not in runtime_error:
+                        runtime_error = f"FAIL_CLOSED: Online Connectivity Required — {runtime_error}"
+                    emit({"id": req_id, "success": False, "online": False, "weightsLoaded": False, "error": runtime_error, **runtime_status()})
             elif cmd == "tokenize":
-                text = params.get("text", "")
-                tokens = model.tokenizer.encode(text)
-                sys.stdout.write(json.dumps({
-                    "id": req_id,
-                    "tokens": tokens,
-                    "count": len(tokens)
-                }) + "\n")
-                sys.stdout.flush()
-
+                if runtime_tokenizer is None:
+                    emit(fail_closed(req_id, "tokenization"))
+                else:
+                    tokens = runtime_tokenizer.encode(str(params.get("text", "")))
+                    emit({"id": req_id, "tokens": tokens, "count": len(tokens)})
             elif cmd == "generate":
-                prompt = params.get("prompt", "")
-                role = params.get("role", "coder")
-                max_tokens = params.get("max_tokens", 1024)
-                temp = params.get("temperature", 0.2)
-                corr_id = params.get("correlation_id")
-                res = model.generate(prompt, role=role, max_tokens=max_tokens, temperature=temp, correlation_id=corr_id)
-                res["id"] = req_id
-                sys.stdout.write(json.dumps(res) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "stream_generate":
-                prompt = params.get("prompt", "")
-                role = params.get("role", "coder")
-                corr_id = params.get("correlation_id")
-                for chunk in model.stream_generate(prompt, role=role, correlation_id=corr_id):
-                    sys.stdout.write(json.dumps({
+                try:
+                    prompt = str(params.get("prompt", ""))
+                    text, input_count, output_count, latency_ms, rate = generate_ids(
+                        prompt,
+                        params.get("max_tokens", 128),
+                        params.get("temperature", 0.7),
+                    )
+                    emit({
                         "id": req_id,
-                        "type": "chunk",
-                        "text": chunk,
-                        "correlation_id": corr_id
-                    }) + "\n")
-                    sys.stdout.flush()
-                sys.stdout.write(json.dumps({
-                    "id": req_id,
-                    "type": "done",
-                    "correlation_id": corr_id
-                }) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "verify_suite":
-                v_res = run_verification_suite(model)
-                v_res["id"] = req_id
-                sys.stdout.write(json.dumps(v_res) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "verify_language_integrity":
-                lang_res = run_language_integrity_suite(model)
-                lang_res["id"] = req_id
-                sys.stdout.write(json.dumps(lang_res) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "self_evolve":
-                domain = params.get("domain", "algorithm_resilience")
-                evo_res = run_self_evolve_cycle(model, domain)
-                evo_res["id"] = req_id
-                sys.stdout.write(json.dumps(evo_res) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "get_memory":
-                sys.stdout.write(json.dumps({
-                    "id": req_id,
-                    "memory": model.memory_cache
-                }) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "train_step":
-                text = params.get("text", "ZYNTHEOR Sovereign Intelligence Native Architecture")
-                epochs = params.get("epochs", 2)
-                train_out = shared_trainer.train_on_text(text, epochs=epochs)
-                train_out["id"] = req_id
-                train_out["success"] = True
-                sys.stdout.write(json.dumps(train_out) + "\n")
-                sys.stdout.flush()
-
-            elif cmd == "export_checkpoint":
-                step = params.get("step", shared_trainer.optimizer.step_count)
-                loss = params.get("loss", shared_trainer.training_history[-1]["loss_after"] if shared_trainer.training_history else 0.42)
-                exp_res = CheckpointManager.export_full_tensor_checkpoint(training_step=step, loss=loss)
-                # Reload model checkpoint
-                model.load_checkpoint()
-                exp_res["id"] = req_id
-                sys.stdout.write(json.dumps(exp_res) + "\n")
-                sys.stdout.flush()
-
+                        "text": text,
+                        "input_tokens_count": input_count,
+                        "output_tokens_count": output_count,
+                        "latency_ms": round(latency_ms, 3),
+                        "tokens_per_sec": round(rate, 3),
+                        "checkpoint_hash": runtime_sha256,
+                        "latent_norm": None,
+                        "runtime_state": "READY",
+                    })
+                except Exception as exc:
+                    emit({"id": req_id, "error": str(exc)})
+            elif cmd == "stream_generate":
+                if runtime_model is None or runtime_tokenizer is None:
+                    emit(fail_closed(req_id, "inference"))
+                else:
+                    prompt = str(params.get("prompt", ""))
+                    prompt_ids = runtime_tokenizer.encode(prompt) or [1]
+                    prompt_ids = prompt_ids[-runtime_model.cfg.ctx:]
+                    max_tokens = max(1, min(int(params.get("max_tokens", 128)), 512))
+                    temperature = max(0.0, min(float(params.get("temperature", 0.7)), 1.5))
+                    generated = []
+                    previous_text = ""
+                    pending_tail = ""
+                    started = time.perf_counter()
+                    for token_id in runtime_model.generate_ids_stream(
+                        prompt_ids,
+                        max_new_tokens=max_tokens,
+                        temperature=temperature,
+                        stop_ids={runtime_tokenizer.token_to_id.get("[EOS]", 2)},
+                    ):
+                        generated.append(token_id)
+                        full_text = runtime_tokenizer.decode(generated, skip_instruction_markers=True)
+                        delta = full_text[len(previous_text):] if full_text.startswith(previous_text) else full_text
+                        previous_text = full_text
+                        safe, pending_tail = runtime_tokenizer.split_thai_safe_stream_prefix(pending_tail + delta, flush=False)
+                        if safe:
+                            emit({"id": req_id, "type": "chunk", "text": safe, "correlation_id": params.get("correlation_id")})
+                    if pending_tail:
+                        emit({"id": req_id, "type": "chunk", "text": pending_tail, "correlation_id": params.get("correlation_id")})
+                    emit({
+                        "id": req_id,
+                        "type": "done",
+                        "correlation_id": params.get("correlation_id"),
+                        "output_tokens_count": len(generated),
+                        "tokens_per_sec": round(len(generated) / max(time.perf_counter() - started, 1e-9), 3),
+                    })
             elif cmd == "inspect_checkpoint":
-                insp_res = CheckpointManager.inspect_checkpoint()
-                insp_res["id"] = req_id
-                sys.stdout.write(json.dumps(insp_res) + "\n")
-                sys.stdout.flush()
-
+                if runtime_model is None:
+                    emit(fail_closed(req_id, "checkpoint inspection"))
+                else:
+                    emit({"id": req_id, "exists": True, "status": "CLOUD_CHECKPOINT_VERIFIED", "metadata": runtime_metadata, "payload_sha256": runtime_sha256, "source_uri": runtime_source_uri, "payload_bytes": runtime_metadata.get("payload_bytes")})
+            elif cmd in ("train_step", "export_checkpoint"):
+                emit({"id": req_id, "error": "BLOCKED: training/export requires a verified dataset, a separate Native PureSeqLM training pipeline, and an approved human authorization record."})
+            elif cmd in ("verify_suite", "verify_language_integrity", "self_evolve", "get_memory"):
+                emit({"id": req_id, "error": "NOT_IMPLEMENTED: this operation is not wired to evidence-backed Native PureSeqLM runtime yet."})
             else:
-                sys.stdout.write(json.dumps({
-                    "id": req_id,
-                    "error": f"Unknown command: {cmd}"
-                }) + "\n")
-                sys.stdout.flush()
+                emit({"id": req_id, "error": f"Unknown command: {cmd}"})
+        except Exception as exc:
+            emit({"id": req.get("id"), "error": f"{type(exc).__name__}: {exc}"})
 
-        except Exception as err:
-            sys.stdout.write(json.dumps({
-                "id": req.get("id") if "req" in locals() else None,
-                "error": str(err)
-            }) + "\n")
-            sys.stdout.flush()
 
 if __name__ == "__main__":
     main()

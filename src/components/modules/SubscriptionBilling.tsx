@@ -11,8 +11,8 @@ interface SubscriptionBillingProps {
 
 export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ statusData, onRefresh }) => {
   const commercial = statusData?.commercial;
-  const currentPlan = commercial?.activePlanId || 'tier_pro';
-  const currentPhase = commercial?.currentPhase || 'COMMERCIAL_LAUNCH';
+  const currentPlan = commercial?.activePlanId || 'tier_free';
+  const currentPhase = commercial?.currentPhase || 'PRIVATE_BETA';
   const [switching, setSwitching] = useState(false);
 
   const plans = [
@@ -21,10 +21,10 @@ export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ status
       name: 'Private Beta (Developer)',
       price: '$0',
       period: 'Forever free',
-      desc: 'Ideal for single developers exploring sovereign offline intelligence.',
+      desc: 'For developers evaluating the Native Intelligence platform and governed Cloud Runtime. Checkout is not connected.',
       features: [
         'Single-tenant Sandbox (/workspace)',
-        '33.7M Native Neural Model',
+        'Native Intelligence Runtime',
         'SHA-256 Audit Ledger',
         'Standard Tokenizer'
       ]
@@ -34,14 +34,14 @@ export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ status
       name: 'Public Beta (Professional)',
       price: '$79',
       period: 'per month',
-      desc: 'Full 4-role multi-agent automation with self-evolving intelligence loop.',
+      desc: 'Planned multi-role automation features. Availability depends on verified runtime and execution gates.',
       popular: true,
       features: [
         '4-Role Multi-Agent Automation',
         'Self-Evolving Loop (Automated Evaluator)',
         'Unlimited File Inspect & Execution',
         'Persistent Cross-Session Memory',
-        'Priority Local Execution Gateway'
+        'Priority Cloud Execution Gateway'
       ]
     },
     {
@@ -49,12 +49,12 @@ export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ status
       name: 'Commercial Enterprise (Sovereign Core)',
       price: '$299',
       period: 'per month',
-      desc: 'Air-gapped deployment mode, hardware encryption & multi-tenant isolation.',
+      desc: 'Planned managed Cloud Runtime, key controls and multi-tenant isolation; not yet a live service offer.',
       features: [
         'Multi-tenant Virtual Isolation',
         'Hardware Checkpoint Encryption',
         'Custom Architecture Fine-Tuning Delta',
-        'Air-Gapped Sovereign Deployment Mode',
+        'Governed Cloud Runtime Deployment',
         'Cryptographic Proof Audit Verification'
       ]
     }

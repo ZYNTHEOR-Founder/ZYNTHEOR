@@ -98,7 +98,7 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
         stepNumber: idx + 1,
         title,
         summary: summary || line,
-        status: isStreaming && idx === lines.length - 1 ? 'IN_PROGRESS' : 'VERIFIED'
+        status: isStreaming && idx === lines.length - 1 ? 'IN_PROGRESS' : 'COMPLETED'
       };
     });
   }, [thoughtContent, lang, isStreaming]);
@@ -148,28 +148,28 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
               }`}
             />
             <span className="font-semibold text-[var(--app-text-primary)]">
-              {isStreaming ? t('chat.thinking') : 'Native 33.7M Model'}
+              {isStreaming ? t('chat.thinking') : 'Native Model Runtime'}
             </span>
           </div>
 
           {isStreaming && (
             <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[var(--app-accent)] font-semibold animate-pulse">
               <Sparkles className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-              STREAMING TOKENS
+              GENERATING OUTPUT
             </span>
           )}
         </div>
 
         {/* Telemetry Counters */}
         <div className="flex items-center gap-3 font-mono text-[11px] text-[var(--app-text-secondary)]">
-          <div className="flex items-center gap-1" title="Tokens processed">
+          <div className="flex items-center gap-1" title="Stream chunks received">
             <Zap className="w-3.5 h-3.5 text-[var(--z-warn)]" />
-            <span>{formatNumber(tokenCount)} tok</span>
+            <span>{formatNumber(tokenCount)} chunks</span>
           </div>
 
           <div className="flex items-center gap-1" title="Throughput">
             <Activity className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-            <span>{tokensPerSec > 0 ? tokensPerSec.toLocaleString() : '42,500'} t/s</span>
+            <span>{tokensPerSec > 0 ? `${tokensPerSec.toLocaleString()} t/s` : '—'}</span>
           </div>
 
           {timeToFirstTokenMs !== undefined && timeToFirstTokenMs > 0 && (
@@ -231,8 +231,8 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
                         <span className="text-xs font-bold text-[var(--app-text-primary)]">
                           {step.title}
                         </span>
-                        <span className="text-[10px] font-mono font-semibold text-[var(--z-ok)] dark:text-[var(--z-ok)] bg-[var(--z-ok)] dark:bg-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] px-1.5 py-0.5 rounded border border-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] shrink-0">
-                          {step.status === 'VERIFIED' ? 'VERIFIED' : 'STREAMING'}
+                        <span className="text-[10px] font-mono font-semibold text-[var(--app-text-secondary)] bg-[var(--app-surface-elevated)] px-1.5 py-0.5 rounded border border-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] shrink-0">
+                          {step.status === 'VERIFIED' ? 'VERIFIED' : step.status === 'COMPLETED' ? 'COMPLETED' : 'IN PROGRESS'}
                         </span>
                       </div>
                       <p className="text-[11px] text-[var(--app-text-secondary)] mt-0.5 leading-relaxed font-sans">

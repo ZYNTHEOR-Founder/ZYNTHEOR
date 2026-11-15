@@ -38,8 +38,11 @@ export const ConversationalIntelligence: React.FC = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
   const [liveTokenCount, setLiveTokenCount] = useState<number>(0);
-  const [liveThroughput, setLiveThroughput] = useState<number>(42500);
-  const [ttftMs, setTtftMs] = useState<number>(14);
+  const [liveThroughput, setLiveThroughput] = useState<number>(0);
+  const [ttftMs, setTtftMs] = useState<number>(0);
+  const [runtimeStatus, setRuntimeStatus] = useState<'UNVERIFIED' | 'VERIFIED' | 'BLOCKED'>('UNVERIFIED');
+  const [runtimeReason, setRuntimeReason] = useState('Checking Native Cloud Runtime…');
+  const runtimeProductLabel = 'Sovereign Runtime';
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -57,6 +60,14 @@ export const ConversationalIntelligence: React.FC = () => {
 
   useEffect(() => {
     fetchSessions();
+    fetch('/api/system/status').then((response) => response.json()).then((data) => {
+      const ready = Boolean(data?.model?.weightsLoaded && data?.model?.inferenceReady);
+      setRuntimeStatus(ready ? 'VERIFIED' : 'BLOCKED');
+      setRuntimeReason(ready ? 'Native Cloud Runtime is ready.' : (data?.model?.readinessReason || 'Native inference is blocked until a verified Cloud Runtime checkpoint is loaded.'));
+    }).catch(() => {
+      setRuntimeStatus('UNVERIFIED');
+      setRuntimeReason('Runtime status could not be retrieved.');
+    });
   }, []);
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || {
@@ -78,6 +89,10 @@ export const ConversationalIntelligence: React.FC = () => {
   const handleSendMessage = async (customText?: string) => {
     const textToSend = customText || inputMessage;
     if (!textToSend.trim() || isStreaming) return;
+    if (runtimeStatus !== 'VERIFIED') {
+      setStreamChunks(runtimeReason);
+      return;
+    }
 
     setInputMessage('');
     setIsStreaming(true);
@@ -203,10 +218,9 @@ export const ConversationalIntelligence: React.FC = () => {
           sender: 'assistant',
           content:
             lang === 'th'
-              ? 'สวัสดีครับ! ผมคือ **ZYNTHEOR Q+ Sovereign Conversational Core** ขับเคลื่อนด้วยสถาปัตยกรรม Native Transformer 33.7M Parameters ทำงานในเครื่อง 100% ไม่พึ่งพาคลาวด์ภายนอก พร้อมให้เหตุผลแบบสองภาษาและเขียนโค้ดที่ตรวจสอบได้ครับ'
-              : 'Greetings! I am the **ZYNTHEOR Q+ Sovereign Conversational Core**, powered by our 33.7M Native Neural Transformer. Running 100% locally with zero external APIs, capable of bilingual Thai-English reasoning and verifiable code synthesis.',
-          thought:
-            'Initialized sovereign memory context · Dual-engine Thai/English tokenizer ready · Loaded 33.7M weights from native_data/model_checkpoint.pt',
+              ? 'ZYNTHEOR พร้อมรับงานผ่าน Native Cloud Runtime เมื่อโหลด checkpoint ที่ตรวจสอบแล้ว สถานะการอนุมานจะถูกตรวจสอบก่อนส่งคำขอทุกครั้ง'
+              : 'ZYNTHEOR routes requests through its Native Cloud Runtime. Inference is enabled only after a verified checkpoint is loaded.',
+          thought: 'Runtime readiness is checked from live backend status; no model weights are claimed as loaded by this greeting.',
           timestamp: new Date().toISOString()
         }
       ]
@@ -241,9 +255,9 @@ export const ConversationalIntelligence: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="font-bold text-[var(--app-text-primary)] text-base">{t('chat.title')}</h2>
-                <StatusBadge status="VERIFIED" />
+                <StatusBadge status={runtimeStatus} />
                 <span className="px-2 py-0.5 rounded-md bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-[var(--app-accent)] text-[10px] font-bold">
-                  TH / EN DUAL ENGINE
+                  TH / EN TOKENIZER
                 </span>
               </div>
               <p className="text-xs text-[var(--app-text-secondary)] mt-0.5">
@@ -265,7 +279,7 @@ export const ConversationalIntelligence: React.FC = () => {
 
             <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[var(--z-ok)] bg-[var(--app-surface-elevated)] px-3 py-1.5 rounded-xl border border-[var(--app-card-border)]">
               <ShieldCheck className="w-4 h-4 text-[var(--z-ok)]" />
-              <span>Sovereign Localhost</span>
+              <span>Native Cloud Runtime</span>
             </div>
           </div>
         </div>
@@ -285,7 +299,7 @@ export const ConversationalIntelligence: React.FC = () => {
 
           <VividCard
             title={lang === 'th' ? 'ประวัติการสนทนา' : 'Chat History'}
-            subtitle={lang === 'th' ? 'จัดเก็บถาวรในเครื่อง' : 'Persisted on sovereign disk'}
+            subtitle={lang === 'th' ? 'ยังไม่ยืนยันการจัดเก็บเซสชัน' : 'Session persistence is not yet verified'}
             className="!p-3"
           >
             <div className="space-y-1 max-h-[500px] overflow-y-auto">
@@ -459,6 +473,7 @@ export const ConversationalIntelligence: React.FC = () => {
               <button
                 key={idx}
                 onClick={() => handleSendMessage(s)}
+                disabled={runtimeStatus !== 'VERIFIED'}
                 className="px-2.5 py-1 text-[11px] rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] hover:text-[var(--app-accent)] whitespace-nowrap transition-colors cursor-pointer font-medium shadow-2xs"
               >
                 {s}
@@ -486,7 +501,7 @@ export const ConversationalIntelligence: React.FC = () => {
               />
               <button
                 onClick={() => handleSendMessage()}
-                disabled={!inputMessage.trim() || isStreaming}
+                disabled={!inputMessage.trim() || isStreaming || runtimeStatus !== 'VERIFIED'}
                 className="chat-send-button"
                 aria-label={t('btn.send')}
               >
@@ -495,8 +510,8 @@ export const ConversationalIntelligence: React.FC = () => {
               </button>
             </div>
             <div className="chat-composer-meta">
-              <span>{isStreaming ? <><span className="live-dot" /> Native stream active · {liveTokenCount} tokens</> : 'Enter to send · Shift + Enter for a new line'}</span>
-              <span>{isStreaming ? `TTFT ${ttftMs} ms · ${liveThroughput.toLocaleString()} tok/s` : 'Local runtime · no external API'}</span>
+              <span>{isStreaming ? <><span className="live-dot" /> Native stream active · {liveTokenCount} chunks</> : 'Enter to send · Shift + Enter for a new line'}</span>
+              <span>{isStreaming ? `TTFT ${ttftMs > 0 ? `${ttftMs} ms` : '—'} · ${liveThroughput > 0 ? `${liveThroughput.toLocaleString()} tok/s` : 'throughput pending'}` : (runtimeStatus === 'VERIFIED' ? 'Cloud Runtime ready' : runtimeReason)}</span>
             </div>
           </div>
         </div>

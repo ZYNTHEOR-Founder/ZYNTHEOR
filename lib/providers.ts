@@ -79,7 +79,6 @@ export class NativeNeuralLMProvider {
   private reqCounter = 0;
   private pendingRequests = new Map<number, { resolve: (val: any) => void; reject: (err: any) => void }>();
   private activeStreamCallback: ((chunk: string) => void) | null = null;
-  private activeStreamDone: (() => void) | null = null;
 
   private constructor() {
     this.startBridge();
@@ -113,27 +112,29 @@ export class NativeNeuralLMProvider {
       try {
         const msg = JSON.parse(line);
         
-        // Handle stream chunk events
-        if (msg.type === 'chunk' && this.activeStreamCallback) {
-          this.activeStreamCallback(msg.text);
+        const reqId = msg.id;
+        // Stream chunks are correlated to the active request; completion and errors
+        // settle the same pending promise as ordinary bridge commands.
+        if (msg.type === 'chunk') {
+          this.activeStreamCallback?.(msg.text);
           return;
         }
-        if (msg.type === 'done' && this.activeStreamDone) {
-          this.activeStreamDone();
-          this.activeStreamDone = null;
+        if (msg.type === 'done' || msg.error) {
+          if (reqId !== undefined && this.pendingRequests.has(reqId)) {
+            const pending = this.pendingRequests.get(reqId)!;
+            this.pendingRequests.delete(reqId);
+            if (msg.error) pending.reject(new Error(`Native Model Error: ${msg.error}`));
+            else pending.resolve(msg);
+          }
           this.activeStreamCallback = null;
           return;
         }
 
-        const reqId = msg.id;
         if (reqId !== undefined && this.pendingRequests.has(reqId)) {
           const { resolve, reject } = this.pendingRequests.get(reqId)!;
           this.pendingRequests.delete(reqId);
-          if (msg.error) {
-            reject(new Error(`Native Model Error: ${msg.error}`));
-          } else {
-            resolve(msg);
-          }
+          if (msg.error) reject(new Error(`Native Model Error: ${msg.error}`));
+          else resolve(msg);
         }
       } catch (err) {
         console.error('[Native Bridge Parse Error]', line, err);
@@ -191,10 +192,25 @@ export class NativeNeuralLMProvider {
     model_name: string;
     architecture: string;
     total_params: number;
+    active_params: number;
+    target_params?: number | null;
     checkpoint_hash: string;
     weights_loaded: boolean;
+    inference_ready: boolean;
+    online_connectivity_required: boolean;
+    runtime_state: string;
+    readiness_reason?: string;
+    source_uri?: string | null;
   }> {
     return this.sendCommand('ping');
+  }
+
+  public async connectivityCheck(): Promise<any> {
+    return this.sendCommand('connectivity_check', {}, 12000);
+  }
+
+  public async reconnect(presignedUrl?: string): Promise<any> {
+    return this.sendCommand('connectivity_reconnect', presignedUrl ? { presignedUrl } : {}, 45000);
   }
 
   public async chat(
@@ -205,8 +221,8 @@ export class NativeNeuralLMProvider {
     return this.sendCommand<InferenceResponse>('generate', {
       prompt,
       role,
-      max_tokens: options.max_tokens || 1024,
-      temperature: options.temperature || 0.2,
+      max_tokens: options.max_tokens ?? 128,
+      temperature: options.temperature ?? 0.7,
       correlation_id: options.correlation_id || `corr_${Date.now()}`
     });
   }
@@ -215,29 +231,26 @@ export class NativeNeuralLMProvider {
     prompt: string,
     role: string = 'coder',
     onChunk: (chunk: string) => void,
-    options: { correlation_id?: string } = {}
+    options: { correlation_id?: string; max_tokens?: number; temperature?: number } = {}
   ): Promise<void> {
-    if (!this.bridgeProcess || this.bridgeProcess.killed) {
-      this.startBridge();
-    }
-
+    if (!this.bridgeProcess || this.bridgeProcess.killed) this.startBridge();
     const reqId = ++this.reqCounter;
     this.activeStreamCallback = onChunk;
+    const timeoutMs = 120000;
 
     return new Promise<void>((resolve, reject) => {
-      this.activeStreamDone = resolve;
-
       const timeout = setTimeout(() => {
-        this.activeStreamDone = null;
-        this.activeStreamCallback = null;
-        reject(new Error(`Stream timed out for prompt`));
-      }, 15000);
+        if (this.pendingRequests.has(reqId)) {
+          this.pendingRequests.delete(reqId);
+          this.activeStreamCallback = null;
+          reject(new Error(`Native inference stream timed out after ${timeoutMs}ms`));
+        }
+      }, timeoutMs);
 
-      const origDone = this.activeStreamDone;
-      this.activeStreamDone = () => {
-        clearTimeout(timeout);
-        if (origDone) origDone();
-      };
+      this.pendingRequests.set(reqId, {
+        resolve: () => { clearTimeout(timeout); resolve(); },
+        reject: (err) => { clearTimeout(timeout); reject(err); }
+      });
 
       const payload = JSON.stringify({
         id: reqId,
@@ -245,11 +258,20 @@ export class NativeNeuralLMProvider {
         params: {
           prompt,
           role,
+          max_tokens: options.max_tokens ?? 128,
+          temperature: options.temperature ?? 0.7,
           correlation_id: options.correlation_id || `corr_${Date.now()}`
         }
       }) + '\n';
 
-      this.bridgeProcess?.stdin.write(payload);
+      this.bridgeProcess?.stdin.write(payload, (err) => {
+        if (err && this.pendingRequests.has(reqId)) {
+          this.pendingRequests.delete(reqId);
+          clearTimeout(timeout);
+          this.activeStreamCallback = null;
+          reject(err);
+        }
+      });
     });
   }
 

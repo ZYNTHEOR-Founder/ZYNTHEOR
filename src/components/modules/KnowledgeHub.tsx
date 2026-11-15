@@ -79,6 +79,7 @@ interface DatasetManifest {
   qualityScoreAvg?: number;
   datasetHash: string;
   status: 'VERIFIED_READY' | 'NEEDS_REVIEW' | string;
+  humanApproval?: { approvedBy?: string; approvedAt?: string; evidenceHash?: string };
 }
 
 const DocumentSkeleton: React.FC = () => (
@@ -106,7 +107,7 @@ export const KnowledgeHub: React.FC = () => {
   const [hybridResults, setHybridResults] = useState<any>(null);
   const [hybridLoading, setHybridLoading] = useState(false);
   const [hybridError, setHybridError] = useState<string | null>(null);
-  const [ingestText, setIngestText] = useState('{"title":"Demo Note","content":"Sovereign knowledge test document about audit ledgers and Thai tokenizer.\n\nเอกสารทดสอบเกี่ยวกับบัญชีตรวจสอบ","format":"markdown","collection":"Tests"}');
+  const [ingestText, setIngestText] = useState('');
   const [ingestJobs, setIngestJobs] = useState<any[]>([]);
   const [ingestBusy, setIngestBusy] = useState(false);
   const [ingestError, setIngestError] = useState<string | null>(null);
@@ -146,7 +147,7 @@ export const KnowledgeHub: React.FC = () => {
   const [editContent, setEditContent] = useState('');
 
   // Interactive Retrieval Playground
-  const [retrievalQuery, setRetrievalQuery] = useState('Sovereign Transformer architecture 33.7M parameters');
+  const [retrievalQuery, setRetrievalQuery] = useState('Native Core architecture and checkpoint evidence');
   const [retrievalResults, setRetrievalResults] = useState<RetrievalResult[]>([]);
   const [isRetrieving, setIsRetrieving] = useState(false);
 
@@ -1165,15 +1166,15 @@ export const KnowledgeHub: React.FC = () => {
                   Dataset Quality Gate Policy:
                 </span>
                 <span className="text-[var(--app-text-secondary)]">
-                  Synthetic sources quarantined under <span className="text-[var(--app-amber)] font-mono font-bold">NEEDS_REVIEW</span>; 100% human-verified collections certified as <span className="text-[var(--z-ok)] font-mono font-bold">VERIFIED_READY</span>.
+                  Automatic quality scoring is preliminary only. Every new dataset remains pending explicit human approval before training.
                 </span>
               </div>
               <div className="flex items-center gap-2 font-mono text-[11px]">
-                <span className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]">
-                  Entropy Check Active
+                <span className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-amber)_10%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_30%,transparent)]">
+                  Human review required
                 </span>
                 <span className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-amber)_10%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_30%,transparent)]">
-                  Deduplication On
+                  Training approval gated
                 </span>
               </div>
             </div>
@@ -1209,35 +1210,36 @@ export const KnowledgeHub: React.FC = () => {
                       </td>
                       <td className="py-3 text-[var(--app-text-primary)] font-bold">
                         {ds.qualityScoreAvg !== undefined ? (
-                          <span className={ds.qualityScoreAvg >= 0.8 ? 'text-[var(--z-ok)]' : 'text-[var(--app-amber)]'}>
-                            {(ds.qualityScoreAvg * 100).toFixed(0)}%
+                          <span className={ds.qualityScoreAvg >= 80 ? 'text-[var(--z-ok)]' : 'text-[var(--app-amber)]'}>
+                            {Number(ds.qualityScoreAvg).toFixed(0)}%
                           </span>
                         ) : (
-                          <span className="text-[var(--app-text-secondary)]">92%</span>
+                          <span className="text-[var(--app-text-secondary)]">—</span>
                         )}
                       </td>
                       <td className="py-3 text-[var(--app-accent)] font-bold">
-                        {ds.totalTokensEstimate?.toLocaleString() || '1,240'} tok
+                        {typeof ds.totalTokensEstimate === 'number' ? ds.totalTokensEstimate.toLocaleString() : '—'} tok
                       </td>
                       <td className="py-3">
-                        {ds.status === 'NEEDS_REVIEW' ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]">
-                            NEEDS_REVIEW
+                        {ds.humanApproval?.approvedBy && ds.humanApproval?.approvedAt && ds.humanApproval?.evidenceHash ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]">
+                            HUMAN APPROVED · EVIDENCE
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]">
-                            VERIFIED_READY
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]">
+                            NEEDS_REVIEW
                           </span>
                         )}
                       </td>
                       <td className="py-3 text-right pr-1">
                         <button
                           onClick={() => handleTriggerTraining(ds.datasetId)}
-                          disabled={isTraining}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--z-ok)] hover:bg-[var(--z-ok)] transition-all cursor-pointer flex items-center gap-1.5 ml-auto"
+                          disabled
+                          title="Training is blocked until the dataset has explicit human approval and a verified Cloud training runner."
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--app-amber)] opacity-60 cursor-not-allowed flex items-center gap-1.5 ml-auto"
                         >
                           <Zap className="w-3 h-3 text-[var(--app-amber)]" />
-                          <span>{isTraining ? 'Training...' : 'Train Model'}</span>
+                          <span>Training blocked</span>
                         </button>
                       </td>
                     </tr>

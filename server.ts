@@ -156,6 +156,63 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
+// Online Cloud Runtime readiness. A connected API process is not proof that
+// native weights or inference are ready; these routes report the bridge state.
+app.get('/api/connectivity/health', async (_req: Request, res: Response) => {
+  try {
+    const provider = NativeNeuralLMProvider.getInstance();
+    const [connectivity, model] = await Promise.all([provider.connectivityCheck(), provider.ping()]);
+    const online = Boolean(connectivity?.online && model?.inference_ready);
+    const payload = {
+      success: true,
+      online,
+      onlineConnectivityRequired: true,
+      weightsLoaded: Boolean(model?.weights_loaded),
+      inferenceReady: Boolean(model?.inference_ready),
+      runtimeState: model?.runtime_state || 'BLOCKED',
+      status: online ? 'CONNECTED' : 'FAIL_CLOSED',
+      reason: model?.readiness_reason || connectivity?.reason || 'FAIL_CLOSED: Online Connectivity Required',
+      activeParams: Number(model?.active_params || 0),
+      targetParams: model?.target_params ?? null,
+      checkpointHash: model?.checkpoint_hash || null,
+      sourceUri: model?.source_uri || null,
+      checkedAt: new Date().toISOString()
+    };
+    res.status(online ? 200 : 503).json(payload);
+  } catch (err: any) {
+    res.status(503).json({ success: false, online: false, onlineConnectivityRequired: true, weightsLoaded: false, inferenceReady: false, runtimeState: 'BLOCKED', status: 'FAIL_CLOSED', reason: `FAIL_CLOSED: Online Connectivity Required — ${err.message}` });
+  }
+});
+
+app.post('/api/connectivity/reconnect', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const presignedUrl = req.body?.presignedUrl;
+    if (presignedUrl !== undefined && (typeof presignedUrl !== 'string' || presignedUrl.length > 4096)) {
+      return res.status(400).json({ success: false, code: 'INVALID_URL', error: 'presignedUrl must be a valid URL string.' });
+    }
+    const provider = NativeNeuralLMProvider.getInstance();
+    const result = await provider.reconnect(presignedUrl);
+    const online = Boolean(result?.online && result?.inference_ready && result?.weights_loaded);
+    if (!online) {
+      const error = String(result?.error || result?.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required');
+      const statusCode = error.includes('SSRF_BLOCKED') ? 400 : 503;
+      return res.status(statusCode).json({ success: false, online: false, onlineConnectivityRequired: true, weightsLoaded: false, inferenceReady: false, runtimeState: 'BLOCKED', code: error.includes('SSRF_BLOCKED') ? 'SSRF_BLOCKED' : 'FAIL_CLOSED', error });
+    }
+    AuditLedger.append('SYSTEM', 'CLOUD_RUNTIME_CHECKPOINT_LOADED', {
+      userId: req.sovereignUserId,
+      tenantId: req.sovereignTenantId,
+      sourceUri: result.source_uri,
+      checkpointHash: result.checkpoint_hash,
+      activeParams: result.active_params
+    });
+    res.json({ success: true, online: true, onlineConnectivityRequired: true, weightsLoaded: true, inferenceReady: true, runtimeState: 'READY', activeParams: result.active_params, checkpointHash: result.checkpoint_hash, sourceUri: result.source_uri });
+  } catch (err: any) {
+    const error = String(err?.message || err);
+    const blockedBySsrF = error.includes('SSRF_BLOCKED');
+    res.status(blockedBySsrF ? 400 : 503).json({ success: false, online: false, onlineConnectivityRequired: true, weightsLoaded: false, inferenceReady: false, runtimeState: 'BLOCKED', code: blockedBySsrF ? 'SSRF_BLOCKED' : 'FAIL_CLOSED', error });
+  }
+});
+
 // 1. System Status API
 app.get('/api/system/status', async (_req: Request, res: Response) => {
   try {
@@ -173,7 +230,12 @@ app.get('/api/system/status', async (_req: Request, res: Response) => {
         architecture: pingRes.architecture,
         totalParams: pingRes.total_params,
         checkpointHash: pingRes.checkpoint_hash,
-        weightsLoaded: pingRes.weights_loaded
+        weightsLoaded: pingRes.weights_loaded,
+        activeParams: pingRes.active_params,
+        targetParams: pingRes.target_params ?? null,
+        inferenceReady: pingRes.inference_ready,
+        runtimeState: pingRes.runtime_state,
+        readinessReason: pingRes.readiness_reason
       },
       audit: {
         totalRecords: integrity.totalRecords,
@@ -213,6 +275,10 @@ app.post('/api/native/inference', requireAuth('guest'), async (req: Authenticate
     const prompt = req.body?.prompt || 'ทดสอบ';
     const role = req.body?.role || 'chat';
     const provider = NativeNeuralLMProvider.getInstance();
+    const runtime = await provider.ping();
+    if (!runtime.inference_ready || !runtime.weights_loaded) {
+      return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required', runtimeState: runtime.runtime_state });
+    }
     const result = await provider.chat(prompt, role);
 
     AuditLedger.append('SYSTEM', 'NATIVE_INFERENCE_EXECUTED', {
@@ -226,8 +292,8 @@ app.post('/api/native/inference', requireAuth('guest'), async (req: Authenticate
     res.json({
       success: true,
       model: 'ZYNTHEOR Q+ Sovereign',
-      architecture: 'Transformer-33.7M',
-      totalParams: 33958400,
+      architecture: runtime.architecture,
+      totalParams: runtime.active_params,
       checkpointHash: result.checkpoint_hash,
       prompt,
       response: result.text,
@@ -238,18 +304,23 @@ app.post('/api/native/inference', requireAuth('guest'), async (req: Authenticate
       latentNorm: result.latent_norm
     });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const blocked = String(err?.message || err).includes('FAIL_CLOSED');
+    res.status(blocked ? 503 : 500).json({ success: false, code: blocked ? 'FAIL_CLOSED' : 'INFERENCE_ERROR', error: err.message });
   }
 });
 
 // 2. NDJSON Agent Execution Stream (Planner -> Coder -> Reviewer -> Tester)
-app.post('/api/agent/execute', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+app.post('/api/agent/execute', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
   const { goal } = req.body;
-  if (!goal || typeof goal !== 'string') {
-    return res.status(400).json({ error: 'Goal string is required' });
+  if (typeof goal !== 'string' || !goal.trim() || goal.length > 8000) {
+    return res.status(400).json({ success: false, code: 'INVALID_TASK_GOAL', error: 'Goal must contain 1–8000 characters.' });
+  }
+  const runtime = await NativeNeuralLMProvider.getInstance().ping();
+  if (!runtime.inference_ready || !runtime.weights_loaded) {
+    return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required', runtimeState: runtime.runtime_state });
   }
 
-  // Set up chunked streaming
+  // Set up chunked streaming only after Native Runtime readiness has been established.
   res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
   res.setHeader('Transfer-Encoding', 'chunked');
   res.setHeader('Cache-Control', 'no-cache');
@@ -260,7 +331,7 @@ app.post('/api/agent/execute', requireAuth('guest'), async (req: AuthenticatedRe
   try {
     const result = await orchestrator.executeTask(goal, (event) => {
       res.write(JSON.stringify(event) + '\n');
-    });
+    }, { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! });
 
     CommercialManager.getInstance().recordTask(result.success, 350);
 
@@ -306,7 +377,7 @@ app.post('/api/verify/language-integrity', requireAuth('developer'), async (_req
     const provider = NativeNeuralLMProvider.getInstance();
     const result = await provider.verifyLanguageIntegrity();
 
-    AuditLedger.append('SYSTEM', 'LANGUAGE_INTEGRITY_VERIFIED', {
+    AuditLedger.append('SYSTEM', 'LANGUAGE_INTEGRITY_RUN', {
       passed: result.passed_tests,
       total: result.total_tests,
       verified: result.verified,
@@ -578,6 +649,12 @@ app.delete('/api/memory/episodic/:key', requireAuth('guest'), (req: Authenticate
  */
 app.post('/api/auth/login', (req: Request, res: Response) => {
   try {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ success: false, error: 'IDENTITY_PROVIDER_REQUIRED' });
+    }
+    if (process.env.ZYNTHEOR_ENABLE_DEV_LOGIN !== 'true') {
+      return res.status(403).json({ success: false, error: 'DEVELOPMENT_LOGIN_DISABLED' });
+    }
     const body = req.body || {};
     const requestedUiRole = (body.role as string) || 'User';
     const allowedUi = ['User', 'Developer', 'Administrator'];
@@ -919,7 +996,7 @@ function loadChatSessions(): ChatSession[] {
       {
         id: 'msg-0',
         sender: 'assistant',
-        content: 'สวัสดีครับ! ผมคือ **ZYNTHEOR Q+ Native Conversational Intelligence** ปัญญาประดิษฐ์สถาปัตยกรรม Sovereign Transformer 33.7M Parameters ที่รันบนเครื่องของคุณแบบ 100% First-Party โดยไม่ผ่าน Cloud AI ภายนอก\n\nพร้อมทำงานร่วมกับคุณทั้งการวิเคราะห์สถาปัตยกรรม, เขียนและตรวจโค้ด, รัน Sandbox และบันทึก Audit Ledger ครับ',
+        content: 'ยินดีต้อนรับสู่ ZYNTHEOR VIVID INTELLIGENCE — Native Multi-Domain Intelligence สำหรับการวางแผน สร้าง ทดสอบ และส่งมอบงาน\n\nการอนุมานด้วย Native Model จะเปิดใช้งานต่อเมื่อ Cloud Runtime โหลด checkpoint ที่ตรวจสอบได้แล้วเท่านั้น',
         timestamp: new Date().toISOString()
       }
     ]
@@ -942,6 +1019,8 @@ app.get('/api/chat/sessions', requireAuth('guest'), (_req: AuthenticatedRequest,
   }
 });
 
+app.post('/api/chat', (req: Request, res: Response, next) => { req.url = '/api/chat/message'; next(); });
+
 app.post('/api/chat/message', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
   const { sessionId = 'session-default', message } = req.body;
   if (!message || typeof message !== 'string') {
@@ -950,8 +1029,13 @@ app.post('/api/chat/message', requireAuth('guest'), async (req: AuthenticatedReq
 
   const correlationId = (req.body?.correlationId || req.headers['x-correlation-id'] || `corr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`) as string;
   const startTime = Date.now();
+  const provider = NativeNeuralLMProvider.getInstance();
+  const runtime = await provider.ping();
+  if (!runtime.inference_ready || !runtime.weights_loaded) {
+    return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required', runtimeState: runtime.runtime_state });
+  }
 
-  // Set up chunked streaming
+  // Set up chunked streaming only after inference readiness has been established.
   res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
   res.setHeader('Transfer-Encoding', 'chunked');
   res.setHeader('Cache-Control', 'no-cache');
@@ -999,7 +1083,6 @@ app.post('/api/chat/message', requireAuth('guest'), async (req: AuthenticatedReq
     effectivePrompt = `[KNOWLEDGE_WORKSPACE_GROUNDING_PASSAGES]:\n${contextPassages}\n\n[USER_QUERY]:\n${message}`;
   }
 
-  const provider = NativeNeuralLMProvider.getInstance();
   let accumulated = '';
   let tokenCount = 0;
 
@@ -1056,7 +1139,8 @@ app.post('/api/chat/message', requireAuth('guest'), async (req: AuthenticatedReq
     }) + '\n');
     res.end();
   } catch (err: any) {
-    res.write(JSON.stringify({ type: 'error', correlationId, error: err.message }) + '\n');
+    const blocked = String(err?.message || err).includes('FAIL_CLOSED');
+    res.write(JSON.stringify({ type: 'error', correlationId, code: blocked ? 'FAIL_CLOSED' : 'INFERENCE_ERROR', error: err.message }) + '\n');
     res.end();
   }
 });
@@ -1450,56 +1534,22 @@ app.post('/api/knowledge/parse-preview', requireAuth('developer'), (req: Authent
 // ==========================================
 // 12. NATIVE TRAINING & CHECKPOINT ENDPOINTS
 // ==========================================
-app.post('/api/model/train', requireRole(['Developer', 'Administrator']), async (req: Request, res: Response) => {
-  try {
-    const { text, epochs = 2, datasetId } = req.body;
-    let trainingText = text;
-
-    if (datasetId) {
-      const kw = KnowledgeWorkspace.getInstance();
-      const datasetDetail = kw.getDatasetDetail(datasetId);
-      if (datasetDetail && Array.isArray(datasetDetail.items)) {
-        trainingText = datasetDetail.items.map((i: any) => i.text).join('\n\n');
-      }
-    }
-
-    if (!trainingText) {
-      trainingText = "ZYNTHEOR Native Transformer Model 33.7M parameters sovereign inference. ภาษาไทยและอังกฤษ";
-    }
-
-    const provider = NativeNeuralLMProvider.getInstance();
-    const trainResult = await provider.trainStep(trainingText, epochs);
-
-    AuditLedger.append('SYSTEM', 'NATIVE_TRAINING_STEP_COMMITTED', {
-      trainingStep: trainResult.training_step,
-      lossBefore: trainResult.loss_before,
-      lossAfter: trainResult.loss_after,
-      lossReductionPct: trainResult.loss_reduction_pct,
-      paramMutationDelta: trainResult.param_mutation_delta
-    });
-
-    res.json({ success: true, ...trainResult });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+app.post('/api/model/train', requireRole(['Developer', 'Administrator']), async (_req: Request, res: Response) => {
+  return res.status(409).json({
+    success: false,
+    status: 'BLOCKED',
+    code: 'NATIVE_TRAINING_GATE_NOT_READY',
+    error: 'Training is blocked until a provenance-verified dataset, explicit human approval, and a tested Native Cloud training runner are connected. No built-in placeholder corpus is permitted.'
+  });
 });
 
-app.post('/api/model/export', requireRole(['Developer', 'Administrator']), async (req: Request, res: Response) => {
-  try {
-    const { step, loss } = req.body;
-    const provider = NativeNeuralLMProvider.getInstance();
-    const exportResult = await provider.exportCheckpoint(step, loss);
-
-    AuditLedger.append('SYSTEM', 'FULL_TENSOR_CHECKPOINT_EXPORTED', {
-      fileSize: exportResult.file_size,
-      totalParams: exportResult.total_params,
-      payloadSha256: exportResult.payload_sha256
-    });
-
-    res.json({ success: true, ...exportResult });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+app.post('/api/model/export', requireRole(['Developer', 'Administrator']), async (_req: Request, res: Response) => {
+  return res.status(409).json({
+    success: false,
+    status: 'BLOCKED',
+    code: 'SYNTHETIC_CHECKPOINT_EXPORT_PROHIBITED',
+    error: 'Checkpoint export is blocked. Only a real checkpoint produced by the approved Native training pipeline may be exported.'
+  });
 });
 
 app.get('/api/model/inspect', requireRole(['Developer', 'Administrator']), async (_req: Request, res: Response) => {

@@ -36,8 +36,8 @@ export class AuditLedger {
         'GENESIS_INITIALIZATION',
         {
           engine: 'ZYNTHEOR Q+ Sovereign AI Engine',
-          architecture: 'Transformer-33.7M',
-          sovereignty_rule: '100% First-party neural execution with zero external APIs',
+          architecture: 'ZYNTHEOR Native architecture; checkpoint parameters are runtime-evidence controlled',
+          sovereignty_rule: 'Native Intelligence Core; execution status is recorded from verified runtime evidence',
           init_timestamp: new Date().toISOString()
         }
       );

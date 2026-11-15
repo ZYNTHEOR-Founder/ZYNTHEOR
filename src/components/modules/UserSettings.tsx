@@ -45,21 +45,21 @@ export const UserSettings: React.FC = () => {
   const [activeSection, setActiveSection] = useState<ControlSection>('appearance');
   const [tenantName, setTenantName] = useState(session.tenantId);
   const [memoryRetention, setMemoryRetention] = useState('infinite');
-  const [sovereigntyStatus, setSovereigntyStatus] = useState<'VERIFIED' | 'PARTIAL'>('PARTIAL');
+  const [sovereigntyStatus, setSovereigntyStatus] = useState<'VERIFIED' | 'BLOCKED' | 'UNVERIFIED'>('UNVERIFIED');
   const [configAudit, setConfigAudit] = useState<ConfigAuditEntry[]>([]);
   const [rolePermissions, setRolePermissions] = useState<Record<ControlRole, Record<string, boolean>>>({
     User: { nativeInference: true, modelTraining: false, sandboxExec: false, auditExport: false },
-    Developer: { nativeInference: true, modelTraining: true, sandboxExec: true, auditExport: true },
-    Administrator: { nativeInference: true, modelTraining: true, sandboxExec: true, auditExport: true }
+    Developer: { nativeInference: true, modelTraining: false, sandboxExec: true, auditExport: true },
+    Administrator: { nativeInference: true, modelTraining: false, sandboxExec: true, auditExport: true }
   });
 
   useEffect(() => {
     fetch('/api/system/status')
       .then((r) => r.json())
       .then((d) => {
-        if (d.success) setSovereigntyStatus('VERIFIED');
+        if (d.success) setSovereigntyStatus(d.model?.weightsLoaded && d.model?.inferenceReady ? 'VERIFIED' : 'BLOCKED');
       })
-      .catch(() => setSovereigntyStatus('PARTIAL'));
+      .catch(() => setSovereigntyStatus('UNVERIFIED'));
   }, []);
 
   const recordConfigChange = (setting: string, oldValue: string, newValue: string) => {
@@ -222,11 +222,11 @@ export const UserSettings: React.FC = () => {
           )}
 
           {activeSection === 'intelligence' && (
-            <VividCard title="Native Intelligence" subtitle="33.7M Sovereign Transformer Policy" gradientAccent="emerald">
+            <VividCard title="Native Intelligence" subtitle="Native Intelligence Runtime Policy" gradientAccent="emerald">
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                   <span className="text-[var(--app-text-secondary)]">Active Native Model</span>
-                  <span className="font-mono font-bold text-[var(--app-text-primary)]">ZYNTHEOR Q+ 33.9M (READ-ONLY)</span>
+                  <span className="font-mono font-bold text-[var(--app-text-primary)]">231,168 checkpoint payload values · Cloud load not confirmed</span>
                 </div>
                 <div className="flex justify-between p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                   <span className="text-[var(--app-text-secondary)]">Full-Model Training Status</span>
@@ -237,7 +237,7 @@ export const UserSettings: React.FC = () => {
           )}
 
           {activeSection === 'memory' && (
-            <VividCard title="Data Sovereignty & Memory" subtitle="Retention, Backup & Local Data Deletion" gradientAccent="emerald">
+            <VividCard title="Data Sovereignty & Memory" subtitle="Retention, Backup & Governed Data Deletion" gradientAccent="emerald">
               <div className="space-y-4 text-xs">
                 <div>
                   <label className="block text-[var(--app-text-secondary)] font-bold mb-1">Episodic Memory Retention</label>
@@ -249,7 +249,7 @@ export const UserSettings: React.FC = () => {
                     }}
                     className="w-full px-3.5 py-2 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                   >
-                    <option value="infinite">Infinite (Local Sovereign Disk)</option>
+                    <option value="infinite">Managed retention policy</option>
                     <option value="90d">90 Days Rolling</option>
                     <option value="30d">30 Days Rolling</option>
                   </select>
@@ -274,7 +274,7 @@ export const UserSettings: React.FC = () => {
             >
               <div className="space-y-2.5 text-xs">
                 {[
-                  { key: 'nativeInference', label: 'Native Neural Inference (33.7M)' },
+                  { key: 'nativeInference', label: 'Native Neural Inference (Cloud Runtime)' },
                   { key: 'modelTraining', label: 'Model Laboratory Training' },
                   { key: 'sandboxExec', label: 'DevStudio Sandbox Execution' },
                   { key: 'auditExport', label: 'Audit Ledger & Provenance Export' }

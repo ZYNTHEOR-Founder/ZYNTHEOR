@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark"><img src="/assets/zyntheor-icon.svg" alt="ZYNTHEOR" /></div>
-          <div><strong>ZYNTHEOR</strong><small>Intelligence first</small></div>
+          <div><strong>ZYNTHEOR</strong><small>VIVID INTELLIGENCE</small></div>
         </div>
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
           {groups.map((group) => (

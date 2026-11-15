@@ -6,3 +6,18 @@ coverage/
 *.log
 .env*
 !.env.example
+native_data/
+*.pt
+*.pth
+
+# Model checkpoints
+native_data/
+*.pt
+*.pth
+*.bin
+
+# Large model files
+native_data/**/*.pt
+native_data/**/*.pth
+*.pt
+*.pth

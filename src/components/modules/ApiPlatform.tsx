@@ -36,7 +36,7 @@ export const ApiPlatform: React.FC = () => {
   -d '{"prompt": "Analyze Thai & English semantic alignment with reasoning chain", "max_tokens": 128}'`,
     node: `import fetch from 'node-fetch';
 
-// Call Native 33.7M Neural Model with Reasoning Chain
+// Call Native Cloud Runtime with evidence-backed generation
 const response = await fetch('https://your-domain/api/inference/generate', {
   method: 'POST',
   headers: {

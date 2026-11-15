@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(
-    async (requestedRole: AuthRole = 'Administrator', opts?: { userId?: string; tenantId?: string }) => {
+    async (requestedRole: AuthRole = 'User', opts?: { userId?: string; tenantId?: string }) => {
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         const sess: AuthSession = {
           userId: data.session.userId,
-          email: `${data.session.userId}@zyntheor.local`,
+          email: '',
           tenantId: data.session.tenantId,
           authenticatedAt: data.session.authenticatedAt,
           sovereignRole: data.session.sovereignRole,
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (data.success && data.session && !cancelled) {
               const sess: AuthSession = {
                 userId: data.session.userId,
-                email: `${data.session.userId}@zyntheor.local`,
+                email: '',
                 tenantId: data.session.tenantId,
                 authenticatedAt: new Date((data.session.iat || 0) * 1000).toISOString(),
                 sovereignRole: data.session.sovereignRole,
@@ -148,9 +148,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           /* fall through to login */
         }
       }
-      // Fresh login as Administrator for local-first operator UX (server still issues real token)
+      // Never bootstrap a privileged identity. A user must complete an explicit
+      // sign-in flow before the application receives an authenticated session.
       if (!cancelled) {
-        await login('Administrator');
+        logout();
         setAuthReady(true);
       }
     })();

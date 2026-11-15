@@ -1,5 +1,6 @@
 /**
  * ZYNTHEOR Sovereign Client-Side Audit Ledger
+ * Client-Side Audit Cache (Non-Authoritative): server AuditLedger remains the authority.
  * Universal browser/runtime immutable append-only event stream with SHA-256 chained hashing.
  * 
  * Adheres strictly to Zero-Fake Engineering & Sovereign Governance standards:
@@ -209,7 +210,7 @@ class AuditLedgerStore {
       system: 'ZYNTHEOR Q+ Sovereign AI Client Engine',
       constitution: 'Zero-Fake Immutable Audit Trail',
       hashAlgorithm: 'SHA-256',
-      airgapped: true
+      authority: 'CLIENT_CACHE_NON_AUTHORITATIVE'
     });
     const payloadStr = JSON.stringify(payload);
     const payload_digest = sha256Sync(payloadStr);

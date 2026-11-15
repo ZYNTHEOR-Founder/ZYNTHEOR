@@ -460,7 +460,7 @@ export const GovernanceSecurity: React.FC = () => {
               <span className="text-[11px] font-bold text-[var(--app-accent)] ">
                 {lang === 'th' ? 'การพิสูจน์ความสมบูรณ์ของภาษาและการแปลงโทเค็น' : 'Bilingual Tokenization & Semantic Integrity'}
               </span>
-              <StatusBadge status={languageSuiteResult?.verified ? 'VERIFIED' : 'PARTIAL'} />
+              <StatusBadge status={languageSuiteResult?.verified && Array.isArray(languageSuiteResult?.results) && languageSuiteResult.results.length > 0 ? 'VERIFIED' : languageSuiteResult ? 'PARTIAL' : 'UNVERIFIED'} />
             </div>
             <h2 className="text-xl font-bold text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)] mt-1">
               {lang === 'th'
@@ -469,8 +469,8 @@ export const GovernanceSecurity: React.FC = () => {
             </h2>
             <p className="text-xs text-[var(--app-text-secondary)] dark:text-[var(--app-text-secondary)] mt-1 max-w-3xl leading-relaxed">
               {lang === 'th'
-                ? 'ทดสอบความสามารถของ Native Model ในการประมวลผล แปลงเป็นโทเค็น และแปลงกลับ (Encode & Detokenize) ข้อความภาษาไทย อังกฤษ และการสลับภาษา (Code-Switching) โดยไม่มีการสูญเสียความหมาย และไม่มีโทเค็นที่ไม่รู้จัก ([UNK] = 0)'
-                : "Verifies the Native Model's ability to tokenize and detokenize Thai, English, and code-switching scripts with 100% round-trip fidelity, full vowel/tone mark preservation, and zero unknown tokens ([UNK] = 0)."}
+                ? 'แสดงผลจากชุดทดสอบภาษาเมื่อมีการรันจริง โดยไม่กำหนดคะแนนหรืออ้างผลล่วงหน้า'
+                : "Displays the result returned by the language-integrity runner. No score is assumed before a real test run."}
             </p>
           </div>
 
@@ -479,10 +479,10 @@ export const GovernanceSecurity: React.FC = () => {
               <Languages className="w-6 h-6 text-[var(--app-accent)] shrink-0" />
               <div>
                 <div className="text-xs font-bold text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)]">
-                  {languageSuiteResult.passed_tests} / {languageSuiteResult.total_tests} {lang === 'th' ? 'การทดสอบผ่านฉลุย' : 'Script Proofs Passed'}
+                  {Number(languageSuiteResult.passed_tests ?? 0)} / {Number(languageSuiteResult.total_tests ?? 0)} {lang === 'th' ? 'การทดสอบผ่าน' : 'Tests passed'}
                 </div>
                 <div className="text-[10px] text-[var(--z-ok)] dark:text-[var(--z-ok)] font-mono font-bold">
-                  100% ROUNDTRIP FIDELITY
+                  {languageSuiteResult.verified ? 'RUNNER REPORTED VERIFIED' : 'RESULT NOT VERIFIED'}
                 </div>
               </div>
             </div>
@@ -498,7 +498,7 @@ export const GovernanceSecurity: React.FC = () => {
                 <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)]" />
               </div>
               <div className="text-xs font-bold text-[var(--z-ok)] font-mono">
-                100.0% EXACT
+                {(Array.isArray(languageSuiteResult.results) ? languageSuiteResult.results : []).filter((item: any) => item.roundtrip_exact === true).length} EXACT
               </div>
               <div className="text-[10px] text-[var(--app-text-secondary)] font-mono">
                 decode(encode(text)) === text
@@ -511,10 +511,10 @@ export const GovernanceSecurity: React.FC = () => {
                 <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)]" />
               </div>
               <div className="text-xs font-bold text-[var(--z-ok)] font-mono">
-                0 UNK (0.00% LOSS)
+                {(Array.isArray(languageSuiteResult.results) ? languageSuiteResult.results : []).reduce((sum: number, item: any) => sum + Number(item.unk_count ?? 0), 0)} UNK
               </div>
               <div className="text-[10px] text-[var(--app-text-secondary)] font-mono">
-                Zero character truncation
+                Count reported by the test runner
               </div>
             </div>
 
@@ -524,7 +524,7 @@ export const GovernanceSecurity: React.FC = () => {
                 <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)]" />
               </div>
               <div className="text-xs font-bold text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)] font-mono">
-                16,384 SUBWORDS
+                {languageSuiteResult.vocabulary_size?.toLocaleString?.() || '—'} VOCAB
               </div>
               <div className="text-[10px] text-[var(--app-text-secondary)] font-mono">
                 Thai Unicode U+0E01-0E5B
@@ -537,10 +537,10 @@ export const GovernanceSecurity: React.FC = () => {
                 <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)]" />
               </div>
               <div className="text-xs font-bold text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)] font-mono">
-                &lt; 0.50 ms
+                {typeof languageSuiteResult.avg_latency_ms === 'number' ? `${languageSuiteResult.avg_latency_ms.toFixed(2)} ms` : '—'}
               </div>
               <div className="text-[10px] text-[var(--z-ok)] font-mono">
-                In-Memory Subword Trie
+                Measured runner latency
               </div>
             </div>
           </div>
@@ -562,58 +562,7 @@ export const GovernanceSecurity: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)] dark:divide-[var(--app-card-border)] font-sans">
-              {(languageSuiteResult?.results || [
-                {
-                  test_id: 'LANG-01',
-                  name: 'Thai Pure Script Tokenization & Detokenization',
-                  sample: 'ปัญญาประดิษฐ์สถาปัตยกรรม Sovereign Transformer ทำงานแบบออฟไลน์ 100%',
-                  token_count: 52,
-                  unk_count: 0,
-                  roundtrip_exact: true,
-                  status: 'PASS',
-                  duration_ms: 0.27
-                },
-                {
-                  test_id: 'LANG-02',
-                  name: 'English Technical Script & Architecture Tokenization',
-                  sample: 'Native Neural LM with 33.7M parameters and SHA-256 chained audit ledger.',
-                  token_count: 103,
-                  unk_count: 0,
-                  roundtrip_exact: true,
-                  status: 'PASS',
-                  duration_ms: 0.45
-                },
-                {
-                  test_id: 'LANG-03',
-                  name: 'Thai-English Code-Switching & Dual Vocabulary',
-                  sample: 'สร้างฟังก์ชัน HMAC-SHA256 Token Validator พร้อม timingSafeEqual ใน sandbox',
-                  token_count: 96,
-                  unk_count: 0,
-                  roundtrip_exact: true,
-                  status: 'PASS',
-                  duration_ms: 0.44
-                },
-                {
-                  test_id: 'LANG-04',
-                  name: 'Thai Complex Vowels, Tone Marks & Unicode Orthography',
-                  sample: 'ผู้เชี่ยวชาญ ค้นคว้า ปัญหาการจัดเก็บข้อมูล ความจำระยะยาว กฎเกณฑ์สถิติ',
-                  token_count: 61,
-                  unk_count: 0,
-                  roundtrip_exact: true,
-                  status: 'PASS',
-                  duration_ms: 0.27
-                },
-                {
-                  test_id: 'LANG-05',
-                  name: 'Zero UNK Token Guarantee Across Bilingual Corpi',
-                  sample: 'ระบบ ZYNTHEOR ประมวลผลคำสั่งภาษาไทยและอังกฤษได้อย่างราบรื่น ไม่สูญเสียความหมาย',
-                  token_count: 65,
-                  unk_count: 0,
-                  roundtrip_exact: true,
-                  status: 'PASS',
-                  duration_ms: 0.29
-                }
-              ]).map((t: any) => (
+              {(Array.isArray(languageSuiteResult?.results) ? languageSuiteResult.results : []).map((t: any) => (
                 <tr key={t.test_id} className="hover:bg-[color-mix(in_srgb,var(--app-surface-elevated)_80%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--app-surface)_50%,transparent)] transition-colors">
                   <td className="py-2.5 px-3 font-mono font-bold text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)]">
                     {t.test_id}
@@ -631,18 +580,21 @@ export const GovernanceSecurity: React.FC = () => {
                     {t.unk_count}
                   </td>
                   <td className="py-2.5 px-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[var(--z-ok)] dark:bg-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] text-[var(--z-ok)] dark:text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_20%,transparent)]">
-                      100% EXACT
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[color-mix(in_srgb,var(--app-amber)_10%,transparent)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)]">
+                      {t.roundtrip_exact === true ? 'EXACT' : t.roundtrip_exact === false ? 'MISMATCH' : 'NOT REPORTED'}
                     </span>
                   </td>
                   <td className="py-2.5 px-3">
-                    <StatusBadge status={t.status === 'PASS' ? 'VERIFIED' : 'BLOCKED'} />
+                    <StatusBadge status={t.status === 'PASS' && t.roundtrip_exact === true ? 'VERIFIED' : t.status === 'FAIL' ? 'BLOCKED' : 'UNVERIFIED'} />
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-[11px] text-[var(--app-text-secondary)]">
-                    {t.duration_ms}ms
+                    {typeof t.duration_ms === 'number' ? `${t.duration_ms}ms` : '—'}
                   </td>
                 </tr>
               ))}
+              {(!Array.isArray(languageSuiteResult?.results) || languageSuiteResult.results.length === 0) && (
+                <tr><td colSpan={8} className="py-6 text-center text-xs text-[var(--app-text-secondary)]">{lang === 'th' ? 'ยังไม่มีผลการทดสอบที่ตรวจสอบได้' : 'No recorded language test results yet.'}</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -667,9 +619,9 @@ export const GovernanceSecurity: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold text-[var(--app-accent)] ">
-                {lang === 'th' ? 'การจัดเก็บความจำถาวรข้ามเซสชัน' : 'Cross-Session Episodic Persistence'}
+                {lang === 'th' ? 'สถานะคลังความจำที่อ่านได้' : 'Episodic memory store status'}
               </span>
-              <StatusBadge status="VERIFIED" />
+              <StatusBadge status={memoryStats ? 'PARTIAL' : 'UNVERIFIED'} />
             </div>
             <h2 className="text-xl font-bold text-[var(--app-text-primary)] mt-1">{t('mem.title')}</h2>
             <p className="text-xs text-[var(--app-text-secondary)] mt-1 max-w-3xl leading-relaxed">
@@ -961,7 +913,7 @@ export const GovernanceSecurity: React.FC = () => {
                     {t.simulatedBehavior}
                   </td>
                   <td className="py-2.5 px-3">
-                    <StatusBadge status={t.status === 'PASS' ? 'VERIFIED' : 'BLOCKED'} />
+                    <StatusBadge status={t.status === 'PASS' && t.roundtrip_exact === true ? 'VERIFIED' : t.status === 'FAIL' ? 'BLOCKED' : 'UNVERIFIED'} />
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-[11px] text-[var(--app-text-primary)]">
                     {t.evidence}

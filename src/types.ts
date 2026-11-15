@@ -20,7 +20,7 @@ export type ModuleId =
   | 'user_settings'
   | 'admin_console';
 
-export type StatusLevel = 'IMPLEMENTED' | 'VERIFIED' | 'PARTIAL' | 'BLOCKED' | 'NOT IMPLEMENTED';
+export type StatusLevel = 'IMPLEMENTED' | 'VERIFIED' | 'PARTIAL' | 'BLOCKED' | 'UNVERIFIED' | 'NOT IMPLEMENTED';
 
 export interface Citation {
   docTitle: string;
@@ -76,8 +76,13 @@ export interface SystemStatusData {
     name: string;
     architecture: string;
     totalParams: number;
+    activeParams: number;
+    targetParams?: number | null;
     checkpointHash: string;
     weightsLoaded: boolean;
+    inferenceReady: boolean;
+    runtimeState: string;
+    readinessReason?: string;
   };
   audit: {
     totalRecords: number;

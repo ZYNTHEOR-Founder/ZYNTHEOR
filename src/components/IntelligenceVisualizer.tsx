@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { VividCard } from './ui/VividCard';
-import { StatusBadge } from './ui/StatusBadge';
 import { useLanguage } from '../context/LanguageContext';
 import {
   Brain,
@@ -25,10 +24,10 @@ interface IntelligenceVisualizerProps {
 }
 
 export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
-  weightsLoaded = true,
-  totalParams = 33958400,
-  tokensPerSec = 42500,
-  checkpointHash = '7f88088ef2b13344...',
+  weightsLoaded = false,
+  totalParams = 0,
+  tokensPerSec = 0,
+  checkpointHash = '',
   onNavigate
 }) => {
   const { lang, formatNumber } = useLanguage();
@@ -54,11 +53,11 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
 
   return (
     <VividCard
-      title={lang === 'th' ? 'การแสดงผลการประมวลผลสมองประสาทเทียมสด (Live Neural Engine)' : 'Real-Time Native Intelligence Visualizer'}
+      title={lang === 'th' ? 'การแสดงผลการประมวลผลสมองประสาทเทียมสด (Live Neural Engine)' : 'Native Architecture Illustration'}
       subtitle={
         lang === 'th'
-          ? 'แสดงโครงข่าย 10 Transformer Layers, 8 Attention Heads, มิติเวกเตอร์ 512 มิติ และสถานะการประมวลผลจริง'
-          : 'Interactive 10-layer transformer architecture, 8 attention heads, 512-dim embedding flow, and live inference state.'
+          ? 'ภาพประกอบสเปกเป้าหมาย 10 ชั้น, 8 หัว attention และมิติ 512 — ไม่ใช่ trace การอนุมานสด'
+          : 'Illustration of the 10-layer target specification, 8 attention heads and 512-dimensional width; this is not a live inference trace.'
       }
       gradientAccent="cyan"
       className="!p-6"
@@ -75,7 +74,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               10L · 8H · 512D
             </div>
             <div className="text-[10px] text-[var(--z-ok)] font-bold mt-0.5">
-              33.7M Native Float32
+              {formatNumber(totalParams)} active params
             </div>
           </div>
 
@@ -85,10 +84,10 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               <span>{lang === 'th' ? 'ความเร็วประมวลผล' : 'Token Throughput'}</span>
             </div>
             <div className="text-sm font-extrabold text-[var(--app-text-primary)] mt-1 font-mono">
-              {formatNumber(tokensPerSec)} t/s
+              {tokensPerSec > 0 ? `${formatNumber(tokensPerSec)} t/s` : '—'}
             </div>
             <div className="text-[10px] text-[var(--app-accent)] font-bold mt-0.5">
-              Peak Local Speed
+              Measured runtime throughput
             </div>
           </div>
 
@@ -101,7 +100,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               16,384 Subwords
             </div>
             <div className="text-[10px] text-[var(--app-accent)] font-bold mt-0.5">
-              Thai & English 0% UNK
+              Tokenizer evaluation pending
             </div>
           </div>
 
@@ -111,10 +110,10 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               <span>{lang === 'th' ? 'การรันแบบเอกเทศ' : 'Sovereignty'}</span>
             </div>
             <div className="text-sm font-extrabold text-[var(--z-ok)] mt-1 font-mono">
-              100% AIR-GAPPED
+              CLOUD RUNTIME
             </div>
             <div className="text-[10px] text-[var(--z-ok)] font-bold mt-0.5">
-              Zero Cloud APIs
+              Online checkpoint verification required
             </div>
           </div>
         </div>
@@ -129,7 +128,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               </span>
             </div>
             <span className="px-2 py-0.5 rounded-full bg-[color-mix(in_srgb,var(--app-accent)_80%,transparent)] text-[var(--app-accent)] text-[10px] font-mono border border-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-bold">
-              WEIGHTS_SYNCHRONIZED
+              {weightsLoaded ? 'CHECKPOINT LOADED' : 'TARGET SPECIFICATION'}
             </span>
           </div>
 
@@ -250,10 +249,10 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
           <div className="mt-3 pt-3 border-t border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono">
             <div className="flex items-center gap-2 text-[var(--app-text-secondary)]">
               <span className="w-2 h-2 rounded-full bg-[var(--z-ok)] animate-ping" />
-              <span>Forward Pass: <span className="text-[var(--z-ok)] font-bold">ACTIVE DETERMINISTIC</span></span>
+              <span>Illustration: <span className="text-[var(--app-text-secondary)] font-bold">NOT LIVE INFERENCE</span></span>
             </div>
             <div className="text-[var(--app-text-secondary)]">
-              Checkpoint SHA-256: <span className="text-[var(--app-accent)]">{checkpointHash.slice(0, 16)}...</span>
+              Checkpoint SHA-256: <span className="text-[var(--app-accent)]">{checkpointHash ? `${checkpointHash.slice(0, 16)}…` : 'not loaded'}</span>
             </div>
             <div className="text-[var(--app-text-secondary)]">
               Rotary Embeddings: <span className="text-[var(--app-accent)] font-bold">RoPE + SwiGLU</span>

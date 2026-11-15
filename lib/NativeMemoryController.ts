@@ -72,8 +72,8 @@ export class NativeMemoryController {
       version: '1.0.0-SOVEREIGN',
       lastPersisted: new Date().toISOString(),
       verified_knowledge: {
-        architecture: 'ZYNTHEOR Q+ Sovereign 33.7M Parameter Transformer',
-        sovereignty_rule: '100% Native neural inference with zero third-party cloud APIs',
+        architecture: 'ZYNTHEOR Native Core; active checkpoint size must be read from verified Cloud Runtime evidence',
+        sovereignty_rule: 'Native model is the intelligence core; runtime readiness requires a verified Cloud checkpoint and recorded evidence',
         sandbox_root: '/workspace',
         multilingual_engine: 'Thai-English Dual Native Vocabulary & Code-Switching'
       },

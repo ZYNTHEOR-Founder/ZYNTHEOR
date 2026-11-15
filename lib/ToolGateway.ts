@@ -1,6 +1,7 @@
 /**
  * ZYNTHEOR Sovereign ToolGateway
- * Isolated Execution Gateway with strict Sandbox Isolation, Whitelisting, and Path Traversal Defense.
+ * Workspace-scoped command gateway with command allowlisting and path traversal defenses.
+ * Note: cwd/path controls are not an OS-level sandbox; deploy behind a dedicated isolated runner.
  * All operations logged to AuditLedger.
  */
 
@@ -39,7 +40,7 @@ export interface TamperVerificationResult {
 export class ToolGateway {
   private static workspaceRoot = path.resolve(process.cwd(), 'workspace');
   private static allowedCommands = new Set([
-    'node', 'python3', 'ls', 'cat', 'head', 'pwd', 'echo', 'mkdir', 'rm', 'find'
+    'node', 'python3', 'ls', 'cat', 'head', 'pwd', 'echo', 'mkdir', 'find'
   ]);
   private static executionTimeoutMs = 5000;
 
@@ -162,12 +163,16 @@ export class ToolGateway {
   }
 
   /**
-   * Executes a command strictly in /workspace with whitelist validation and 5s timeout.
+   * Executes an allowlisted command with workspace cwd and a 5s timeout. This is not OS isolation.
    */
   public static async runCommand(command: string, args: string[] = []): Promise<CommandResult> {
     if (!this.allowedCommands.has(command)) {
       AuditLedger.append('TESTER', 'COMMAND_REJECTED_WHITELIST', { command, args });
       throw new Error(`SECURITY_VIOLATION: Command '${command}' is not in the sandbox whitelist (${Array.from(this.allowedCommands).join(', ')}).`);
+    }
+
+    if (!Array.isArray(args) || args.length > 64 || args.some((arg) => typeof arg !== 'string' || arg.length > 4096)) {
+      throw new Error('SECURITY_VIOLATION: Command arguments must be an array of at most 64 strings, each no longer than 4096 characters.');
     }
 
     const cwd = this.getWorkspaceRoot();
@@ -181,10 +186,22 @@ export class ToolGateway {
           cwd,
           timeout: this.executionTimeoutMs,
           maxBuffer: 1024 * 1024,
+          // Do not pass server credentials or arbitrary runtime options to generated code.
           env: {
-            ...process.env,
+            PATH: process.env.PATH || '',
+            HOME: process.env.HOME || cwd,
+            TMPDIR: process.env.TMPDIR || process.env.TMP || '/tmp',
+            TEMP: process.env.TEMP || process.env.TMP || '/tmp',
+            TMP: process.env.TMP || process.env.TEMP || '/tmp',
+            SystemRoot: process.env.SystemRoot || '',
+            WINDIR: process.env.WINDIR || '',
+            LANG: process.env.LANG || 'C.UTF-8',
+            LC_ALL: process.env.LC_ALL || '',
+            TZ: process.env.TZ || 'UTC',
+            NODE_ENV: process.env.NODE_ENV || 'production',
             NODE_PATH: cwd,
-            PYTHONPATH: cwd
+            PYTHONPATH: cwd,
+            CI: '1'
           }
         },
         (error, stdout, stderr) => {

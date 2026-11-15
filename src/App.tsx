@@ -145,7 +145,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
 export default function App() {
   const { t, lang } = useLanguage();
   const { role, session } = useAuth();
-  const [activeModule, setActiveModule] = useState<ModuleId>('conversational_intelligence');
+  const [activeModule, setActiveModule] = useState<ModuleId>('command_center');
   const [statusData, setStatusData] = useState<SystemStatusData | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -860,7 +860,7 @@ export default function App() {
                     {lang === 'th' ? 'สั่งการประมวลผล Native Intelligence' : 'Dispatch Native Intelligence Engine'}
                   </h3>
                   <p className="text-[11px]" style={{ color: 'var(--app-text-secondary)' }}>
-                    {lang === 'th' ? 'โมเดล 33.7M พร้อมการคิดแบบลูกโซ่และการทำงานใน Sandbox' : '33.7M Neural Reasoning & Sandboxed Tool Synthesis'}
+                    {lang === 'th' ? 'Native Cloud Runtime พร้อมระบบวางแผน สร้าง และตรวจสอบงาน' : 'Native Cloud Runtime for planning, creation, execution and verification'}
                   </p>
                 </div>
               </div>

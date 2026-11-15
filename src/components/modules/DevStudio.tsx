@@ -945,7 +945,7 @@ export const DevStudio: React.FC = () => {
               <div className="p-2.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
                 <div className="flex items-center justify-between font-bold text-[var(--app-text-primary)]">
                   <span>Model Topology</span>
-                  <span className="text-[var(--app-accent)] font-mono">33.7M</span>
+                  <span className="text-[var(--app-accent)] font-mono">41.5M TARGET</span>
                 </div>
                 <div className="text-[11px] text-[var(--app-text-secondary)]">
                   10 Layers · 8 Heads · 512D · SwiGLU
@@ -958,17 +958,17 @@ export const DevStudio: React.FC = () => {
                   <span className="text-[var(--app-amber)] font-mono text-[10px] font-bold">PARTIAL</span>
                 </div>
                 <div className="text-[11px] text-[var(--app-text-secondary)]">
-                  Seed descriptor verified. No fake padding.
+                  Seed descriptor only; not a loadable tensor checkpoint.
                 </div>
               </div>
 
               <div className="p-2.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
                 <div className="flex items-center justify-between font-bold text-[var(--app-text-primary)]">
                   <span>Autograd Subgraph</span>
-                  <span className="text-[var(--app-accent)] font-mono text-[10px] font-bold">VERIFIED</span>
+                  <span className="text-[var(--app-amber)] font-mono text-[10px] font-bold">IMPLEMENTED</span>
                 </div>
                 <div className="text-[11px] text-[var(--app-text-secondary)]">
-                  Exact numerical gradients confirmed
+                  Gradient implementation is present; full numerical-gradient regression evidence is pending
                 </div>
               </div>
             </div>

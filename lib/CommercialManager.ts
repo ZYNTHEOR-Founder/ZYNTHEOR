@@ -45,14 +45,14 @@ export interface CommercialMetrics {
 export class CommercialManager {
   private static instance: CommercialManager | null = null;
 
-  private currentPhase: LaunchPhase = 'COMMERCIAL_LAUNCH';
+  private currentPhase: LaunchPhase = 'PRIVATE_BETA';
   private activeTenantId = 'tenant_sovereign_prime';
   private activePlanId = 'tier_pro';
 
-  private tasksCompleted = 142;
-  private tasksFailed = 3;
-  private totalTokens = 428900;
-  private simulatedRevenue = 4990.00;
+  private tasksCompleted = 0;
+  private tasksFailed = 0;
+  private totalTokens = 0;
+  private simulatedRevenue = 0;
 
   public static readonly PLANS: CommercialPlan[] = [
     {
@@ -65,7 +65,7 @@ export class CommercialManager {
       slaTarget: 'Best Effort',
       features: [
         'Single-tenant Sandbox (/workspace)',
-        '33.7M Native Neural Model',
+        'Native Intelligence Runtime',
         'SHA-256 Audit Ledger',
         'Standard Tokenizer'
       ]
@@ -124,7 +124,7 @@ export class CommercialManager {
       plan: this.activePlanId,
       success,
       tokensProcessed: tokens,
-      cloudCostUsd: 0.00
+      cloudCostUsd: null
     });
   }
 
@@ -140,14 +140,14 @@ export class CommercialManager {
 
   public getMetrics(): CommercialMetrics {
     const totalTasks = this.tasksCompleted + this.tasksFailed;
-    const rate = totalTasks > 0 ? (this.tasksCompleted / totalTasks) * 100 : 100;
+    const rate = totalTasks > 0 ? (this.tasksCompleted / totalTasks) * 100 : 0;
     
     // Cloud API cost is strictly 0 because 100% sovereign
     const cloudApiCostUsd = 0.00;
     // Native compute cost: approximate $0.000002 per token equivalent
     const nativeComputeCostUsd = +(this.totalTokens * 0.000002).toFixed(4);
     const revenue = this.simulatedRevenue;
-    const grossMargin = revenue > 0 ? +(((revenue - nativeComputeCostUsd) / revenue) * 100).toFixed(2) : 100;
+    const grossMargin = revenue > 0 ? +(((revenue - nativeComputeCostUsd) / revenue) * 100).toFixed(2) : 0;
 
     return {
       currentPhase: this.currentPhase,
@@ -163,32 +163,32 @@ export class CommercialManager {
       grossMarginPct: grossMargin,
       readinessChecklist: {
         product: {
-          passed: true,
-          evidence: `Task completion rate is ${rate.toFixed(1)}% across ${totalTasks} real-world workloads.`
+          passed: false,
+          evidence: totalTasks > 0 ? `Measured ${totalTasks} recorded workloads; release threshold is not yet certified.` : 'No benchmark-backed workload records are available yet.'
         },
         usability: {
-          passed: true,
-          evidence: '3-Column Cockpit layout with one-click dispatch, interactive review trace, and live terminal.'
+          passed: false,
+          evidence: 'Creation Studio workflows require end-to-end verification before usability is certified.'
         },
         nativeAi: {
-          passed: true,
-          evidence: '33.7M Native Transformer checkpoint loaded from native_data/model_checkpoint.pt with SHA-256 seal.'
+          passed: false,
+          evidence: 'Native cloud checkpoint and decoder readiness have not been certified by this commercial readiness check.'
         },
         security: {
-          passed: true,
-          evidence: 'Strict ToolGateway path traversal defense and 5000ms timeout sandbox in /workspace.'
+          passed: false,
+          evidence: 'Security release evidence has not been attached to this readiness checklist.'
         },
         reliability: {
-          passed: true,
-          evidence: 'Fail-closed architecture with SHA-256 chained audit ledger and instant recovery.'
+          passed: false,
+          evidence: 'Reliability and recovery thresholds have not yet been proven by the current release test suite.'
         },
         business: {
-          passed: true,
-          evidence: `Zero 3rd-party API cost ($0.00) yields ${grossMargin}% gross margin with multi-tier billing.`
+          passed: false,
+          evidence: 'Revenue, infrastructure costs, and margin have not yet been measured from live tenant billing.'
         },
         support: {
-          passed: true,
-          evidence: 'Integrated diagnostics console, real-time error telemetry, and verification test harness.'
+          passed: false,
+          evidence: 'Support readiness has not yet been assessed against a production service workflow.'
         }
       }
     };

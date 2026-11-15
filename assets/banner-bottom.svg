@@ -1,41 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="220" viewBox="0 0 1200 220" role="img" aria-labelledby="title desc">
-  <title id="title">Intelligence Without Boundaries</title>
-  <desc id="desc">A luminous emerald and violet horizon with drifting particles and a softly pulsing neural constellation.</desc>
+  <title id="title">ZYNTHEOR Rainbow Horizon</title>
+  <desc id="desc">A flowing six-color light horizon with moving particles and a luminous constellation.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080b17"/><stop offset=".55" stop-color="#10152a"/><stop offset="1" stop-color="#071713"/></linearGradient>
-    <linearGradient id="horizon" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00e99b" stop-opacity="0"/><stop offset=".5" stop-color="#00e99b" stop-opacity=".74"/><stop offset="1" stop-color="#b080ff" stop-opacity="0"/></linearGradient>
-    <linearGradient id="text" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#c4ffe9"/><stop offset=".52" stop-color="#fff"/><stop offset="1" stop-color="#d2baff"/></linearGradient>
-    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <filter id="blur" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="18"/></filter>
-    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#b6ffe7" stroke-opacity=".045"/></pattern>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#070B19"/><stop offset=".5" stop-color="#10152D"/><stop offset="1" stop-color="#071C29"/></linearGradient>
+    <linearGradient id="spectrum"><stop stop-color="#00F0FF"/><stop offset=".2" stop-color="#397BFF"/><stop offset=".4" stop-color="#7B2CBF"/><stop offset=".6" stop-color="#FF007F"/><stop offset=".8" stop-color="#FF5E3A"/><stop offset="1" stop-color="#CCFF00"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#c5d3ff" stroke-opacity=".05"/></pattern>
   </defs>
   <style>
-    .glow{animation:glow 3.4s ease-in-out infinite alternate}.drift{animation:drift 9s ease-in-out infinite alternate}.spin{transform-box:fill-box;transform-origin:center;animation:spin 30s linear infinite}.spark{animation:spark 2.3s ease-in-out infinite alternate}
-    @keyframes glow{from{opacity:.38;transform:scale(.96)}to{opacity:.9;transform:scale(1.04)}}
-    @keyframes drift{from{transform:translateX(-14px)}to{transform:translateX(14px)}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes spark{from{opacity:.2}to{opacity:1}}
-    @media(prefers-reduced-motion:reduce){.glow,.drift,.spin,.spark{animation:none!important}}
+    .drift{animation:drift 10s ease-in-out infinite alternate}.rotate{transform-box:fill-box;transform-origin:center;animation:rotate 28s linear infinite}.spark{animation:spark 2s ease-in-out infinite alternate}
+    @keyframes drift{from{transform:translateX(-28px);opacity:.45}to{transform:translateX(28px);opacity:.9}}@keyframes rotate{to{transform:rotate(360deg)}}@keyframes spark{from{opacity:.15}to{opacity:1}}
+    @media(prefers-reduced-motion:reduce){.drift,.rotate,.spark{animation:none!important}}
   </style>
-  <rect width="1200" height="220" rx="24" fill="url(#bg)"/>
-  <rect width="1200" height="220" rx="24" fill="url(#grid)"/>
-  <ellipse cx="600" cy="171" rx="500" ry="38" fill="url(#horizon)" filter="url(#blur)" class="drift"/>
-  <path d="M0 170Q180 134 335 169T645 163t300 1 255-19" fill="none" stroke="url(#horizon)" stroke-width="2" filter="url(#glow)"/>
-  <g class="spin" fill="none" stroke="#72ffd0" stroke-opacity=".34" stroke-width="1.2">
-    <path d="M432 83 500 113 565 76 633 112 701 78 768 111"/><path d="M500 113 522 151 600 130 678 151 701 78"/>
-    <circle cx="600" cy="112" r="74" stroke="#a78aff" stroke-opacity=".26"/><ellipse cx="600" cy="112" rx="124" ry="42" stroke="#62ffd0" stroke-opacity=".24"/>
-  </g>
-  <g fill="#bffff0" filter="url(#glow)">
-    <circle cx="432" cy="83" r="2.6" class="spark"/><circle cx="500" cy="113" r="2" class="spark"/><circle cx="565" cy="76" r="2.4" class="spark"/>
-    <circle cx="633" cy="112" r="2.2" class="spark"/><circle cx="701" cy="78" r="2.5" class="spark"/><circle cx="768" cy="111" r="2" class="spark"/>
-    <circle cx="522" cy="151" r="2" class="spark"/><circle cx="600" cy="130" r="3" class="glow"/><circle cx="678" cy="151" r="2" class="spark"/>
-    <circle cx="102" cy="59" r="1.5" class="spark"/><circle cx="1084" cy="58" r="1.5" class="spark"/><circle cx="170" cy="177" r="1.4" class="spark"/><circle cx="1030" cy="177" r="1.4" class="spark"/>
-  </g>
-  <circle cx="600" cy="112" r="18" fill="#00e99b" opacity=".25" filter="url(#glow)" class="glow"/>
-  <circle cx="600" cy="112" r="7" fill="#d4fff0" filter="url(#glow)" class="glow"/>
-  <g text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif">
-    <text x="600" y="52" fill="url(#text)" font-size="23" font-weight="700" letter-spacing="3">INTELLIGENCE WITHOUT BOUNDARIES</text>
-    <text x="600" y="202" fill="#b8d7ce" fill-opacity=".76" font-size="10" font-weight="600" letter-spacing="4">THAI · ENGLISH · VIVID INTELLIGENCE</text>
-  </g>
-  <rect x=".75" y=".75" width="1198.5" height="218.5" rx="23.25" fill="none" stroke="#7effd4" stroke-opacity=".24" stroke-width="1.5"/>
+  <rect width="1200" height="220" rx="24" fill="url(#bg)"/><rect width="1200" height="220" rx="24" fill="url(#grid)"/>
+  <ellipse cx="600" cy="148" rx="540" ry="37" fill="url(#spectrum)" opacity=".25" filter="url(#blur)" class="drift"/>
+  <path d="M-20 144Q140 72 294 135t306-5 300 4 320-25" fill="none" stroke="url(#spectrum)" stroke-width="2.4" opacity=".8" filter="url(#glow)" class="drift"/>
+  <path d="M-20 163Q140 92 294 153t306-4 300 3 320-20" fill="none" stroke="url(#spectrum)" stroke-width="1.1" opacity=".5" class="drift"/>
+  <g class="rotate" fill="none" stroke="url(#spectrum)" stroke-width="1.2" opacity=".55"><ellipse cx="600" cy="95" rx="110" ry="38"/><ellipse cx="600" cy="95" rx="66" ry="55" transform="rotate(52 600 95)"/><ellipse cx="600" cy="95" rx="66" ry="55" transform="rotate(-52 600 95)"/></g>
+  <g fill="#fff" filter="url(#glow)"><circle cx="600" cy="95" r="4"/><circle cx="490" cy="95" r="2" class="spark"/><circle cx="710" cy="95" r="2.3" class="spark"/><circle cx="547" cy="49" r="1.6" class="spark"/><circle cx="653" cy="141" r="1.7" class="spark"/></g>
+  <text x="600" y="40" text-anchor="middle" fill="#eaf0ff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="14" font-weight="800" letter-spacing="4">CREATE · EXECUTE · VERIFY · DELIVER</text>
+  <text x="600" y="203" text-anchor="middle" fill="#b9c8ed" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="9" font-weight="700" letter-spacing="4">ZYNTHEOR VIVID INTELLIGENCE</text>
+  <rect x=".75" y=".75" width="1198.5" height="218.5" rx="23.25" fill="none" stroke="url(#spectrum)" stroke-opacity=".38"/>
 </svg>

@@ -11,12 +11,11 @@ import {
   CheckCircle2,
   HelpCircle,
   Lightbulb,
-  ArrowRight,
-  Download
+  ArrowRight
 } from 'lucide-react';
 
 export const ResearchLab: React.FC = () => {
-  const [researchTopic, setResearchTopic] = useState('Subword Tokenizer Compression for 33.7M Models');
+  const [researchTopic, setResearchTopic] = useState('Thai-English tokenizer and sequence-model evaluation');
   const [activeTab, setActiveTab] = useState<'evidence' | 'graph' | 'report' | 'benchmarks'>('evidence');
   const [isRunningBenchmarks, setIsRunningBenchmarks] = useState(false);
   const [benchmarkResults, setBenchmarkResults] = useState<any[] | null>(null);
@@ -30,36 +29,34 @@ export const ResearchLab: React.FC = () => {
       title: 'Subword Tokenizer Roundtrip Consistency',
       evidence: 'Sovereign tokenizer encodes Thai + English 16k vocabulary; runtime roundtrip benchmark pending full corpus sweep.',
       source: 'qplus_native/tokenizer.py',
-      confidence: 85.0
+      confidence: 0
     },
     {
-      type: 'VERIFIED',
-      title: 'Local Latent Norm Invariant',
-      evidence: 'Latent embedding vector has bounded standard variance across sampled prompts.',
-      source: 'qplus_native/model.py:compute_embedding_projection',
-      confidence: 92.0
+      type: 'UNVERIFIED',
+      title: 'Native Forward-Pass Numerical Stability',
+      evidence: 'The active runtime numerical-stability benchmark has not been executed against a verified Cloud checkpoint.',
+      source: 'qplus_native/model.py · Cloud Runtime evaluation pending',
+      confidence: 0
     },
     {
       type: 'UNVERIFIED',
       title: 'Quantization to 4-bit INT4 without Perplexity Loss',
       evidence: 'Preliminary tensor truncation hypothesis suggests memory reduction on edge devices.',
       source: 'Literature Review / Hypothesis',
-      confidence: 62.0
+      confidence: 0
     },
     {
       type: 'HYPOTHESIS',
       title: 'Dynamic Multi-Head Pruning during Inference',
       evidence: 'Hypothesis that layers 7-9 can dynamically bypass attention heads on pure arithmetic queries.',
       source: 'Autonomous Research Engine',
-      confidence: 45.0
+      confidence: 0
     }
   ];
 
-  const verifiedAxiomsCount = evidenceItems.filter((i) => i.type === 'VERIFIED').length;
+  const verifiedAxiomsCount = 0;
   const hypothesesCount = evidenceItems.filter((i) => i.type === 'HYPOTHESIS' || i.type === 'UNVERIFIED').length;
-  const avgConfidence = (
-    evidenceItems.reduce((acc, i) => acc + i.confidence, 0) / evidenceItems.length
-  ).toFixed(1);
+  const avgConfidence = '—';
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
@@ -92,12 +89,12 @@ export const ResearchLab: React.FC = () => {
           <body style="font-family: sans-serif; padding: 24px;">
             <h2>ZYNTHEOR — Sovereign Intelligence Research Briefing</h2>
             <p><strong>Topic:</strong> ${researchTopic}</p>
-            <p><strong>Verified Axioms:</strong> ${verifiedAxiomsCount} | <strong>Hypotheses:</strong> ${hypothesesCount} | <strong>Mean Confidence:</strong> ${avgConfidence}%</p>
+            <p><strong>Verified Axioms:</strong> ${verifiedAxiomsCount} | <strong>Hypotheses:</strong> ${hypothesesCount} | <strong>Mean Confidence:</strong> ${avgConfidence === '—' ? 'not scored' : `${avgConfidence}%`}</p>
             <hr/>
             ${evidenceItems
               .map(
                 (item) =>
-                  `<div style="margin-bottom:12px;"><strong>[${item.type}] ${item.title}</strong> (${item.confidence}%)<br/><small>${item.source}</small><p>${item.evidence}</p></div>`
+                  `<div style="margin-bottom:12px;"><strong>[${item.type}] ${item.title}</strong> (${item.confidence > 0 ? `${item.confidence}%` : 'not scored'})<br/><small>${item.source}</small><p>${item.evidence}</p></div>`
               )
               .join('')}
           </body>
@@ -133,7 +130,7 @@ export const ResearchLab: React.FC = () => {
           <div className="w-full md:w-2/3">
             <h2 className="text-xl font-bold text-[var(--app-text-primary)]">Sovereign Intelligence Research Lab</h2>
             <p className="text-xs text-[var(--app-text-secondary)] mt-1">
-              Synthesizing autonomous neural research with strict mathematical verification boundaries.
+              Research workspace for evidence, hypotheses and reproducible runtime evaluations.
             </p>
             <div className="mt-3 flex gap-2">
               <input
@@ -154,7 +151,7 @@ export const ResearchLab: React.FC = () => {
             </div>
             {nativeInspect && (
               <div className="mt-2 text-[11px] font-mono text-[var(--z-ok)]">
-                Native Runtime: {nativeInspect.total_params?.toLocaleString() || '33,958,400'} params · Status: PARTIAL
+                Cloud Runtime checkpoint: {nativeInspect.total_params?.toLocaleString() || '—'} active parameters · Status: {nativeInspect.status || 'UNVERIFIED'}
               </div>
             )}
           </div>
@@ -246,7 +243,7 @@ export const ResearchLab: React.FC = () => {
                   )}
                 </div>
                 <span className="text-xs font-mono font-bold text-[var(--app-text-secondary)]">
-                  {item.confidence}% Match
+                  {item.confidence > 0 ? `${item.confidence}% Match` : 'Not scored'}
                 </span>
               </div>
 
@@ -266,36 +263,31 @@ export const ResearchLab: React.FC = () => {
           <div className="p-8 bg-[var(--app-surface)] rounded-xl text-center space-y-4">
             <Network className="w-16 h-16 text-[var(--app-accent)] mx-auto animate-pulse" />
             <div className="max-w-md mx-auto text-xs text-[var(--app-text-secondary)]">
-              <span className="text-[var(--app-accent)] font-bold">Evidence-Backed Retrieval Graph (PARTIAL)</span> — separate from learned weights in <code className="text-[var(--app-text-primary)] font-mono">native_data/model_checkpoint.pt</code>, with Grounding Enforcement & Abstention.
-              Zero ungrounded hallucinations permitted.
+              <span className="text-[var(--app-accent)] font-bold">Knowledge Retrieval Graph (IMPLEMENTED / evaluation pending)</span> — separate from learned model weights. Grounding coverage and abstention quality are not yet benchmarked.
             </div>
           </div>
         </VividCard>
       )}
 
       {activeTab === 'report' && (
-        <VividCard title="Executive Research Report" subtitle="Compiled by Autonomous Native Research Engine" headerAction={
-          <button className="flex items-center gap-1 text-xs font-semibold text-[var(--app-accent)]">
-            <Download className="w-3.5 h-3.5" /> Download PDF
-          </button>
-        }>
+        <VividCard title="Executive Research Report" subtitle="Evidence and hypotheses · not a certified capability report">
+          <p className="mb-3 text-xs text-[var(--app-text-secondary)]">No PDF export is offered here until a real report-generation endpoint exists.</p>
           <div className="space-y-4 text-xs text-[var(--app-text-primary)] leading-relaxed font-sans max-w-2xl">
             <h3 className="text-sm font-bold text-[var(--app-text-primary)]">Executive Summary</h3>
             <p>
-              The 33.7M Sovereign Transformer architecture demonstrates exceptional resilience across deterministic reasoning tasks.
-              Zero reliance on external APIs guarantees complete confidentiality and zero token leakage.
+              No domain benchmark report is currently certified by the active runtime. Architecture descriptions and hypotheses are kept separate from measured model capability.
             </p>
             <h3 className="text-sm font-bold text-[var(--app-text-primary)]">Empirical Verification</h3>
             <p>
-              All 8 validation benchmarks (Tokenizer roundtrip, Checkpoint SHA-256 seal, Local tensor isolation) passed with 100% adherence.
+              No end-to-end benchmark suite result is attached to this report. A claim becomes VERIFIED only when its test output, runtime identity, and checkpoint evidence are recorded.
             </p>
           </div>
         </VividCard>
       )}
       {activeTab === 'benchmarks' && (
         <VividCard
-          title="Sovereign Benchmarks (Thai / English Runtime)"
-          subtitle="Live execution against /api/verify/language-integrity"
+          title="Tokenizer & Runtime Benchmarks (Thai / English)"
+          subtitle="Recorded test results from /api/verify/language-integrity"
           gradientAccent="emerald"
         >
           <div className="space-y-4">

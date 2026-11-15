@@ -998,7 +998,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                         <td className="py-2.5 pr-4 text-[var(--app-text-primary)]">{p.summary}</td>
                         <td className="py-2.5 text-right">
                           <StatusDot
-                            status={p.status === 'PASS' || p.status === 'REPAIRED' ? 'VERIFIED' : p.status === 'SKIPPED' ? 'PARTIAL' : p.status}
+                            status={p.status === 'PASS' ? 'VERIFIED' : p.status === 'REPAIRED' ? 'IMPLEMENTED' : p.status === 'SKIPPED' ? 'PARTIAL' : p.status}
                             label={p.status}
                           />
                         </td>
@@ -1770,7 +1770,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-mono text-xs font-semibold text-[var(--app-text-primary)]">{gate.gateId}</span>
                         <StatusDot
-                          status={gate.status === 'IMPLEMENTED' ? 'VERIFIED' : (gate.status as any)}
+                          status={gate.status as any}
                           label={gate.status}
                         />
                       </div>
