@@ -1,2 +1,0 @@
-# Only needed for qplus_native/lm_v2.py, train_lm.py, eval_lm.py. The v1 runtime stays pure Python.
-numpy>=1.26
