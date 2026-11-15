@@ -1,5 +1,52 @@
 [
   {
+    "datasetId": "ds_1794771215250",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:33:35.250Z",
+    "sourceDocIds": [
+      "doc_1794771215248_61icy"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "0dc92a45e2d678d2f7f7185cc886efb3fbfe393ec45189f9d13dd5f2e9673d37",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
+    "datasetId": "ds_1794771215242",
+    "name": "Verified Human Technical Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-15T19:33:35.243Z",
+    "sourceDocIds": [
+      "doc_1794417361977_n0jiv",
+      "doc_1794417142794_rdczp",
+      "doc_1794398039736_umc9j",
+      "doc_1794398039735_aph6y",
+      "doc_1794398039734_igy57",
+      "doc_1794398039733_p78a9"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 4,
+    "valSamples": 1,
+    "evalSamples": 2,
+    "totalTokensEstimate": 579,
+    "thaiScriptRatio": 0.304,
+    "englishScriptRatio": 0.696,
+    "datasetHash": "e85c1bbfe5ccea9a7a8afa9d0bfde30e3f8e131f81a75be8356668d34483bfbd",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  {
     "datasetId": "ds_1794771075200",
     "name": "Contaminated Test Corpus",
     "version": "1.0.0",

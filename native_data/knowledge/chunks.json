@@ -168,5 +168,15 @@
     "text": "Synthetic machine generated data for testing quarantine protocol.",
     "language": "en",
     "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1794771215248_61icy_0",
+    "documentId": "doc_1794771215248_61icy",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
   }
 ]
