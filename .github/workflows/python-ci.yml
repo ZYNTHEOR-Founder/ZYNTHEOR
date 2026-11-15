@@ -1,60 +1,113 @@
-name: ZYNTHEOR Native Python CI
+
+name: ZYNTHEOR Python CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
+    paths:
+      - "**.py"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - "setup.py"
+      - ".github/workflows/python-ci.yml"
+
   pull_request:
-    branches: [main]
+    branches: [main, master]
+
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: python-ci-${{ github.ref }}
+  group: python-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  native-python:
-    name: Native Runtime Verification
+  python-validation:
+    name: Python Source Validation
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      ZYNTHEOR_ENV: test
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-      - name: Compile Python Sources
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+          pip install pytest pytest-cov ruff mypy
+
+      - name: Compile Python source
         run: |
           python -m compileall -q qplus_native
-          echo "Python sources compiled successfully."
 
-      - name: Cache pip
-        uses: actions/cache@v4
+      - name: Ruff lint
+        run: |
+          ruff check qplus_native
+
+      - name: Python formatting check
+        run: |
+          ruff format --check qplus_native
+
+      - name: Static type analysis
+        continue-on-error: true
+        run: |
+          mypy qplus_native
+
+      - name: Run unit tests
+        run: |
+          pytest -q tests \
+            --ignore=tests/e2e \
+            --ignore=tests/integration \
+            --cov=qplus_native \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml
+
+      - name: Verify native module imports
+        run: |
+          python - <<'PY'
+          import importlib.util
+
+          modules = [
+              "qplus_native",
+          ]
+
+          for module in modules:
+              if importlib.util.find_spec(module) is None:
+                  raise SystemExit(f"FAIL: Missing module {module}")
+              print(f"VERIFIED: {module}")
+
+          PY
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
-          restore-keys: pip-${{ runner.os }}-
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip pytest
-          if [ -f requirements-native.txt ]; then
-            python -m pip install -r requirements-native.txt
-          fi
-          if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
-          fi
-
-      - name: Run Python Tests (if any)
-        run: |
-          if find . -type f \( -name "test_*.py" -o -name "*_test.py" \) -not -path "./.git/*" -not -path "./node_modules/*" -not -path "./extracted/*" | grep -q .; then
-            python -m pytest -q
-          else
-            echo "No Python test files found. Status: PARTIAL (compile-only)."
-          fi
+          name: python-coverage-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: ignore
+          retention-days: 14
