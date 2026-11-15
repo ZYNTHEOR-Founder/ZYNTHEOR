@@ -129,12 +129,12 @@ function collectFolderPaths(nodes: TreeNode[]): string[] {
 function renderFileIcon(path: string) {
   const lower = path.toLowerCase();
   if (lower.endsWith('.json')) {
-    return <FileJson className="w-3.5 h-3.5 shrink-0 text-[#CCFF00]/90" />;
+    return <FileJson className="w-3.5 h-3.5 shrink-0 text-[color-mix(in_srgb,var(--z-ok)_90%,transparent)]" />;
   }
   if (lower.endsWith('.md') || lower.endsWith('.txt') || lower.endsWith('.template')) {
-    return <FileText className="w-3.5 h-3.5 shrink-0 text-[#9AA8C7]" />;
+    return <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--app-text-secondary)]" />;
   }
-  return <FileCode className="w-3.5 h-3.5 shrink-0 text-[#00F0FF]/90" />;
+  return <FileCode className="w-3.5 h-3.5 shrink-0 text-[color-mix(in_srgb,var(--app-accent)_90%,transparent)]" />;
 }
 
 export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
@@ -193,7 +193,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               type="button"
               onClick={() => handleToggleDir(node.path)}
               style={{ paddingLeft: `${depth * 12 + 6}px` }}
-              className="w-full flex items-center gap-1.5 pr-2 py-1 rounded-lg text-[11px] text-[#9AA8C7] hover:text-[#F4F7FF] hover:bg-[#131B36]/50 cursor-pointer transition-colors"
+              className="w-full flex items-center gap-1.5 pr-2 py-1 rounded-lg text-[11px] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[color-mix(in_srgb,var(--app-surface-elevated)_50%,transparent)] cursor-pointer transition-colors"
             >
               {isCollapsed ? (
                 <ChevronRight className="w-3 h-3 shrink-0" />
@@ -201,9 +201,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 <ChevronDown className="w-3 h-3 shrink-0" />
               )}
               {isCollapsed ? (
-                <Folder className="w-3.5 h-3.5 text-[#00F0FF] shrink-0" />
+                <Folder className="w-3.5 h-3.5 text-[var(--app-accent)] shrink-0" />
               ) : (
-                <FolderOpen className="w-3.5 h-3.5 text-[#00F0FF] shrink-0" />
+                <FolderOpen className="w-3.5 h-3.5 text-[var(--app-accent)] shrink-0" />
               )}
               <span className="truncate font-semibold">{node.name}</span>
             </button>
@@ -221,8 +221,8 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
           style={{ paddingLeft: `${depth * 12 + 18}px` }}
           className={`group flex items-center justify-between gap-1.5 pr-1.5 py-1 rounded-lg transition-colors ${
             isSelected
-              ? 'bg-[#00F0FF]/12 text-[#00F0FF] border border-[#00F0FF]/30'
-              : 'text-[#CBD5E1] hover:bg-[#131B36]/60 border border-transparent'
+              ? 'bg-[color-mix(in_srgb,var(--app-accent)_12%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_30%,transparent)]'
+              : 'text-[var(--app-text-secondary)] hover:bg-[color-mix(in_srgb,var(--app-surface-elevated)_60%,transparent)] border border-transparent'
           }`}
         >
           <button
@@ -234,18 +234,18 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
             {renderFileIcon(node.path)}
             <span className="truncate">{node.name}</span>
             {isLoading && (
-              <span className="text-[9px] text-[#00F0FF] shrink-0 animate-pulse">loading</span>
+              <span className="text-[9px] text-[var(--app-accent)] shrink-0 animate-pulse">loading</span>
             )}
           </button>
           <div className="flex items-center gap-1 shrink-0">
-            <span className="text-[10px] text-[#64748B] tabular-nums">
+            <span className="text-[10px] text-[var(--app-text-secondary)] tabular-nums">
               {node.file.bytes}B
             </span>
             {onDeleteFile && (
               <button
                 type="button"
                 onClick={() => void onDeleteFile(node.path)}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-0.5 text-[#9AA8C7] hover:text-[#FF007F] cursor-pointer transition-opacity"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-0.5 text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] cursor-pointer transition-opacity"
                 title={`Delete ${node.path}`}
                 aria-label={`Delete ${node.path}`}
               >
@@ -258,12 +258,12 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
     });
 
   return (
-    <div className="h-full flex flex-col bg-[#0D1326] text-[#F4F7FF] min-w-0">
+    <div className="h-full flex flex-col bg-[var(--app-surface)] text-[var(--app-text-primary)] min-w-0">
       {/* Header */}
-      <div className="px-3.5 py-2.5 bg-[#0B1124] border-b border-[#1E294A] flex items-center justify-between gap-2 shrink-0">
+      <div className="px-3.5 py-2.5 bg-[var(--app-bg-secondary)] border-b border-[var(--app-card-border)] flex items-center justify-between gap-2 shrink-0">
         <div className="min-w-0">
-          <div className="text-xs font-bold text-[#F4F7FF] truncate">Project Explorer</div>
-          <div className="text-[11px] font-mono text-[#9AA8C7] tabular-nums">
+          <div className="text-xs font-bold text-[var(--app-text-primary)] truncate">Project Explorer</div>
+          <div className="text-[11px] font-mono text-[var(--app-text-secondary)] tabular-nums">
             {projects.length} app(s) · {files.length} file(s)
           </div>
         </div>
@@ -272,7 +272,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
             <button
               type="button"
               onClick={onNewApp}
-              className="px-2 py-1 rounded-lg bg-[#00F0FF]/15 text-[#00F0FF] hover:bg-[#00F0FF]/25 text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap cursor-pointer"
+              className="px-2 py-1 rounded-lg bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_25%,transparent)] text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap cursor-pointer"
               title="Focus new app prompt"
             >
               <Plus className="w-3 h-3" />
@@ -283,7 +283,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
             <button
               type="button"
               onClick={onRefreshProjects}
-              className="p-1.5 rounded-lg text-[#9AA8C7] hover:text-white cursor-pointer"
+              className="p-1.5 rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
               title="Refresh projects"
               aria-label="Refresh projects"
             >
@@ -294,9 +294,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
       </div>
 
       {/* Application Selector List */}
-      <div className="p-2.5 border-b border-[#1E294A] max-h-44 overflow-y-auto divide-y divide-[#1E294A] shrink-0">
+      <div className="p-2.5 border-b border-[var(--app-card-border)] max-h-44 overflow-y-auto divide-y divide-[var(--app-card-border)] shrink-0">
         {projects.length === 0 ? (
-          <div className="py-4 text-center text-xs text-[#9AA8C7]">
+          <div className="py-4 text-center text-xs text-[var(--app-text-secondary)]">
             No applications created yet. Describe an app above and click Execute Application Task.
           </div>
         ) : (
@@ -308,12 +308,12 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 type="button"
                 onClick={() => onSelectProject(p.projectId)}
                 className={`w-full py-2 px-2 text-left transition-colors cursor-pointer flex items-center justify-between gap-2 ${
-                  active ? 'bg-[#00F0FF]/10 rounded-lg' : 'hover:bg-[#131B36]/60'
+                  active ? 'bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] rounded-lg' : 'hover:bg-[color-mix(in_srgb,var(--app-surface-elevated)_60%,transparent)]'
                 }`}
               >
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-[#F4F7FF] truncate">{p.name}</div>
-                  <div className="text-[10px] font-mono text-[#9AA8C7] tabular-nums truncate">
+                  <div className="text-xs font-semibold text-[var(--app-text-primary)] truncate">{p.name}</div>
+                  <div className="text-[10px] font-mono text-[var(--app-text-secondary)] tabular-nums truncate">
                     {p.stack} · {p.currentRevision}
                   </div>
                 </div>
@@ -339,7 +339,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
       {/* Interactive Nested File Tree */}
       {selectedProject && (
         <div className="p-2.5 space-y-2 flex-1 flex flex-col min-h-0">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7] px-1 shrink-0">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)] px-1 shrink-0">
             <span className="truncate">Source Tree ({selectedProject.currentRevision})</span>
             <div className="flex items-center gap-1.5 font-mono text-[10px] shrink-0">
               {allFolderPaths.length > 0 && (
@@ -347,7 +347,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                   <button
                     type="button"
                     onClick={() => handleSetAllCollapsed(false)}
-                    className="hover:text-[#00F0FF] cursor-pointer"
+                    className="hover:text-[var(--app-accent)] cursor-pointer"
                     title="Expand all folders"
                   >
                     Expand
@@ -356,7 +356,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                   <button
                     type="button"
                     onClick={() => handleSetAllCollapsed(true)}
-                    className="hover:text-[#00F0FF] cursor-pointer"
+                    className="hover:text-[var(--app-accent)] cursor-pointer"
                     title="Collapse all folders"
                   >
                     Collapse
@@ -368,14 +368,14 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
 
           {/* Search files */}
           <div className="relative shrink-0">
-            <Search className="w-3.5 h-3.5 text-[#64748B] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-[var(--app-text-secondary)] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={fileFilter}
               onChange={(e) => setFileFilter(e.target.value)}
               placeholder="Filter project files..."
               aria-label="Filter project files"
-              className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[11px] font-mono text-[#F4F7FF] placeholder:text-[#64748B] focus:outline-none focus:border-[#00F0FF]"
+              className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:outline-none focus:border-[var(--app-accent)]"
             />
           </div>
 
@@ -387,12 +387,12 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 onChange={(e) => setNewFileRelPath(e.target.value)}
                 placeholder="src/helper.mjs"
                 aria-label="New file relative path"
-                className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[11px] font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
               />
               <button
                 type="submit"
                 disabled={isCreating || !newFileRelPath.trim()}
-                className="px-2.5 py-1.5 rounded-lg bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-[#00F0FF] text-[11px] font-semibold whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                className="px-2.5 py-1.5 rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-accent)] text-[11px] font-semibold whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
               >
                 + File
               </button>
@@ -401,7 +401,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
 
           <div className="space-y-0.5 flex-1 min-h-[160px] max-h-80 overflow-y-auto text-xs font-mono pr-0.5">
             {treeNodes.length === 0 ? (
-              <div className="py-6 text-center text-[11px] text-[#9AA8C7]">
+              <div className="py-6 text-center text-[11px] text-[var(--app-text-secondary)]">
                 {fileFilter.trim()
                   ? `No files match "${fileFilter.trim()}"`
                   : 'No files in active revision.'}
@@ -412,11 +412,11 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
           </div>
 
           {/* Collapsible 13-Stage Lifecycle Summary */}
-          <div className="pt-2 border-t border-[#1E294A] shrink-0">
+          <div className="pt-2 border-t border-[var(--app-card-border)] shrink-0">
             <button
               type="button"
               onClick={() => setShowPipelineDetails((v) => !v)}
-              className="w-full flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7] hover:text-[#F4F7FF] py-1 cursor-pointer"
+              className="w-full flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] py-1 cursor-pointer"
             >
               <span>
                 13-Stage Lifecycle (
@@ -429,10 +429,10 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               )}
             </button>
             {showPipelineDetails && (
-              <div className="mt-1.5 divide-y divide-[#1E294A] max-h-56 overflow-y-auto text-[10px]">
+              <div className="mt-1.5 divide-y divide-[var(--app-card-border)] max-h-56 overflow-y-auto text-[10px]">
                 {selectedProject.stages.map((st) => (
                   <div key={st.stage} className="py-1.5 flex items-center justify-between gap-2">
-                    <span className="text-[#CBD5E1] truncate">
+                    <span className="text-[var(--app-text-secondary)] truncate">
                       {String(st.order).padStart(2, '0')}. {st.label}
                     </span>
                     <StatusDot

@@ -1,6 +1,6 @@
 {
   "name": "ZYNTHEOR Q+ Sovereign AI Engine",
-  "description": "First-Party Sovereign AI Engine with Native Target 41.53M Neural Model (41,527,808 parameters), Multi-Agent Orchestrator, Self-Evolving Loop, SHA-256 Audit Ledger, and Commercial Launch Cockpit.",
+  "description": "First-Party Sovereign AI Engine with 33.7M Native Neural Model, Multi-Agent Orchestrator, Self-Evolving Loop, SHA-256 Audit Ledger, and Commercial Launch Cockpit.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

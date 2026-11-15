@@ -85,63 +85,20 @@ function verifyToken(raw, options = {}) {
   return { valid: true, code: 'VERIFIED', payload };
 }
 
-// --- Server-side seal (mirrors AuthMiddleware + AuditLedger SHA-256 hash chaining) ---
-function appendChainedAuditRecord(role, action, payload) {
-  const dir = path.dirname(auditPath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  let lines = fs.existsSync(auditPath)
-    ? fs.readFileSync(auditPath, 'utf8').trim().split('\n').map((l) => l.trim()).filter(Boolean)
-    : [];
-
-  if (lines.length === 0) {
-    const genesisTimestamp = new Date().toISOString();
-    const genesisPayload = {
-      engine: 'ZYNTHEOR Q+ Sovereign AI Engine',
-      architecture: 'ZYNTHEOR-Native-ActiveSubgraph-v1',
-      sovereignty_rule: 'Online-first first-party neural execution on the Sovereign Cloud runtime',
-      init_timestamp: genesisTimestamp
-    };
-    const genesisDigest = crypto.createHash('sha256').update(JSON.stringify(genesisPayload)).digest('hex');
-    const genesisPrev = '0'.repeat(64);
-    const genesisPreimage = `0|${genesisTimestamp}|${genesisPrev}|SYSTEM|GENESIS_INITIALIZATION|${genesisDigest}`;
-    const genesisEntry = {
-      index: 0,
-      timestamp: genesisTimestamp,
-      prev_hash: genesisPrev,
-      role: 'SYSTEM',
-      action: 'GENESIS_INITIALIZATION',
-      payload_digest: genesisDigest,
-      payload: genesisPayload,
-      entry_hash: crypto.createHash('sha256').update(genesisPreimage).digest('hex')
-    };
-    fs.writeFileSync(auditPath, JSON.stringify(genesisEntry) + '\n', 'utf8');
-    lines = [JSON.stringify(genesisEntry)];
-  }
-
-  const last = JSON.parse(lines[lines.length - 1]);
-  const index = last.index + 1;
-  const prev_hash = last.entry_hash;
-  const timestamp = new Date().toISOString();
-  const payload_digest = crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
-  const preimage = `${index}|${timestamp}|${prev_hash}|${role}|${action}|${payload_digest}`;
-  const entry_hash = crypto.createHash('sha256').update(preimage).digest('hex');
-  const record = { index, timestamp, prev_hash, role, action, payload_digest, payload, entry_hash };
-  fs.appendFileSync(auditPath, JSON.stringify(record) + '\n', 'utf8');
-  return record;
-}
-
+// --- Server-side seal (mirrors AuthMiddleware) ---
 function sealLogs(logs, meta) {
   const contentHash = crypto.createHash('sha256').update(logs.join('\n'), 'utf8').digest('hex');
   const sealId = crypto.randomUUID();
   const sealedAt = new Date().toISOString();
-  const record = appendChainedAuditRecord('GOVERNANCE', 'QUICK_LOGS_SERVER_SEAL', {
-    sealId,
-    contentHash,
-    logCount: logs.length,
-    ...meta,
-    sealedAt
+  // Append to real audit ledger file
+  const line = JSON.stringify({
+    index: -1,
+    timestamp: sealedAt,
+    action: 'QUICK_LOGS_SERVER_SEAL',
+    payload: { sealId, contentHash, logCount: logs.length, ...meta }
   });
-  return { sealId, contentHash, entryHash: record.entry_hash, sealedAt };
+  fs.appendFileSync(auditPath, line + '\n', 'utf8');
+  return { sealId, contentHash, sealedAt };
 }
 
 function verifyLogs(logs, expectedHash) {

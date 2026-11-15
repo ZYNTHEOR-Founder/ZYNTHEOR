@@ -1,0 +1,28 @@
+# STATUS: BLOCKED
+# Reason: Playwright is not a project dependency. No playwright.config.* or e2e test files.
+# "npx playwright test" would fail. Keep disabled until real E2E suite and deps are added.
+name: ZYNTHEOR E2E Acceptance
+
+on:
+  workflow_dispatch:
+    # Explicitly disabled for push/PR until real suites exist.
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: E2E Acceptance (BLOCKED)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Report BLOCKED status
+        run: |
+          echo "=== ZYNTHEOR E2E Workflow ==="
+          echo "Status: BLOCKED"
+          echo "Reasons:"
+          echo "  - Playwright not listed in package.json dependencies or devDependencies"
+          echo "  - No playwright.config.ts / e2e test directory present"
+          echo "  - npm run build exists, but no verified browser test suite"
+          echo "Do not install Playwright ad-hoc or use --if-present to fake success."
+          exit 0

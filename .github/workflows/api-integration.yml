@@ -1,0 +1,29 @@
+# STATUS: BLOCKED
+# Reason: No /api/health endpoint exists (actual status endpoint is /api/system/status).
+# No "test:integration" script in package.json. No dedicated API integration test suite.
+# Keep disabled until real health endpoint + integration tests are implemented.
+name: ZYNTHEOR API Integration
+
+on:
+  workflow_dispatch:
+    # Explicitly disabled for push/PR until real suites exist.
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: API Integration (BLOCKED)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Report BLOCKED status
+        run: |
+          echo "=== ZYNTHEOR API Integration Workflow ==="
+          echo "Status: BLOCKED"
+          echo "Reasons:"
+          echo "  - package.json has no 'test:integration' script"
+          echo "  - server exposes /api/system/status, not /api/health"
+          echo "  - No committed API integration test suite"
+          echo "Do not use --if-present to fake success."
+          exit 0

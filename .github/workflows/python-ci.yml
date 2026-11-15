@@ -1,0 +1,53 @@
+name: ZYNTHEOR Native Python CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-python:
+    name: Native Runtime Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile Python Sources
+        run: |
+          python -m compileall -q qplus_native
+          echo "Python sources compiled successfully."
+
+      - name: Check for Python dependency manifests
+        run: |
+          if [ -f requirements.txt ] || [ -f pyproject.toml ] || [ -f setup.py ]; then
+            echo "Manifest found."
+          else
+            echo "PARTIAL: No requirements.txt / pyproject.toml present. Skipping pip install and pytest."
+            echo "Python CI limited to syntax compile of qplus_native/."
+          fi
+
+      - name: Run Python Tests (if any)
+        run: |
+          if find . -type f \( -name "test_*.py" -o -name "*_test.py" \) -not -path "./.git/*" | grep -q .; then
+            python -m pip install --upgrade pip pytest
+            python -m pytest -q
+          else
+            echo "No Python test files found. Status: PARTIAL (compile-only)."
+          fi

@@ -29,91 +29,93 @@ export const ThemeSwitcher: React.FC = () => {
     accentPreview: string;
   }> = [
     {
-      id: 'midnight-navy',
-      labelTh: 'Midnight Navy (เนวี่ราตรี Batch 25)',
-      labelEn: 'Midnight Navy (Flagship)',
-      subTh: 'Deep Midnight Navy & Electric Cyan',
-      subEn: 'Deep Midnight Navy & Electric Cyan',
-      icon: <Palette className="w-4 h-4 text-[#00F0FF]" />,
-      bgPreview: '#070B19',
-      borderPreview: '#1E294A',
-      accentPreview: '#00F0FF'
+      id: 'emerald-amber',
+      labelTh: 'Ink Indigo (น้ำเงินหมึก · ค่าเริ่มต้น)',
+      labelEn: 'Ink Indigo (default)',
+      subTh: 'หมึกคราม เน้นสัญญาณฟ้าคราม',
+      subEn: 'Ink surfaces, periwinkle signal',
+      icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#0C1020',
+      borderPreview: '#2A3558',
+      accentPreview: '#8FA4FF'
     },
     {
       id: 'light',
-      labelTh: 'High-Contrast Light (สว่างคมชัด)',
-      labelEn: 'High-Contrast Light',
-      subTh: 'Clean · Crisp · Neon Blue',
-      subEn: 'Clean · Crisp · Neon Blue',
-      icon: <Sun className="w-4 h-4 text-[#FF5E3A]" />,
-      bgPreview: '#F3F6FC',
-      borderPreview: '#CBD5EA',
-      accentPreview: '#2563EB'
+      labelTh: 'Paper (กระดาษสว่าง)',
+      labelEn: 'Paper (light)',
+      subTh: 'พื้นสว่าง ตัวหนังสือหมึกเข้ม',
+      subEn: 'Bright paper, ink text',
+      icon: <Sun className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#EFF2F8',
+      borderPreview: '#CDD5E4',
+      accentPreview: '#2B46D9'
     },
     {
       id: 'dark',
-      labelTh: 'Dark Mode (มืดสนิท)',
-      labelEn: 'Dark Mode',
-      subTh: 'Midnight Navy & Neon Blue',
-      subEn: 'Midnight Navy & Neon Blue',
-      icon: <Moon className="w-4 h-4 text-[#2563EB]" />,
-      bgPreview: '#070B19',
-      borderPreview: '#1E294A',
-      accentPreview: '#00F0FF'
+      labelTh: 'Ink Indigo (มืด)',
+      labelEn: 'Ink Indigo (dark)',
+      subTh: 'โทนเดียวกับค่าเริ่มต้น',
+      subEn: 'Same as default',
+      icon: <Moon className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#0C1020',
+      borderPreview: '#2A3558',
+      accentPreview: '#8FA4FF'
+    },
+    {
+      id: 'midnight-navy',
+      labelTh: 'Graphite (เทากราไฟต์)',
+      labelEn: 'Graphite',
+      subTh: 'เทาเข้มเป็นกลาง ลดสี',
+      subEn: 'Neutral, low-chroma',
+      icon: <Palette className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#0E0F12',
+      borderPreview: '#2F323B',
+      accentPreview: '#C7CCD8'
     },
     {
       id: 'vivid-cyan',
-      labelTh: 'Electric Cyan (ไซแอนนีออน)',
-      labelEn: 'Electric Cyan',
-      subTh: 'Electric Cyan & Luminous Lime',
-      subEn: 'Electric Cyan & Luminous Lime',
-      icon: <Sparkles className="w-4 h-4 text-[#00F0FF]" />,
-      bgPreview: '#070B19',
-      borderPreview: '#00F0FF4D',
-      accentPreview: '#00F0FF'
+      labelTh: 'Teal Signal (เขียวน้ำทะเล)',
+      labelEn: 'Teal Signal',
+      subTh: 'เขียวน้ำทะเลลึก',
+      subEn: 'Deep sea teal',
+      icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#08171A',
+      borderPreview: '#244A52',
+      accentPreview: '#4FD1C5'
     },
     {
       id: 'royal-purple',
-      labelTh: 'Brilliant Violet (ม่วงไวโอเลต)',
-      labelEn: 'Brilliant Violet',
-      subTh: 'Brilliant Violet & Vivid Magenta',
-      subEn: 'Brilliant Violet & Vivid Magenta',
-      icon: <Sparkles className="w-4 h-4 text-[#FF007F]" />,
-      bgPreview: '#09071A',
-      borderPreview: '#7B2CBF73',
-      accentPreview: '#7B2CBF'
-    },
-    {
-      id: 'emerald-amber',
-      labelTh: 'Aurora Classic (ออโรร่า)',
-      labelEn: 'Aurora Classic',
-      subTh: 'Midnight Surface & Coral',
-      subEn: 'Midnight Surface & Coral',
-      icon: <Sparkles className="w-4 h-4 text-[#CCFF00]" />,
-      bgPreview: '#0D1326',
-      borderPreview: '#1E294A',
-      accentPreview: '#CCFF00'
+      labelTh: 'Saffron Dark (หญ้าฝรั่นมืด)',
+      labelEn: 'Saffron Dark',
+      subTh: 'น้ำตาลเข้ม เน้นเหลืองหญ้าฝรั่น',
+      subEn: 'Warm dark, saffron signal',
+      icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#16120A',
+      borderPreview: '#463C26',
+      accentPreview: '#F2B544'
     },
     {
       id: 'system',
-      labelTh: 'System Default (ตามระบบปฏิบัติการ)',
-      labelEn: 'System Default',
-      subTh: 'Follows OS Dark/Light',
-      subEn: 'Follows OS Dark/Light',
-      icon: <Laptop className="w-4 h-4 text-slate-400" />,
-      bgPreview: 'linear-gradient(135deg, #F3F6FC 50%, #070B19 50%)',
+      labelTh: 'ตามระบบ (System)',
+      labelEn: 'System',
+      subTh: 'ตามโหมดมืด/สว่างของเครื่อง',
+      subEn: 'Follows OS dark/light',
+      icon: <Laptop className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: 'linear-gradient(135deg, #EFF2F8 50%, #0C1020 50%)',
       borderPreview: '#94A3B8',
-      accentPreview: '#2563EB'
-    }
+      accentPreview: '#4A60DD'
+    },
   ];
 
   const presetAccents = [
-    { label: 'Electric Cyan', hex: '#00F0FF' },
-    { label: 'Neon Blue', hex: '#2563EB' },
-    { label: 'Brilliant Violet', hex: '#7B2CBF' },
-    { label: 'Vivid Magenta', hex: '#FF007F' },
-    { label: 'Coral Orange', hex: '#FF5E3A' },
-    { label: 'Luminous Lime', hex: '#CCFF00' }
+    { label: 'Periwinkle', hex: '#8FA4FF' },
+    { label: 'Cobalt', hex: '#2B46D9' },
+    { label: 'Saffron', hex: '#F2B544' },
+    { label: 'Teal', hex: '#4FD1C5' },
+    { label: 'Jade', hex: '#5FD6A0' },
+    { label: 'Coral', hex: '#F08A4B' },
+    { label: 'Rose', hex: '#F0657A' },
+    { label: 'Graphite', hex: '#C7CCD8' }
   ];
 
   return (
@@ -123,7 +125,7 @@ export const ThemeSwitcher: React.FC = () => {
         <div className="text-xs font-bold text-[var(--app-text-primary)] mb-3 flex items-center justify-between">
           <span>{lang === 'th' ? 'เลือกชุดสีและธีมหลัก (Theme Presets)' : 'Select Primary Theme Preset'}</span>
           <span className="text-[11px] font-mono font-medium text-[var(--app-text-secondary)]">
-            Active: <span className="font-bold text-[var(--app-accent)] uppercase">{resolvedTheme}</span>
+            Active: <span className="font-bold text-[var(--app-accent)] ">{resolvedTheme}</span>
           </span>
         </div>
 
@@ -136,13 +138,13 @@ export const ThemeSwitcher: React.FC = () => {
                 onClick={() => setTheme(opt.id)}
                 className={`p-3.5 rounded-2xl border text-left transition-all relative cursor-pointer ${
                   isSelected
-                    ? 'border-[var(--app-accent)] shadow-md ring-2 ring-[var(--app-accent)]/20 bg-[var(--app-surface)]'
-                    : 'border-[var(--app-card-border)] bg-[var(--app-surface)]/60 hover:bg-[var(--app-surface)]'
+                    ? 'border-[var(--app-accent)] shadow-md ring-2 ring-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] bg-[var(--app-surface)]'
+                    : 'border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-surface)_60%,transparent)] hover:bg-[var(--app-surface)]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800">
+                    <div className="p-1.5 rounded-xl bg-[var(--app-surface-elevated)] dark:bg-[var(--app-surface)]">
                       {opt.icon}
                     </div>
                     <div>
@@ -192,15 +194,15 @@ export const ThemeSwitcher: React.FC = () => {
           </label>
           <div className="flex flex-wrap items-center gap-2">
             {presetAccents.map((pa) => {
-              const isActive = (customAccent || '#397BFF').toLowerCase() === pa.hex.toLowerCase();
+              const isActive = (customAccent || 'var(--app-accent)').toLowerCase() === pa.hex.toLowerCase();
               return (
                 <button
                   key={pa.hex}
                   onClick={() => setCustomAccent(pa.hex)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'border-slate-800 shadow-sm scale-105'
-                      : 'border-slate-200/80 hover:scale-102'
+                      ? 'border-[var(--app-card-border)] shadow-sm scale-105'
+                      : 'border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] hover:scale-102'
                   }`}
                   style={{
                     backgroundColor: pa.hex + '18',
@@ -217,16 +219,16 @@ export const ThemeSwitcher: React.FC = () => {
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)]">
               <input
                 type="color"
-                value={customAccent || '#397BFF'}
+                value={customAccent || 'var(--app-accent)'}
                 onChange={(e) => setCustomAccent(e.target.value)}
                 className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent"
                 title="Pick custom color"
               />
               <input
                 type="text"
-                value={customAccent || '#397BFF'}
+                value={customAccent || 'var(--app-accent)'}
                 onChange={(e) => setCustomAccent(e.target.value)}
-                placeholder="#397BFF"
+                placeholder="var(--app-accent)"
                 className="w-20 text-[11px] font-mono bg-transparent text-[var(--app-text-primary)] focus:outline-none"
               />
             </div>
@@ -261,9 +263,9 @@ export const ThemeSwitcher: React.FC = () => {
 
         {/* Contrast & Accessibility Verification Card */}
         <div className="p-3.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-          <div className="text-[11px] font-bold text-[var(--app-text-primary)] uppercase tracking-wider mb-2 flex items-center justify-between">
+          <div className="text-[11px] font-bold text-[var(--app-text-primary)] mb-2 flex items-center justify-between">
             <span>{lang === 'th' ? 'การรักษามาตรฐานการเข้าถึงและสีความปลอดภัย' : 'Accessibility & Status Color Invariants'}</span>
-            <span className="text-[10px] text-emerald-600 font-mono font-bold">AAA ACCESSIBLE</span>
+            <span className="text-[10px] text-[var(--z-ok)] font-mono font-bold">AAA ACCESSIBLE</span>
           </div>
           <p className="text-[11px] text-[var(--app-text-secondary)] mb-3 leading-relaxed">
             {lang === 'th'
@@ -272,11 +274,11 @@ export const ThemeSwitcher: React.FC = () => {
           </p>
 
           <div className="flex flex-wrap items-center gap-3 text-xs">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 font-bold font-mono">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] font-bold font-mono">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>VERIFIED / TAMPER-FREE</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/30 font-bold font-mono">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] font-bold font-mono">
               <ShieldAlert className="w-3.5 h-3.5" />
               <span>BLOCKED / TAMPER DETECTED</span>
             </div>

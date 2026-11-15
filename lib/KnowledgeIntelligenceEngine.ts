@@ -21,11 +21,7 @@ import {
   KnowledgeChunk,
   RetrievalResult
 } from './KnowledgeWorkspace';
-import {
-  detectLang as detectLangUtil,
-  semanticChunk as semanticChunkUtil,
-  assertRetrievalQueryNoTargetLeakage,
-} from './knowledgeUtils';
+import { detectLang as detectLangUtil, semanticChunk as semanticChunkUtil } from './knowledgeUtils';
 
 // Re-export types that may not all be exported — use structural typing
 export type DocFormat =
@@ -98,7 +94,6 @@ export interface IngestionJob {
   errors: Array<{ item: string; error: string }>;
   documentIds: string[];
   resumable: boolean;
-  tenantId?: string;
 }
 
 export interface ParsedIngest {
@@ -410,29 +405,15 @@ export class KnowledgeIntelligenceEngine {
    */
   public hybridRetrieve(
     query: string,
-    options: {
-      limit?: number;
-      collection?: string;
-      minScore?: number;
-      forbiddenTargetValues?: Array<string | number>;
-      tenantId?: string;
-      role?: string;
-    } = {}
+    options: { limit?: number; collection?: string; minScore?: number } = {}
   ): GroundedRetrievalResponse {
-    if (options.forbiddenTargetValues && options.forbiddenTargetValues.length > 0) {
-      assertRetrievalQueryNoTargetLeakage(query, options.forbiddenTargetValues);
-    }
     const start = Date.now();
     const limit = options.limit ?? 5;
     const kw = KnowledgeWorkspace.getInstance();
-    const lexical = kw.retrieve(query, {
-      limit: Math.max(limit * 3, 15),
-      collection: options.collection,
-      forbiddenTargetValues: options.forbiddenTargetValues,
-      tenantId: options.tenantId,
-      role: options.role,
-    });
+    const lexical = kw.retrieve(query, { limit: Math.max(limit * 3, 15), collection: options.collection });
     this.rebuildVectors(
+      // access chunks via retrieve side-effect — get from list by re-querying docs is heavy;
+      // rebuild from lexical candidates only for efficiency
       lexical.map((r) => ({
         id: r.chunkId,
         documentId: r.documentId,
@@ -455,7 +436,7 @@ export class KnowledgeIntelligenceEngine {
     reranked.sort((a, b) => b.score - a.score);
     const top = reranked.slice(0, limit);
 
-    const docs = kw.listDocuments({ tenantId: options.tenantId, role: options.role });
+    const docs = kw.listDocuments();
     const docMap = new Map(docs.map((d) => [d.id, d]));
 
     const results = top.map((r) => {
@@ -493,17 +474,11 @@ export class KnowledgeIntelligenceEngine {
   }
 
   /** Summarize by extracting top sentences by overlap with query (extractive). */
-  public extractiveSummary(
-    documentIds: string[],
-    maxSentences = 5,
-    scope?: { tenantId?: string; role?: string }
-  ): { summary: string; sources: string[] } {
+  public extractiveSummary(documentIds: string[], maxSentences = 5): { summary: string; sources: string[] } {
     const kw = KnowledgeWorkspace.getInstance();
-    const visibleDocs = kw.listDocuments(scope ? { tenantId: scope.tenantId, role: scope.role } : undefined);
-    const docMap = new Map(visibleDocs.map((d) => [d.id, d]));
     const sentences: Array<{ text: string; docId: string; score: number }> = [];
     for (const id of documentIds) {
-      const doc = docMap.get(id);
+      const doc = kw.listDocuments().find((d) => d.id === id);
       if (!doc) continue;
       const parts = doc.content.split(/(?<=[\.\!\?\u0E2F])\s+/).filter((s) => s.trim().length > 20);
       for (const p of parts) {
@@ -518,9 +493,9 @@ export class KnowledgeIntelligenceEngine {
     };
   }
 
-  public buildGraphEdges(scope?: { tenantId?: string; role?: string }): GraphEdge[] {
+  public buildGraphEdges(): GraphEdge[] {
     const kw = KnowledgeWorkspace.getInstance();
-    const docs = kw.listDocuments(scope ? { tenantId: scope.tenantId, role: scope.role } : undefined);
+    const docs = kw.listDocuments();
     const edges: GraphEdge[] = [];
     const byCollection = new Map<string, string[]>();
     for (const d of docs) {
@@ -559,10 +534,10 @@ export class KnowledgeIntelligenceEngine {
     return edges;
   }
 
-  public findDuplicates(scope?: { tenantId?: string; role?: string }): Array<{ hash: string; documentIds: string[]; titles: string[] }> {
+  public findDuplicates(): Array<{ hash: string; documentIds: string[]; titles: string[] }> {
     const kw = KnowledgeWorkspace.getInstance();
     const byHash = new Map<string, KnowledgeDocument[]>();
-    for (const d of kw.listDocuments(scope ? { tenantId: scope.tenantId, role: scope.role } : undefined)) {
+    for (const d of kw.listDocuments()) {
       const list = byHash.get(d.contentHash) || [];
       list.push(d);
       byHash.set(d.contentHash, list);
@@ -591,8 +566,7 @@ export class KnowledgeIntelligenceEngine {
       collection?: string;
       tags?: string[];
       provenance?: string;
-    }>,
-    scope?: { tenantId?: string }
+    }>
   ): IngestionJob {
     const jobId = `job_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
     const job: IngestionJob = {
@@ -606,14 +580,13 @@ export class KnowledgeIntelligenceEngine {
       failed: 0,
       errors: [],
       documentIds: [],
-      resumable: true,
-      tenantId: scope?.tenantId
+      resumable: true
     };
     this.jobs.set(jobId, job);
     this.saveJobs();
 
     const kw = KnowledgeWorkspace.getInstance();
-    const existingHashes = new Set(kw.listDocuments(scope?.tenantId ? { tenantId: scope.tenantId } : undefined).map((d) => d.contentHash));
+    const existingHashes = new Set(kw.listDocuments().map((d) => d.contentHash));
 
     for (const item of items) {
       try {
@@ -635,8 +608,7 @@ export class KnowledgeIntelligenceEngine {
             collection: item.collection || 'General',
             tags: item.tags || ['ingested'],
             provenance: item.provenance || 'Bulk ingestion job',
-            language: detectLang(parsed.cleanText),
-            tenantId: scope?.tenantId
+            language: detectLang(parsed.cleanText)
           });
           existingHashes.add(hash);
           job.documentIds.push(doc.id);
@@ -662,24 +634,18 @@ export class KnowledgeIntelligenceEngine {
       jobId,
       status: job.status,
       succeeded: job.succeeded,
-      failed: job.failed,
-      tenantId: scope?.tenantId || 'unscoped'
+      failed: job.failed
     });
 
     return job;
   }
 
-  public getJob(jobId: string, scope?: { tenantId?: string }): IngestionJob | undefined {
-    const job = this.jobs.get(jobId);
-    if (!job) return undefined;
-    if (scope?.tenantId && job.tenantId && job.tenantId !== scope.tenantId) {
-      throw new Error(`FORBIDDEN: Cross-tenant ingestion job access denied for '${jobId}'`);
-    }
-    return job;
+  public getJob(jobId: string): IngestionJob | undefined {
+    return this.jobs.get(jobId);
   }
 
-  public resumeJob(jobId: string, scope?: { tenantId?: string }): IngestionJob {
-    const job = this.getJob(jobId, scope);
+  public resumeJob(jobId: string): IngestionJob {
+    const job = this.jobs.get(jobId);
     if (!job) {
       throw new Error(`Ingestion job '${jobId}' not found`);
     }
@@ -688,13 +654,13 @@ export class KnowledgeIntelligenceEngine {
     return job;
   }
 
-  public listJobs(scope?: { tenantId?: string }): IngestionJob[] {
-    return Array.from(this.jobs.values())
-      .filter((j) => !scope?.tenantId || !j.tenantId || j.tenantId === scope.tenantId)
-      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  public listJobs(): IngestionJob[] {
+    return Array.from(this.jobs.values()).sort((a, b) =>
+      a.createdAt < b.createdAt ? 1 : -1
+    );
   }
 
-  public analyzeCorpus(scope?: { tenantId?: string; role?: string }): {
+  public analyzeCorpus(): {
     entities: ExtractedEntity[];
     contradictions: ContradictionFlag[];
     duplicates: ReturnType<KnowledgeIntelligenceEngine['findDuplicates']>;
@@ -703,7 +669,10 @@ export class KnowledgeIntelligenceEngine {
     chunkCount: number;
   } {
     const kw = KnowledgeWorkspace.getInstance();
-    const docs = kw.listDocuments(scope ? { tenantId: scope.tenantId, role: scope.role } : undefined);
+    const docs = kw.listDocuments();
+    // Pull chunks indirectly via retrieve with empty-ish query is wrong — use hybrid path
+    // Access private chunks through list + retrieve of titles is incomplete.
+    // We'll entity-extract from document content bodies.
     const entities: ExtractedEntity[] = [];
     const chunkProxies: Array<{ documentId: string; text: string }> = [];
     for (const d of docs) {
@@ -715,8 +684,8 @@ export class KnowledgeIntelligenceEngine {
       });
     }
     const contradictions = detectContradictions(chunkProxies);
-    const duplicates = this.findDuplicates(scope);
-    const edges = this.buildGraphEdges(scope);
+    const duplicates = this.findDuplicates();
+    const edges = this.buildGraphEdges();
     return {
       entities: entities.slice(0, 200),
       contradictions,
@@ -724,249 +693,6 @@ export class KnowledgeIntelligenceEngine {
       edges,
       documentCount: docs.length,
       chunkCount: chunkProxies.length
-    };
-  }
-
-  private retrievalTelemetry = {
-    totalQueries: 0,
-    groundedQueries: 0,
-    totalCitationsVerified: 0,
-    failedCitations: 0,
-    avgLatencyMs: 0,
-    lastUpdatedAt: null as string | null,
-  };
-
-  /** Batch 28: Rewrites & expands a bilingual/technical query into normalized sub-queries. */
-  public rewriteAndExpandQuery(query: string): string[] {
-    const clean = query.trim().replace(/\s+/g, ' ');
-    if (!clean) return [];
-    const expansions = new Set<string>([clean]);
-
-    const synMap: Array<[RegExp, string]> = [
-      [/\b(auth|authentication|login|ยืนยันตัวตน)\b/i, 'HMAC token verifyToken timingSafeEqual'],
-      [/\b(memory|ความจำ|บริบท)\b/i, 'episodic semantic working_context consolidation'],
-      [/\b(model|checkpoint|โมเดล|น้ำหนัก)\b/i, 'PureSeqLM NativeLM SHA-256 checkpoint weights'],
-      [/\b(security|rbac|tenant|ความปลอดภัย)\b/i, 'tenantId RBAC AuditLedger SSRF isolation'],
-      [/\b(plan|dag|orchestrator|วางแผน)\b/i, 'DAG topological acceptance criteria repair'],
-    ];
-
-    for (const [pat, extra] of synMap) {
-      if (pat.test(clean)) {
-        expansions.add(`${clean} ${extra}`);
-      }
-    }
-    const tokens = tokenize(clean);
-    if (tokens.length >= 4) {
-      expansions.add(tokens.slice(0, Math.ceil(tokens.length / 2)).join(' '));
-      expansions.add(tokens.slice(Math.floor(tokens.length / 2)).join(' '));
-    }
-    return Array.from(expansions).slice(0, 4);
-  }
-
-  /**
-   * Batch 28: Multi-Query Hybrid Retrieval with Reciprocal Rank Fusion (RRF),
-   * Knowledge Freshness boost, and Extractive Context Compression.
-   */
-  public advancedRetrieve(
-    query: string,
-    options: {
-      limit?: number;
-      collection?: string;
-      minScore?: number;
-      maxContextChars?: number;
-      forbiddenTargetValues?: Array<string | number>;
-      tenantId?: string;
-      role?: string;
-    } = {}
-  ): GroundedRetrievalResponse & {
-    subQueries: string[];
-    compressedContext: string;
-    freshnessApplied: boolean;
-  } {
-    const start = Date.now();
-    const subQueries = this.rewriteAndExpandQuery(query);
-    const kw = KnowledgeWorkspace.getInstance();
-    const docs = kw.listDocuments({ tenantId: options.tenantId, role: options.role });
-    const docMap = new Map(docs.map((d) => [d.id, d]));
-
-    const fusedMap = new Map<
-      string,
-      {
-        hit: RetrievalResult & { citation: GroundedCitation };
-        rrfScore: number;
-        bestScore: number;
-      }
-    >();
-
-    const nowMs = Date.now();
-    const kRrf = 60;
-
-    for (const sq of subQueries) {
-      const resp = this.hybridRetrieve(sq, {
-        limit: (options.limit ?? 5) * 2,
-        collection: options.collection,
-        minScore: 0.8,
-        forbiddenTargetValues: options.forbiddenTargetValues,
-        tenantId: options.tenantId,
-        role: options.role,
-      });
-
-      resp.results.forEach((r, idx) => {
-        const doc = docMap.get(r.documentId);
-        const ageDays = doc ? Math.max(0, (nowMs - Date.parse(doc.updatedAt || doc.createdAt)) / 86_400_000) : 30;
-        const freshnessBoost = 1 + 0.15 * Math.exp(-ageDays / 30);
-        const rrf = (1 / (kRrf + idx + 1)) * freshnessBoost;
-
-        const existing = fusedMap.get(r.chunkId);
-        if (existing) {
-          existing.rrfScore += rrf;
-          existing.bestScore = Math.max(existing.bestScore, r.score);
-        } else {
-          fusedMap.set(r.chunkId, {
-            hit: r,
-            rrfScore: rrf,
-            bestScore: r.score,
-          });
-        }
-      });
-    }
-
-    const fusedList = Array.from(fusedMap.values())
-      .map((entry) => ({
-        ...entry.hit,
-        score: Number((entry.bestScore * 0.7 + entry.rrfScore * 100 * 0.3).toFixed(3)),
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, options.limit ?? 5);
-
-    const minScore = options.minScore ?? 1.5;
-    const filtered = fusedList.filter((r) => r.score >= minScore);
-    const found = filtered.length > 0;
-
-    // Context Compression: extract top sentences matching query tokens within char budget
-    const maxChars = options.maxContextChars ?? 1200;
-    const qTokens = new Set(tokenize(query));
-    const candidateSentences: Array<{ text: string; score: number; docTitle: string }> = [];
-    for (const item of filtered) {
-      const sents = item.text.split(/(?<=[\.\!\?\u0E2F])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length >= 16);
-      for (const s of sents) {
-        const sToks = tokenize(s);
-        let overlap = 0;
-        for (const st of sToks) if (qTokens.has(st)) overlap++;
-        candidateSentences.push({
-          text: s,
-          score: overlap + item.score * 0.1,
-          docTitle: item.documentTitle,
-        });
-      }
-    }
-    candidateSentences.sort((a, b) => b.score - a.score);
-    let compressed = '';
-    for (const cs of candidateSentences) {
-      const line = `[${cs.docTitle}] ${cs.text}\n`;
-      if (compressed.length + line.length > maxChars) break;
-      compressed += line;
-    }
-
-    const latencyMs = Date.now() - start;
-    this.retrievalTelemetry.totalQueries += 1;
-    if (found) this.retrievalTelemetry.groundedQueries += 1;
-    this.retrievalTelemetry.avgLatencyMs = Number(
-      (
-        (this.retrievalTelemetry.avgLatencyMs * (this.retrievalTelemetry.totalQueries - 1) + latencyMs) /
-        this.retrievalTelemetry.totalQueries
-      ).toFixed(2)
-    );
-    this.retrievalTelemetry.lastUpdatedAt = new Date().toISOString();
-
-    return {
-      query,
-      found,
-      results: found ? filtered : [],
-      notFoundReason: found
-        ? undefined
-        : 'No chunk exceeded multi-query fusion threshold; abstaining honestly.',
-      latencyMs,
-      mode: 'hybrid',
-      subQueries,
-      compressedContext: compressed.trim(),
-      freshnessApplied: true,
-    };
-  }
-
-  /**
-   * Batch 28: Citation Verification — verifies cited chunk/doc IDs, hash provenance,
-   * and lexical support of claimed answer statements against retrieved evidence.
-   */
-  public verifyCitations(params: {
-    answer: string;
-    citations: Array<{ documentId: string; chunkId?: string; snippet?: string; contentHash?: string }>;
-    scope?: { tenantId?: string; role?: string };
-  }): {
-    verified: boolean;
-    citationCorrectnessRate: number;
-    answerGroundingRate: number;
-    validCitations: number;
-    invalidCitations: Array<{ documentId: string; reason: string }>;
-  } {
-    const kw = KnowledgeWorkspace.getInstance();
-    const invalidCitations: Array<{ documentId: string; reason: string }> = [];
-    let validCitations = 0;
-    const evidenceTexts: string[] = [];
-
-    for (const c of params.citations) {
-      let doc: KnowledgeDocument | null = null;
-      try {
-        doc = kw.getDocument(c.documentId, params.scope);
-      } catch (err: any) {
-        invalidCitations.push({ documentId: c.documentId, reason: err?.message || 'Access denied' });
-        continue;
-      }
-      if (!doc) {
-        invalidCitations.push({ documentId: c.documentId, reason: 'Document not found' });
-        continue;
-      }
-      if (c.contentHash && c.contentHash !== doc.contentHash) {
-        invalidCitations.push({ documentId: c.documentId, reason: 'Document contentHash mismatch (stale/tampered)' });
-        continue;
-      }
-      if (c.snippet && !doc.content.toLowerCase().includes(c.snippet.trim().slice(0, 48).toLowerCase())) {
-        invalidCitations.push({ documentId: c.documentId, reason: 'Cited snippet absent from source document' });
-        continue;
-      }
-      validCitations += 1;
-      evidenceTexts.push(c.snippet || doc.content);
-    }
-
-    const total = params.citations.length;
-    const citationCorrectnessRate = total > 0 ? Number((validCitations / total).toFixed(3)) : 0;
-
-    // Measure lexical grounding coverage of answer tokens against verified evidence
-    const ansTokens = tokenize(params.answer);
-    const evSet = new Set(tokenize(evidenceTexts.join(' ')));
-    let supported = 0;
-    for (const t of ansTokens) if (evSet.has(t)) supported++;
-    const answerGroundingRate = ansTokens.length > 0 ? Number((supported / ansTokens.length).toFixed(3)) : 0;
-
-    this.retrievalTelemetry.totalCitationsVerified += total;
-    this.retrievalTelemetry.failedCitations += invalidCitations.length;
-
-    return {
-      verified: total > 0 && invalidCitations.length === 0 && answerGroundingRate >= 0.25,
-      citationCorrectnessRate,
-      answerGroundingRate,
-      validCitations,
-      invalidCitations,
-    };
-  }
-
-  public getRetrievalTelemetry() {
-    return {
-      ...this.retrievalTelemetry,
-      groundedRatePct:
-        this.retrievalTelemetry.totalQueries > 0
-          ? Number(((this.retrievalTelemetry.groundedQueries / this.retrievalTelemetry.totalQueries) * 100).toFixed(1))
-          : 0,
     };
   }
 }

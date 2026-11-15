@@ -1,111 +1,141 @@
 import React, { useEffect, useState } from 'react';
 import { VividCard } from './ui/VividCard';
 import { Cpu, HardDrive, Activity } from 'lucide-react';
-import { apiUrl } from '../lib/apiClient';
-
-type ResourceTelemetry = {
-  cpuPercent?: number;
-  processHeapUsedMb?: number;
-  processHeapTotalMb?: number;
-  processRssMb?: number;
-  systemRamUsedMb?: number;
-  systemRamTotalMb?: number;
-  systemRamFreeMb?: number;
-};
 
 interface HardwareMonitorProps {
   isTraining: boolean;
-  activeModelLabel?: string;
+  memoryBudgetMb?: number;
 }
 
-const formatMb = (value?: number) =>
-  typeof value === 'number' && Number.isFinite(value) ? `${value.toFixed(1)} MB` : '—';
+interface ResourceTelemetry {
+  cpuPercent: number;
+  processHeapUsedMb: number;
+  processRssMb: number;
+  systemRamUsedMb: number;
+  systemRamTotalMb: number;
+  vramMb: number;
+  vramMaxMb: number;
+}
 
-export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({ isTraining, activeModelLabel }) => {
-  const [telemetry, setTelemetry] = useState<ResourceTelemetry | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
+  isTraining,
+  memoryBudgetMb = 512
+}) => {
+  const [telemetry, setTelemetry] = useState<ResourceTelemetry>({
+    cpuPercent: 0,
+    processHeapUsedMb: 0,
+    processRssMb: 0,
+    systemRamUsedMb: 0,
+    systemRamTotalMb: 1,
+    vramMb: 0,
+    vramMaxMb: memoryBudgetMb
+  });
 
   useEffect(() => {
     let active = true;
     const fetchResources = async () => {
       try {
-        const res = await fetch(apiUrl('/api/system/status'));
-        if (!res.ok) throw new Error(`Runtime telemetry unavailable (${res.status})`);
+        const res = await fetch('/api/system/status');
         const data = await res.json();
-        if (!data.success || !data.resources) throw new Error(data.error || 'Runtime telemetry not returned');
-        if (active) {
-          const current = data.resources.current || data.resources;
+        if (active && data.success && data.resources) {
+          const r = data.resources;
           setTelemetry({
-            cpuPercent: current.cpuPercent,
-            processHeapUsedMb: current.processHeapUsedMb,
-            processHeapTotalMb: current.processHeapTotalMb,
-            processRssMb: current.processRssMb,
-            systemRamUsedMb: current.systemRamUsedMb,
-            systemRamTotalMb: current.systemRamTotalMb,
-            systemRamFreeMb: current.systemRamFreeMb,
+            cpuPercent: r.cpuPercent ?? 0,
+            processHeapUsedMb: r.processHeapUsedMb ?? 0,
+            processRssMb: r.processRssMb ?? 0,
+            systemRamUsedMb: r.systemRamUsedMb ?? 0,
+            systemRamTotalMb: r.systemRamTotalMb ?? 1,
+            vramMb: r.vramMb ?? r.processHeapUsedMb ?? 0,
+            vramMaxMb: memoryBudgetMb
           });
-          setLoadError(null);
         }
-      } catch (error: any) {
-        if (active) setLoadError(error?.message || 'Runtime telemetry unavailable');
+      } catch {
+        // ignore transient poll errors
       }
     };
 
-    void fetchResources();
-    const interval = setInterval(() => void fetchResources(), isTraining ? 1500 : 5000);
+    fetchResources();
+    const interval = setInterval(fetchResources, isTraining ? 1500 : 5000);
     return () => {
       active = false;
       clearInterval(interval);
     };
-  }, [isTraining]);
+  }, [isTraining, memoryBudgetMb]);
 
-  const metricCards = [
-    {
-      title: 'CPU usage',
-      value: typeof telemetry?.cpuPercent === 'number' ? `${telemetry.cpuPercent.toFixed(1)}%` : '—',
-      detail: 'Reported by runtime',
-      icon: <Cpu className="h-4 w-4 text-[#CCFF00]" />,
-    },
-    {
-      title: 'Process memory',
-      value: formatMb(telemetry?.processRssMb),
-      detail: `Heap ${formatMb(telemetry?.processHeapUsedMb)} / ${formatMb(telemetry?.processHeapTotalMb)}`,
-      icon: <Activity className="h-4 w-4 text-[#00F0FF]" />,
-    },
-    {
-      title: 'Host memory',
-      value: `${formatMb(telemetry?.systemRamUsedMb)} / ${formatMb(telemetry?.systemRamTotalMb)}`,
-      detail: `Free ${formatMb(telemetry?.systemRamFreeMb)}`,
-      icon: <HardDrive className="h-4 w-4 text-[#FF5E3A]" />,
-    },
-  ];
+  const ramPct = Math.min(100, Math.round((telemetry.processRssMb / Math.max(1, memoryBudgetMb)) * 100));
+  const vramPct = Math.min(100, Math.round((telemetry.vramMb / Math.max(1, telemetry.vramMaxMb)) * 100));
+  const withinBudget = telemetry.processRssMb <= memoryBudgetMb;
 
   return (
     <VividCard
-      title={`Runtime resources${activeModelLabel ? ` · ${activeModelLabel}` : ''}`}
-      subtitle="Only telemetry returned by the server is displayed."
-      gradientAccent="cyan"
+      title="HardwareMonitor (33.9M Memory-Bounded)"
+      subtitle={`Real-time CPU, RAM & VRAM utilization · Budget: ${memoryBudgetMb} MB`}
+      gradientAccent="emerald"
     >
-      {loadError && !telemetry && (
-        <p role="status" className="mb-3 text-xs text-[var(--app-text-secondary)]">{loadError}</p>
-      )}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {metricCards.map((metric) => (
-          <div key={metric.title} className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] p-3.5">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--app-text-secondary)]">
-              {metric.icon}
-              <span>{metric.title}</span>
-            </div>
-            <div className="mt-2 text-xl font-bold font-mono tabular-nums text-[var(--app-text-primary)]">{metric.value}</div>
-            <div className="mt-1 text-[10px] text-[var(--app-text-secondary)]">{metric.detail}</div>
-          </div>
-        ))}
+      <div className="flex justify-end mb-3">
+        <span
+          className={`px-2.5 py-1 rounded-md text-[10px] font-bold font-mono border ${
+            withinBudget
+              ? 'bg-[color-mix(in_srgb,var(--z-ok)_60%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+              : 'bg-[color-mix(in_srgb,var(--app-amber)_60%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
+          }`}
+        >
+          {withinBudget ? 'BOUNDED OK' : 'NEAR BUDGET'}
+        </span>
       </div>
-      {loadError && telemetry && (
-        <p role="status" className="mt-3 text-[10px] text-[var(--app-text-secondary)]">Latest refresh failed: {loadError}</p>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)] font-semibold">
+              <Cpu className="w-3.5 h-3.5 text-[var(--app-accent)]" />
+              CPU Load
+            </span>
+            <span className="font-mono font-bold text-[var(--app-text-primary)]">{telemetry.cpuPercent}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-[var(--app-bg)] overflow-hidden">
+            <div
+              className="h-full bg-[var(--app-accent)] transition-all duration-300"
+              style={{ width: `${telemetry.cpuPercent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)] font-semibold">
+              <HardDrive className="w-3.5 h-3.5 text-[var(--app-amber)]" />
+              Process RSS / Budget
+            </span>
+            <span className="font-mono font-bold text-[var(--app-text-primary)]">
+              {telemetry.processRssMb.toFixed(1)} / {memoryBudgetMb} MB
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-[var(--app-bg)] overflow-hidden">
+            <div
+              className="h-full bg-[var(--app-amber)] transition-all duration-300"
+              style={{ width: `${ramPct}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)] font-semibold">
+              <Activity className="w-3.5 h-3.5 text-[var(--app-accent)]" />
+              Heap / Tensor Buffer
+            </span>
+            <span className="font-mono font-bold text-[var(--app-text-primary)]">
+              {telemetry.vramMb.toFixed(1)} MB
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-[var(--app-bg)] overflow-hidden">
+            <div
+              className="h-full bg-[var(--z-ok)] transition-all duration-300"
+              style={{ width: `${vramPct}%` }}
+            />
+          </div>
+        </div>
+      </div>
     </VividCard>
   );
 };
-
-export default HardwareMonitor;

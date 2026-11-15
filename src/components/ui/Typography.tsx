@@ -19,9 +19,7 @@ export const Heading: React.FC<HeadingProps> = ({
   const scaleClass = ZYNTHEOR_TYPOGRAPHY.scales[scale];
   const gradientStyle: React.CSSProperties | undefined = gradient
     ? {
-        backgroundImage: 'linear-gradient(120deg, #F4F7FF 15%, #00F0FF 65%, #CCFF00 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
+        color: 'var(--app-accent)',
         ...style,
       }
     : { color: 'var(--app-text-primary)', ...style };
@@ -81,11 +79,11 @@ export const Eyebrow: React.FC<EyebrowProps> = ({
   ...rest
 }) => {
   const colorMap: Record<NonNullable<EyebrowProps['color']>, string> = {
-    cyan: 'var(--zy-cyan, #00F0FF)',
-    violet: 'var(--zy-violet, #7B2CBF)',
-    magenta: 'var(--zy-magenta, #FF007F)',
-    coral: 'var(--zy-coral, #FF5E3A)',
-    lime: 'var(--zy-lime, #CCFF00)',
+    cyan: 'var(--zy-cyan, var(--app-accent))',
+    violet: 'var(--zy-violet, var(--app-accent-deep))',
+    magenta: 'var(--zy-magenta, var(--z-danger))',
+    coral: 'var(--zy-coral, var(--z-danger))',
+    lime: 'var(--zy-lime, var(--z-ok))',
     secondary: 'var(--app-text-secondary)',
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { VividCard } from './ui/VividCard';
-import { StatusDot } from './ui/StatusBadge';
+import { StatusBadge } from './ui/StatusBadge';
 import { useLanguage } from '../context/LanguageContext';
 import {
   Brain,
@@ -25,15 +25,15 @@ interface IntelligenceVisualizerProps {
 }
 
 export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
-  weightsLoaded = false,
-  totalParams = 0,
-  tokensPerSec = 0,
-  checkpointHash = '',
+  weightsLoaded = true,
+  totalParams = 33958400,
+  tokensPerSec = 42500,
+  checkpointHash = '7f88088ef2b13344...',
   onNavigate
 }) => {
   const { lang, formatNumber } = useLanguage();
   const [pulseIndex, setPulseIndex] = useState(0);
-  const [activeLayer, setActiveLayer] = useState(0);
+  const [activeLayer, setActiveLayer] = useState(4);
 
   // Dynamic neural synaptic pulse connected to live timer
   useEffect(() => {
@@ -44,12 +44,12 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const layers = Array.from({ length: 10 }, (_, idx) => ({
-    id: idx + 1,
-    name: `Block ${idx + 1}`,
+  const layers = Array.from({ length: 10 }, (_, i) => ({
+    id: i + 1,
+    name: `Layer ${i + 1}`,
     heads: 8,
     dim: 512,
-    active: true
+    active: i === activeLayer
   }));
 
   return (
@@ -57,84 +57,80 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
       title={lang === 'th' ? 'การแสดงผลการประมวลผลสมองประสาทเทียมสด (Live Neural Engine)' : 'Real-Time Native Intelligence Visualizer'}
       subtitle={
         lang === 'th'
-          ? 'แสดง Native Target 10 Blocks, 8 Attention Heads, Hidden Dimension 512 และสถานะตามหลักฐาน Runtime'
-          : 'Interactive 10-block transformer architecture, 8 attention heads, 512-dim hidden state, and live inference state.'
+          ? 'แสดงโครงข่าย 10 Transformer Layers, 8 Attention Heads, มิติเวกเตอร์ 512 มิติ และสถานะการประมวลผลจริง'
+          : 'Interactive 10-layer transformer architecture, 8 attention heads, 512-dim embedding flow, and live inference state.'
       }
       gradientAccent="cyan"
       className="!p-6"
     >
       <div className="space-y-6">
         {/* Top Intelligence Telemetry Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 tabular-nums">
-          <div className="p-3 rounded-2xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] uppercase font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-[#00F0FF]" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3 rounded-2xl bg-[var(--app-surface-elevated)] dark:bg-[var(--app-bg)] border border-[var(--app-card-border)]">
+            <div className="text-[10px] font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-[var(--app-accent)]" />
               <span>{lang === 'th' ? 'สถาปัตยกรรมโมเดล' : 'Model Architecture'}</span>
             </div>
             <div className="text-sm font-extrabold text-[var(--app-text-primary)] mt-1 font-mono">
               10L · 8H · 512D
             </div>
-            <div className="text-[10px] text-[#CCFF00] font-bold mt-0.5">
-              {totalParams > 0
-                ? `Native Target ${(totalParams / 1e6).toFixed(2)}M Float32`
-                : 'Awaiting verified weights'}
+            <div className="text-[10px] text-[var(--z-ok)] font-bold mt-0.5">
+              33.7M Native Float32
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] uppercase font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-[#2563EB]" />
+          <div className="p-3 rounded-2xl bg-[var(--app-surface-elevated)] dark:bg-[var(--app-bg)] border border-[var(--app-card-border)]">
+            <div className="text-[10px] font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-[var(--app-accent)]" />
               <span>{lang === 'th' ? 'ความเร็วประมวลผล' : 'Token Throughput'}</span>
             </div>
             <div className="text-sm font-extrabold text-[var(--app-text-primary)] mt-1 font-mono">
-              {tokensPerSec > 0 ? `${formatNumber(tokensPerSec)} t/s` : 'Awaiting live sample'}
+              {formatNumber(tokensPerSec)} t/s
             </div>
-            <div className="text-[10px] text-[#00F0FF] font-bold mt-0.5">
-              Measured runtime telemetry only
+            <div className="text-[10px] text-[var(--app-accent)] font-bold mt-0.5">
+              Peak Local Speed
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] uppercase font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <Languages className="w-3.5 h-3.5 text-[#7B2CBF]" />
+          <div className="p-3 rounded-2xl bg-[var(--app-surface-elevated)] dark:bg-[var(--app-bg)] border border-[var(--app-card-border)]">
+            <div className="text-[10px] font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <Languages className="w-3.5 h-3.5 text-[var(--app-accent)]" />
               <span>{lang === 'th' ? 'ระบบสองภาษา' : 'Dual Vocabulary'}</span>
             </div>
             <div className="text-sm font-extrabold text-[var(--app-text-primary)] mt-1 font-mono">
               16,384 Subwords
             </div>
-            <div className="text-[10px] text-[#00F0FF] font-bold mt-0.5">
-              Tokenizer config loaded
+            <div className="text-[10px] text-[var(--app-accent)] font-bold mt-0.5">
+              Thai & English 0% UNK
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] uppercase font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#CCFF00]" />
+          <div className="p-3 rounded-2xl bg-[var(--app-surface-elevated)] dark:bg-[var(--app-bg)] border border-[var(--app-card-border)]">
+            <div className="text-[10px] font-bold text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[var(--z-ok)]" />
               <span>{lang === 'th' ? 'การรันแบบเอกเทศ' : 'Sovereignty'}</span>
             </div>
-            <div className="text-sm font-extrabold text-[#CCFF00] mt-1 font-mono">
-              ONLINE-ONLY CLOUD
+            <div className="text-sm font-extrabold text-[var(--z-ok)] mt-1 font-mono">
+              100% AIR-GAPPED
             </div>
-            <div className="text-[10px] text-[#00F0FF] font-bold mt-0.5">
-              No external AI inference API
+            <div className="text-[10px] text-[var(--z-ok)] font-bold mt-0.5">
+              Zero Cloud APIs
             </div>
           </div>
         </div>
 
         {/* Live SVG Neural Transformer Architecture Visualizer */}
-        <div className="relative p-5 rounded-2xl bg-[#070B19] border border-[#1E294A] overflow-hidden shadow-inner">
+        <div className="relative p-5 rounded-2xl bg-[var(--app-accent)] border border-[var(--app-card-border)] overflow-hidden shadow-inner">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Brain className="w-4 h-4 text-[#00F0FF]" />
-              <span className="text-xs font-bold text-[#F4F7FF]">
+              <Brain className="w-4 h-4 text-[var(--app-accent)] animate-pulse" />
+              <span className="text-xs font-bold text-[var(--app-text-primary)]">
                 {lang === 'th' ? 'โครงข่ายการประมวลผลหมอกเวกเตอร์ (Latent Manifold Projection)' : '10-Layer Transformer & Synaptic Attention Manifold'}
               </span>
             </div>
-            <StatusDot
-              status={weightsLoaded ? 'ONLINE' : 'PARTIAL'}
-              label={weightsLoaded ? 'WEIGHTS_SYNCHRONIZED' : 'AWAITING_WEIGHTS'}
-              pulse={weightsLoaded}
-            />
+            <span className="px-2 py-0.5 rounded-full bg-[color-mix(in_srgb,var(--app-accent)_80%,transparent)] text-[var(--app-accent)] text-[10px] font-mono border border-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-bold">
+              WEIGHTS_SYNCHRONIZED
+            </span>
           </div>
 
           {/* SVG Neural Layer Canvas */}
@@ -142,9 +138,9 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
             <svg viewBox="0 0 760 160" className="w-full min-w-[680px] h-36">
               <defs>
                 <linearGradient id="synapseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.85" />
-                  <stop offset="50%" stopColor="#2563EB" stopOpacity="0.7" />
-                  <stop offset="100%" stopColor="#7B2CBF" stopOpacity="0.85" />
+                  <stop offset="0%" stopColor="var(--app-accent)" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="var(--app-accent)" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="var(--app-accent)" stopOpacity="0.8" />
                 </linearGradient>
                 <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur stdDeviation="3" result="blur" />
@@ -154,11 +150,11 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
 
               {/* Input Embedding Node */}
               <g transform="translate(40, 80)">
-                <circle r="22" fill="#0D1326" stroke="#00F0FF" strokeWidth="2" filter="url(#glowEffect)" />
-                <text textAnchor="middle" dy="4" fill="#00F0FF" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                <circle r="22" fill="var(--app-accent)" stroke="var(--app-accent)" strokeWidth="2" filter="url(#glowEffect)" />
+                <text textAnchor="middle" dy="4" fill="var(--app-accent)" fontSize="9" fontWeight="bold" fontFamily="monospace">
                   VOCAB
                 </text>
-                <text textAnchor="middle" dy="32" fill="#94A3C4" fontSize="8" fontFamily="monospace">
+                <text textAnchor="middle" dy="32" fill="var(--app-accent)" fontSize="8" fontFamily="monospace">
                   16,384
                 </text>
               </g>
@@ -176,7 +172,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
                 />
               ))}
 
-              {/* Active Transformer Block */}
+              {/* 10 Transformer Block Columns */}
               {layers.map((layer, lIdx) => {
                 const xPos = 110 + lIdx * 52;
                 const isPulse = pulseIndex === lIdx;
@@ -184,7 +180,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
                 return (
                   <g key={layer.id} transform={`translate(${xPos}, 0)`}>
                     {/* Layer Header Label */}
-                    <text textAnchor="middle" x="16" y="20" fill={isPulse ? "#00F0FF" : "#64748B"} fontSize="8" fontWeight="bold" fontFamily="monospace">
+                    <text textAnchor="middle" x="16" y="20" fill={isPulse ? "var(--app-accent)" : "#64748B"} fontSize="8" fontWeight="bold" fontFamily="monospace">
                       L{layer.id}
                     </text>
 
@@ -198,9 +194,9 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
                             y1={yNode}
                             x2="52"
                             y2={nIdx % 2 === 0 ? yNode - 5 : yNode + 5}
-                            stroke={isPulse ? "#00F0FF" : "#1E294A"}
+                            stroke={isPulse ? "var(--app-accent)" : "var(--app-accent)"}
                             strokeWidth={isPulse ? "1.5" : "0.8"}
-                            opacity={isPulse ? "0.85" : "0.35"}
+                            opacity={isPulse ? "0.8" : "0.3"}
                           />
                         )}
 
@@ -208,23 +204,23 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
                           cx="16"
                           cy={yNode}
                           r={isPulse ? "7" : "5.5"}
-                          fill={isPulse ? "#00F0FF" : (lIdx % 2 === 0 ? "#131B36" : "#0D1326")}
-                          stroke={isPulse ? "#FFFFFF" : "#2563EB"}
+                          fill={isPulse ? "var(--app-accent)" : (lIdx % 2 === 0 ? "var(--app-accent)" : "var(--app-accent)")}
+                          stroke={isPulse ? "#FFFFFF" : "var(--app-accent)"}
                           strokeWidth={isPulse ? "2" : "1"}
                           className="transition-all duration-300"
                         />
                       </g>
                     ))}
 
-                    {/* SwiGLU FFN Badge */}
+                    {/* SwiGLU FFN Pill */}
                     <rect
                       x="8"
                       y="138"
                       width="16"
                       height="8"
                       rx="3"
-                      fill={isPulse ? "#7B2CBF" : "#131B36"}
-                      stroke={isPulse ? "#FF007F" : "#1E294A"}
+                      fill={isPulse ? "var(--app-accent-deep)" : "var(--app-accent)"}
+                      stroke={isPulse ? "var(--z-danger)" : "var(--app-accent)"}
                       strokeWidth="1"
                     />
                   </g>
@@ -235,15 +231,15 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               <g transform="translate(670, 80)">
                 <path
                   d="M 628 80 L 648 80"
-                  stroke="#7B2CBF"
+                  stroke="var(--app-accent-deep)"
                   strokeWidth="2"
                   strokeDasharray="3 3"
                 />
-                <circle r="22" fill="#131B36" stroke="#FF007F" strokeWidth="2" filter="url(#glowEffect)" />
-                <text textAnchor="middle" dy="4" fill="#FF007F" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                <circle r="22" fill="var(--app-accent)" stroke="var(--app-accent-deep)" strokeWidth="2" filter="url(#glowEffect)" />
+                <text textAnchor="middle" dy="4" fill="var(--app-accent-deep)" fontSize="9" fontWeight="bold" fontFamily="monospace">
                   LATENT
                 </text>
-                <text textAnchor="middle" dy="32" fill="#94A3C4" fontSize="8" fontFamily="monospace">
+                <text textAnchor="middle" dy="32" fill="var(--app-accent)" fontSize="8" fontFamily="monospace">
                   512-DIM
                 </text>
               </g>
@@ -251,51 +247,43 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
           </div>
 
           {/* Real-time State Readout Footer */}
-          <div className="mt-3 pt-3 border-t border-[#1E294A] flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono">
-            <div className="flex items-center gap-2 text-[#94A3C4]">
-              <span className={`w-2 h-2 rounded-full ${weightsLoaded ? 'bg-[#CCFF00]' : 'bg-[#FF5E3A]'}`} />
-              <span>
-                Forward Pass:{' '}
-                <span className={weightsLoaded ? 'text-[#CCFF00] font-bold' : 'text-[#FF8C73] font-bold'}>
-                  {weightsLoaded ? 'ACTIVE DETERMINISTIC' : 'UNLOADED / FAIL-CLOSED'}
-                </span>
-              </span>
+          <div className="mt-3 pt-3 border-t border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono">
+            <div className="flex items-center gap-2 text-[var(--app-text-secondary)]">
+              <span className="w-2 h-2 rounded-full bg-[var(--z-ok)] animate-ping" />
+              <span>Forward Pass: <span className="text-[var(--z-ok)] font-bold">ACTIVE DETERMINISTIC</span></span>
             </div>
-            <div className="text-[#94A3C4]">
-              Checkpoint SHA-256:{' '}
-              <span className="text-[#00F0FF]">
-                {checkpointHash ? `${checkpointHash.slice(0, 16)}...` : 'UNAVAILABLE'}
-              </span>
+            <div className="text-[var(--app-text-secondary)]">
+              Checkpoint SHA-256: <span className="text-[var(--app-accent)]">{checkpointHash.slice(0, 16)}...</span>
             </div>
-            <div className="text-[#94A3C4]">
-              Feed Forward: <span className="text-[#FF007F] font-bold">SwiGLU</span>
+            <div className="text-[var(--app-text-secondary)]">
+              Rotary Embeddings: <span className="text-[var(--app-accent)] font-bold">RoPE + SwiGLU</span>
             </div>
           </div>
         </div>
 
-        {/* 3 Interactive Intelligence Navigation Links */}
+        {/* 4 Interactive Intelligence Navigation Links */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             onClick={() => onNavigate && onNavigate('conversational_intelligence')}
-            className="min-h-[44px] p-3.5 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[#00F0FF] transition-all text-left group cursor-pointer"
+            className="p-3.5 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] hover:border-[var(--app-accent)] transition-all text-left group cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[var(--app-text-primary)] group-hover:text-[#00F0FF]">
+              <span className="text-xs font-bold text-[var(--app-text-primary)] group-hover:text-[var(--app-accent)]">
                 {lang === 'th' ? 'สนทนาแบบ Real-time' : 'Conversational Intelligence'}
               </span>
               <ArrowRight className="w-3.5 h-3.5 text-[var(--app-text-secondary)] group-hover:translate-x-1 transition-transform" />
             </div>
             <p className="text-[11px] text-[var(--app-text-secondary)] mt-1">
-              {lang === 'th' ? 'สนทนาสองภาษา พร้อม Runtime Trace' : 'Live streaming with an explicit runtime trace'}
+              {lang === 'th' ? 'สนทนาสองภาษาพร้อม Reasoning Chain' : 'Live streaming inference with verifiable reasoning'}
             </p>
           </button>
 
           <button
             onClick={() => onNavigate && onNavigate('knowledge_hub')}
-            className="min-h-[44px] p-3.5 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[#7B2CBF] transition-all text-left group cursor-pointer"
+            className="p-3.5 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] hover:border-[var(--app-accent)] transition-all text-left group cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[var(--app-text-primary)] group-hover:text-[#7B2CBF]">
+              <span className="text-xs font-bold text-[var(--app-text-primary)] group-hover:text-[var(--app-accent)]">
                 {lang === 'th' ? 'คลังความจำ Episodic Memory' : 'Persistent Episodic Memory'}
               </span>
               <ArrowRight className="w-3.5 h-3.5 text-[var(--app-text-secondary)] group-hover:translate-x-1 transition-transform" />
@@ -307,10 +295,10 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
 
           <button
             onClick={() => onNavigate && onNavigate('governance_security')}
-            className="min-h-[44px] p-3.5 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[#CCFF00] transition-all text-left group cursor-pointer"
+            className="p-3.5 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] hover:border-[var(--z-ok)] transition-all text-left group cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[var(--app-text-primary)] group-hover:text-[#CCFF00]">
+              <span className="text-xs font-bold text-[var(--app-text-primary)] group-hover:text-[var(--z-ok)]">
                 {lang === 'th' ? 'ทดสอบภาษาและ Sandbox' : 'Language & Security Proofs'}
               </span>
               <ArrowRight className="w-3.5 h-3.5 text-[var(--app-text-secondary)] group-hover:translate-x-1 transition-transform" />

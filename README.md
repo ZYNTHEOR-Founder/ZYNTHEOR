@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="./assets/banner-top.svg" alt="ZYNTHEOR — Vivid Intelligence. An animated emerald and violet neural core surrounded by glowing network nodes." width="100%" />
+  <img src="./assets/banner-top.gif" alt="ZYNTHEOR — Vivid Intelligence. Animated banner: a Thai water buffalo walks across a dusk paddy while emerald neural-network pulses travel through its silhouette and amber particles drift upward." width="100%" />
 </p>
 
 # ZYNTHEOR — VIVID INTELLIGENCE
 
 <p align="center">
   <b>Intelligence Without Boundaries.</b><br />
-  Online-first · Native Transformer runtime · Thai/English dual engine · Evidence-labelled claims
+  Local-first · Native Transformer core (architecture spec) · No external AI APIs in the intended core path · Evidence-labelled claims
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Architecture-231K_active_(41.53M_target_roadmap)-8B5CF6?style=flat" alt="Measured 231K active parameters; 41.53M target roadmap" />
+  <img src="https://img.shields.io/badge/Architecture-~34M_params_(reported)-8B5CF6?style=flat" alt="Architecture ~34M parameters (reported)" />
   <img src="https://img.shields.io/badge/Training-PARTIAL-F59E0B?style=flat" alt="Training status PARTIAL" />
-  <img src="https://img.shields.io/badge/Runtime-Online--only-06B6D4?style=flat" alt="Online-only runtime" />
+  <img src="https://img.shields.io/badge/Runtime-Local--first-06B6D4?style=flat" alt="Local-first runtime" />
   <img src="https://img.shields.io/badge/Tokenizer-Thai_%26_English-10B981?style=flat" alt="Thai and English tokenizer" />
   <img src="https://img.shields.io/badge/Audit_Log-SHA--256_hash_chain-F59E0B?style=flat" alt="SHA-256 hash-chained audit log" />
   <img src="https://img.shields.io/badge/External_AI_APIs-none_in_core_path_(PARTIAL)-rose?style=flat" alt="No external AI APIs in core path, status PARTIAL" />
@@ -22,9 +22,9 @@
 
 ## Overview
 
-**ZYNTHEOR** is a first-party **native intelligence system**. Rather than wrapping a hosted API, it is designed to run its own decoder Transformer inside the hosted Sovereign Cloud runtime, with persistent episodic memory, a Thai/English tokenizer, structured reasoning traces, a path-confined tool sandbox, and a SHA-256 hash-chained audit log.
+**ZYNTHEOR** is a first-party **native intelligence system**. Rather than wrapping a hosted API, it is designed to run its own decoder Transformer locally, with persistent episodic memory, a Thai/English tokenizer, structured reasoning traces, a path-confined tool sandbox, and a SHA-256 hash-chained audit log.
 
-> **Reading this document.** Every capability carries a status. **`VERIFIED`** means a reproducible command *and* its recorded output are attached to this repository. **`PARTIAL`** means the feature is implemented or specified but its evidence is missing, incomplete, or covers only a narrower claim than the one a reader might assume. See [§13](#13-evidence-based-verification-status). No separate per-claim audit record is published in this repository. Architecture numbers describe the **model's shape**, not the quality of its **learned weights**.
+> **Reading this document.** Every capability carries a status. **`VERIFIED`** means a reproducible command *and* its recorded output are attached to this repository. **`PARTIAL`** means the feature is implemented or specified but its evidence is missing, incomplete, or covers only a narrower claim than the one a reader might assume. See [§13](#13-evidence-based-verification-status) and the [claims audit](./docs/CLAIMS_AUDIT.md). Architecture numbers describe the **model's shape**, not the quality of its **learned weights**.
 
 ---
 
@@ -49,25 +49,6 @@
 
 ---
 
-## Operating contract — Online-only
-
-ZYNTHEOR is an **online-only product**. The production user experience is served by the Sovereign Cloud runtime; the product requires the Sovereign Cloud runtime and does not expose a disconnected product mode. Development commands in this repository are engineering tools only and do not define the production deployment model. Persistent product data, identity, knowledge, memory, audit, and model-serving services must be provisioned in the controlled cloud environment before a production launch.
-
-## Admin and verification evidence boundary
-
-The Admin Console does not seed example users, verification passes, or benchmark figures. Verification rows appear only after an actual runtime suite response. Client-side audit history is a convenience cache and is not authoritative; the server-side audit ledger is the governance record. Session listing/revocation remains unavailable in the UI until an authenticated administrative endpoint is implemented.
-
-### Runtime evidence API
-
-`GET /api/model/evidence` returns measured checkpoint facts used by the runtime: loaded parameter count, target roadmap count, storage mode, weights source, checkpoint SHA-256, bilingual tokenizer results, and the recorded v2 evaluation summary. It deliberately reports the active runtime checkpoint separately from the v2 evaluation artifact.
-
-## Commercial and request-rate controls
-
-- Request throttles are available for native inference, chat messages, and agent execution. Limits are per verified tenant/user identity and are configurable through `ZYNTHEOR_RATE_<SCOPE>_LIMIT` and `ZYNTHEOR_RATE_<SCOPE>_WINDOW_SECONDS`.
-- The current limiter uses an in-process fixed-window store. It is suitable for a single runtime instance only; horizontal or multi-region deployment requires a shared atomic rate-limit store before scaling.
-- Optional Pro/Team prices are intentionally unset unless `ZYNTHEOR_PRICE_PRO_USD` and `ZYNTHEOR_PRICE_TEAM_USD` are configured. No commercial price is represented as approved by default.
-- Revenue, cloud infrastructure cost, and gross margin are not claimed until payment and cloud-cost ledgers are connected. Launch-readiness gates remain false until supporting evidence is recorded.
-
 ## 1. Intelligence Mission & Vision
 
 ZYNTHEOR avoids thin wrappers, placeholder mocks, and third-party API dependencies in its core reasoning path.
@@ -75,7 +56,7 @@ ZYNTHEOR avoids thin wrappers, placeholder mocks, and third-party API dependenci
 | Principle | Engineering Standard | Status |
 |---|---|---|
 | **No external AI APIs in the core path** | The core reasoning path is intended to contain no OpenAI, Google Gemini, Anthropic Claude, or other hosted inference endpoints. *Scope: AI inference only — `npm install` and `git clone` still need network access, and a source scan has not been published.* | `PARTIAL` |
-| **Native neural core** | Reasoning, code generation, and conversation are intended to originate from the cloud-hosted Native Transformer via `qplus_native.bridge`. | `PARTIAL` |
+| **Native neural core** | Reasoning, code generation, and conversation are intended to originate from the local Transformer via `qplus_native.bridge`. | `PARTIAL` |
 | **Fail-closed checkpoint loading** | A missing or corrupted checkpoint should halt execution (`FAIL_CLOSED`) instead of simulating success. | `PARTIAL` |
 | **Bilingual script fidelity** | Thai and English text is tokenized with no unknown tokens (`[UNK]`) **on the project's test corpora**. Arbitrary Unicode (emoji, CJK, other scripts) is not covered by that claim. | `PARTIAL` |
 | **Tamper-evident accountability** | State transitions, inference checks, and memory mutations are appended to a SHA-256 hash-chained log (`native_data/audit_log.jsonl`). A hash chain is *tamper-evident*, not tamper-proof — see [§6](#6-persistent-episodic-memory). | `PARTIAL` |
@@ -84,7 +65,7 @@ ZYNTHEOR avoids thin wrappers, placeholder mocks, and third-party API dependenci
 
 ## 2. Native Model Architecture
 
-ZYNTHEOR specifies a first-party decoder Transformer intended for cloud-hosted execution:
+ZYNTHEOR specifies a first-party decoder Transformer intended for local execution:
 
 ```
                   ┌─────────────────────────────────────┐
@@ -122,23 +103,22 @@ ZYNTHEOR specifies a first-party decoder Transformer intended for cloud-hosted e
 | **Hidden dimension ($d_{model}$)** | `512` | |
 | **FFN intermediate dimension** | `1,472` | SwiGLU gated network |
 | **Vocabulary size** | `16,384` | Subwords for Thai Unicode + English + technical code |
-| **Loaded active checkpoint** | `231,168` | Measured Float32 payload in `native_data/model_checkpoint.pt` |
-| **Learned v2 evaluation checkpoint** | `502,912` | Measured Float32 payload in `native_data/model_checkpoint_v2.pt`; evaluation artifact is separate from the active bridge |
-| **Target architecture** | `41,527,808` | Roadmap specification, not instantiated in either current checkpoint |
+| **Reported parameter count** | `33,958,400` | From the checkpoint metadata; **see reconciliation note below** |
+| **Reported weight size** | `135.8 MB` | 33,958,400 × 4 bytes (Float32); weights only, excluding activations/KV cache |
 | **Checkpoint file** | `native_data/model_checkpoint.pt` | Container with magic header `ZYNTHEOR_QPLUS_PT` |
 | **Checkpoint integrity check** | SHA-256 at startup | Detects corruption; proves authenticity only if the expected hash is pinned or signed separately |
 
-> **Reconciliation.** The runtime reports measured payload counts instead of conflating the roadmap with loaded weights. The active bridge currently loads `231,168` parameters; the separately evaluated v2 learned checkpoint contains `502,912`; `41,527,808` remains a target specification.
+> **Parameter-count reconciliation (open item, `PARTIAL`).** The earlier 33.7-million label disagreed with the stated 33,958,400 (≈34.0M). Separately, a standard layout at the dimensions above (separate Q/K/V/O projections, 3-matrix SwiGLU, two RMSNorms per block, 16,384×512 embedding) works out to **41,495,040** parameters with a tied output head and **49,883,648** with an untied one. One of the published dimensions, the layout, or the reported count therefore needs correcting. Resolve it by printing the parameter count from the loaded model and updating this table.
 
 ### Learned parameters vs. architecture
 
 | Question | Answer | Status |
 |---|---|---|
-| Does the architecture exist as specified? | Parameter accounting is reconciled at 41,527,808; the target graph is not instantiated in the active runtime. | `PARTIAL` |
+| Does the architecture exist as specified? | Described above; reconciliation pending. | `PARTIAL` |
 | Are all parameters *trained*? | **Not claimed.** The Model Laboratory's `MemoryShardMap` itself reports `PARTIAL` until full-model training is verified ([§15](#15-recent-capabilities--ui-controls)). | `PARTIAL` |
 | Is there a published quality metric (perplexity, benchmark, eval set)? | None in this repository revision. | `PARTIAL` |
 
-A float32 file of the right size says nothing about whether those weights encode learned behaviour. Do not read "41,527,808 parameters" as "41,527,808 trained parameters".
+A float32 file of the right size says nothing about whether those weights encode learned behaviour. Do not read "33,958,400 parameters" as "33,958,400 trained parameters".
 
 ---
 
@@ -148,7 +128,7 @@ The inference engine bridges the Node.js/TypeScript runtime and the native Pytho
 
 - **Entry point**: `python3 -m qplus_native.bridge`
 - **Controller**: `NativeNeuralLMProvider` in `lib/providers.ts`
-- **Cloud-runtime IPC**: stdio instead of a network socket (no port exhaustion, no network exposure). Latency is not published.
+- **Local IPC**: stdio instead of a network socket (no port exhaustion, no network exposure). Latency is not published.
 - **Fail-closed invariant**: checkpoint magic bytes and parameter counts are validated before inference commands are accepted.
 - **Memory-grounded context**: entries from `native_data/memory_store.json` are supplied as context. This can reduce unsupported output but **does not eliminate hallucination**; no hallucination-rate measurement is published.
 
@@ -208,13 +188,13 @@ First-party memory is managed by `NativeMemoryController` (`src/services/NativeM
 
 ## 7. Real-Time Conversational Intelligence
 
-The conversational core (`src/components/modules/ConversationalIntelligence.tsx`) provides an interactive Online-first dialog:
+The conversational core (`src/components/modules/ConversationalIntelligence.tsx`) provides an interactive local dialog:
 
 - **Token streaming** from the native Transformer forward pass.
 - **Live telemetry bar**: token count, throughput (tokens/sec), time-to-first-token (TTFT).
 - **Persistent sessions** in `native_data/chat_sessions.json`, restored automatically.
 - **Code-block highlighting** for JavaScript, TypeScript, Python, and shell, with one-click copy.
-- **Cloud-backed storage of conversations**: chat data is persisted through the configured Sovereign Cloud runtime. Treat as `PARTIAL` until a production network-policy test is attached.
+- **Local storage of conversations**: chat data is written to the host's disk by the application; no cloud upload is intended. Treat as `PARTIAL` until a network-egress test is attached.
 
 ---
 
@@ -285,7 +265,7 @@ Metrics come from OS and process counters inside the running app. **No benchmark
 | Metric | Measurement method | Previously reported (unverified) | Status |
 |---|---|---|---|
 | **Inference rate** | Tokens emitted over elapsed time | 38,000 – 45,000 tokens/sec (hardware, batch size, and prompt not stated) | `PARTIAL` |
-| **Target weight memory** | Float32 weight size | 166.1 MB decimal / 158.4 MiB (weights only; target graph, not active runtime) | `PARTIAL` |
+| **Weight memory** | Float32 weight size | 135.8 MB (weights only; unspecified whether GPU or CPU heap) | `PARTIAL` |
 | **Time to first token** | Request-to-stream latency | 12 – 18 ms | `PARTIAL` |
 | **Sandbox timeout** | Child-process OS timer | 5,000 ms max | `PARTIAL` |
 | **Hash-chain cost** | SHA-256 block calculation | < 1 ms per record | `PARTIAL` |
@@ -310,14 +290,14 @@ Managed by `lib/SovereignIdentity.ts` (`PARTIAL`):
 
 **Legend** — `VERIFIED`: reproducible command and recorded output attached to the repository. `PARTIAL`: implemented or specified, but evidence is absent, incomplete, or narrower than the headline claim.
 
-This revision of the document was prepared without access to the running project, so no runtime claim below could be re-executed. Statuses were therefore downgraded from the previous revision rather than assumed. A per-claim audit record (original wording, reason for each change, and evidence) has not been published in this repository.
+This revision of the document was prepared without access to the running project, so no runtime claim below could be re-executed. Statuses were therefore downgraded from the previous revision rather than assumed. Original wording, the reason for each change, and the exact evidence to attach are in [docs/CLAIMS_AUDIT.md](./docs/CLAIMS_AUDIT.md).
 
 | Subsystem | Status | What is claimed | Evidence to attach to reach `VERIFIED` |
 |---|---|---|---|
-| **Checkpoint (architecture + reported size)** | `PARTIAL` | Active file loads with 231,168 parameters; target graph accounting is reconciled at 41,527,808 but is not yet instantiated. | Printed parameter and tensor counts from the loaded model; target graph implementation and training evidence remain open. |
+| **Checkpoint (architecture + reported size)** | `PARTIAL` | File loads; reported size 135.8 MB; tensor count reported as 74. Parameter count does not reconcile with the published dimensions. | Printed parameter and tensor counts from the loaded model; reconciled table in §2. |
 | **Trained-weight quality** | `PARTIAL` | Not claimed. | Training log, final loss, held-out eval set and score. |
 | **Tokenizer** | `PARTIAL` | 16,384 entries; round-trip on tested Thai/English strings. | Test output for `LANG-01…05`; a random-Unicode round-trip fuzz result. |
-| **Inference forward pass** | `PARTIAL` | Cloud-hosted native forward pass produces tokens without external inference API calls. | A recorded run with network disabled. |
+| **Inference forward pass** | `PARTIAL` | Local forward pass produces tokens without external API calls. | A recorded run with network disabled. |
 | **Reasoning trace** | `PARTIAL` | A 4-stage trace is emitted and rendered. | UI capture; note that the trace is descriptive, not a faithfulness guarantee. |
 | **Episodic memory controller** | `PARTIAL` | CRUD persists to disk and is logged. | Test run showing create/read/update/delete plus matching ledger entries. |
 | **Dual-script integrity** | `PARTIAL` | 5/5 tests, 0 UNK, via `/api/verify/language-integrity`. | Saved JSON response from that endpoint. |
@@ -325,8 +305,8 @@ This revision of the document was prepared without access to the running project
 | **ToolGateway sandbox** | `PARTIAL` | Path confinement and 5 s timeout. Not an OS-level isolation boundary. | Test showing traversal and symlink attempts blocked and the timeout firing. |
 | **Audit ledger hash chain** | `PARTIAL` | Continuous SHA-256 chain from genesis to tip (`chainValid: true`). Tamper-evident only. | Verification output plus a deliberate-tamper test that is detected. |
 | **No external AI API calls** | `PARTIAL` | None in the core path. | Dependency/source scan and a packet capture or firewall-denied run. |
-| **Disconnected operation** | `PARTIAL` | Not claimed. Online-only is the product target; disconnected operation is not claimed. | A run on a host with no network at all, from install artifacts. |
-| **README banners (animated SVG)** | `NOT_VERIFIED` | Two CSS-animated SVG files are referenced by this file. No rendering or accessibility check is recorded in this repository. | [assets/README-BANNERS.md](./assets/README-BANNERS.md) |
+| **Air-gapped operation** | `PARTIAL` | Not claimed. Local-first is the accurate description. | A run on a host with no network at all, from install artifacts. |
+| **README banners (animated GIF)** | `VERIFIED` | Two animated, looping GIFs referenced by this file. | [docs/BANNER_EVIDENCE.md](./docs/BANNER_EVIDENCE.md), reproducible with `python3 scripts/verify_readme.py`. |
 
 ---
 
@@ -375,7 +355,7 @@ curl -s -X POST http://localhost:3000/api/verify/language-integrity
 - **Model Laboratory**:
   - `HardwareMonitor`: CPU, process RSS, and heap/tensor-buffer utilization against the memory budget.
   - `TrainingProgress`: cross-entropy loss, optimizer delta, and epoch/shard status.
-  - `MemoryShardMap`: 12-shard coverage map for the reported 41,527,808 parameters. **Status `PARTIAL` until full-model training is verified.**
+  - `MemoryShardMap`: 12-shard coverage map for the reported 33,958,400 parameters. **Status `PARTIAL` until full-model training is verified.**
   - `GradientNormOverlay`: per-layer gradient-norm inspector for vanishing or exploding gradients.
 
 ---
@@ -387,5 +367,5 @@ Distributed under the **AGPL-3.0 License**.
 ---
 
 <p align="center">
-  <img src="./assets/banner-bottom.svg" alt="Intelligence Without Boundaries — an animated glowing neural horizon." width="100%" />
+  <img src="./assets/banner-bottom.gif" alt="Intelligence Without Boundaries. Animated banner: a Thai water buffalo walks away through reeds at dusk, with emerald neural pulses in its silhouette, amber particles rising, and a scrolling stream of hexadecimal hash fragments along the bottom edge." width="100%" />
 </p>

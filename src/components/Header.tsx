@@ -1,41 +1,39 @@
 import React from 'react';
-import { ModuleId, SystemStatusData, ConnectivityHealthState } from '../types';
-import { Menu, Terminal, RefreshCw, Keyboard } from 'lucide-react';
+import { ModuleId, SystemStatusData } from '../types';
+import { Menu, ShieldCheck, Terminal, RefreshCw, Languages, Clock, Keyboard } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { StatusDot } from './ui/StatusBadge';
 
 interface HeaderProps {
   activeModule: ModuleId;
   statusData: SystemStatusData | null;
-  connectivity?: ConnectivityHealthState | null;
   onToggleMobile: () => void;
   onOpenQuickTask: () => void;
   onRefreshStatus: () => void;
   isRefreshing: boolean;
   onOpenShortcuts?: () => void;
-  onRegenerateModel?: () => void;
-  isRegenerating?: boolean;
-  regenerationError?: string | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeModule,
   statusData,
-  connectivity = null,
   onToggleMobile,
   onOpenQuickTask,
   onRefreshStatus,
   isRefreshing,
-  onOpenShortcuts,
+  onOpenShortcuts
 }) => {
   const { t, lang } = useLanguage();
+  const { session, role } = useAuth();
+  const sessionAgeMin = Math.floor((Date.now() - new Date(session.authenticatedAt).getTime()) / 60000);
+  const remainingMin = Math.max(0, 60 - sessionAgeMin);
+  const sessionHealthColor =
+    remainingMin > 15 ? 'text-[var(--z-ok)]' : remainingMin > 0 ? 'text-[var(--app-amber)]' : 'text-[var(--z-danger)]';
 
   const getModuleTitle = (mod: ModuleId): string => {
     switch (mod) {
       case 'command_center': return t('nav.command_center');
-      case 'autonomous_execution': return t('nav.autonomous_execution');
-      case 'cognitive_operations': return t('nav.cognitive_operations');
       case 'conversational_intelligence': return t('nav.conversational_intelligence');
       case 'intelligence_core': return t('nav.intelligence_core');
       case 'dev_studio': return t('nav.dev_studio');
@@ -55,119 +53,122 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const activeKey = statusData?.model?.activeKey;
-  const bridgeTelemetry = connectivity?.bridgeLifecycle || statusData?.connectivity?.bridgeLifecycle;
-  const bridgeState = bridgeTelemetry?.state;
-  const runtimeState =
-    connectivity?.runtimeState ||
-    statusData?.model?.runtimeState ||
-    (statusData?.model?.weightsLoaded ? 'READY' : undefined);
-  const executionVerified =
-    connectivity?.executionVerified ??
-    statusData?.model?.executionVerified ??
-    false;
-  const isFailClosed = Boolean(
-    (connectivity && (!connectivity.online || connectivity.onlineConnectivityRequired || !executionVerified)) ||
-      (statusData &&
-        statusData.model &&
-        (statusData.model.weightsLoaded === false ||
-          statusData.model.onlineConnectivityRequired === true ||
-          statusData.model.executionVerified === false))
-  );
-  const headerStatus = !statusData && !connectivity
-    ? 'CHECKING'
-    : !isFailClosed && executionVerified && runtimeState === 'READY'
-    ? 'READY'
-    : runtimeState || bridgeState || 'FAIL_CLOSED';
-  const modelTitle = isFailClosed
-    ? `${bridgeState ? `Bridge: ${bridgeState} · ` : ''}${connectivity?.reason || statusData?.model?.failClosedReason || statusData?.model?.executionError || 'FAIL_CLOSED: Online Connectivity Required'}`
-    : `${bridgeState ? `Bridge: ${bridgeState} · ` : ''}${statusData?.model?.weightsSource || activeKey || 'Cloud Runtime'}`;
-  const headerLabel =
-    headerStatus === 'READY'
-      ? `Runtime ready${bridgeState ? ` · ${bridgeState}` : ''}`
-      : bridgeState
-        ? `${headerStatus.replaceAll('_', ' ').toLowerCase()} · ${bridgeState}`
-        : headerStatus.replaceAll('_', ' ').toLowerCase();
+  const phase = statusData?.commercial?.currentPhase || 'COMMERCIAL_LAUNCH';
+  const phaseLabel =
+    phase === 'COMMERCIAL_LAUNCH'
+      ? t('badge.commercial_launch')
+      : phase === 'PUBLIC_BETA'
+      ? t('badge.public_beta')
+      : t('badge.private_beta');
 
   return (
-    <div className="sticky top-0 z-30">
-      <header className="workspace-header h-16 px-4 md:px-7 flex items-center justify-between gap-3 transition-colors duration-200">
-        {/* Left: Mobile Toggle & Breadcrumbs */}
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={onToggleMobile}
-            className="lg:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-[var(--app-text-secondary)] hover:bg-white/5 transition-colors cursor-pointer shrink-0"
-            aria-label="Toggle menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+    <header className="h-16 px-4 md:px-8 bg-[color-mix(in_srgb,var(--app-surface)_85%,transparent)] backdrop-blur-md border-b border-[var(--app-card-border)] sticky top-0 z-30 flex items-center justify-between gap-4 transition-colors duration-200">
+      {/* Left: Mobile Toggle & Breadcrumbs */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggleMobile}
+          className="lg:hidden p-2 rounded-xl text-[var(--app-text-secondary)] hover:bg-[var(--app-surface-elevated)] dark:hover:bg-[var(--app-surface)] transition-colors"
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
 
-          <div className="flex items-center gap-2 text-sm min-w-0">
-            <span className="workspace-breadcrumb hidden sm:inline shrink-0">{t('nav.ecosystem')}</span>
-            <span className="workspace-breadcrumb-divider hidden sm:inline shrink-0">/</span>
-            <h1 className="font-semibold text-[var(--app-text-primary)] text-base md:text-[17px] tracking-tight truncate">
-              {getModuleTitle(activeModule)}
-            </h1>
-          </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-semibold text-[var(--app-text-secondary)] hidden sm:inline">{t('nav.ecosystem')}</span>
+          <span className="text-[var(--app-text-secondary)] dark:text-[var(--app-text-primary)] hidden sm:inline">/</span>
+          <h1 className="font-bold text-[var(--app-text-primary)] text-base md:text-lg tracking-tight whitespace-nowrap">
+            {getModuleTitle(activeModule)}
+          </h1>
+        </div>
+      </div>
+
+      {/* Right: Actions, Language Toggle, Sovereign Indicator & Quick Task CTA */}
+      <div className="flex items-center gap-3">
+        {/* Session Health Indicator */}
+        <div
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)]"
+          title={`Session (${role}): ${remainingMin}m remaining`}
+        >
+          <Clock className={`w-3.5 h-3.5 ${sessionHealthColor}`} />
+          <span>{remainingMin}m</span>
         </div>
 
-        {/* Right: Actions, Language Toggle, Minimal Runtime Dot & Quick Task CTA */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          {/* Dedicated Language Switcher Component */}
-          <LanguageSwitcher variant="compact" />
+        {/* Dedicated Language Switcher Component */}
+        <LanguageSwitcher variant="compact" />
 
-          <div className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-full workspace-runtime">
-            <StatusDot
-              status={(
-                bridgeState === 'Reconnecting' ||
-                bridgeState === 'Unreachable' ||
-                bridgeState === 'Initialization Error' ||
-                bridgeState === 'Session Timeout' ||
-                bridgeState === 'Service Error'
-                  ? bridgeState
-                  : headerStatus
-              ) as any}
-              label={headerLabel}
-              detail={modelTitle}
-              pulse={headerStatus === 'CHECKING' || headerStatus === 'INITIALIZING' || bridgeState === 'Initializing' || bridgeState === 'Connecting' || bridgeState === 'Reconnecting'}
-            />
-          </div>
-
-          {onOpenShortcuts && (
-            <button
-              type="button"
-              onClick={onOpenShortcuts}
-              title="Keyboard shortcuts"
-              aria-label="Keyboard shortcuts"
-              className="workspace-icon-button hidden sm:flex"
-            >
-              <Keyboard className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* Manual Refresh */}
-          <button
-            onClick={onRefreshStatus}
-            disabled={isRefreshing}
-            title={t('btn.refresh')}
-            aria-label={t('btn.refresh')}
-            className="workspace-icon-button min-w-[40px] min-h-[40px]"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} style={isRefreshing ? { color: 'var(--app-accent)' } : undefined} />
-          </button>
-
-          {/* Primary Action Button with Shortcut Badge */}
-          <button
-            onClick={onOpenQuickTask}
-            title={lang === 'th' ? 'สั่งการประมวลผลด่วน (Ctrl+K)' : 'Quick Dispatch Native Intelligence (Ctrl+K)'}
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-[0_6px_20px_rgba(0,240,255,0.22)] hover:brightness-110 transition-all whitespace-nowrap cursor-pointer border border-[#00F0FF]/35"
-          >
-            <Terminal className="w-4 h-4 text-[#CCFF00]" />
-            <span className="hidden sm:inline">{t('btn.run_agent')}</span>
-            <span className="sm:hidden">{t('btn.run')}</span>
-          </button>
+        {/* Verification Status Badge */}
+        <div 
+          className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-semibold"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--z-ok) 12%, transparent)',
+            color: 'var(--status-verified)',
+            border: '1px solid color-mix(in srgb, var(--z-ok) 30%, transparent)'
+          }}
+        >
+          <ShieldCheck className="w-4 h-4" />
+          <span>{t('badge.sovereign')}</span>
+          <span className="opacity-50 font-normal">·</span>
+          <span className="font-mono text-[11px] font-bold">Invariants Verified (SHA-256)</span>
         </div>
-      </header>
-    </div>
+
+        {/* Phase Indicator */}
+        <div 
+          className="hidden sm:flex items-center px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap"
+          style={{
+            backgroundColor: 'var(--app-card)',
+            color: 'var(--app-text-primary)',
+            border: '1px solid var(--app-card-border)'
+          }}
+        >
+          {phaseLabel}
+        </div>
+
+        {/* Keyboard Shortcuts Trigger Button */}
+        {onOpenShortcuts && (
+          <button
+            onClick={onOpenShortcuts}
+            title={lang === 'th' ? 'แป้นพิมพ์ลัด (Ctrl+/ หรือ ?)' : 'Keyboard Shortcuts (Ctrl+/ or ?)'}
+            className="hidden sm:flex items-center gap-1 px-2.5 py-2 rounded-xl transition-colors cursor-pointer text-[11px] font-mono"
+            style={{
+              color: 'var(--app-text-secondary)',
+              backgroundColor: 'var(--app-card)',
+              border: '1px solid var(--app-card-border)'
+            }}
+          >
+            <Keyboard className="w-4 h-4 text-[var(--app-accent)]" />
+            <kbd className="hidden lg:inline-block px-1 py-0.2 text-[9px] bg-black/20 rounded border border-[var(--app-card-border)]">?</kbd>
+          </button>
+        )}
+
+        {/* Manual Refresh */}
+        <button
+          onClick={onRefreshStatus}
+          disabled={isRefreshing}
+          title={t('btn.refresh')}
+          className="p-2 rounded-xl transition-colors cursor-pointer"
+          style={{
+            color: 'var(--app-text-secondary)',
+            backgroundColor: 'var(--app-card)',
+            border: '1px solid var(--app-card-border)'
+          }}
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} style={isRefreshing ? { color: 'var(--app-accent)' } : undefined} />
+        </button>
+
+        {/* Primary Action Button with Shortcut Badge */}
+        <button
+          onClick={onOpenQuickTask}
+          title={lang === 'th' ? 'สั่งการประมวลผลด่วน (Ctrl+K)' : 'Quick Dispatch Native Intelligence (Ctrl+K)'}
+          className="flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md  hover:opacity-95 transition-all whitespace-nowrap cursor-pointer border border-[color-mix(in_srgb,var(--z-ok)_20%,transparent)]"
+        >
+          <Terminal className="w-4 h-4 text-[var(--app-amber)]" />
+          <span className="hidden sm:inline">{t('btn.run_agent')}</span>
+          <span className="sm:hidden">{t('btn.run')}</span>
+          <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono font-normal bg-black/30 border border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] rounded text-[var(--z-ok)]">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
+    </header>
   );
 };

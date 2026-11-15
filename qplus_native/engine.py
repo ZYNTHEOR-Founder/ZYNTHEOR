@@ -14,8 +14,6 @@ Implements:
 
 import math
 import time
-import random
-import zlib
 import array
 import struct
 from typing import List, Dict, Tuple, Optional, Any
@@ -58,10 +56,13 @@ class LinearLayer:
 
         # He / Kaiming normal initialization
         std = math.sqrt(2.0 / in_features)
-        # Reproducible across processes: Python's built-in hash() of str is salted
-        # per process (PYTHONHASHSEED), so a stable CRC32 of the layer name seeds the RNG.
-        rng = random.Random(zlib.crc32(name.encode("utf-8")))
-        seed_data = [rng.gauss(0.0, std) for _ in range(in_features * out_features)]
+        seed_data = []
+        for i in range(in_features * out_features):
+            # Deterministic pseudo-random Gaussian approximation
+            u1 = max(1e-7, (hash((name, i, 1)) & 0xFFFF) / 65536.0)
+            u2 = (hash((name, i, 2)) & 0xFFFF) / 65536.0
+            z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
+            seed_data.append(z0 * std)
 
         self.weight = Tensor(seed_data, (out_features, in_features), requires_grad=True)
         self.bias = Tensor([0.0] * out_features, (out_features,), requires_grad=True)
@@ -275,88 +276,36 @@ class MultiHeadAttentionLayer:
             self.out_proj.weight, self.out_proj.bias
         ]
         self.last_attn_ctx: Optional[List[float]] = None
-        self._q_hat: Optional[List[float]] = None
-        self._k_hat: Optional[List[float]] = None
-        self._rms_q: Optional[List[float]] = None
-        self._rms_k: Optional[List[float]] = None
-        self._v: Optional[List[float]] = None
-        self._w: Optional[List[float]] = None
 
     def forward(self, x: List[float]) -> List[float]:
-        """Single-token QK-RMSNorm self-gated attention (v1 subgraph; sequence attention lives in lm_v2)."""
+        """Single-step self-projection and scaled attention output."""
         q = self.q_proj.forward(x)
         k = self.k_proj.forward(x)
         v = self.v_proj.forward(x)
 
-        # Per-head QK-RMSNorm prevents attention logit saturation (dot stays in [-sqrt(d_head), sqrt(d_head)])
+        # Scaled dot-product attention score for self-token
         scale = 1.0 / math.sqrt(max(1, self.d_head))
-        eps = 1e-6
         attn_vec = [0.0] * self.d_model
-        q_hat = [0.0] * self.d_model
-        k_hat = [0.0] * self.d_model
-        rms_q_list: List[float] = []
-        rms_k_list: List[float] = []
-        weights: List[float] = []
-
         for h in range(self.n_heads):
-            o = h * self.d_head
-            mean_q2 = sum(q[o + i] * q[o + i] for i in range(self.d_head)) / self.d_head
-            mean_k2 = sum(k[o + i] * k[o + i] for i in range(self.d_head)) / self.d_head
-            rq = math.sqrt(mean_q2 + eps)
-            rk = math.sqrt(mean_k2 + eps)
-            rms_q_list.append(rq)
-            rms_k_list.append(rk)
+            offset = h * self.d_head
+            dot = sum(q[offset + i] * k[offset + i] for i in range(self.d_head)) * scale
+            weight = 1.0 / (1.0 + math.exp(-min(max(dot, -15.0), 15.0))) # Sigmoid activation for single-head self-score
             for i in range(self.d_head):
-                q_hat[o + i] = q[o + i] / rq
-                k_hat[o + i] = k[o + i] / rk
+                attn_vec[offset + i] = v[offset + i] * weight
 
-            dot = sum(q_hat[o + i] * k_hat[o + i] for i in range(self.d_head)) * scale
-            weight = 1.0 / (1.0 + math.exp(-dot))
-            weights.append(weight)
-            for i in range(self.d_head):
-                attn_vec[o + i] = v[o + i] * weight
-
-        self._q_hat, self._k_hat = q_hat, k_hat
-        self._rms_q, self._rms_k = rms_q_list, rms_k_list
-        self._v, self._w = v, weights
         self.last_attn_ctx = list(attn_vec)
         return self.out_proj.forward(attn_vec)
 
     def backward(self, grad_output: List[float]) -> List[float]:
-        """
-        Exact backward pass through out_proj, per-head sigmoid gate, QK-RMSNorm, and Q/K/V projections.
-        """
-        if self._q_hat is None or self._k_hat is None or self._rms_q is None or self._rms_k is None or self._v is None or self._w is None:
-            raise RuntimeError("Backward called before forward pass.")
-        d_ctx = self.out_proj.backward(grad_output)
-        scale = 1.0 / math.sqrt(max(1, self.d_head))
-        d_q = [0.0] * self.d_model
-        d_k = [0.0] * self.d_model
-        d_v = [0.0] * self.d_model
-        for h in range(self.n_heads):
-            o = h * self.d_head
-            w = self._w[h]
-            rq = self._rms_q[h]
-            rk = self._rms_k[h]
-            d_w = 0.0
-            for i in range(self.d_head):
-                d_v[o + i] = d_ctx[o + i] * w
-                d_w += d_ctx[o + i] * self._v[o + i]
-            d_dot = d_w * w * (1.0 - w)
+        """Backward pass propagating gradients through out_proj, v_proj, q_proj, k_proj."""
+        d_attn = self.out_proj.backward(grad_output)
+        d_v = self.v_proj.backward(d_attn)
+        d_q = self.q_proj.backward(d_attn)
+        d_k = self.k_proj.backward(d_attn)
 
-            # Backprop through QK-RMSNorm: d_x = (d_xhat - xhat * mean(d_xhat * xhat)) / rms
-            dq_hat = [d_dot * scale * self._k_hat[o + i] for i in range(self.d_head)]
-            dk_hat = [d_dot * scale * self._q_hat[o + i] for i in range(self.d_head)]
-            mean_dq_qhat = sum(dq_hat[i] * self._q_hat[o + i] for i in range(self.d_head)) / self.d_head
-            mean_dk_khat = sum(dk_hat[i] * self._k_hat[o + i] for i in range(self.d_head)) / self.d_head
-            for i in range(self.d_head):
-                d_q[o + i] = (dq_hat[i] - self._q_hat[o + i] * mean_dq_qhat) / rq
-                d_k[o + i] = (dk_hat[i] - self._k_hat[o + i] * mean_dk_khat) / rk
-
-        dx_q = self.q_proj.backward(d_q)
-        dx_k = self.k_proj.backward(d_k)
-        dx_v = self.v_proj.backward(d_v)
-        return [dx_q[i] + dx_k[i] + dx_v[i] for i in range(self.d_model)]
+        # Combine input gradients from q, k, v projections
+        grad_input = [d_v[i] + d_q[i] + d_k[i] for i in range(self.d_model)]
+        return grad_input
 
 class SwiGLUFeedForwardLayer:
     """

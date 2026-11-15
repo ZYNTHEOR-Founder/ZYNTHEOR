@@ -42,32 +42,32 @@ const VARIANT_STYLES: Record<
   }
 > = {
   success: {
-    topBar: 'bg-gradient-to-r from-[#00F0FF] via-[#CCFF00] to-[#00F0FF]',
-    border: 'border-[#CCFF00]/45 shadow-[0_14px_34px_rgba(0,240,255,0.14)]',
+    topBar: 'bg-[var(--app-accent)]',
+    border: 'border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)] shadow-sm',
     dotStatus: 'VERIFIED',
-    titleColor: 'text-[#F4F7FF]',
-    metaBg: 'text-[#CCFF00]',
+    titleColor: 'text-[var(--app-text-primary)]',
+    metaBg: 'text-[var(--z-ok)]',
   },
   info: {
-    topBar: 'bg-gradient-to-r from-[#00F0FF] via-[#2563EB] to-[#7B2CBF]',
-    border: 'border-[#00F0FF]/45 shadow-[0_14px_34px_rgba(0,240,255,0.14)]',
+    topBar: 'bg-[var(--app-accent)]',
+    border: 'border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)] shadow-sm',
     dotStatus: 'IMPLEMENTED',
-    titleColor: 'text-[#F4F7FF]',
-    metaBg: 'text-[#00F0FF]',
+    titleColor: 'text-[var(--app-text-primary)]',
+    metaBg: 'text-[var(--app-accent)]',
   },
   warning: {
-    topBar: 'bg-gradient-to-r from-[#FF5E3A] via-[#FF007F] to-[#7B2CBF]',
-    border: 'border-[#FF5E3A]/50 shadow-[0_14px_34px_rgba(255,94,58,0.14)]',
+    topBar: 'bg-[var(--z-warn)]',
+    border: 'border-[color-mix(in_srgb,var(--z-warn)_50%,transparent)] shadow-sm',
     dotStatus: 'PARTIAL',
-    titleColor: 'text-[#F4F7FF]',
-    metaBg: 'text-[#FF8C73]',
+    titleColor: 'text-[var(--app-text-primary)]',
+    metaBg: 'text-[var(--z-warn)]',
   },
   error: {
-    topBar: 'bg-gradient-to-r from-[#FF007F] via-[#FF5E3A] to-[#7B2CBF]',
-    border: 'border-[#FF007F]/55 shadow-[0_14px_34px_rgba(255,0,127,0.16)]',
+    topBar: 'bg-[var(--z-danger)]',
+    border: 'border-[color-mix(in_srgb,var(--z-danger)_55%,transparent)] shadow-sm',
     dotStatus: 'FAILED',
-    titleColor: 'text-[#F4F7FF]',
-    metaBg: 'text-[#FF66B2]',
+    titleColor: 'text-[var(--app-text-primary)]',
+    metaBg: 'text-[var(--z-danger)]',
   },
 };
 
@@ -162,7 +162,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               onMouseLeave={() => scheduleDismiss(toast.id, toast.durationMs)}
               onFocus={() => clearTimer(toast.id)}
               onBlur={() => scheduleDismiss(toast.id, toast.durationMs)}
-              className={`zy-toast-enter pointer-events-auto relative overflow-hidden rounded-2xl border bg-[#0D1326]/95 backdrop-blur-md text-[#F4F7FF] ${style.border}`}
+              className={`zy-toast-enter pointer-events-auto relative overflow-hidden rounded-2xl border bg-[color-mix(in_srgb,var(--app-surface)_95%,transparent)] backdrop-blur-md text-[var(--app-text-primary)] ${style.border}`}
             >
               <div className={`h-1 w-full ${style.topBar}`} />
               <div className="px-4 py-3 flex items-start gap-3">
@@ -174,7 +174,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     {toast.title}
                   </div>
                   {toast.message && (
-                    <p className="mt-0.5 text-[11px] text-[#9AA8C7] leading-relaxed break-words">
+                    <p className="mt-0.5 text-[11px] text-[var(--app-text-secondary)] leading-relaxed break-words">
                       {toast.message}
                     </p>
                   )}
@@ -188,7 +188,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   type="button"
                   onClick={() => dismissToast(toast.id)}
                   aria-label="Dismiss notification"
-                  className="min-w-[32px] min-h-[32px] -mr-1.5 -mt-1 flex items-center justify-center rounded-lg text-[#9AA8C7] hover:text-[#F4F7FF] hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                  className="min-w-[32px] min-h-[32px] -mr-1.5 -mt-1 flex items-center justify-center rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[color-mix(in_srgb,var(--app-text-primary)_10%,transparent)] transition-colors cursor-pointer shrink-0"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

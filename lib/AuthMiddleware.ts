@@ -10,8 +10,6 @@ import path from 'path';
 import { SovereignIdentity, SovereignRole, TokenPayload } from './SovereignIdentity';
 import { AuditLedger } from './AuditLedger';
 import { TokenRevocation } from './TokenRevocation';
-import { isCloudSqlConfigured } from '../src/db/index.ts';
-import { saveCloudQuickLogSeal } from '../src/db/repositories.ts';
 
 /** UI-facing role labels mapped to SovereignIdentity roles */
 export type UiRole = 'User' | 'Developer' | 'Administrator';
@@ -262,19 +260,6 @@ export function sealLogsServerSide(
     goal: meta.goal || null,
     sealedAt
   });
-
-  if (isCloudSqlConfigured()) {
-    void saveCloudQuickLogSeal({
-      sealId,
-      userId: meta.userId,
-      tenantId: meta.tenantId,
-      contentHash,
-      entryHash: record.entry_hash,
-      logs,
-    }).catch((err) => {
-      console.warn('[AuthMiddleware] Cloud SQL seal mirror warning:', err?.message || err);
-    });
-  }
 
   return {
     sealId,

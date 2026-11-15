@@ -6,7 +6,7 @@ export interface NavGroupLabelProps {
 
 export const NavGroupLabel: React.FC<NavGroupLabelProps> = ({ children, className = '' }) => (
   <div
-    className={`nav-group-label px-3 mb-1.5 text-[10px] font-mono font-bold uppercase tracking-[0.14em] ${className}`}
+    className={`nav-group-label px-3 mb-1.5 text-[10px] font-mono font-bold ${className}`}
     style={{ color: 'var(--app-text-secondary)' }}
   >
     {children}
@@ -26,7 +26,7 @@ export const NavItemButton: React.FC<NavItemButtonProps> = ({
   label,
   icon,
   active = false,
-  accentColor = '#00F0FF',
+  accentColor = 'var(--app-accent)',
   onClick,
   badge,
 }) => (
@@ -47,7 +47,7 @@ export const NavItemButton: React.FC<NavItemButtonProps> = ({
     </div>
     <div className="flex items-center gap-1.5 shrink-0">
       {badge && (
-        <span className="text-[10px] font-mono font-bold text-[#00F0FF]">
+        <span className="text-[10px] font-mono font-bold text-[var(--app-accent)]">
           {badge}
         </span>
       )}
@@ -95,7 +95,7 @@ export function TabBar<T extends string>({
             onClick={() => onChange(item.id)}
             className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isActive
-                ? 'bg-gradient-to-r from-[#00F0FF]/20 via-[#2563EB]/25 to-[#7B2CBF]/25 text-[#F4F7FF] border border-[#00F0FF]/50 shadow-sm'
+                ? 'bg-gradient-to-r from-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] via-[color-mix(in_srgb,var(--app-accent-deep)_25%,transparent)] to-[color-mix(in_srgb,var(--app-accent-deep)_25%,transparent)] text-[var(--app-text-primary)] border border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)] shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] border border-transparent'
             }`}
           >

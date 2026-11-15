@@ -15,13 +15,13 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   if (variant === 'buttons') {
     return (
-      <div className={`flex items-center gap-1.5 p-1 rounded-xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-xs font-bold ${className}`}>
+      <div className={`flex items-center gap-1.5 p-1 rounded-xl bg-[var(--app-surface-elevated)] dark:bg-[var(--app-surface)] border border-[var(--app-card-border)] dark:border-[var(--app-card-border)] text-xs font-bold ${className}`}>
         <button
           onClick={() => setLang('th')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
             lang === 'th'
-              ? 'bg-[var(--app-surface)] text-[#00F0FF] border border-[#00F0FF]/40 shadow-xs'
-              : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
+              ? 'bg-white dark:bg-[var(--app-bg)] text-[var(--app-accent)] shadow-xs'
+              : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] dark:hover:text-[var(--app-text-primary)]'
           }`}
         >
           <span>🇹🇭 ภาษาไทย (TH)</span>
@@ -32,8 +32,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           onClick={() => setLang('en')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
             lang === 'en'
-              ? 'bg-[var(--app-surface)] text-[#00F0FF] border border-[#00F0FF]/40 shadow-xs'
-              : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
+              ? 'bg-white dark:bg-[var(--app-bg)] text-[var(--app-accent)] shadow-xs'
+              : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] dark:hover:text-[var(--app-text-primary)]'
           }`}
         >
           <span>🇬🇧 English (EN)</span>
@@ -45,13 +45,13 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   // Compact variant (default for Header)
   return (
-    <div className={`flex items-center bg-[var(--app-input-bg)] p-0.5 rounded-xl border border-[var(--app-card-border)] text-xs font-bold ${className}`}>
+    <div className={`flex items-center bg-[var(--app-surface-elevated)] dark:bg-[var(--app-surface)] p-0.5 rounded-xl border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] dark:border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] text-xs font-bold ${className}`}>
       <button
         onClick={() => setLang('th')}
         className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
           lang === 'th'
-            ? 'bg-[var(--app-surface)] text-[#00F0FF] shadow-xs'
-            : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
+            ? 'bg-white dark:bg-[var(--app-bg)] text-[var(--app-accent)] shadow-xs'
+            : 'text-[var(--app-text-secondary)] dark:text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] dark:hover:text-[var(--app-text-primary)]'
         }`}
         title="สลับเป็นภาษาไทย (Switch to Thai)"
       >
@@ -61,8 +61,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         onClick={() => setLang('en')}
         className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
           lang === 'en'
-            ? 'bg-[var(--app-surface)] text-[#00F0FF] shadow-xs'
-            : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
+            ? 'bg-white dark:bg-[var(--app-bg)] text-[var(--app-accent)] shadow-xs'
+            : 'text-[var(--app-text-secondary)] dark:text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] dark:hover:text-[var(--app-text-primary)]'
         }`}
         title="Switch to English"
       >

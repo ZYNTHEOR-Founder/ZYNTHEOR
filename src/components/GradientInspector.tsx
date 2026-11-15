@@ -271,16 +271,16 @@ export const GradientInspector: React.FC = () => {
             type="button"
             onClick={() => void fetchInspectorData()}
             disabled={isLoading}
-            className="min-h-[40px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] bg-[var(--app-input-bg)] text-[var(--app-text-primary)] hover:border-[#00F0FF] cursor-pointer disabled:opacity-50"
+            className="min-h-[40px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] bg-[var(--app-input-bg)] text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#00F0FF] ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[var(--app-accent)] ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
           <button
             type="button"
             onClick={() => void handleRunTrainingStep()}
             disabled={isStepping}
-            className="min-h-[40px] flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[#00F0FF] to-[#CCFF00] text-[#070B19] hover:brightness-105 cursor-pointer disabled:opacity-50 shadow-sm"
+            className="min-h-[40px] flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] hover:brightness-105 cursor-pointer disabled:opacity-50 shadow-sm"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span>{isStepping ? 'Stepping 2.0M Autograd...' : 'Run 2.0M Training Step'}</span>
@@ -290,8 +290,8 @@ export const GradientInspector: React.FC = () => {
     >
       <div className="space-y-6">
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-[#FF007F]/12 border border-[#FF007F]/45 text-[#FF99C8] text-xs font-mono flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-[#FF007F] shrink-0" />
+          <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] text-[var(--z-danger)] text-xs font-mono flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-[var(--z-danger)] shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -299,21 +299,21 @@ export const GradientInspector: React.FC = () => {
         {/* Top Verification & Runtime Summary Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 tabular-nums">
           <div className="p-3.5 rounded-xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-[#00F0FF]" />
+            <div className="text-[10px] font-mono text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-[var(--app-accent)]" />
               Checkpoint Params
             </div>
             <div className="mt-1 text-lg font-black font-mono text-[var(--app-text-primary)]">
               {(inspectData?.payload_float32_count ?? inspectData?.metadata?.total_params ?? 502912).toLocaleString()}
             </div>
-            <div className="text-[10px] font-mono text-[#CCFF00] mt-0.5">
+            <div className="text-[10px] font-mono text-[var(--z-ok)] mt-0.5">
               {tensors.length} Float32 tensors · {inspectData?.status || 'LOADING'}
             </div>
           </div>
 
           <div className="p-3.5 rounded-xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <TrendingDown className="w-3.5 h-3.5 text-[#00F0FF]" />
+            <div className="text-[10px] font-mono text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <TrendingDown className="w-3.5 h-3.5 text-[var(--app-accent)]" />
               Latest Step Loss Delta
             </div>
             <div className="mt-1 text-lg font-black font-mono text-[var(--app-text-primary)]">
@@ -321,7 +321,7 @@ export const GradientInspector: React.FC = () => {
                 ? `${latestStep.loss_before.toFixed(4)} → ${latestStep.loss_after.toFixed(4)}`
                 : '—'}
             </div>
-            <div className="text-[10px] font-mono text-[#00F0FF] mt-0.5">
+            <div className="text-[10px] font-mono text-[var(--app-accent)] mt-0.5">
               {latestStep?.loss_reduction_pct !== undefined
                 ? `${latestStep.loss_reduction_pct >= 0 ? '-' : '+'}${Math.abs(latestStep.loss_reduction_pct)}% step reduction`
                 : 'Awaiting step'}
@@ -329,11 +329,11 @@ export const GradientInspector: React.FC = () => {
           </div>
 
           <div className="p-3.5 rounded-xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-[#FF5E3A]" />
+            <div className="text-[10px] font-mono text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-[var(--z-warn)]" />
               Parameter Mutation (L2)
             </div>
-            <div className="mt-1 text-lg font-black font-mono text-[#FF5E3A]">
+            <div className="mt-1 text-lg font-black font-mono text-[var(--z-warn)]">
               {latestStep?.param_mutation_delta !== undefined
                 ? `Δ ${latestStep.param_mutation_delta.toFixed(6)}`
                 : '—'}
@@ -346,11 +346,11 @@ export const GradientInspector: React.FC = () => {
           </div>
 
           <div className="p-3.5 rounded-xl bg-[var(--app-input-bg)] border border-[var(--app-card-border)]">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--app-text-secondary)] flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#CCFF00]" />
+            <div className="text-[10px] font-mono text-[var(--app-text-secondary)] flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[var(--z-ok)]" />
               Autograd Bridge Health
             </div>
-            <div className="mt-1 text-lg font-black font-mono text-[#CCFF00]">
+            <div className="mt-1 text-lg font-black font-mono text-[var(--z-ok)]">
               {tensors.length > 0 ? `${healthyTensorCount} / ${tensors.length} HEALTHY` : '—'}
             </div>
             <div className="text-[10px] font-mono text-[var(--app-text-secondary)] mt-0.5 truncate">
@@ -370,7 +370,7 @@ export const GradientInspector: React.FC = () => {
             type="text"
             value={stepInputText}
             onChange={(e) => setStepInputText(e.target.value)}
-            className="flex-1 px-3 py-1.5 rounded-lg text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)] focus:outline-none focus:border-[#00F0FF]"
+            className="flex-1 px-3 py-1.5 rounded-lg text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
             placeholder="Training sample for real 2.0M forward/backward step..."
           />
           {inspectData?.payload_sha256 && (
@@ -378,7 +378,7 @@ export const GradientInspector: React.FC = () => {
               className="text-[10px] font-mono text-[var(--app-text-secondary)] shrink-0"
               title={inspectData.payload_sha256}
             >
-              Cloud SHA: <b className="text-[#00F0FF]">{inspectData.payload_sha256.slice(0, 12)}…</b>
+              Cloud SHA: <b className="text-[var(--app-accent)]">{inspectData.payload_sha256.slice(0, 12)}…</b>
             </span>
           )}
         </div>
@@ -398,11 +398,11 @@ export const GradientInspector: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3 text-[10px] font-mono">
-                <span className="flex items-center gap-1 text-[#00F0FF]">
-                  <span className="w-2.5 h-0.5 bg-[#00F0FF] inline-block" /> Train
+                <span className="flex items-center gap-1 text-[var(--app-accent)]">
+                  <span className="w-2.5 h-0.5 bg-[var(--app-accent)] inline-block" /> Train
                 </span>
-                <span className="flex items-center gap-1 text-[#FF5E3A]">
-                  <span className="w-2.5 h-0.5 bg-[#FF5E3A] inline-block border-t border-dashed" /> Val
+                <span className="flex items-center gap-1 text-[var(--z-warn)]">
+                  <span className="w-2.5 h-0.5 bg-[var(--z-warn)] inline-block border-t border-dashed" /> Val
                 </span>
               </div>
             </div>
@@ -415,20 +415,20 @@ export const GradientInspector: React.FC = () => {
                   role="img"
                   aria-label="2.0M training and validation loss sparkline"
                 >
-                  <line x1="0" y1="8" x2={sparklineStats.width} y2="8" stroke="#1E294A" strokeDasharray="3 3" />
+                  <line x1="0" y1="8" x2={sparklineStats.width} y2="8" stroke="var(--app-accent)" strokeDasharray="3 3" />
                   <line
                     x1="0"
                     y1={sparklineStats.height - 8}
                     x2={sparklineStats.width}
                     y2={sparklineStats.height - 8}
-                    stroke="#1E294A"
+                    stroke="var(--app-accent)"
                     strokeDasharray="3 3"
                   />
                   {sparklineStats.valPath && (
                     <path
                       d={sparklineStats.valPath}
                       fill="none"
-                      stroke="#FF5E3A"
+                      stroke="var(--z-warn)"
                       strokeWidth="1.8"
                       strokeDasharray="4 3"
                     />
@@ -437,7 +437,7 @@ export const GradientInspector: React.FC = () => {
                     <path
                       d={sparklineStats.trainPath}
                       fill="none"
-                      stroke="#00F0FF"
+                      stroke="var(--app-accent)"
                       strokeWidth="2.2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -451,7 +451,7 @@ export const GradientInspector: React.FC = () => {
                   <span>
                     Range [{sparklineStats.minLoss.toFixed(3)} – {sparklineStats.maxLoss.toFixed(3)}]
                   </span>
-                  <span className="text-[#CCFF00] font-bold">
+                  <span className="text-[var(--z-ok)] font-bold">
                     Step {v2Points[v2Points.length - 1]?.step}: {v2Points[v2Points.length - 1]?.trainLoss.toFixed(3)}
                   </span>
                 </div>
@@ -476,11 +476,11 @@ export const GradientInspector: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3 text-[10px] font-mono">
-                <span className="flex items-center gap-1 text-[#00F0FF]">
-                  <span className="w-2.5 h-0.5 bg-[#00F0FF] inline-block" /> Step Loss
+                <span className="flex items-center gap-1 text-[var(--app-accent)]">
+                  <span className="w-2.5 h-0.5 bg-[var(--app-accent)] inline-block" /> Step Loss
                 </span>
-                <span className="flex items-center gap-1 text-[#FF007F]">
-                  <span className="w-2.5 h-0.5 bg-[#FF007F] inline-block" /> ΔW
+                <span className="flex items-center gap-1 text-[var(--z-danger)]">
+                  <span className="w-2.5 h-0.5 bg-[var(--z-danger)] inline-block" /> ΔW
                 </span>
               </div>
             </div>
@@ -493,12 +493,12 @@ export const GradientInspector: React.FC = () => {
                   role="img"
                   aria-label="Live step loss and parameter delta sparkline"
                 >
-                  <line x1="0" y1="56" x2={sparklineStats.width} y2="56" stroke="#1E294A" strokeDasharray="3 3" />
+                  <line x1="0" y1="56" x2={sparklineStats.width} y2="56" stroke="var(--app-accent)" strokeDasharray="3 3" />
                   {sparklineStats.liveLossPath && (
                     <path
                       d={sparklineStats.liveLossPath}
                       fill="none"
-                      stroke="#00F0FF"
+                      stroke="var(--app-accent)"
                       strokeWidth="2.2"
                       strokeLinecap="round"
                     />
@@ -507,7 +507,7 @@ export const GradientInspector: React.FC = () => {
                     <path
                       d={sparklineStats.deltaPath}
                       fill="none"
-                      stroke="#FF007F"
+                      stroke="var(--z-danger)"
                       strokeWidth="1.6"
                       strokeDasharray="3 2"
                     />
@@ -516,20 +516,20 @@ export const GradientInspector: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2 pt-1 text-[10px] font-mono tabular-nums">
                   <div className="px-2 py-1 rounded bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                     <span className="text-[var(--app-text-secondary)] block">Loss Before → After</span>
-                    <span className="text-[#00F0FF] font-bold">
+                    <span className="text-[var(--app-accent)] font-bold">
                       {liveSteps[liveSteps.length - 1].lossBefore.toFixed(4)} →{' '}
                       {liveSteps[liveSteps.length - 1].lossAfter.toFixed(4)}
                     </span>
                   </div>
                   <div className="px-2 py-1 rounded bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                     <span className="text-[var(--app-text-secondary)] block">Weight Delta (L2)</span>
-                    <span className="text-[#FF5E3A] font-bold">
+                    <span className="text-[var(--z-warn)] font-bold">
                       +{liveSteps[liveSteps.length - 1].paramMutationDelta.toFixed(6)}
                     </span>
                   </div>
                   <div className="px-2 py-1 rounded bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                     <span className="text-[var(--app-text-secondary)] block">Norm Update</span>
-                    <span className="text-[#CCFF00] font-bold">
+                    <span className="text-[var(--z-ok)] font-bold">
                       {liveSteps[liveSteps.length - 1].initialParamNorm.toFixed(3)} →{' '}
                       {liveSteps[liveSteps.length - 1].finalParamNorm.toFixed(3)}
                     </span>
@@ -548,7 +548,7 @@ export const GradientInspector: React.FC = () => {
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--app-text-primary)]">
-              <Layers className="w-4 h-4 text-[#7B2CBF]" />
+              <Layers className="w-4 h-4 text-[var(--app-accent-deep)]" />
               <span>2.0M Model Tensor Weights & Gradient Norms ({filteredTensors.length} shown)</span>
             </div>
 
@@ -568,8 +568,8 @@ export const GradientInspector: React.FC = () => {
                   onClick={() => setGroupFilter(tab.id)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border transition-colors cursor-pointer ${
                     groupFilter === tab.id
-                      ? 'bg-[#00F0FF] text-[#070B19] border-[#00F0FF]'
-                      : 'bg-[var(--app-input-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:border-[#00F0FF]/60'
+                      ? 'bg-[var(--app-accent)] text-[var(--app-bg)] border-[var(--app-accent)]'
+                      : 'bg-[var(--app-input-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)]'
                   }`}
                 >
                   {tab.label}
@@ -605,17 +605,17 @@ export const GradientInspector: React.FC = () => {
                       {!hasGrad ? (
                         <span className="text-[10px] text-[var(--app-text-secondary)]">NO STEP</span>
                       ) : isVanishing || isExploding ? (
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#FF007F]">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--z-danger)]">
                           <AlertTriangle className="w-3 h-3" />
                           {isExploding ? 'EXPLODING' : 'VANISHING'}
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#CCFF00]">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--z-ok)]">
                           <CheckCircle2 className="w-3 h-3" />
                           HEALTHY
                         </span>
                       )}
-                      <span className="text-[#FF5E3A] font-bold">
+                      <span className="text-[var(--z-warn)] font-bold">
                         {hasGrad ? gNorm.toFixed(6) : '—'}
                       </span>
                     </div>
@@ -625,10 +625,10 @@ export const GradientInspector: React.FC = () => {
                     <div
                       className={`h-full transition-all ${
                         !hasGrad
-                          ? 'bg-slate-600'
+                          ? 'bg-[var(--app-surface-elevated)]'
                           : isVanishing || isExploding
-                          ? 'bg-[#FF007F]'
-                          : 'bg-gradient-to-r from-[#00F0FF] to-[#CCFF00]'
+                          ? 'bg-[var(--z-danger)]'
+                          : 'bg-[var(--app-accent)]'
                       }`}
                       style={{ width: `${barPct}%` }}
                     />

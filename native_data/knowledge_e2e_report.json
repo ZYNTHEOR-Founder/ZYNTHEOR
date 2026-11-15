@@ -1,16 +1,15 @@
 {
   "suite": "knowledge_e2e",
-  "timestamp": "2026-11-14T18:29:29.745Z",
-  "passed": 4,
-  "failed": 4,
+  "timestamp": "2026-11-11T20:34:57.072Z",
+  "passed": 5,
+  "failed": 1,
   "evidence": [
-    "FAIL: PDF capability",
+    "PASS: PDF capability | {\"pdf\":\"pypdf\",\"docx\":\"none\",\"ocr\":\"not-implemented\"}",
     "FAIL: DOCX capability",
     "PASS: OCR not falsely claimed",
-    "FAIL: PDF extract online | [\"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 3, in <module>\\n    from pypdf import PdfReader\\nModuleNotFoundError: No module named 'pypdf'\\n\"]",
-    "PASS: DOCX fixture skipped (create with python-docx online)",
+    "PASS: PDF extract offline | Hello ZYNTHEOR",
+    "PASS: DOCX fixture skipped (create with python-docx offline)",
     "PASS: multipart parser extracts file+fields | t.pdf",
-    "PASS: login",
-    "FAIL: live parse-binary multipart | {\"success\":false,\"extracted\":false,\"status\":\"PARSE_FAILED\",\"parsed\":{\"success\":false,\"format\":\"pdf\",\"text\":\"\",\"pages\":[],\"pageCount\":0,\"warnings\":[],\"errors\":[\""
+    "BLOCKED: live server unreachable"
   ]
 }

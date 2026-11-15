@@ -556,7 +556,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
       />
 
       {error && (
-        <div role="alert" className="rounded-xl border border-[#FF007F]/50 bg-[#FF007F]/12 px-4 py-3 text-xs text-rose-100 flex items-center justify-between gap-3">
+        <div role="alert" className="rounded-xl border border-[color-mix(in_srgb,var(--z-danger)_50%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] px-4 py-3 text-xs text-[var(--z-danger)] flex items-center justify-between gap-3">
           <span>{error}</span>
           <Button variant="ghost" size="sm" onClick={() => setError(null)}>
             Dismiss
@@ -565,7 +565,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
       )}
 
       {actionMsg && (
-        <div className="rounded-xl border border-[#00F0FF]/40 bg-[#00F0FF]/10 px-4 py-3 text-xs text-[#F4F7FF] flex items-center justify-between gap-3">
+        <div className="rounded-xl border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] px-4 py-3 text-xs text-[var(--app-text-primary)] flex items-center justify-between gap-3">
           <span>{actionMsg}</span>
           <Button variant="ghost" size="sm" onClick={() => setActionMsg(null)}>
             Close
@@ -613,7 +613,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
       <div
         role="tablist"
         aria-label="Cognitive operation domains"
-        className="flex items-center gap-1 p-1 rounded-xl border border-[#1E294A] bg-[#0D1326] overflow-x-auto"
+        className="flex items-center gap-1 p-1 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] overflow-x-auto"
       >
         {tabs.map((tab) => {
           const active = activeTab === tab.id;
@@ -626,8 +626,8 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               onClick={() => setActiveTab(tab.id)}
               className={`min-h-[40px] px-4 py-2 text-xs font-semibold rounded-lg whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                 active
-                  ? 'bg-gradient-to-r from-[#00F0FF]/20 via-[#2563EB]/25 to-[#7B2CBF]/25 text-[#F4F7FF] border border-[#00F0FF]/45'
-                  : 'text-[#9AA8C7] hover:text-[#F4F7FF]'
+                  ? 'bg-gradient-to-r from-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] via-[color-mix(in_srgb,var(--app-accent-deep)_25%,transparent)] to-[color-mix(in_srgb,var(--app-accent-deep)_25%,transparent)] text-[var(--app-text-primary)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]'
+                  : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
               }`}
             >
               {tab.label}
@@ -650,18 +650,18 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             variant="midnight"
             headerAction={
               <div className="flex items-center gap-3 text-xs font-mono tabular-nums">
-                <span className="text-[#9AA8C7]">
-                  Attribution: <span className="text-[#00F0FF]">deterministic_action_engine</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  Attribution: <span className="text-[var(--app-accent)]">deterministic_action_engine</span>
                 </span>
-                <span className="text-[#9AA8C7]">
-                  Delivered: <span className="text-[#CCFF00]">{actionCaps?.recentMissionStats?.delivered ?? 0}/{actionCaps?.recentMissionStats?.total ?? 0}</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  Delivered: <span className="text-[var(--z-ok)]">{actionCaps?.recentMissionStats?.delivered ?? 0}/{actionCaps?.recentMissionStats?.total ?? 0}</span>
                 </span>
               </div>
             }
           >
             {/* Quick Verified Engineering Presets */}
             <div className="mb-5">
-              <div className="text-xs font-semibold text-[#9AA8C7] mb-2">
+              <div className="text-xs font-semibold text-[var(--app-text-secondary)] mb-2">
                 {lang === 'th' ? 'ภารกิจตัวอย่างสำหรับทดสอบการทำงานจริง' : 'Quick Verifiable Missions'}
               </div>
               <div className="flex flex-wrap gap-2">
@@ -669,7 +669,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="button"
                   size="sm"
                   variant="secondary"
-                  leftIcon={<FileCode2 className="w-3.5 h-3.5 text-[#00F0FF]" />}
+                  leftIcon={<FileCode2 className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
                   onClick={() =>
                     handleApplyActionPreset({
                       mode: 'engineering_blueprint_execute',
@@ -684,7 +684,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="button"
                   size="sm"
                   variant="secondary"
-                  leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-[#7B2CBF]" />}
+                  leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-[var(--app-accent-deep)]" />}
                   onClick={() =>
                     handleApplyActionPreset({
                       mode: 'engineering_blueprint_execute',
@@ -699,7 +699,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="button"
                   size="sm"
                   variant="secondary"
-                  leftIcon={<GitBranch className="w-3.5 h-3.5 text-[#CCFF00]" />}
+                  leftIcon={<GitBranch className="w-3.5 h-3.5 text-[var(--z-ok)]" />}
                   onClick={() =>
                     handleApplyActionPreset({
                       mode: 'engineering_blueprint_execute',
@@ -714,7 +714,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="button"
                   size="sm"
                   variant="secondary"
-                  leftIcon={<Wrench className="w-3.5 h-3.5 text-[#FF5E3A]" />}
+                  leftIcon={<Wrench className="w-3.5 h-3.5 text-[var(--z-warn)]" />}
                   onClick={() =>
                     handleApplyActionPreset({
                       mode: 'workspace_verify_repair',
@@ -732,7 +732,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="button"
                   size="sm"
                   variant="secondary"
-                  leftIcon={<Activity className="w-3.5 h-3.5 text-[#00F0FF]" />}
+                  leftIcon={<Activity className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
                   onClick={() =>
                     handleApplyActionPreset({
                       mode: 'system_integrity_audit',
@@ -749,14 +749,14 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             <form onSubmit={handleExecuteActionMission} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="md:col-span-2">
-                  <label htmlFor="action-mode-select" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                  <label htmlFor="action-mode-select" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                     Action Mode
                   </label>
                   <select
                     id="action-mode-select"
                     value={actionMode}
                     onChange={(e) => setActionMode(e.target.value as ActionMissionModeUI)}
-                    className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3 py-2 text-sm text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                    className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                   >
                     <option value="engineering_blueprint_execute">Engineering Blueprint — Build, Test & Package ZIP</option>
                     <option value="workspace_verify_repair">Workspace Verify & Self-Repair (Snapshot + Rollback)</option>
@@ -765,14 +765,14 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="action-runtime-select" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                  <label htmlFor="action-runtime-select" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                     Sandbox Runtime
                   </label>
                   <select
                     id="action-runtime-select"
                     value={actionRuntime}
                     onChange={(e) => setActionRuntime(e.target.value as 'node' | 'python3')}
-                    className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3 py-2 text-sm font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                    className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3 py-2 text-sm font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                   >
                     <option value="node">node (v22 sandbox)</option>
                     <option value="python3">python3 (-B sandbox)</option>
@@ -781,7 +781,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               </div>
 
               <div>
-                <label htmlFor="action-goal-input" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                <label htmlFor="action-goal-input" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                   Mission Objective (Thai or English)
                 </label>
                 <textarea
@@ -789,7 +789,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   rows={2}
                   value={actionGoal}
                   onChange={(e) => setActionGoal(e.target.value)}
-                  className="w-full rounded-xl border border-[#1E294A] bg-[#070B19] px-3.5 py-2.5 text-sm text-[#F4F7FF] placeholder:text-[#6D7B9D] focus:border-[#00F0FF] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3.5 py-2.5 text-sm text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:border-[var(--app-accent)] focus:outline-none"
                   placeholder="Describe what ZYNTHEOR should build, verify, repair, or audit..."
                 />
               </div>
@@ -798,16 +798,16 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 <button
                   type="button"
                   onClick={() => setShowAdvancedInputs((v) => !v)}
-                  className="text-xs font-semibold text-[#00F0FF] hover:brightness-110 cursor-pointer"
+                  className="text-xs font-semibold text-[var(--app-accent)] hover:brightness-110 cursor-pointer"
                 >
                   {showAdvancedInputs ? 'Hide workspace code & governance inputs' : 'Configure custom workspace file, source code, tests, or Approval ID'}
                 </button>
               </div>
 
               {showAdvancedInputs && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 rounded-xl border border-[#1E294A] bg-[#070B19]/70">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 rounded-xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_70%,transparent)]">
                   <div>
-                    <label htmlFor="action-target-file" className="block text-xs font-semibold text-[#9AA8C7] mb-1">
+                    <label htmlFor="action-target-file" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1">
                       Target File (relative inside /workspace)
                     </label>
                     <input
@@ -816,11 +816,11 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       value={actionTargetFile}
                       onChange={(e) => setActionTargetFile(e.target.value)}
                       placeholder="e.g. missions/custom_service.js"
-                      className="w-full min-h-[38px] rounded-lg border border-[#1E294A] bg-[#0D1326] px-3 py-1.5 text-xs font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                      className="w-full min-h-[38px] rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-1.5 text-xs font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label htmlFor="action-approval-id" className="block text-xs font-semibold text-[#9AA8C7] mb-1">
+                    <label htmlFor="action-approval-id" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1">
                       Approval Request ID (required only for high-impact actions)
                     </label>
                     <input
@@ -829,11 +829,11 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       value={actionApprovalId}
                       onChange={(e) => setActionApprovalId(e.target.value)}
                       placeholder="Optional APR-..."
-                      className="w-full min-h-[38px] rounded-lg border border-[#1E294A] bg-[#0D1326] px-3 py-1.5 text-xs font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                      className="w-full min-h-[38px] rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-1.5 text-xs font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label htmlFor="action-source-code" className="block text-xs font-semibold text-[#9AA8C7] mb-1">
+                    <label htmlFor="action-source-code" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1">
                       Source Code (optional; overrides generated blueprint)
                     </label>
                     <textarea
@@ -842,11 +842,11 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       value={actionSourceCode}
                       onChange={(e) => setActionSourceCode(e.target.value)}
                       placeholder="Paste JS or Python code to verify or repair..."
-                      className="w-full rounded-lg border border-[#1E294A] bg-[#0D1326] px-3 py-2 text-xs font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                      className="w-full rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label htmlFor="action-unit-test" className="block text-xs font-semibold text-[#9AA8C7] mb-1">
+                    <label htmlFor="action-unit-test" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1">
                       Unit Test Code (optional)
                     </label>
                     <textarea
@@ -855,7 +855,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       value={actionUnitTestCode}
                       onChange={(e) => setActionUnitTestCode(e.target.value)}
                       placeholder="Optional assertion test script..."
-                      className="w-full rounded-lg border border-[#1E294A] bg-[#0D1326] px-3 py-2 text-xs font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                      className="w-full rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -866,7 +866,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="button"
                   variant="secondary"
                   loading={busyAction}
-                  leftIcon={<Terminal className="w-4 h-4 text-[#00F0FF]" />}
+                  leftIcon={<Terminal className="w-4 h-4 text-[var(--app-accent)]" />}
                   onClick={() => void handlePerceiveAction()}
                 >
                   Perceive Environment
@@ -890,24 +890,24 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             </form>
 
             {perceptionSnap && !activeMission && (
-              <div className="mt-6 pt-6 border-t border-[#1E294A] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+              <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                 <div>
-                  <div className="text-[#9AA8C7]">Workspace Files</div>
-                  <div className="font-mono tabular-nums text-[#F4F7FF] mt-0.5">{perceptionSnap.workspaceFileCount}</div>
+                  <div className="text-[var(--app-text-secondary)]">Workspace Files</div>
+                  <div className="font-mono tabular-nums text-[var(--app-text-primary)] mt-0.5">{perceptionSnap.workspaceFileCount}</div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Docker Sandbox</div>
-                  <div className="font-mono text-[#00F0FF] mt-0.5">
+                  <div className="text-[var(--app-text-secondary)]">Docker Sandbox</div>
+                  <div className="font-mono text-[var(--app-accent)] mt-0.5">
                     {perceptionSnap.dockerStatus?.dockerAvailable ? 'Available' : 'Process Sandbox Only'}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Detected Intent</div>
-                  <div className="font-mono text-[#CCFF00] mt-0.5">{perceptionSnap.contextAnalysis?.intent?.primary}</div>
+                  <div className="text-[var(--app-text-secondary)]">Detected Intent</div>
+                  <div className="font-mono text-[var(--z-ok)] mt-0.5">{perceptionSnap.contextAnalysis?.intent?.primary}</div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Audit Chain</div>
-                  <div className="font-mono text-[#F4F7FF] mt-0.5">
+                  <div className="text-[var(--app-text-secondary)]">Audit Chain</div>
+                  <div className="font-mono text-[var(--app-text-primary)] mt-0.5">
                     {perceptionSnap.auditIntegrity?.valid ? `VALID (${perceptionSnap.auditIntegrity.totalRecords})` : 'INVALID'}
                   </div>
                 </div>
@@ -942,33 +942,33 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 </div>
               }
             >
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs pb-5 border-b border-[#1E294A]">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs pb-5 border-b border-[var(--app-card-border)]">
                 <div>
-                  <div className="text-[#9AA8C7]">Mode</div>
-                  <div className="font-mono text-[#F4F7FF] mt-0.5">{activeMission.mode}</div>
+                  <div className="text-[var(--app-text-secondary)]">Mode</div>
+                  <div className="font-mono text-[var(--app-text-primary)] mt-0.5">{activeMission.mode}</div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Runtime</div>
-                  <div className="font-mono text-[#00F0FF] mt-0.5">{activeMission.runtime}</div>
+                  <div className="text-[var(--app-text-secondary)]">Runtime</div>
+                  <div className="font-mono text-[var(--app-accent)] mt-0.5">{activeMission.runtime}</div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Attribution</div>
-                  <div className="font-mono text-[#F4F7FF] mt-0.5">{activeMission.attribution}</div>
+                  <div className="text-[var(--app-text-secondary)]">Attribution</div>
+                  <div className="font-mono text-[var(--app-text-primary)] mt-0.5">{activeMission.attribution}</div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Duration</div>
-                  <div className="font-mono tabular-nums text-[#F4F7FF] mt-0.5">{activeMission.durationMs} ms</div>
+                  <div className="text-[var(--app-text-secondary)]">Duration</div>
+                  <div className="font-mono tabular-nums text-[var(--app-text-primary)] mt-0.5">{activeMission.durationMs} ms</div>
                 </div>
                 <div>
-                  <div className="text-[#9AA8C7]">Audit Hash</div>
-                  <div className="font-mono tabular-nums text-[#9AA8C7] mt-0.5 truncate" title={activeMission.auditEntryHash}>
+                  <div className="text-[var(--app-text-secondary)]">Audit Hash</div>
+                  <div className="font-mono tabular-nums text-[var(--app-text-secondary)] mt-0.5 truncate" title={activeMission.auditEntryHash}>
                     {String(activeMission.auditEntryHash || '').slice(0, 14)}…
                   </div>
                 </div>
               </div>
 
               {activeMission.failureReason && (
-                <div className="mt-4 rounded-xl border border-[#FF5E3A]/40 bg-[#FF5E3A]/10 px-4 py-2.5 text-xs text-[#FFD4CA]">
+                <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--z-warn)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-warn)_10%,transparent)] px-4 py-2.5 text-xs text-[var(--z-danger)]">
                   <strong>Reason / Blocker:</strong> {activeMission.failureReason}
                 </div>
               )}
@@ -977,7 +977,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               <div className="mt-5 overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                    <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                       <th className="py-2 pr-3">Pillar</th>
                       <th className="py-2 pr-4">Stage</th>
                       <th className="py-2 pr-4">Latency</th>
@@ -985,17 +985,17 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       <th className="py-2 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1E294A]/70">
+                  <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                     {(activeMission.pillars || []).map((p: any) => (
                       <tr key={p.id}>
-                        <td className="py-2.5 pr-3 font-mono text-[#00F0FF] whitespace-nowrap">{p.id}</td>
-                        <td className="py-2.5 pr-4 font-semibold text-[#F4F7FF] whitespace-nowrap">
+                        <td className="py-2.5 pr-3 font-mono text-[var(--app-accent)] whitespace-nowrap">{p.id}</td>
+                        <td className="py-2.5 pr-4 font-semibold text-[var(--app-text-primary)] whitespace-nowrap">
                           {lang === 'th' ? p.labelTh : p.name}
                         </td>
-                        <td className="py-2.5 pr-4 font-mono tabular-nums text-[#9AA8C7] whitespace-nowrap">
+                        <td className="py-2.5 pr-4 font-mono tabular-nums text-[var(--app-text-secondary)] whitespace-nowrap">
                           {p.durationMs} ms
                         </td>
-                        <td className="py-2.5 pr-4 text-[#F4F7FF]">{p.summary}</td>
+                        <td className="py-2.5 pr-4 text-[var(--app-text-primary)]">{p.summary}</td>
                         <td className="py-2.5 text-right">
                           <StatusDot
                             status={p.status === 'PASS' || p.status === 'REPAIRED' ? 'VERIFIED' : p.status === 'SKIPPED' ? 'PARTIAL' : p.status}
@@ -1010,46 +1010,46 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
 
               {/* Verification Output & Acceptance Criteria */}
               {activeMission.verificationOutput && (
-                <div className="mt-6 pt-5 border-t border-[#1E294A] grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
-                  <div className="rounded-xl border border-[#1E294A] bg-[#070B19] p-3.5 space-y-2">
-                    <div className="flex items-center justify-between font-semibold text-[#F4F7FF]">
+                <div className="mt-6 pt-5 border-t border-[var(--app-card-border)] grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+                  <div className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-3.5 space-y-2">
+                    <div className="flex items-center justify-between font-semibold text-[var(--app-text-primary)]">
                       <span>Sandbox Output (exit={String(activeMission.verificationOutput.runtimeExitCode)})</span>
-                      <span className="font-mono text-[#00F0FF]">
+                      <span className="font-mono text-[var(--app-accent)]">
                         Syntax: {activeMission.verificationOutput.syntaxOk ? 'OK' : 'FAIL'}
                       </span>
                     </div>
-                    <pre className="font-mono text-[11px] text-[#CCFF00] whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+                    <pre className="font-mono text-[11px] text-[var(--z-ok)] whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
                       {activeMission.verificationOutput.stdout || activeMission.verificationOutput.stderr || '(no output)'}
                     </pre>
                     {activeMission.verificationOutput.unitTestExitCode !== null && (
-                      <div className="pt-2 border-t border-[#1E294A]">
-                        <div className="text-[#9AA8C7] mb-1">
+                      <div className="pt-2 border-t border-[var(--app-card-border)]">
+                        <div className="text-[var(--app-text-secondary)] mb-1">
                           Unit Tests (exit={activeMission.verificationOutput.unitTestExitCode})
                         </div>
-                        <pre className="font-mono text-[11px] text-[#F4F7FF] whitespace-pre-wrap break-all max-h-32 overflow-y-auto">
+                        <pre className="font-mono text-[11px] text-[var(--app-text-primary)] whitespace-pre-wrap break-all max-h-32 overflow-y-auto">
                           {activeMission.verificationOutput.unitTestStdout || '(no unit test output)'}
                         </pre>
                       </div>
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-[#1E294A] bg-[#070B19] p-3.5 space-y-2">
-                    <div className="font-semibold text-[#F4F7FF]">Acceptance Criteria & Artifacts</div>
+                  <div className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-3.5 space-y-2">
+                    <div className="font-semibold text-[var(--app-text-primary)]">Acceptance Criteria & Artifacts</div>
                     <div className="space-y-1.5">
                       {(activeMission.acceptanceCriteria || []).map((ac: any) => (
                         <div key={ac.id} className="flex items-start gap-2">
                           <CheckCircle2
-                            className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${ac.passed ? 'text-[#CCFF00]' : 'text-[#FF007F]'}`}
+                            className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${ac.passed ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'}`}
                           />
                           <div className="min-w-0">
-                            <div className="font-mono text-[#F4F7FF]">{ac.id}</div>
-                            <div className="text-[#9AA8C7] break-words">{ac.evidence}</div>
+                            <div className="font-mono text-[var(--app-text-primary)]">{ac.id}</div>
+                            <div className="text-[var(--app-text-secondary)] break-words">{ac.evidence}</div>
                           </div>
                         </div>
                       ))}
                     </div>
                     {activeMission.learningCapture?.captured && (
-                      <div className="pt-2 border-t border-[#1E294A] text-[11px] font-mono text-[#00F0FF]">
+                      <div className="pt-2 border-t border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-accent)]">
                         Learned Memory Key: {activeMission.learningCapture.memoryKey}
                       </div>
                     )}
@@ -1070,7 +1070,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                    <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                       <th className="py-2 pr-3">Mission ID</th>
                       <th className="py-2 pr-4">Mode</th>
                       <th className="py-2 pr-4">Goal</th>
@@ -1079,12 +1079,12 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       <th className="py-2 text-right">Inspect</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1E294A]/70">
+                  <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                     {recentMissions.map((m: any) => (
                       <tr key={m.missionId} className="hover:bg-white/[0.02]">
-                        <td className="py-2.5 pr-3 font-mono text-[#00F0FF] whitespace-nowrap">{m.missionId}</td>
-                        <td className="py-2.5 pr-4 font-mono text-[#9AA8C7] whitespace-nowrap">{m.mode}</td>
-                        <td className="py-2.5 pr-4 text-[#F4F7FF] max-w-md truncate">{m.goal}</td>
+                        <td className="py-2.5 pr-3 font-mono text-[var(--app-accent)] whitespace-nowrap">{m.missionId}</td>
+                        <td className="py-2.5 pr-4 font-mono text-[var(--app-text-secondary)] whitespace-nowrap">{m.mode}</td>
+                        <td className="py-2.5 pr-4 text-[var(--app-text-primary)] max-w-md truncate">{m.goal}</td>
                         <td className="py-2.5 pr-3 font-mono tabular-nums whitespace-nowrap">{m.durationMs} ms</td>
                         <td className="py-2.5 pr-3">
                           <StatusDot
@@ -1128,7 +1128,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
           >
             <form onSubmit={handleAnalyzeContext} className="space-y-4">
               <div>
-                <label htmlFor="cognitive-prompt-input" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                <label htmlFor="cognitive-prompt-input" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                   Task Specification or Bilingual Query (Thai / English)
                 </label>
                 <textarea
@@ -1136,7 +1136,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   rows={3}
                   value={contextPrompt}
                   onChange={(e) => setContextPrompt(e.target.value)}
-                  className="w-full rounded-xl border border-[#1E294A] bg-[#070B19] px-3.5 py-2.5 text-sm text-[#F4F7FF] placeholder:text-[#6D7B9D] focus:border-[#00F0FF] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3.5 py-2.5 text-sm text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:border-[var(--app-accent)] focus:outline-none"
                   placeholder="Enter a technical specification, constraint list, or Thai/English query..."
                 />
               </div>
@@ -1145,7 +1145,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="submit"
                   variant="secondary"
                   loading={busyContext}
-                  leftIcon={<Brain className="w-4 h-4 text-[#00F0FF]" />}
+                  leftIcon={<Brain className="w-4 h-4 text-[var(--app-accent)]" />}
                 >
                   Analyze Context
                 </Button>
@@ -1178,9 +1178,9 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             </form>
 
             {contextAnalysis && (
-              <div className="mt-6 pt-6 border-t border-[#1E294A] space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#9AA8C7]">
-                  <span className="font-semibold text-[#F4F7FF]">Context Analysis Result</span>
+              <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--app-text-secondary)]">
+                  <span className="font-semibold text-[var(--app-text-primary)]">Context Analysis Result</span>
                   <span className="font-mono tabular-nums">
                     {contextAnalysis.attribution} · Neural {contextAnalysis.nativeNeuralState} · Lang {contextAnalysis.language} · Intent {contextAnalysis.intent.primary} ({Math.round((contextAnalysis.intent.confidence ?? 0) * 100)}%)
                   </span>
@@ -1188,27 +1188,27 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                      <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                         <th className="py-2 pr-4 font-semibold">Kind</th>
                         <th className="py-2 pr-4 font-semibold">Priority</th>
                         <th className="py-2 pr-4 font-semibold">Relevance</th>
                         <th className="py-2 font-semibold">Segment</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#1E294A]/70">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                       {contextAnalysis.segments.map((seg: any) => (
                         <tr key={seg.segmentId} className="hover:bg-white/[0.02]">
-                          <td className="py-2.5 pr-4 font-mono text-[#00F0FF] whitespace-nowrap">{seg.kind}</td>
+                          <td className="py-2.5 pr-4 font-mono text-[var(--app-accent)] whitespace-nowrap">{seg.kind}</td>
                           <td className="py-2.5 pr-4 font-mono tabular-nums">P{seg.priority}</td>
                           <td className="py-2.5 pr-4 font-mono tabular-nums">{seg.relevanceScore}</td>
-                          <td className="py-2.5 text-[#F4F7FF]">{seg.text}</td>
+                          <td className="py-2.5 text-[var(--app-text-primary)]">{seg.text}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
                 {contextAnalysis.conflicts?.length > 0 && (
-                  <div className="pt-2 text-xs text-[#FF8C73]">
+                  <div className="pt-2 text-xs text-[var(--z-warn)]">
                     {contextAnalysis.conflicts.length} conflict(s) detected:{' '}
                     {contextAnalysis.conflicts.map((c: any) => c.description).join(' | ')}
                   </div>
@@ -1217,9 +1217,9 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             )}
 
             {reasoningOutcome && (
-              <div className="mt-6 pt-6 border-t border-[#1E294A] space-y-3">
+              <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-xs font-semibold text-[#F4F7FF]">
+                  <div className="text-xs font-semibold text-[var(--app-text-primary)]">
                     Adaptive Reasoning Outcome · Class {reasoningOutcome.problemClass}
                   </div>
                   <StatusDot
@@ -1229,41 +1229,41 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs pt-1">
                   <div>
-                    <div className="text-[#9AA8C7]">Strategy</div>
-                    <div className="font-mono text-[#00F0FF] mt-0.5">{reasoningOutcome.selectedStrategy}</div>
+                    <div className="text-[var(--app-text-secondary)]">Strategy</div>
+                    <div className="font-mono text-[var(--app-accent)] mt-0.5">{reasoningOutcome.selectedStrategy}</div>
                   </div>
                   <div>
-                    <div className="text-[#9AA8C7]">Calibrated Confidence</div>
-                    <div className="font-mono tabular-nums text-[#F4F7FF] mt-0.5">
+                    <div className="text-[var(--app-text-secondary)]">Calibrated Confidence</div>
+                    <div className="font-mono tabular-nums text-[var(--app-text-primary)] mt-0.5">
                       {reasoningOutcome.uncertainty?.calibratedConfidence} (U={reasoningOutcome.uncertainty?.epistemicUncertainty})
                     </div>
                   </div>
                   <div>
-                    <div className="text-[#9AA8C7]">Counterexample Test</div>
-                    <div className="font-mono text-[#CCFF00] mt-0.5">
+                    <div className="text-[var(--app-text-secondary)]">Counterexample Test</div>
+                    <div className="font-mono text-[var(--z-ok)] mt-0.5">
                       {reasoningOutcome.winningHypothesis?.counterexamplePassed ? 'Passed' : 'Flagged'}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[#9AA8C7]">Redacted Trace SHA-256</div>
-                    <div className="font-mono tabular-nums text-[#9AA8C7] mt-0.5 truncate" title={reasoningOutcome.reasoningMetadata?.traceDigestSha256}>
+                    <div className="text-[var(--app-text-secondary)]">Redacted Trace SHA-256</div>
+                    <div className="font-mono tabular-nums text-[var(--app-text-secondary)] mt-0.5 truncate" title={reasoningOutcome.reasoningMetadata?.traceDigestSha256}>
                       {String(reasoningOutcome.reasoningMetadata?.traceDigestSha256 || '').slice(0, 14)}…
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-[#F4F7FF] leading-relaxed pt-1">{reasoningOutcome.answerSummary}</p>
+                <p className="text-xs text-[var(--app-text-primary)] leading-relaxed pt-1">{reasoningOutcome.answerSummary}</p>
               </div>
             )}
 
             {reasoningBenchmark && (
-              <div className="mt-6 pt-6 border-t border-[#1E294A] space-y-2 text-xs">
-                <div className="font-semibold text-[#F4F7FF]">
+              <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] space-y-2 text-xs">
+                <div className="font-semibold text-[var(--app-text-primary)]">
                   Independent Reasoning Benchmark: {reasoningBenchmark.passedCases}/{reasoningBenchmark.totalCases} passed ({Math.round((reasoningBenchmark.accuracy ?? 0) * 100)}%) · Avg {reasoningBenchmark.avgLatencyMs} ms
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                      <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                         <th className="py-2 pr-4">Case</th>
                         <th className="py-2 pr-4">Class</th>
                         <th className="py-2 pr-4">Strategy</th>
@@ -1271,12 +1271,12 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                         <th className="py-2 text-right">Result</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#1E294A]/70">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                       {(reasoningBenchmark.cases || []).map((r: any) => (
                         <tr key={r.caseId}>
                           <td className="py-2 pr-4 font-mono">{r.caseId}</td>
-                          <td className="py-2 pr-4 font-mono text-[#9AA8C7]">{r.problemClass}</td>
-                          <td className="py-2 pr-4 font-mono text-[#00F0FF]">{r.strategy}</td>
+                          <td className="py-2 pr-4 font-mono text-[var(--app-text-secondary)]">{r.problemClass}</td>
+                          <td className="py-2 pr-4 font-mono text-[var(--app-accent)]">{r.strategy}</td>
                           <td className="py-2 pr-4 font-mono tabular-nums">{r.calibratedConfidence}</td>
                           <td className="py-2 text-right">
                             <StatusDot status={r.passed ? 'VERIFIED' : 'FAILED'} label={r.passed ? 'PASS' : 'FAIL'} />
@@ -1300,7 +1300,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                    <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                       <th className="py-2 pr-4">Time</th>
                       <th className="py-2 pr-4">Class</th>
                       <th className="py-2 pr-4">Strategy</th>
@@ -1309,14 +1309,14 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                       <th className="py-2 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1E294A]/70">
+                  <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                     {opsData.reasoning.recentOutcomes.map((item: any) => (
                       <tr key={item.reasoningId}>
-                        <td className="py-2.5 pr-4 font-mono tabular-nums text-[#9AA8C7] whitespace-nowrap">
+                        <td className="py-2.5 pr-4 font-mono tabular-nums text-[var(--app-text-secondary)] whitespace-nowrap">
                           {new Date(item.timestamp).toLocaleTimeString()}
                         </td>
                         <td className="py-2.5 pr-4 font-mono">{item.problemClass}</td>
-                        <td className="py-2.5 pr-4 font-mono text-[#00F0FF]">{item.selectedStrategy}</td>
+                        <td className="py-2.5 pr-4 font-mono text-[var(--app-accent)]">{item.selectedStrategy}</td>
                         <td className="py-2.5 pr-4 font-mono tabular-nums">{item.uncertainty?.calibratedConfidence}</td>
                         <td className="py-2.5 pr-4 font-mono tabular-nums">{item.reasoningMetadata?.durationMs} ms</td>
                         <td className="py-2.5 text-right">
@@ -1355,7 +1355,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 size="sm"
                 loading={busyGraph}
                 disabled={!isDeveloperPlus}
-                leftIcon={<GitBranch className="w-3.5 h-3.5 text-[#00F0FF]" />}
+                leftIcon={<GitBranch className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
                 onClick={() => void handleRebuildGraph()}
               >
                 Rebuild Graph
@@ -1364,7 +1364,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
           >
             <form onSubmit={handleTraverseGraph} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
               <div className="flex-1 min-w-0">
-                <label htmlFor="kg-query-input" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                <label htmlFor="kg-query-input" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                   Entity or Concept Seed Query
                 </label>
                 <input
@@ -1372,19 +1372,19 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="text"
                   value={graphQuery}
                   onChange={(e) => setGraphQuery(e.target.value)}
-                  className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3.5 py-2 text-sm text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                  className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3.5 py-2 text-sm text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                   placeholder="e.g. ZYNTHEOR, NativeLM, AuditLedger, HMAC..."
                 />
               </div>
               <div className="w-full sm:w-32">
-                <label htmlFor="kg-hops-select" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                <label htmlFor="kg-hops-select" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                   Max Hops
                 </label>
                 <select
                   id="kg-hops-select"
                   value={graphMaxHops}
                   onChange={(e) => setGraphMaxHops(Number(e.target.value))}
-                  className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3 py-2 text-sm font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                  className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3 py-2 text-sm font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                 >
                   <option value={1}>1 hop</option>
                   <option value={2}>2 hops</option>
@@ -1397,8 +1397,8 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             </form>
 
             {graphTraversal && (
-              <div className="mt-6 pt-6 border-t border-[#1E294A] space-y-3">
-                <div className="text-xs text-[#9AA8C7] font-mono tabular-nums">
+              <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] space-y-3">
+                <div className="text-xs text-[var(--app-text-secondary)] font-mono tabular-nums">
                   {graphTraversal.paths.length} traversal path(s) in {graphTraversal.latencyMs} ms · Seed nodes:{' '}
                   {graphTraversal.seedNodes.join(', ') || 'None matched'}
                 </div>
@@ -1406,23 +1406,23 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                        <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                           <th className="py-2 pr-4">Path Chain</th>
                           <th className="py-2 pr-4">Sources</th>
                           <th className="py-2 pr-4">Provenance Hash</th>
                           <th className="py-2 text-right">Score</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#1E294A]/70">
+                      <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                         {graphTraversal.paths.map((p: any, idx: number) => (
                           <tr key={idx}>
-                            <td className="py-2.5 pr-4 text-[#F4F7FF]">
+                            <td className="py-2.5 pr-4 text-[var(--app-text-primary)]">
                               {p.hops.map((h: any) => `${h.fromLabel} —[${h.relation}]→ ${h.toLabel}`).join(' · ')}
                             </td>
-                            <td className="py-2.5 pr-4 text-[#9AA8C7]">
+                            <td className="py-2.5 pr-4 text-[var(--app-text-secondary)]">
                               {p.hops.map((h: any) => h.documentTitle).join(', ')}
                             </td>
-                            <td className="py-2.5 pr-4 font-mono tabular-nums text-[#00F0FF]">
+                            <td className="py-2.5 pr-4 font-mono tabular-nums text-[var(--app-accent)]">
                               {String(p.provenanceHashes?.[0] || '').slice(0, 12)}…
                             </td>
                             <td className="py-2.5 text-right font-mono tabular-nums">{p.score}</td>
@@ -1438,14 +1438,14 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             )}
 
             {graphConsistency && (
-              <div className="mt-6 pt-6 border-t border-[#1E294A] flex flex-wrap items-center justify-between gap-4 text-xs">
+              <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] flex flex-wrap items-center justify-between gap-4 text-xs">
                 <div className="flex items-center gap-3">
                   <StatusDot status={graphConsistency.valid ? 'VERIFIED' : 'FAILED'} label={graphConsistency.valid ? 'Graph Consistent' : 'Inconsistency Detected'} />
-                  <span className="font-mono tabular-nums text-[#9AA8C7]">
+                  <span className="font-mono tabular-nums text-[var(--app-text-secondary)]">
                     Dangling edges: {graphConsistency.danglingEdgeIds?.length ?? 0} · Missing provenance: {graphConsistency.missingProvenanceEdgeIds?.length ?? 0} · Contradictions: {graphConsistency.contradictions?.length ?? 0}
                   </span>
                 </div>
-                <span className="font-mono text-[#9AA8C7]">{new Date(graphConsistency.checkedAt).toLocaleString()}</span>
+                <span className="font-mono text-[var(--app-text-secondary)]">{new Date(graphConsistency.checkedAt).toLocaleString()}</span>
               </div>
             )}
           </VividCard>
@@ -1463,7 +1463,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
           >
             <form onSubmit={handleConsolidateMemory} className="space-y-4">
               <div>
-                <label htmlFor="cons-target-key" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                <label htmlFor="cons-target-key" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                   Target Semantic Anchor Key
                 </label>
                 <input
@@ -1471,15 +1471,15 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="text"
                   value={consolidationKey}
                   onChange={(e) => setConsolidationKey(e.target.value)}
-                  className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3.5 py-2 text-sm font-mono text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                  className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3.5 py-2 text-sm font-mono text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                 />
               </div>
-              <label className="flex items-center gap-2 text-xs text-[#9AA8C7] cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-[var(--app-text-secondary)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={archiveSources}
                   onChange={(e) => setArchiveSources(e.target.checked)}
-                  className="rounded border-[#1E294A]"
+                  className="rounded border-[var(--app-card-border)]"
                 />
                 <span>Move consolidated episodic items out of active index after writing verbatim archive</span>
               </label>
@@ -1494,10 +1494,10 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-[#1E294A] space-y-3">
+            <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="font-semibold text-[#F4F7FF]">Importance Tier Breakdown</span>
-                <span className="font-mono tabular-nums text-[#9AA8C7]">
+                <span className="font-semibold text-[var(--app-text-primary)]">Importance Tier Breakdown</span>
+                <span className="font-mono tabular-nums text-[var(--app-text-secondary)]">
                   Critical {memSummary?.tierCounts?.critical ?? 0} · High {memSummary?.tierCounts?.high ?? 0} · Normal {memSummary?.tierCounts?.normal ?? 0} · Low {memSummary?.tierCounts?.low ?? 0}
                 </span>
               </div>
@@ -1506,17 +1506,17 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                      <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                         <th className="py-2 pr-3">Archive ID</th>
                         <th className="py-2 pr-3">Sources</th>
                         <th className="py-2 pr-3">State</th>
                         <th className="py-2 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#1E294A]/70">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                       {memSummary.archives.slice(0, 6).map((arch: any) => (
                         <tr key={arch.consolidationId}>
-                          <td className="py-2 pr-3 font-mono text-[#00F0FF]">{arch.consolidationId}</td>
+                          <td className="py-2 pr-3 font-mono text-[var(--app-accent)]">{arch.consolidationId}</td>
                           <td className="py-2 pr-3 font-mono tabular-nums">{arch.sourceCount}</td>
                           <td className="py-2 pr-3 font-mono">{arch.rolledBack ? 'Rolled Back' : 'Archived'}</td>
                           <td className="py-2 text-right">
@@ -1550,7 +1550,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
             <form onSubmit={handleApplyOptimization} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="perf-limit" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                  <label htmlFor="perf-limit" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                     Retrieval Limit (1–20)
                   </label>
                   <input
@@ -1560,11 +1560,11 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                     max={20}
                     value={optRetrievalLimit}
                     onChange={(e) => setOptRetrievalLimit(Number(e.target.value))}
-                    className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3 py-2 text-sm font-mono tabular-nums text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                    className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3 py-2 text-sm font-mono tabular-nums text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label htmlFor="perf-ttl" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                  <label htmlFor="perf-ttl" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                     Cache TTL (ms)
                   </label>
                   <input
@@ -1575,12 +1575,12 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                     step={1000}
                     value={optCacheTtlMs}
                     onChange={(e) => setOptCacheTtlMs(Number(e.target.value))}
-                    className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3 py-2 text-sm font-mono tabular-nums text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                    className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3 py-2 text-sm font-mono tabular-nums text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label htmlFor="perf-reason" className="block text-xs font-semibold text-[#9AA8C7] mb-1.5">
+                <label htmlFor="perf-reason" className="block text-xs font-semibold text-[var(--app-text-secondary)] mb-1.5">
                   Change Rationale
                 </label>
                 <input
@@ -1588,7 +1588,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   type="text"
                   value={optReason}
                   onChange={(e) => setOptReason(e.target.value)}
-                  className="w-full min-h-[40px] rounded-xl border border-[#1E294A] bg-[#070B19] px-3.5 py-2 text-sm text-[#F4F7FF] focus:border-[#00F0FF] focus:outline-none"
+                  className="w-full min-h-[40px] rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] px-3.5 py-2 text-sm text-[var(--app-text-primary)] focus:border-[var(--app-accent)] focus:outline-none"
                 />
               </div>
               <Button
@@ -1603,10 +1603,10 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-[#1E294A] space-y-3">
+            <div className="mt-6 pt-6 border-t border-[var(--app-card-border)] space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="font-semibold text-[#F4F7FF]">Telemetry & Cache Policy</span>
-                <span className="font-mono tabular-nums text-[#9AA8C7]">
+                <span className="font-semibold text-[var(--app-text-primary)]">Telemetry & Cache Policy</span>
+                <span className="font-mono tabular-nums text-[var(--app-text-secondary)]">
                   Samples {perfTelemetry?.totalSamples ?? 0} · Avg{' '}
                   {perfTelemetry?.recentAvgLatencyMs != null ? `${perfTelemetry.recentAvgLatencyMs} ms` : 'UNAVAILABLE'} · Cache Hit{' '}
                   {perfTelemetry?.cachePolicy?.hitRatePct != null ? `${perfTelemetry.cachePolicy.hitRatePct}%` : 'UNAVAILABLE'} · Time Saved{' '}
@@ -1618,17 +1618,17 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                      <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                         <th className="py-2 pr-3">Snapshot</th>
                         <th className="py-2 pr-3">Reason</th>
                         <th className="py-2 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#1E294A]/70">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                       {perfTelemetry.snapshots.slice(0, 6).map((snap: any) => (
                         <tr key={snap.snapshotId}>
-                          <td className="py-2 pr-3 font-mono text-[#00F0FF] whitespace-nowrap">{snap.snapshotId}</td>
-                          <td className="py-2 pr-3 text-[#F4F7FF]">{snap.reason}</td>
+                          <td className="py-2 pr-3 font-mono text-[var(--app-accent)] whitespace-nowrap">{snap.snapshotId}</td>
+                          <td className="py-2 pr-3 text-[var(--app-text-primary)]">{snap.reason}</td>
                           <td className="py-2 text-right">
                             <Button
                               variant="ghost"
@@ -1676,7 +1676,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
           >
             {latestEval ? (
               <div className="space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#9AA8C7] font-mono tabular-nums">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--app-text-secondary)] font-mono tabular-nums">
                   <span>
                     Run {latestEval.runId} · {latestEval.provenance?.runtimeVersion} · {latestEval.provenance?.datasetVersion}
                   </span>
@@ -1687,7 +1687,7 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                      <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                         <th className="py-2 pr-3">ID</th>
                         <th className="py-2 pr-4">Metric</th>
                         <th className="py-2 pr-4">Score</th>
@@ -1695,15 +1695,15 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                         <th className="py-2 text-right">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#1E294A]/70">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                       {latestEval.metrics.map((m: any) => (
                         <tr key={m.id}>
-                          <td className="py-2.5 pr-3 font-mono text-[#00F0FF] whitespace-nowrap">{m.id}</td>
-                          <td className="py-2.5 pr-4 font-semibold text-[#F4F7FF]">{m.name}</td>
+                          <td className="py-2.5 pr-3 font-mono text-[var(--app-accent)] whitespace-nowrap">{m.id}</td>
+                          <td className="py-2.5 pr-4 font-semibold text-[var(--app-text-primary)]">{m.name}</td>
                           <td className="py-2.5 pr-4 font-mono tabular-nums whitespace-nowrap">
                             {m.score !== null ? `${m.score} ${m.unit}` : '—'}
                           </td>
-                          <td className="py-2.5 pr-4 text-[#9AA8C7]">{m.details}</td>
+                          <td className="py-2.5 pr-4 text-[var(--app-text-secondary)]">{m.details}</td>
                           <td className="py-2.5 text-right">
                             <StatusDot status={m.status === 'PASS' ? 'VERIFIED' : (m.status as any)} label={m.status} />
                           </td>
@@ -1714,26 +1714,26 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                 </div>
 
                 {latestEval.baselineComparison && (
-                  <div className="pt-4 border-t border-[#1E294A] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  <div className="pt-4 border-t border-[var(--app-card-border)] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     <div>
-                      <div className="text-[#9AA8C7]">Batch 27 Baseline</div>
-                      <div className="font-mono tabular-nums text-[#F4F7FF] mt-0.5">
+                      <div className="text-[var(--app-text-secondary)]">Batch 27 Baseline</div>
+                      <div className="font-mono tabular-nums text-[var(--app-text-primary)] mt-0.5">
                         {latestEval.baselineComparison.batch27
                           ? `${latestEval.baselineComparison.batch27.passed}/${latestEval.baselineComparison.batch27.total} passed (${latestEval.baselineComparison.batch27.status})`
                           : 'No baseline file'}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[#9AA8C7]">Batch 28 Baseline</div>
-                      <div className="font-mono tabular-nums text-[#F4F7FF] mt-0.5">
+                      <div className="text-[var(--app-text-secondary)]">Batch 28 Baseline</div>
+                      <div className="font-mono tabular-nums text-[var(--app-text-primary)] mt-0.5">
                         {latestEval.baselineComparison.batch28
                           ? `${latestEval.baselineComparison.batch28.passedChecks}/${latestEval.baselineComparison.batch28.totalChecks} passed (${latestEval.baselineComparison.batch28.overallStatus})`
                           : 'No baseline file'}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[#9AA8C7]">LM v2 Baseline</div>
-                      <div className="font-mono tabular-nums text-[#F4F7FF] mt-0.5">
+                      <div className="text-[var(--app-text-secondary)]">LM v2 Baseline</div>
+                      <div className="font-mono tabular-nums text-[var(--app-text-primary)] mt-0.5">
                         {latestEval.baselineComparison.lmV2
                           ? `PPL ${latestEval.baselineComparison.lmV2.valPerplexity.toFixed(2)} · Top-1 ${(latestEval.baselineComparison.lmV2.top1Accuracy * 100).toFixed(1)}%`
                           : 'No baseline file'}
@@ -1766,20 +1766,20 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {Object.values(opsData.capabilityGates.gates).map((gate: any) => (
-                    <div key={gate.gateId} className="p-3.5 rounded-xl bg-[#070B19] border border-[#1E294A] space-y-2">
+                    <div key={gate.gateId} className="p-3.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-2">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-xs font-semibold text-[#F4F7FF]">{gate.gateId}</span>
+                        <span className="font-mono text-xs font-semibold text-[var(--app-text-primary)]">{gate.gateId}</span>
                         <StatusDot
                           status={gate.status === 'IMPLEMENTED' ? 'VERIFIED' : (gate.status as any)}
                           label={gate.status}
                         />
                       </div>
-                      <p className="text-xs text-[#9AA8C7]">{gate.reason}</p>
+                      <p className="text-xs text-[var(--app-text-secondary)]">{gate.reason}</p>
                     </div>
                   ))}
                 </div>
                 {opsData.capabilityGates.truthSummary && (
-                  <div className="text-xs font-mono text-[#9AA8C7] flex flex-wrap gap-4 pt-2 border-t border-[#1E294A]">
+                  <div className="text-xs font-mono text-[var(--app-text-secondary)] flex flex-wrap gap-4 pt-2 border-t border-[var(--app-card-border)]">
                     <span>Truth Kernel Claims: {opsData.capabilityGates.truthSummary.total}</span>
                     <span>VERIFIED_FACT: {opsData.capabilityGates.truthSummary.counts?.VERIFIED_FACT ?? 0}</span>
                     <span>UNVERIFIED: {opsData.capabilityGates.truthSummary.counts?.UNVERIFIED ?? 0}</span>
@@ -1802,24 +1802,24 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-[#1E294A] text-[#9AA8C7]">
+                    <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                       <th className="py-2 pr-4">Modality</th>
                       <th className="py-2 pr-4">Supported Formats</th>
                       <th className="py-2 pr-4">Missing / Blockers</th>
                       <th className="py-2 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1E294A]/70">
+                  <tbody className="divide-y divide-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
                     {multimodal.modalities.map((mod: any) => (
                       <tr key={mod.modality}>
-                        <td className="py-2.5 pr-4 font-semibold text-[#F4F7FF]">
+                        <td className="py-2.5 pr-4 font-semibold text-[var(--app-text-primary)]">
                           <div>{mod.label}</div>
-                          <div className="text-[11px] font-normal text-[#9AA8C7] mt-0.5">{mod.notes}</div>
+                          <div className="text-[11px] font-normal text-[var(--app-text-secondary)] mt-0.5">{mod.notes}</div>
                         </td>
-                        <td className="py-2.5 pr-4 font-mono text-[#00F0FF]">
+                        <td className="py-2.5 pr-4 font-mono text-[var(--app-accent)]">
                           {mod.supportedFormats?.length ? mod.supportedFormats.join(', ') : 'None'}
                         </td>
-                        <td className="py-2.5 pr-4 font-mono text-[#9AA8C7]">
+                        <td className="py-2.5 pr-4 font-mono text-[var(--app-text-secondary)]">
                           {mod.missingDependencies?.length ? mod.missingDependencies.join(', ') : 'None'}
                         </td>
                         <td className="py-2.5 text-right">

@@ -1,6 +1,8 @@
 node_modules/
-*.pt.backup-*
-*.backup*
-*.zip
-__pycache__/
+build/
+dist/
+coverage/
+.DS_Store
 *.log
+.env*
+!.env.example

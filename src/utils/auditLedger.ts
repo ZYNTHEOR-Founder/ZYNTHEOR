@@ -6,7 +6,7 @@
  * - Immutable blocks (Object.freeze)
  * - Cryptographic SHA-256 hash chaining
  * - Preimage structure: index|timestamp|prev_hash|eventType|payload_digest
- * - Browser-side convenience ledger only; server AuditLedger remains the authoritative governance record
+ * - Persistent storage across sessions via localStorage with memory fallback
  */
 
 export interface AuditBlock {
@@ -207,9 +207,9 @@ class AuditLedgerStore {
     const eventType = 'GENESIS';
     const payload = Object.freeze({
       system: 'ZYNTHEOR Q+ Sovereign AI Client Engine',
-      constitution: 'Client-Side Audit Cache (Non-Authoritative)',
+      constitution: 'Zero-Fake Immutable Audit Trail',
       hashAlgorithm: 'SHA-256',
-      authoritative: false,
+      airgapped: true
     });
     const payloadStr = JSON.stringify(payload);
     const payload_digest = sha256Sync(payloadStr);

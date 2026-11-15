@@ -1,27 +1,27 @@
 [
   {
-    "id": "chk_doc_1794679634569_4tn2c_0",
-    "documentId": "doc_1794679634569_4tn2c",
-    "documentTitle": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+    "id": "chk_doc_1794398039733_p78a9_0",
+    "documentId": "doc_1794398039733_p78a9",
+    "documentTitle": "ZYNTHEOR Architecture Manifest & 33.7M Parameter Model Specification",
     "collection": "Architecture",
     "chunkIndex": 0,
-    "text": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nTarget architecture specification: 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).\nTarget parameter budget is 41,527,808 Float32 parameters (~166.1 MB decimal / 158.4 MiB). This is NOT the active runtime checkpoint. The currently serialized active subgraph contains 231,168 Float32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).",
+    "text": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nZYNTHEOR runs a 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).\nTotal parameter count is 33,958,400 Float32 parameters (~135.8 MB).",
     "language": "en",
-    "hash": "44da9f96f6f5fe7b27477cfa5596aeeb01932faf92f7cb759446feecc497479f"
+    "hash": "ee1d8d3d2def165581ee89f33ba47b6dea1c24fe67e1b277b169131db31b2720"
   },
   {
-    "id": "chk_doc_1794679634569_4tn2c_1",
-    "documentId": "doc_1794679634569_4tn2c",
-    "documentTitle": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+    "id": "chk_doc_1794398039733_p78a9_1",
+    "documentId": "doc_1794398039733_p78a9",
+    "documentTitle": "ZYNTHEOR Architecture Manifest & 33.7M Parameter Model Specification",
     "collection": "Architecture",
     "chunkIndex": 1,
-    "text": "loat32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.\n- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.\n- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.\n- Memory Isolation: Episodic memory persisted separately from static model weights.",
+    "text": "## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.\n- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.\n- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.\n- Memory Isolation: Episodic memory persisted separately from static model weights.",
     "language": "en",
-    "hash": "389c582491716bd5c497dfb3fdd3ff2fbdfb99aac726e379b17af7ebf26b9fd8"
+    "hash": "7abe1375338244ac9b4423ce0729be70984168da435e944067463bd0c1cc0adc"
   },
   {
-    "id": "chk_doc_1794679634571_qdvqf_0",
-    "documentId": "doc_1794679634571_qdvqf",
+    "id": "chk_doc_1794398039734_igy57_0",
+    "documentId": "doc_1794398039734_igy57",
     "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
     "collection": "Bilingual Language",
     "chunkIndex": 0,
@@ -30,8 +30,8 @@
     "hash": "cf040279ee6302f9c62b41809364c233cdde1283191ed31197806e1bbbb7a27a"
   },
   {
-    "id": "chk_doc_1794679634572_js1vf_0",
-    "documentId": "doc_1794679634572_js1vf",
+    "id": "chk_doc_1794398039735_aph6y_0",
+    "documentId": "doc_1794398039735_aph6y",
     "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
     "collection": "Security Invariants",
     "chunkIndex": 0,
@@ -40,8 +40,8 @@
     "hash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6"
   },
   {
-    "id": "chk_doc_1794679634573_utvpq_0",
-    "documentId": "doc_1794679634573_utvpq",
+    "id": "chk_doc_1794398039736_umc9j_0",
+    "documentId": "doc_1794398039736_umc9j",
     "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
     "collection": "Governance",
     "chunkIndex": 0,
@@ -50,33 +50,103 @@
     "hash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7"
   },
   {
-    "id": "chk_doc_1794680967598_3el9u_0",
-    "documentId": "doc_1794680967598_3el9u",
-    "documentTitle": "TenantA Secret 1794680967587",
-    "collection": "RBAC",
+    "id": "chk_doc_1794400643128_p3pun_0",
+    "documentId": "doc_1794400643128_p3pun",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
     "chunkIndex": 0,
-    "text": "cross-tenant isolation probe content unique e742adf7",
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
     "language": "en",
-    "hash": "e9f7bfea4b76b2d500e6cb1e9cb717a4f9139ccdb4b1b86b836879f86077cca3"
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
   },
   {
-    "id": "chk_doc_1794729684868_xswfo_0",
-    "documentId": "doc_1794729684868_xswfo",
-    "documentTitle": "TenantA Secret 1794729684860",
-    "collection": "RBAC",
+    "id": "chk_doc_1794400668036_qipgn_0",
+    "documentId": "doc_1794400668036_qipgn",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
     "chunkIndex": 0,
-    "text": "cross-tenant isolation probe content unique 9d8a28f6",
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
     "language": "en",
-    "hash": "f6ca13d4b8a0755fc4461e40d43999cfea2ef909d62d5cbf916103b7a796b1fb"
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
   },
   {
-    "id": "chk_doc_1794730736259_ix050_0",
-    "documentId": "doc_1794730736259_ix050",
-    "documentTitle": "TenantA Secret 1794730736248",
+    "id": "chk_doc_1794400809715_mljct_0",
+    "documentId": "doc_1794400809715_mljct",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1794401856020_56xxl_0",
+    "documentId": "doc_1794401856020_56xxl",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1794401912406_uy6xl_0",
+    "documentId": "doc_1794401912406_uy6xl",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1794405924002_oos3b_0",
+    "documentId": "doc_1794405924002_oos3b",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1794417142794_rdczp_0",
+    "documentId": "doc_1794417142794_rdczp",
+    "documentTitle": "TenantA Secret 1794417142789",
     "collection": "RBAC",
     "chunkIndex": 0,
-    "text": "cross-tenant isolation probe content unique ed45cd95",
+    "text": "cross-tenant isolation probe content unique a6d082fa",
     "language": "en",
-    "hash": "8810ab11941542093168831cc8a44ef249191a539b3a64326afcecbe34a4acc2"
+    "hash": "b62a85a9daecab63ab89717c9a9a468e1fff9dc271167404daf308632d8c95ec"
+  },
+  {
+    "id": "chk_doc_1794417361977_n0jiv_0",
+    "documentId": "doc_1794417361977_n0jiv",
+    "documentTitle": "TenantA Secret 1794417361972",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 48991151",
+    "language": "en",
+    "hash": "a72d2579cfafdb088d9f703a2485048024e371f243a6f6a2a6d1896cdcf1014f"
+  },
+  {
+    "id": "chk_doc_1794429292841_nqf09_0",
+    "documentId": "doc_1794429292841_nqf09",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1794430310769_38fq2_0",
+    "documentId": "doc_1794430310769_38fq2",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
   }
 ]

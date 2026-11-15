@@ -12,10 +12,8 @@ export interface Translations {
 export const DICTIONARY: Translations = {
   // Navigation & Ecosystem
   'nav.ecosystem': { th: 'ระบบนิเวศ', en: 'Ecosystem' },
-  'nav.command_center': { th: 'ภาพรวมระบบ', en: 'Overview' },
-  'nav.autonomous_execution': { th: 'พื้นที่สั่งงานอัตโนมัติ', en: 'Autonomous Execution' },
-  'nav.cognitive_operations': { th: 'ศูนย์ปฏิบัติการพุทธิปัญญา', en: 'Cognitive Operations' },
-  'nav.conversational_intelligence': { th: 'ระบบสั่งการและสนทนาเชิงเหตุผล', en: 'Reasoning & Command Dialogue' },
+  'nav.command_center': { th: 'ศูนย์บัญชาการระบบ', en: 'Command Center' },
+  'nav.conversational_intelligence': { th: 'ระบบสนทนาอัจฉริยะ', en: 'Conversational AI' },
   'nav.intelligence_core': { th: 'แกนสมองประสาทเทียม', en: 'Intelligence Core' },
   'nav.model_laboratory': { th: 'ห้องปฏิบัติการโมเดล', en: 'Model Laboratory' },
   'nav.dev_studio': { th: 'สตูดิโอนักพัฒนา', en: 'Dev Studio' },
@@ -30,8 +28,6 @@ export const DICTIONARY: Translations = {
   'nav.governance_security': { th: 'ธรรมาภิบาล & ความปลอดภัย', en: 'Governance & Security' },
   'nav.admin_console': { th: 'คอนโซลผู้ดูแลระบบ', en: 'Admin Console' },
   'nav.user_settings': { th: 'การตั้งค่าระบบ & ผู้ใช้', en: 'User Settings' },
-  'nav.search': { th: 'ค้นหาพื้นที่ทำงาน', en: 'Find a workspace' },
-  'nav.no_results': { th: 'ไม่พบพื้นที่ทำงานที่ตรงกับคำค้นหา', en: 'No workspaces match your search.' },
 
   // Group headers
   'group.operations': { th: 'การปฏิบัติการ & แกนสมอง', en: 'OPERATIONS & CORE' },
@@ -56,16 +52,16 @@ export const DICTIONARY: Translations = {
   'btn.search': { th: 'ค้นหา', en: 'Search' },
 
   // Header badges & status
-  'badge.sovereign': { th: 'Active: NativeLM v2 (2.0M)', en: 'Active: NativeLM v2 (2.0M)' },
+  'badge.sovereign': { th: 'สถาปัตยกรรม Native 33.7M', en: 'Native 33.7M Architecture' },
   'badge.verified': { th: 'ผ่านการพิสูจน์แล้ว', en: 'Verified' },
   'badge.private_beta': { th: 'ทดสอบเบต้าส่วนตัว (Private Beta)', en: 'Private Beta' },
   'badge.public_beta': { th: 'ทดสอบเบต้าสาธารณะ (Public Beta)', en: 'Public Beta' },
   'badge.commercial_launch': { th: 'เปิดตัวเชิงพาณิชย์ (Commercial)', en: 'Commercial Launch' },
-  'footer.sovereign_desc': { th: 'โมเดล Native บน Sovereign Cloud · Online-first runtime · ป้องกันสิทธิ์แบบ Fail-Closed', en: 'First-Party Cloud Runtime · Policy-Controlled Native AI · Fail-Closed Sandbox' },
+  'footer.sovereign_desc': { th: 'โมเดลในเครื่อง · ไร้ Cloud AI API ภายนอก · ป้องกันสิทธิ์แบบ Fail-Closed', en: 'First-Party Local Model · Zero External Cloud AI · Fail-Closed Sandbox' },
 
-  // Multi-Domain Reasoning & Command Dialogue
-  'chat.title': { th: 'คอนโซลสั่งการและให้เหตุผลสองภาษา', en: 'Bilingual Reasoning & Command Console' },
-  'chat.subtitle': { th: 'เชื่อมโยง Native Intelligence Core กับ Knowledge Workspace แบบ Execution-Gated ออนไลน์เท่านั้น', en: 'Execution-gated Bilingual Reasoning & Command Interface grounded on Native Core & Knowledge Workspace' },
+  // Conversational Intelligence
+  'chat.title': { th: 'ระบบสนทนาและให้เหตุผลสองภาษา', en: 'Bilingual Conversational & Reasoning Core' },
+  'chat.subtitle': { th: 'ประมวลผลด้วย Native Model 33.7M ไม่พึ่งพาคลาวด์ภายนอก แสดงขั้นตอนคิดที่ตรวจสอบได้', en: 'Powered by Sovereign 33.7M Local Model with verifiable reasoning steps and dual-engine language flow' },
   'chat.input_placeholder': { th: 'พิมพ์คำถามหรือคำสั่งภาษาไทย หรือ English... (เช่น สร้างฟังก์ชันตรวจสอบสิทธิ์, อธิบายขั้นตอน)', en: 'Type prompt in Thai or English... (e.g. Write an auth validator, explain architecture)' },
   'chat.thinking': { th: 'โมเดลกำลังวิเคราะห์และประมวลผล...', en: 'Model is analyzing and generating tokens...' },
   'chat.thought_process': { th: 'ขั้นตอนการให้เหตุผลที่ตรวจสอบได้ (Verifiable Reasoning)', en: 'Verifiable Reasoning Process' },

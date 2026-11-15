@@ -1,0 +1,38 @@
+{
+  "manifest": {
+    "datasetId": "ds_1794400643129",
+    "name": "Contaminated Test Corpus",
+    "version": "1.0.0",
+    "createdAt": "2026-11-11T12:37:23.129Z",
+    "sourceDocIds": [
+      "doc_1794400643128_p3pun"
+    ],
+    "totalSamples": 1,
+    "trainSamples": 1,
+    "valSamples": 0,
+    "evalSamples": 0,
+    "totalTokensEstimate": 17,
+    "thaiScriptRatio": 0,
+    "englishScriptRatio": 1,
+    "datasetHash": "fb2ec31f16898407b5ca1ac538e9fbd7078bd8a41334a3d6398445d233e3204d",
+    "syntheticCount": 1,
+    "originalCount": 0,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  "items": [
+    {
+      "id": "item_ds_1794400643129_0",
+      "sourceDocId": "doc_1794400643128_p3pun",
+      "text": "Synthetic machine generated data for testing quarantine protocol.",
+      "tokenCount": 17,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": true,
+      "status": "NEEDS_REVIEW",
+      "flags": [
+        "SYNTHETIC_ORIGIN"
+      ]
+    }
+  ]
+}

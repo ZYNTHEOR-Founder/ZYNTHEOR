@@ -139,16 +139,16 @@ function gatePillClass(state: string | undefined | null): string {
     case 'IMPLEMENTED':
     case 'ONLINE':
     case 'READY':
-      return 'border-[#CCFF00]/60 bg-[#CCFF00]/12 text-[#CCFF00]';
+      return 'border-[color-mix(in_srgb,var(--z-ok)_60%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_12%,transparent)] text-[var(--z-ok)]';
     case 'FAILED':
     case 'BLOCKED':
     case 'QUALITY_BLOCKED':
-      return 'border-[#FF007F]/60 bg-[#FF007F]/12 text-[#FF66B2]';
+      return 'border-[color-mix(in_srgb,var(--z-danger)_60%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] text-[var(--z-danger)]';
     case 'PARTIAL':
     case 'PENDING_APPROVAL':
-      return 'border-[#FF5E3A]/55 bg-[#FF5E3A]/10 text-[#FF8C73]';
+      return 'border-[color-mix(in_srgb,var(--z-warn)_55%,transparent)] bg-[color-mix(in_srgb,var(--z-warn)_10%,transparent)] text-[var(--z-warn)]';
     default:
-      return 'border-dashed border-[#475569] bg-[#0B1124] text-[#9AA8C7]';
+      return 'border-dashed border-[var(--app-text-secondary)] bg-[var(--app-bg-secondary)] text-[var(--app-text-secondary)]';
   }
 }
 
@@ -1392,7 +1392,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
   return (
     <div className="space-y-4">
       {errorMessage && (
-        <div className="p-3 rounded-xl bg-[#FF007F]/12 border border-[#FF007F]/45 text-xs font-mono text-[#FF99C8] flex items-center justify-between gap-3">
+        <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] text-xs font-mono text-[var(--z-danger)] flex items-center justify-between gap-3">
           <span>{errorMessage}</span>
           <button
             type="button"
@@ -1405,13 +1405,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
       )}
 
       {/* TOP WORKSPACE HEADER: Dual Separated Status + Prompt-Driven App Builder */}
-      <section className="rounded-2xl bg-[#0D1326] border border-[#1E294A] p-4 space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#1E294A]">
+      <section className="rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] p-4 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[var(--app-card-border)]">
           <div>
-            <h2 className="text-sm font-bold text-[#F4F7FF] tracking-tight">
+            <h2 className="text-sm font-bold text-[var(--app-text-primary)] tracking-tight">
               ZYNTHEOR Application Engineering Workspace
             </h2>
-            <p className="text-xs text-[#9AA8C7] mt-0.5">
+            <p className="text-xs text-[var(--app-text-secondary)] mt-0.5">
               Analyze, generate, visually edit, test, auto-repair, and verify real full-stack applications in isolated sandboxes.
             </p>
           </div>
@@ -1419,18 +1419,18 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
           {/* Strictly Separated Truth Status Indicators */}
           <div className="flex flex-wrap items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-[#9AA8C7]">App Engine &amp; Cloud:</span>
+              <span className="text-[var(--app-text-secondary)]">App Engine &amp; Cloud:</span>
               <StatusDot
                 status={cloudOnline ? 'ONLINE' : 'UNAVAILABLE'}
                 label={cloudLabel}
                 pulse={false}
               />
             </div>
-            <span className="text-[#334155]" aria-hidden="true">
+            <span className="text-[var(--app-accent)]" aria-hidden="true">
               |
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-[#9AA8C7]">Native Intelligence:</span>
+              <span className="text-[var(--app-text-secondary)]">Native Intelligence:</span>
               <StatusDot
                 status={nativeExecutionOk ? 'READY' : toDotState(nativeModelState)}
                 label={nativeExecutionOk ? 'READY (VERIFIED)' : nativeModelState}
@@ -1441,9 +1441,9 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
         </div>
 
         {!isAuthenticated ? (
-          <div className="p-3.5 rounded-xl bg-[#070B19] border border-[#1E294A] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-[#CBD5E1]">
-              <Lock className="w-4 h-4 text-[#FF5E3A] shrink-0" />
+          <div className="p-3.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-[var(--app-text-secondary)]">
+              <Lock className="w-4 h-4 text-[var(--z-warn)] shrink-0" />
               <span>
                 Sign in with a Developer or Administrator account to create, visually inspect, test, repair, or deploy applications.
               </span>
@@ -1455,7 +1455,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
             {/* Domain Segmented Selector + Stack Options */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div
-                className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#070B19] border border-[#1E294A]"
+                className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]"
                 role="group"
                 aria-label="Application Domain Presets"
               >
@@ -1468,8 +1468,8 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       onClick={() => handleSelectDomainPreset(preset)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                         active
-                          ? 'bg-[#00F0FF] text-[#070B19]'
-                          : 'text-[#9AA8C7] hover:text-[#F4F7FF]'
+                          ? 'bg-[var(--app-accent)] text-[var(--app-bg)]'
+                          : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                       }`}
                     >
                       {preset.label}
@@ -1484,19 +1484,19 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   placeholder="App name (auto-derived)"
-                  className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs text-[#F4F7FF] focus:outline-none focus:border-[#00F0FF] w-44"
+                  className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)] w-44"
                 />
                 <select
                   value={projectStack}
                   onChange={(e) => setProjectStack(e.target.value as any)}
-                  className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-[#F4F7FF] focus:outline-none focus:border-[#00F0FF]"
+                  className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                 >
                   <option value="node_fullstack">Full-Stack Web App (UI + Store + Tests)</option>
                   <option value="static_web">Interactive Frontend App + Contract Tests</option>
                   <option value="node_api">Node Service + Automated Tests</option>
                   <option value="python_service">Python 3 Service + unittest</option>
                 </select>
-                <label className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] flex items-center gap-2 text-xs text-[#CBD5E1] cursor-pointer whitespace-nowrap">
+                <label className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] flex items-center gap-2 text-xs text-[var(--app-text-secondary)] cursor-pointer whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={runInitialChecks}
@@ -1515,22 +1515,22 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                 value={projectPrompt}
                 onChange={(e) => setProjectPrompt(e.target.value)}
                 placeholder="Describe the application to build (user flows, views, data schema, integrations)..."
-                className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-[#070B19] border border-[#1E294A] text-xs md:text-sm text-[#F4F7FF] focus:outline-none focus:border-[#00F0FF]"
+                className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs md:text-sm text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
               />
               <button
                 type="submit"
                 disabled={isCreatingProject}
-                className="min-h-[44px] px-5 py-2 rounded-xl text-xs font-bold text-[#070B19] bg-[#00F0FF] hover:bg-[#33F3FF] transition-colors flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                className="min-h-[44px] px-5 py-2 rounded-xl text-xs font-bold text-[var(--app-bg)] bg-[var(--app-accent)] hover:bg-[var(--app-accent)] transition-colors flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
               >
                 <AppWindow className="w-4 h-4" />
                 <span>{isCreatingProject ? 'Building Application...' : 'Execute Application Task'}</span>
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#9AA8C7] tabular-nums">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[var(--app-text-secondary)] tabular-nums">
               <span>Analyze &rarr; Build &rarr; Test &rarr; Debug &rarr; Verify</span>
               <span>
-                Tenant: <strong className="text-[#00F0FF]">{session?.tenantId || 'default'}</strong> · Sandbox: /workspace/projects
+                Tenant: <strong className="text-[var(--app-accent)]">{session?.tenantId || 'default'}</strong> · Sandbox: /workspace/projects
               </span>
             </div>
           </form>
@@ -1563,9 +1563,9 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
           />
         }
         editor={
-          <div className="h-full bg-[#0D1326] min-w-0">
+          <div className="h-full bg-[var(--app-surface)] min-w-0">
           {/* Tab Bar + Quick Verification Controls */}
-          <div className="px-3.5 py-2.5 bg-[#0B1124] border-b border-[#1E294A] flex flex-wrap items-center justify-between gap-2">
+          <div className="px-3.5 py-2.5 bg-[var(--app-bg-secondary)] border-b border-[var(--app-card-border)] flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
               {(
                 [
@@ -1587,8 +1587,8 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     onClick={() => setSubTab(t.id)}
                     className={`min-h-[34px] px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
                       isActive
-                        ? 'bg-[#131B36] text-[#00F0FF] border border-[#00F0FF]/45'
-                        : 'text-[#9AA8C7] hover:text-white'
+                        ? 'bg-[var(--app-surface-elevated)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]'
+                        : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -1604,7 +1604,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   type="button"
                   onClick={() => void handleRunCheck('build')}
                   disabled={Boolean(isRunningCheck)}
-                  className="min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-[#00F0FF] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                  className="min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-accent)] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                 >
                   {isRunningCheck === 'build' ? 'Building...' : 'Build'}
                 </button>
@@ -1612,7 +1612,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   type="button"
                   onClick={() => void handleRunCheck('test')}
                   disabled={Boolean(isRunningCheck)}
-                  className="min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#131B36] border border-[#1E294A] hover:border-[#CCFF00] text-[#CCFF00] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                  className="min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--z-ok)] text-[var(--z-ok)] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                 >
                   {isRunningCheck === 'test' ? 'Testing...' : 'Test'}
                 </button>
@@ -1620,7 +1620,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   type="button"
                   onClick={() => void handleRunCheck('security')}
                   disabled={Boolean(isRunningCheck)}
-                  className="min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#131B36] border border-[#1E294A] hover:border-[#C084FC] text-[#C084FC] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                  className="min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-accent)] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                 >
                   {isRunningCheck === 'security' ? 'Scanning...' : 'Scan'}
                 </button>
@@ -1630,13 +1630,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* Debug & Auto-Repair Banner whenever a Build, Test, or Security Scan fails */}
           {selectedProject && hasActiveFailure && (
-            <div className="mx-4 mt-4 p-3.5 rounded-xl bg-[#FF007F]/10 border border-[#FF007F]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="mx-4 mt-4 p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_50%,transparent)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1 min-w-0">
-                <div className="text-xs font-bold text-[#FF66B2] flex items-center gap-1.5">
+                <div className="text-xs font-bold text-[var(--z-danger)] flex items-center gap-1.5">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>Verification Failure Detected on {selectedProject.currentRevision}</span>
                 </div>
-                <div className="text-[11px] font-mono text-[#CBD5E1] line-clamp-2">
+                <div className="text-[11px] font-mono text-[var(--app-text-secondary)] line-clamp-2">
                   {selectedProject.lastSecurityScan?.status === 'BLOCKED'
                     ? selectedProject.lastSecurityScan.summary
                     : selectedProject.lastBuild?.status === 'FAILED'
@@ -1648,7 +1648,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                 type="button"
                 onClick={() => void handleAutoRepair()}
                 disabled={isRepairing}
-                className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#FF007F] hover:bg-[#FF3399] text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[var(--z-danger)] hover:bg-[var(--z-danger)] text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
               >
                 <Wrench className="w-3.5 h-3.5" />
                 <span>{isRepairing ? 'Diagnosing & Repairing...' : 'Ask ZYNTHEOR to Fix'}</span>
@@ -1657,21 +1657,21 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
           )}
 
           {lastRepairSummary && (
-            <div className="mx-4 mt-3 p-3 rounded-xl bg-[#070B19] border border-[#1E294A] text-[11px] font-mono space-y-1">
+            <div className="mx-4 mt-3 p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className={lastRepairSummary.repaired ? 'text-[#CCFF00] font-bold' : 'text-[#FF8C73] font-bold'}>
+                <span className={lastRepairSummary.repaired ? 'text-[var(--z-ok)] font-bold' : 'text-[var(--z-warn)] font-bold'}>
                   Auto-Repair Outcome: {lastRepairSummary.summary}
                 </span>
                 <button
                   type="button"
                   onClick={() => setLastRepairSummary(null)}
-                  className="text-[#9AA8C7] hover:text-white underline cursor-pointer"
+                  className="text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] underline cursor-pointer"
                 >
                   Close
                 </button>
               </div>
               {lastRepairSummary.diagnoses.map((d, i) => (
-                <div key={i} className="text-[#9AA8C7] truncate">
+                <div key={i} className="text-[var(--app-text-secondary)] truncate">
                   · {d}
                 </div>
               ))}
@@ -1680,13 +1680,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 1: LIVE INTERACTIVE PREVIEW & EXECUTION LOG */}
           {subTab === 'preview' && (
-            <div className="p-4 bg-[#070B19] space-y-4">
+            <div className="p-4 bg-[var(--app-bg)] space-y-4">
               {!selectedProject ? (
                 <div className="py-16 text-center space-y-2">
-                  <div className="text-xs font-semibold text-[#F4F7FF]">
+                  <div className="text-xs font-semibold text-[var(--app-text-primary)]">
                     No Application Selected
                   </div>
-                  <div className="text-xs text-[#9AA8C7] max-w-md mx-auto">
+                  <div className="text-xs text-[var(--app-text-secondary)] max-w-md mx-auto">
                     Choose a domain preset above or describe what you want to build and click Execute Application Task to scaffold and verify your app.
                   </div>
                 </div>
@@ -1695,14 +1695,14 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   {/* Natural Language App Evolution */}
                   <form
                     onSubmit={handleIterateApp}
-                    className="p-3 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-2"
+                    className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-[#00F0FF]" />
+                      <span className="text-xs font-semibold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[var(--app-accent)]" />
                         Refine Application in Natural Language
                       </span>
-                      <span className="text-[10px] font-mono text-[#9AA8C7]">
+                      <span className="text-[10px] font-mono text-[var(--app-text-secondary)]">
                         Preserves source + commits SHA-256 revision
                       </span>
                     </div>
@@ -1712,12 +1712,12 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={iterationInstruction}
                         onChange={(e) => setIterationInstruction(e.target.value)}
                         placeholder="e.g. Add SLA export workflow banner or customer priority filter..."
-                        className="flex-1 min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs text-white focus:outline-none focus:border-[#00F0FF]"
+                        className="flex-1 min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                       <button
                         type="submit"
                         disabled={isIteratingApp || !iterationInstruction.trim()}
-                        className="min-h-[38px] px-4 py-1.5 rounded-lg bg-[#00F0FF] text-[#070B19] font-bold text-xs whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                        className="min-h-[38px] px-4 py-1.5 rounded-lg bg-[var(--app-accent)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                       >
                         {isIteratingApp ? 'Applying...' : 'Apply Change'}
                       </button>
@@ -1726,9 +1726,9 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
                   {/* Interactive Preview Controls */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-xs font-semibold text-white flex items-center gap-2">
+                    <div className="text-xs font-semibold text-[var(--app-text-primary)] flex items-center gap-2">
                       <span>Interactive App Preview</span>
-                      <span className="text-[11px] font-mono text-[#9AA8C7] tabular-nums">
+                      <span className="text-[11px] font-mono text-[var(--app-text-secondary)] tabular-nums">
                         {selectedProject.currentRevision}
                       </span>
                     </div>
@@ -1738,8 +1738,8 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         onClick={() => setInspectMode((v) => !v)}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 border cursor-pointer whitespace-nowrap shrink-0 ${
                           inspectMode
-                            ? 'bg-[#CCFF00] text-[#070B19] border-[#CCFF00]'
-                            : 'bg-[#131B36] text-[#CBD5E1] border-[#1E294A] hover:border-[#00F0FF]'
+                            ? 'bg-[var(--z-ok)] text-[var(--app-bg)] border-[var(--z-ok)]'
+                            : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
                         }`}
                         title="Toggle click-to-inspect element selection inside the preview"
                       >
@@ -1762,8 +1762,8 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                             onClick={() => setPreviewViewport(vp.id)}
                             className={`px-2 py-1 rounded-lg text-[11px] font-mono flex items-center gap-1 border cursor-pointer whitespace-nowrap shrink-0 ${
                               previewViewport === vp.id
-                                ? 'bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF]'
-                                : 'bg-[#131B36] text-[#9AA8C7] border-[#1E294A]'
+                                ? 'bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] border-[var(--app-accent)]'
+                                : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]'
                             }`}
                           >
                             <Icon className="w-3 h-3" />
@@ -1774,7 +1774,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       <button
                         type="button"
                         onClick={() => void loadPreviewAndVisuals(selectedProject.projectId)}
-                        className="px-2.5 py-1 rounded-lg bg-[#131B36] border border-[#1E294A] text-[11px] font-semibold text-[#00F0FF] cursor-pointer whitespace-nowrap shrink-0"
+                        className="px-2.5 py-1 rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-[11px] font-semibold text-[var(--app-accent)] cursor-pointer whitespace-nowrap shrink-0"
                       >
                         Reload
                       </button>
@@ -1782,13 +1782,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   </div>
 
                   {/* Strictly Sandboxed Preview Iframe (allow-scripts allow-forms WITHOUT allow-same-origin) */}
-                  <div className="rounded-xl border border-[#1E294A] overflow-hidden bg-[#0B1124] flex justify-center p-2">
+                  <div className="rounded-xl border border-[var(--app-card-border)] overflow-hidden bg-[var(--app-bg-secondary)] flex justify-center p-2">
                     <iframe
                       ref={previewIframeRef}
                       title={`${selectedProject.name} Preview`}
                       sandbox="allow-scripts allow-forms"
                       srcDoc={previewHtml}
-                      className={`h-[430px] bg-[#070B19] rounded-lg border border-[#1E294A] transition-all ${
+                      className={`h-[430px] bg-[var(--app-bg)] rounded-lg border border-[var(--app-card-border)] transition-all ${
                         previewViewport === 'mobile'
                           ? 'w-[375px] max-w-full'
                           : previewViewport === 'tablet'
@@ -1799,47 +1799,47 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   </div>
 
                   {/* Compact Live Execution Log Strip */}
-                  <div className="rounded-xl bg-[#0D1326] border border-[#1E294A] overflow-hidden">
+                  <div className="rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setShowExecutionLogs((v) => !v)}
-                      className="w-full px-3.5 py-2 bg-[#0B1124] flex items-center justify-between text-xs font-semibold text-[#F4F7FF] cursor-pointer"
+                      className="w-full px-3.5 py-2 bg-[var(--app-bg-secondary)] flex items-center justify-between text-xs font-semibold text-[var(--app-text-primary)] cursor-pointer"
                     >
                       <span className="flex items-center gap-2">
-                        <Terminal className="w-3.5 h-3.5 text-[#00F0FF]" />
+                        <Terminal className="w-3.5 h-3.5 text-[var(--app-accent)]" />
                         <span>
                           Execution Log ({selectedProject.evidenceHistory.length} execution(s) ·{' '}
                           {selectedProject.runtimeLogs.length} log entry)
                         </span>
                       </span>
                       {showExecutionLogs ? (
-                        <ChevronDown className="w-3.5 h-3.5 text-[#9AA8C7]" />
+                        <ChevronDown className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
                       ) : (
-                        <ChevronRight className="w-3.5 h-3.5 text-[#9AA8C7]" />
+                        <ChevronRight className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
                       )}
                     </button>
                     {showExecutionLogs && (
-                      <div className="p-2.5 max-h-44 overflow-y-auto divide-y divide-[#1E294A] font-mono text-[11px]">
+                      <div className="p-2.5 max-h-44 overflow-y-auto divide-y divide-[var(--app-card-border)] font-mono text-[11px]">
                         {selectedProject.runtimeLogs.slice(0, 12).map((log, i) => (
                           <div
                             key={log.logId || i}
                             className="py-1.5 flex items-start justify-between gap-3"
                           >
-                            <span className="text-[#CBD5E1] min-w-0">
+                            <span className="text-[var(--app-text-secondary)] min-w-0">
                               <span
                                 className={
                                   log.level === 'ERROR'
-                                    ? 'text-[#FF66B2] font-bold'
+                                    ? 'text-[var(--z-danger)] font-bold'
                                     : log.level === 'WARN'
-                                      ? 'text-[#FF8C73] font-bold'
-                                      : 'text-[#00F0FF] font-bold'
+                                      ? 'text-[var(--z-warn)] font-bold'
+                                      : 'text-[var(--app-accent)] font-bold'
                                 }
                               >
                                 [{log.level}]
                               </span>{' '}
-                              <span className="text-[#9AA8C7]">({log.source})</span> {log.message}
+                              <span className="text-[var(--app-text-secondary)]">({log.source})</span> {log.message}
                             </span>
-                            <span className="text-[#64748B] shrink-0 tabular-nums">
+                            <span className="text-[var(--app-text-secondary)] shrink-0 tabular-nums">
                               {log.timestamp.slice(11, 19)}Z
                             </span>
                           </div>
@@ -1849,35 +1849,35 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   </div>
 
                   {/* Secondary Backend API Contract */}
-                  <div className="rounded-xl bg-[#0D1326] border border-[#1E294A] p-3 space-y-2">
+                  <div className="rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-[#CBD5E1]">
+                      <span className="text-xs font-semibold text-[var(--app-text-secondary)]">
                         Supporting Backend Routes ({previewEndpoints.length} endpoint(s))
                       </span>
                       <button
                         type="button"
                         onClick={() => setShowSecondaryApiContract((v) => !v)}
-                        className="text-[11px] font-mono text-[#00F0FF] hover:underline cursor-pointer"
+                        className="text-[11px] font-mono text-[var(--app-accent)] hover:underline cursor-pointer"
                       >
                         {showSecondaryApiContract ? 'Hide Routes' : 'Inspect Routes'}
                       </button>
                     </div>
                     {showSecondaryApiContract && (
-                      <div className="overflow-x-auto rounded-lg border border-[#1E294A]">
+                      <div className="overflow-x-auto rounded-lg border border-[var(--app-card-border)]">
                         <table className="w-full text-left text-xs font-mono">
-                          <thead className="bg-[#0B1124] border-b border-[#1E294A] text-[#9AA8C7]">
+                          <thead className="bg-[var(--app-bg-secondary)] border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
                             <tr>
                               <th className="py-2 px-3">Method</th>
                               <th className="py-2 px-3">Path</th>
                               <th className="py-2 px-3">Purpose</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#1E294A] bg-[#070B19]">
+                          <tbody className="divide-y divide-[var(--app-card-border)] bg-[var(--app-bg)]">
                             {previewEndpoints.map((ep, i) => (
                               <tr key={i}>
-                                <td className="py-2 px-3 text-[#CCFF00] font-bold">{ep.method}</td>
-                                <td className="py-2 px-3 text-[#00F0FF]">{ep.path}</td>
-                                <td className="py-2 px-3 font-sans text-[#CBD5E1]">{ep.purpose}</td>
+                                <td className="py-2 px-3 text-[var(--z-ok)] font-bold">{ep.method}</td>
+                                <td className="py-2 px-3 text-[var(--app-accent)]">{ep.path}</td>
+                                <td className="py-2 px-3 font-sans text-[var(--app-text-secondary)]">{ep.purpose}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -1892,17 +1892,17 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 2: SOURCE CODE EDITOR */}
           {subTab === 'code' && (
-            <div className="p-4 bg-[#070B19]">
+            <div className="p-4 bg-[var(--app-bg)]">
               {!selectedProject ? (
-                <div className="py-12 text-center text-xs text-[#9AA8C7]">
+                <div className="py-12 text-center text-xs text-[var(--app-text-secondary)]">
                   Select or create an application, then pick any file from the left Project Explorer to edit it.
                 </div>
               ) : (
                 <div className="flex flex-col space-y-2.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#9AA8C7]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[var(--app-text-secondary)]">
                     <span className="truncate">
-                      File: <strong className="text-white">{selectedRelPath || 'None selected'}</strong>
-                      {hasUnsaved && <span className="ml-2 text-[#FF8C73]">(modified)</span>}
+                      File: <strong className="text-[var(--app-text-primary)]">{selectedRelPath || 'None selected'}</strong>
+                      {hasUnsaved && <span className="ml-2 text-[var(--z-warn)]">(modified)</span>}
                     </span>
                     <div className="flex items-center gap-2">
                       <input
@@ -1910,13 +1910,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={commitMessage}
                         onChange={(e) => setCommitMessage(e.target.value)}
                         placeholder="Revision commit message"
-                        className="px-2.5 py-1.5 rounded-lg bg-[#0D1326] border border-[#1E294A] text-[11px] text-white"
+                        className="px-2.5 py-1.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[11px] text-[var(--app-text-primary)]"
                       />
                       <button
                         type="button"
                         onClick={() => void handleSaveFile()}
                         disabled={!selectedRelPath || isSavingFile || !hasUnsaved}
-                        className="px-3 py-1.5 rounded-lg bg-[#00F0FF] text-[#070B19] font-bold text-xs flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-lg bg-[var(--app-accent)] text-[var(--app-bg)] font-bold text-xs flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                       >
                         <Save className="w-3.5 h-3.5" />
                         <span>{isSavingFile ? 'Saving...' : 'Commit Revision'}</span>
@@ -1926,7 +1926,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   <textarea
                     value={editorContent}
                     onChange={(e) => setEditorContent(e.target.value)}
-                    className="w-full min-h-[440px] p-3.5 rounded-xl bg-[#0D1326] border border-[#1E294A] font-mono text-xs leading-relaxed text-[#F4F7FF] focus:outline-none focus:border-[#00F0FF]"
+                    className="w-full min-h-[440px] p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-xs leading-relaxed text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                   />
                 </div>
               )}
@@ -1935,30 +1935,30 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 3: DATABASE & PERSISTENCE WORKSPACE */}
           {subTab === 'database' && (
-            <div className="p-4 bg-[#070B19] space-y-4">
+            <div className="p-4 bg-[var(--app-bg)] space-y-4">
               {!selectedProject ? (
-                <div className="py-12 text-center text-xs text-[#9AA8C7]">
+                <div className="py-12 text-center text-xs text-[var(--app-text-secondary)]">
                   Select an application to inspect its persistent datastore, schema definition, and database connections.
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div className="p-3.5 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-1">
-                      <div className="text-[11px] text-[#9AA8C7]">Persistence Mode</div>
-                      <div className="font-mono font-bold text-[#00F0FF]">
+                    <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
+                      <div className="text-[11px] text-[var(--app-text-secondary)]">Persistence Mode</div>
+                      <div className="font-mono font-bold text-[var(--app-accent)]">
                         {dbInspector?.persistenceMode || 'json_file_store'}
                       </div>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-1">
-                      <div className="text-[11px] text-[#9AA8C7]">Managed Cloud SQL</div>
+                    <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
+                      <div className="text-[11px] text-[var(--app-text-secondary)]">Managed Cloud SQL</div>
                       <StatusDot
                         status={dbInspector?.cloudSqlConfigured ? 'VERIFIED' : 'NOT_CONFIGURED'}
                         label={dbInspector?.cloudSqlConfigured ? 'CONFIGURED' : 'NOT_CONFIGURED'}
                       />
                     </div>
-                    <div className="p-3.5 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-1">
-                      <div className="text-[11px] text-[#9AA8C7]">Bound Database Integrations</div>
-                      <div className="font-mono font-bold text-white tabular-nums">
+                    <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
+                      <div className="text-[11px] text-[var(--app-text-secondary)]">Bound Database Integrations</div>
+                      <div className="font-mono font-bold text-[var(--app-text-primary)] tabular-nums">
                         {dbInspector?.databaseIntegrations?.length || 0} connected
                       </div>
                     </div>
@@ -1966,20 +1966,20 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
                   {dbInspector?.schema && (
                     <div className="space-y-1.5">
-                      <div className="text-xs font-bold text-white">
+                      <div className="text-xs font-bold text-[var(--app-text-primary)]">
                         Application Data Schema (data/schema.json)
                       </div>
-                      <pre className="p-3.5 rounded-xl bg-[#0D1326] border border-[#1E294A] font-mono text-[11px] text-[#CCFF00] overflow-x-auto">
+                      <pre className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-[11px] text-[var(--z-ok)] overflow-x-auto">
                         {JSON.stringify(dbInspector.schema, null, 2)}
                       </pre>
                     </div>
                   )}
 
                   <div className="space-y-1.5">
-                    <div className="text-xs font-bold text-white">Schema &amp; Persistence Files</div>
-                    <div className="divide-y divide-[#1E294A] rounded-xl bg-[#0D1326] border border-[#1E294A] font-mono text-xs">
+                    <div className="text-xs font-bold text-[var(--app-text-primary)]">Schema &amp; Persistence Files</div>
+                    <div className="divide-y divide-[var(--app-card-border)] rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-xs">
                       {(dbInspector?.dataFiles || []).length === 0 ? (
-                        <div className="p-3 text-[#9AA8C7]">
+                        <div className="p-3 text-[var(--app-text-secondary)]">
                           No explicit schema files in this stack revision.
                         </div>
                       ) : (
@@ -1988,8 +1988,8 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                             key={df.relativePath}
                             className="p-3 flex items-center justify-between gap-2"
                           >
-                            <span className="text-[#00F0FF]">{df.relativePath}</span>
-                            <span className="text-[10px] text-[#9AA8C7] tabular-nums">
+                            <span className="text-[var(--app-accent)]">{df.relativePath}</span>
+                            <span className="text-[10px] text-[var(--app-text-secondary)] tabular-nums">
                               {df.bytes} B · sha256:{df.sha256.slice(0, 14)}…
                             </span>
                           </div>
@@ -2004,14 +2004,14 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 4: INTERNET CONNECTIVITY, WEB RESEARCH, REGISTRY & INTEGRATIONS */}
           {subTab === 'internet' && (
-            <div className="p-4 bg-[#070B19] space-y-4">
-              <div className="p-3.5 rounded-xl bg-[#0D1326] border border-[#1E294A] flex flex-wrap items-center justify-between gap-2">
+            <div className="p-4 bg-[var(--app-bg)] space-y-4">
+              <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <div className="text-xs font-bold text-white flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-[#00F0FF]" />
+                  <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[var(--app-accent)]" />
                     Internet Connectivity Engine &amp; SSRF Guardrails
                   </div>
-                  <div className="text-[11px] font-mono text-[#9AA8C7] mt-0.5">
+                  <div className="text-[11px] font-mono text-[var(--app-text-secondary)] mt-0.5">
                     Blocks loopback/private/metadata CIDRs ({internetPolicy?.blockedCidrs?.slice(0, 4).join(', ') || '127.0.0.0/8, 10.0.0.0/8, 169.254.169.254'}) + DNS rebinding validation
                   </div>
                 </div>
@@ -2023,17 +2023,17 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
               <form
                 onSubmit={handleProbeInternetUrl}
-                className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3"
+                className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3"
               >
-                <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <PlugZap className="w-3.5 h-3.5 text-[#00F0FF]" />
+                <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                  <PlugZap className="w-3.5 h-3.5 text-[var(--app-accent)]" />
                   Live Outbound HTTP/HTTPS Connectivity Probe
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <select
                     value={probeMethod}
                     onChange={(e) => setProbeMethod(e.target.value as any)}
-                    className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                    className="min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                   >
                     <option value="GET">GET</option>
                     <option value="HEAD">HEAD</option>
@@ -2045,26 +2045,26 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     value={probeUrl}
                     onChange={(e) => setProbeUrl(e.target.value)}
                     placeholder="https://api.example.com/health"
-                    className="flex-1 min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                    className="flex-1 min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                   />
                   <input
                     type="text"
                     value={probeSecretAlias}
                     onChange={(e) => setProbeSecretAlias(e.target.value)}
                     placeholder="Secret alias"
-                    className="sm:w-32 min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                    className="sm:w-32 min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                   />
                   <button
                     type="submit"
                     disabled={isProbingUrl}
-                    className="min-h-[38px] px-4 py-1.5 rounded-lg bg-[#00F0FF] text-[#070B19] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
+                    className="min-h-[38px] px-4 py-1.5 rounded-lg bg-[var(--app-accent)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
                   >
                     {isProbingUrl ? 'Connecting...' : 'Probe URL'}
                   </button>
                 </div>
 
                 {probeResult && (
-                  <div className="p-3 rounded-lg bg-[#070B19] border border-[#1E294A] text-[11px] font-mono space-y-1.5">
+                  <div className="p-3 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono space-y-1.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <StatusDot
                         status={
@@ -2083,16 +2083,16 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         }
                       />
                       {probeResult.contentSha256 && (
-                        <span className="text-[#9AA8C7]">
+                        <span className="text-[var(--app-text-secondary)]">
                           sha256:{String(probeResult.contentSha256).slice(0, 16)}…
                         </span>
                       )}
                     </div>
                     {probeResult.error && (
-                      <div className="text-[#FF8C73]">{probeResult.error}</div>
+                      <div className="text-[var(--z-warn)]">{probeResult.error}</div>
                     )}
                     {(probeResult.bodyPreview || probeResult.bodySnippet) && (
-                      <pre className="p-2 rounded bg-[#0D1326] border border-[#1E294A] text-[#CBD5E1] whitespace-pre-wrap max-h-32 overflow-y-auto">
+                      <pre className="p-2 rounded bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[var(--app-text-secondary)] whitespace-pre-wrap max-h-32 overflow-y-auto">
                         {probeResult.bodyPreview || probeResult.bodySnippet}
                       </pre>
                     )}
@@ -2101,9 +2101,9 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
               </form>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3">
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-[#C084FC]" />
+                <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
+                  <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-[var(--app-accent)]" />
                     Web Research &amp; Retrieval
                   </div>
                   <form onSubmit={handleWebResearch} className="flex gap-2">
@@ -2113,12 +2113,12 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       value={researchQuery}
                       onChange={(e) => setResearchQuery(e.target.value)}
                       placeholder="Topic or URL to research..."
-                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs text-white"
+                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-primary)]"
                     />
                     <button
                       type="submit"
                       disabled={isResearching}
-                      className="px-3 py-1.5 rounded-lg bg-[#C084FC] text-[#070B19] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-[var(--app-accent)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
                     >
                       {isResearching ? 'Searching...' : 'Search'}
                     </button>
@@ -2129,22 +2129,22 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       {researchResults.map((r, idx) => (
                         <div
                           key={idx}
-                          className="p-2.5 rounded-lg bg-[#070B19] border border-[#1E294A] space-y-1"
+                          className="p-2.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-1"
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <span className="font-bold text-[#00F0FF]">{r.title}</span>
+                            <span className="font-bold text-[var(--app-accent)]">{r.title}</span>
                             {selectedProject && (
                               <button
                                 type="button"
                                 onClick={() => void handleAttachResearch(r)}
-                                className="px-2 py-0.5 rounded bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-[10px] font-mono text-[#CCFF00] shrink-0 cursor-pointer"
+                                className="px-2 py-0.5 rounded bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[10px] font-mono text-[var(--z-ok)] shrink-0 cursor-pointer"
                               >
                                 + Attach
                               </button>
                             )}
                           </div>
-                          <div className="text-[#CBD5E1] line-clamp-2">{r.snippet}</div>
-                          <div className="text-[10px] font-mono text-[#64748B] truncate">
+                          <div className="text-[var(--app-text-secondary)] line-clamp-2">{r.snippet}</div>
+                          <div className="text-[10px] font-mono text-[var(--app-text-secondary)] truncate">
                             [{r.source}] {r.url}
                           </div>
                         </div>
@@ -2153,16 +2153,16 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   )}
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3">
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <PackageSearch className="w-3.5 h-3.5 text-[#CCFF00]" />
+                <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
+                  <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                    <PackageSearch className="w-3.5 h-3.5 text-[var(--z-ok)]" />
                     Dependency Registry (npm / PyPI)
                   </div>
                   <form onSubmit={handleLookupRegistry} className="flex gap-2">
                     <select
                       value={registryEcosystem}
                       onChange={(e) => setRegistryEcosystem(e.target.value as any)}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                      className="px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                     >
                       <option value="npm">npm</option>
                       <option value="pypi">PyPI</option>
@@ -2173,21 +2173,21 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       value={registryPackage}
                       onChange={(e) => setRegistryPackage(e.target.value)}
                       placeholder="Package name (e.g. zod, fastapi)"
-                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                     />
                     <button
                       type="submit"
                       disabled={isLookingUpPkg}
-                      className="px-3 py-1.5 rounded-lg bg-[#CCFF00] text-[#070B19] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-[var(--z-ok)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
                     >
                       {isLookingUpPkg ? 'Looking up...' : 'Lookup'}
                     </button>
                   </form>
 
                   {registryResult && (
-                    <div className="p-2.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[11px] font-mono space-y-1">
+                    <div className="p-2.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-bold">
+                        <span className="text-[var(--app-text-primary)] font-bold">
                           {registryResult.name || registryResult.packageName}@
                           {registryResult.version || registryResult.latestVersion || 'N/A'}
                         </span>
@@ -2197,7 +2197,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         />
                       </div>
                       {registryResult.description && (
-                        <div className="text-[#CBD5E1] font-sans">{registryResult.description}</div>
+                        <div className="text-[var(--app-text-secondary)] font-sans">{registryResult.description}</div>
                       )}
                     </div>
                   )}
@@ -2205,9 +2205,9 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3">
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-[#FF5E3A]" />
+                <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
+                  <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-[var(--z-warn)]" />
                     Secret Reference Vault (AES-256-GCM)
                   </div>
                   <form onSubmit={handleSaveSecretRef} className="space-y-2">
@@ -2218,14 +2218,14 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={secretAlias}
                         onChange={(e) => setSecretAlias(e.target.value)}
                         placeholder="Alias"
-                        className="px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                        className="px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                       />
                       <input
                         type="text"
                         value={secretProvider}
                         onChange={(e) => setSecretProvider(e.target.value)}
                         placeholder="Provider"
-                        className="px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                        className="px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                       />
                     </div>
                     <input
@@ -2234,7 +2234,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       value={secretValue}
                       onChange={(e) => setSecretValue(e.target.value)}
                       placeholder="Secret API key / token"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                     />
                     <div className="flex gap-2">
                       <input
@@ -2242,36 +2242,36 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={secretEnvFallback}
                         onChange={(e) => setSecretEnvFallback(e.target.value)}
                         placeholder="ENV fallback"
-                        className="flex-1 px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                        className="flex-1 px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                       />
                       <button
                         type="submit"
                         disabled={isSavingSecret}
-                        className="px-3 py-1.5 rounded-lg bg-[#FF5E3A] text-[#070B19] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-lg bg-[var(--z-warn)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
                       >
                         {isSavingSecret ? 'Saving...' : 'Store Secret'}
                       </button>
                     </div>
                   </form>
-                  <div className="divide-y divide-[#1E294A] text-[10px] font-mono">
+                  <div className="divide-y divide-[var(--app-card-border)] text-[10px] font-mono">
                     {(internetPolicy?.secrets || []).map((sr) => (
                       <div key={sr.alias} className="py-1.5 flex items-center justify-between gap-2">
-                        <span className="text-[#00F0FF]">
+                        <span className="text-[var(--app-accent)]">
                           {sr.alias} ({sr.provider})
                         </span>
-                        <span className="text-[#9AA8C7]">{sr.maskedPreview}</span>
+                        <span className="text-[var(--app-text-secondary)]">{sr.maskedPreview}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3">
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <PlugZap className="w-3.5 h-3.5 text-[#00F0FF]" />
+                <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
+                  <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                    <PlugZap className="w-3.5 h-3.5 text-[var(--app-accent)]" />
                     External Service Integrations
                   </div>
                   {!selectedProject ? (
-                    <div className="text-xs text-[#9AA8C7]">Select a project to bind services.</div>
+                    <div className="text-xs text-[var(--app-text-secondary)]">Select a project to bind services.</div>
                   ) : (
                     <>
                       <form onSubmit={handleAttachIntegration} className="space-y-2">
@@ -2279,7 +2279,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                           <select
                             value={intType}
                             onChange={(e) => setIntType(e.target.value as any)}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                            className="px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                           >
                             <option value="http_api">HTTP API</option>
                             <option value="websocket">WebSocket</option>
@@ -2293,7 +2293,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                             value={intName}
                             onChange={(e) => setIntName(e.target.value)}
                             placeholder="Service name"
-                            className="px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs text-white"
+                            className="px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-primary)]"
                           />
                         </div>
                         <input
@@ -2302,7 +2302,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                           value={intEndpoint}
                           onChange={(e) => setIntEndpoint(e.target.value)}
                           placeholder="https://... or wss://..."
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                         />
                         <div className="flex gap-2">
                           <input
@@ -2310,35 +2310,35 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                             value={intSecretAlias}
                             onChange={(e) => setIntSecretAlias(e.target.value)}
                             placeholder="Secret alias"
-                            className="flex-1 px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                            className="flex-1 px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                           />
                           <input
                             type="text"
                             value={intHeaderName}
                             onChange={(e) => setIntHeaderName(e.target.value)}
                             placeholder="Header"
-                            className="w-24 px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                            className="w-24 px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                           />
                           <button
                             type="submit"
                             disabled={isAttachingIntegration}
-                            className="px-3 py-1.5 rounded-lg bg-[#00F0FF] text-[#070B19] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
+                            className="px-3 py-1.5 rounded-lg bg-[var(--app-accent)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
                           >
                             Bind
                           </button>
                         </div>
                       </form>
-                      <div className="divide-y divide-[#1E294A] max-h-36 overflow-y-auto text-[11px] font-mono">
+                      <div className="divide-y divide-[var(--app-card-border)] max-h-36 overflow-y-auto text-[11px] font-mono">
                         {(selectedProject.integrations || []).map((intg) => (
                           <div
                             key={intg.integrationId}
                             className="py-1.5 flex items-center justify-between gap-2"
                           >
                             <div className="min-w-0">
-                              <div className="text-white font-bold truncate">
+                              <div className="text-[var(--app-text-primary)] font-bold truncate">
                                 [{intg.type}] {intg.name}
                               </div>
-                              <div className="text-[10px] text-[#9AA8C7] truncate">
+                              <div className="text-[10px] text-[var(--app-text-secondary)] truncate">
                                 {intg.endpoint}
                               </div>
                             </div>
@@ -2351,7 +2351,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                                 type="button"
                                 onClick={() => void handleTestIntegration(intg.integrationId)}
                                 disabled={testingIntegrationId === intg.integrationId}
-                                className="px-2 py-0.5 rounded bg-[#131B36] border border-[#1E294A] text-[10px] text-[#00F0FF] cursor-pointer"
+                                className="px-2 py-0.5 rounded bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-[10px] text-[var(--app-accent)] cursor-pointer"
                               >
                                 Test
                               </button>
@@ -2368,26 +2368,26 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 5: TESTS & BENCHMARK */}
           {subTab === 'checks' && (
-            <div className="p-4 bg-[#070B19] space-y-4">
+            <div className="p-4 bg-[var(--app-bg)] space-y-4">
               {selectedProject ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div className="p-3 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-1">
+                    <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white">Build</span>
+                        <span className="font-bold text-[var(--app-text-primary)]">Build</span>
                         <StatusDot
                           status={selectedProject.lastBuild?.status || 'UNVERIFIED'}
                           label={selectedProject.lastBuild?.status || 'UNVERIFIED'}
                         />
                       </div>
-                      <div className="text-[11px] font-mono text-[#9AA8C7]">
+                      <div className="text-[11px] font-mono text-[var(--app-text-secondary)]">
                         {selectedProject.lastBuild?.summary || 'Not executed'}
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-1">
+                    <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white">Tests</span>
+                        <span className="font-bold text-[var(--app-text-primary)]">Tests</span>
                         <StatusDot
                           status={selectedProject.lastTests?.status || 'UNVERIFIED'}
                           label={
@@ -2397,68 +2397,68 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                           }
                         />
                       </div>
-                      <div className="text-[11px] font-mono text-[#9AA8C7]">
+                      <div className="text-[11px] font-mono text-[var(--app-text-secondary)]">
                         {selectedProject.lastTests?.summary || 'Not executed'}
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-1">
+                    <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white">Security</span>
+                        <span className="font-bold text-[var(--app-text-primary)]">Security</span>
                         <StatusDot
                           status={selectedProject.lastSecurityScan?.status || 'UNVERIFIED'}
                           label={selectedProject.lastSecurityScan?.status || 'UNVERIFIED'}
                         />
                       </div>
-                      <div className="text-[11px] font-mono text-[#9AA8C7]">
+                      <div className="text-[11px] font-mono text-[var(--app-text-secondary)]">
                         {selectedProject.lastSecurityScan?.summary || 'Not scanned'}
                       </div>
                     </div>
                   </div>
 
                   {selectedProject.lastBuild?.output && (
-                    <pre className="p-3 rounded-xl bg-[#0D1326] border border-[#1E294A] text-[11px] font-mono text-[#CBD5E1] whitespace-pre-wrap overflow-x-auto max-h-36">
+                    <pre className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-text-secondary)] whitespace-pre-wrap overflow-x-auto max-h-36">
                       {selectedProject.lastBuild.output}
                     </pre>
                   )}
 
                   {selectedProject.lastTests?.output && (
-                    <pre className="p-3 rounded-xl bg-[#0D1326] border border-[#1E294A] text-[11px] font-mono text-[#CCFF00] whitespace-pre-wrap overflow-x-auto max-h-44">
+                    <pre className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--z-ok)] whitespace-pre-wrap overflow-x-auto max-h-44">
                       {selectedProject.lastTests.output}
                     </pre>
                   )}
 
                   {selectedProject.lastSecurityScan &&
                     selectedProject.lastSecurityScan.findings.length > 0 && (
-                      <div className="divide-y divide-[#1E294A] rounded-xl bg-[#0D1326] border border-[#1E294A]">
+                      <div className="divide-y divide-[var(--app-card-border)] rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                         {selectedProject.lastSecurityScan.findings.map((f, idx) => (
                           <div key={idx} className="p-3 text-xs font-mono space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className="text-[#FF8C73] font-bold">
+                              <span className="text-[var(--z-warn)] font-bold">
                                 [{f.severity}] {f.rule}
                               </span>
-                              <span className="text-[#9AA8C7]">{f.file}</span>
+                              <span className="text-[var(--app-text-secondary)]">{f.file}</span>
                             </div>
-                            <div className="text-[#CBD5E1]">{f.detail}</div>
+                            <div className="text-[var(--app-text-secondary)]">{f.detail}</div>
                           </div>
                         ))}
                       </div>
                     )}
                 </div>
               ) : (
-                <div className="py-4 text-center text-xs text-[#9AA8C7]">
+                <div className="py-4 text-center text-xs text-[var(--app-text-secondary)]">
                   Select a project to inspect project-level checks.
                 </div>
               )}
 
-              <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3">
+              <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Award className="w-4 h-4 text-[#CCFF00]" />
+                    <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-[var(--z-ok)]" />
                       Software Capability Benchmark (Levels 1–4)
                     </div>
-                    <div className="text-[11px] text-[#9AA8C7]">
+                    <div className="text-[11px] text-[var(--app-text-secondary)]">
                       Executes isolated full-stack builds, test suites, UI contract assertions, and SSRF probes.
                     </div>
                   </div>
@@ -2466,7 +2466,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     type="button"
                     onClick={() => void handleRunBenchmarkSuite()}
                     disabled={isRunningBenchmark}
-                    className="min-h-[36px] px-4 py-1.5 rounded-lg bg-[#CCFF00] text-[#070B19] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
+                    className="min-h-[36px] px-4 py-1.5 rounded-lg bg-[var(--z-ok)] text-[var(--app-bg)] font-bold text-xs whitespace-nowrap cursor-pointer disabled:opacity-50"
                   >
                     {isRunningBenchmark ? 'Running Suite...' : 'Run Benchmark'}
                   </button>
@@ -2474,7 +2474,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
                 {benchmarkReport && (
                   <div className="space-y-3">
-                    <div className="text-[11px] font-mono text-[#00F0FF] tabular-nums">
+                    <div className="text-[11px] font-mono text-[var(--app-accent)] tabular-nums">
                       Run {benchmarkReport.runId} · {benchmarkReport.levelsPassed}/
                       {benchmarkReport.levelsAttempted} levels passed ·{' '}
                       {benchmarkReport.totalDurationMs}ms
@@ -2483,16 +2483,16 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       {benchmarkReport.dimensions.map((d) => (
                         <div
                           key={d.dimension}
-                          className="p-2.5 rounded-lg bg-[#070B19] border border-[#1E294A] space-y-1"
+                          className="p-2.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-1"
                         >
                           <div className="flex items-center justify-between gap-1">
-                            <span className="font-bold text-white truncate">{d.dimension}</span>
+                            <span className="font-bold text-[var(--app-text-primary)] truncate">{d.dimension}</span>
                             <StatusDot
                               status={toDotState(d.status)}
                               label={d.scorePct !== null ? `${d.scorePct}%` : d.status}
                             />
                           </div>
-                          <div className="text-[10px] text-[#9AA8C7]">{d.measurement}</div>
+                          <div className="text-[10px] text-[var(--app-text-secondary)]">{d.measurement}</div>
                         </div>
                       ))}
                     </div>
@@ -2504,20 +2504,20 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 6: CLOUD DEPLOYMENT, HISTORY TIMELINE & ROLLBACK */}
           {subTab === 'deploy' && (
-            <div className="p-4 bg-[#070B19] space-y-4">
+            <div className="p-4 bg-[var(--app-bg)] space-y-4">
               {!selectedProject ? (
-                <div className="py-12 text-center text-xs text-[#9AA8C7]">
+                <div className="py-12 text-center text-xs text-[var(--app-text-secondary)]">
                   Select an application to inspect deployments, Verification Evidence timeline, and rollback snapshots.
                 </div>
               ) : (
                 <>
-                  <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] space-y-3">
+                  <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <div className="text-xs font-bold text-white">
+                        <div className="text-xs font-bold text-[var(--app-text-primary)]">
                           Cloud Deployment Control (ApprovalGate + Bundle SHA-256)
                         </div>
-                        <div className="text-[11px] font-mono text-[#9AA8C7] mt-0.5">
+                        <div className="text-[11px] font-mono text-[var(--app-text-secondary)] mt-0.5">
                           {selectedProject.deployment.reason}
                         </div>
                       </div>
@@ -2541,13 +2541,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={approvalIdInput}
                         onChange={(e) => setApprovalIdInput(e.target.value)}
                         placeholder="ApprovalGate Request ID"
-                        className="flex-1 min-h-[38px] px-3 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white"
+                        className="flex-1 min-h-[38px] px-3 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)]"
                       />
                       <button
                         type="button"
                         onClick={() => void handleDeploy()}
                         disabled={isDeploying}
-                        className="min-h-[38px] px-4 py-1.5 rounded-lg text-xs font-bold text-[#070B19] bg-[#00F0FF] hover:bg-[#33F3FF] flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                        className="min-h-[38px] px-4 py-1.5 rounded-lg text-xs font-bold text-[var(--app-bg)] bg-[var(--app-accent)] hover:bg-[var(--app-accent)] flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                       >
                         <Rocket className="w-3.5 h-3.5" />
                         <span>
@@ -2563,7 +2563,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                           type="button"
                           onClick={() => void handleVerifyRuntime()}
                           disabled={isVerifyingRuntime}
-                          className="min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-bold text-[#CCFF00] bg-[#131B36] border border-[#1E294A] hover:border-[#CCFF00] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                          className="min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--z-ok)] bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--z-ok)] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
                         >
                           <Activity className="w-3.5 h-3.5" />
                           <span>{isVerifyingRuntime ? 'Probing...' : 'Probe Runtime'}</span>
@@ -2580,21 +2580,21 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   />
 
                   <div className="space-y-2">
-                    <div className="text-xs font-bold text-white flex items-center gap-2">
-                      <History className="w-4 h-4 text-[#C084FC]" />
+                    <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-2">
+                      <History className="w-4 h-4 text-[var(--app-accent)]" />
                       Version History &amp; Controlled Rollback
                     </div>
-                    <div className="divide-y divide-[#1E294A] rounded-xl bg-[#0D1326] border border-[#1E294A]">
+                    <div className="divide-y divide-[var(--app-card-border)] rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                       {selectedProject.revisions.map((rev) => (
                         <div
                           key={rev.revisionId}
                           className="p-3 flex flex-wrap items-center justify-between gap-2 text-xs font-mono"
                         >
                           <div className="min-w-0">
-                            <div className="text-white font-bold">
+                            <div className="text-[var(--app-text-primary)] font-bold">
                               {rev.revisionId} · {rev.message}
                             </div>
-                            <div className="text-[10px] text-[#9AA8C7] tabular-nums">
+                            <div className="text-[10px] text-[var(--app-text-secondary)] tabular-nums">
                               {rev.createdAt} · tree {rev.treeSha256.slice(0, 14)}… ({rev.files.length} files)
                             </div>
                           </div>
@@ -2603,7 +2603,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                               type="button"
                               onClick={() => void handleRollback(rev.revisionId)}
                               disabled={Boolean(isRollingBack)}
-                              className="px-2.5 py-1 rounded bg-[#131B36] border border-[#1E294A] hover:border-[#FF5E3A] text-[#FF8C73] text-[11px] font-bold flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+                              className="px-2.5 py-1 rounded bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--z-warn)] text-[var(--z-warn)] text-[11px] font-bold flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
                             >
                               <RotateCcw className="w-3 h-3" />
                               <span>{isRollingBack === rev.revisionId ? 'Rolling back...' : 'Rollback'}</span>
@@ -2618,18 +2618,18 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
                   <div id="project-runtime-logs" className="space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-xs font-bold text-white">Runtime Logs</div>
+                      <div className="text-xs font-bold text-[var(--app-text-primary)]">Runtime Logs</div>
                       {activeDeploymentFilter && (
                         <button
                           type="button"
                           onClick={() => setActiveDeploymentFilter(null)}
-                          className="px-2 py-1 rounded bg-[#131B36] border border-[#1E294A] text-[11px] font-mono text-[#00F0FF] cursor-pointer"
+                          className="px-2 py-1 rounded bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-accent)] cursor-pointer"
                         >
                           Clear Filter
                         </button>
                       )}
                     </div>
-                    <div className="max-h-52 overflow-y-auto rounded-xl bg-[#0D1326] border border-[#1E294A] divide-y divide-[#1E294A] font-mono text-[11px]">
+                    <div className="max-h-52 overflow-y-auto rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] divide-y divide-[var(--app-card-border)] font-mono text-[11px]">
                       {(() => {
                         const orderedLogs = [...selectedProject.runtimeLogs];
                         const displayedLogs = activeDeploymentFilter
@@ -2641,18 +2641,18 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                             )
                           : orderedLogs;
                         if (displayedLogs.length === 0) {
-                          return <div className="p-3 text-[#9AA8C7]">No matching runtime logs.</div>;
+                          return <div className="p-3 text-[var(--app-text-secondary)]">No matching runtime logs.</div>;
                         }
                         return displayedLogs.map((log, i) => (
                           <div
                             key={log.logId || i}
                             className="px-3 py-2 flex items-start justify-between gap-3"
                           >
-                            <span className="text-[#CBD5E1] min-w-0">
-                              <span className="text-[#00F0FF] font-bold">[{log.level}]</span>{' '}
-                              <span className="text-[#9AA8C7]">({log.source})</span> {log.message}
+                            <span className="text-[var(--app-text-secondary)] min-w-0">
+                              <span className="text-[var(--app-accent)] font-bold">[{log.level}]</span>{' '}
+                              <span className="text-[var(--app-text-secondary)]">({log.source})</span> {log.message}
                             </span>
-                            <span className="text-[#64748B] shrink-0 tabular-nums">
+                            <span className="text-[var(--app-text-secondary)] shrink-0 tabular-nums">
                               {log.timestamp.slice(11, 19)}
                             </span>
                           </div>
@@ -2667,19 +2667,19 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
 
           {/* SUB-TAB 7: 13 CAPABILITIES MATRIX */}
           {subTab === 'capabilities' && (
-            <div className="p-4 bg-[#070B19] divide-y divide-[#1E294A]">
+            <div className="p-4 bg-[var(--app-bg)] divide-y divide-[var(--app-card-border)]">
               {capabilities.map((cap) => (
                 <div key={cap.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-white">{cap.name}</span>
+                    <span className="text-xs font-bold text-[var(--app-text-primary)]">{cap.name}</span>
                     <StatusDot
                       status={cap.status === 'IMPLEMENTED' ? 'IMPLEMENTED' : cap.status}
                       label={cap.status}
                     />
                   </div>
-                  <div className="text-[11px] text-[#CBD5E1]">{cap.detail}</div>
+                  <div className="text-[11px] text-[var(--app-text-secondary)]">{cap.detail}</div>
                   {cap.missingDependency && (
-                    <div className="text-[10px] font-mono text-[#FF8C73]">
+                    <div className="text-[10px] font-mono text-[var(--z-warn)]">
                       Missing dependency: {cap.missingDependency}
                     </div>
                   )}
@@ -2690,30 +2690,30 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
           </div>
         }
         inspector={
-          <div className="h-full bg-[#0D1326] min-w-0">
-          <div className="px-3.5 py-2.5 bg-[#0B1124] border-b border-[#1E294A] flex items-center justify-between gap-2">
+          <div className="h-full bg-[var(--app-surface)] min-w-0">
+          <div className="px-3.5 py-2.5 bg-[var(--app-bg-secondary)] border-b border-[var(--app-card-border)] flex items-center justify-between gap-2">
             <div>
-              <div className="text-xs font-bold text-[#F4F7FF] flex items-center gap-1.5">
-                <Sliders className="w-3.5 h-3.5 text-[#00F0FF]" />
+              <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-[var(--app-accent)]" />
                 <span>Visual Inspector</span>
               </div>
-              <div className="text-[11px] font-mono text-[#9AA8C7] truncate">
+              <div className="text-[11px] font-mono text-[var(--app-text-secondary)] truncate">
                 {isJsxSourceSelected
                   ? `Babel AST Patcher · ${selectedRelPath}`
                   : 'Real Source Patcher · public/index.html'}
               </div>
             </div>
-            <span className="text-[10px] font-mono text-[#9AA8C7] tabular-nums">
+            <span className="text-[10px] font-mono text-[var(--app-text-secondary)] tabular-nums">
               {visualElements.length} node(s)
             </span>
           </div>
 
           {!selectedProject ? (
-            <div className="p-4 text-xs text-[#9AA8C7]">
+            <div className="p-4 text-xs text-[var(--app-text-secondary)]">
               Select or build an application to inspect and edit UI element properties directly in source code.
             </div>
           ) : visualElements.length === 0 ? (
-            <div className="p-4 text-xs text-[#9AA8C7]">
+            <div className="p-4 text-xs text-[var(--app-text-secondary)]">
               No HTML visual nodes (`data-z-id`) in this stack. Use the Code tab to inspect {selectedProject.stack} modules.
             </div>
           ) : (
@@ -2722,7 +2722,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
               <div className="space-y-1.5">
                 <label
                   htmlFor="visual-element-select"
-                  className="block text-[11px] font-semibold text-[#9AA8C7]"
+                  className="block text-[11px] font-semibold text-[var(--app-text-secondary)]"
                 >
                   Target UI Element (or click inside Preview)
                 </label>
@@ -2735,7 +2735,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     const node = visualElements.find((v) => v.zId === id) || null;
                     syncVisualFormFromNode(node);
                   }}
-                  className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-[#F4F7FF] focus:outline-none focus:border-[#00F0FF]"
+                  className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                 >
                   {visualElements.map((el) => (
                     <option key={el.zId} value={el.zId}>
@@ -2749,48 +2749,48 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                 <form onSubmit={handleApplyVisualPatch} className="space-y-3 text-xs">
                   {selectedVisualNode.textContent && (
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                         Text Content
                       </label>
                       <input
                         type="text"
                         value={visualText}
                         onChange={(e) => setVisualText(e.target.value)}
-                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs text-white focus:outline-none focus:border-[#00F0FF]"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                     </div>
                   )}
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                         Text Color
                       </label>
                       <input
                         type="text"
                         value={visualColor}
                         onChange={(e) => setVisualColor(e.target.value)}
-                        placeholder="#F4F7FF"
-                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                        placeholder="var(--app-text-primary)"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                         Background
                       </label>
                       <input
                         type="text"
                         value={visualBgColor}
                         onChange={(e) => setVisualBgColor(e.target.value)}
-                        placeholder="#0D1326"
-                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                        placeholder="var(--app-accent)"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                         Padding
                       </label>
                       <input
@@ -2798,11 +2798,11 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={visualPadding}
                         onChange={(e) => setVisualPadding(e.target.value)}
                         placeholder="0.5rem 1rem"
-                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                         Font Size
                       </label>
                       <input
@@ -2810,14 +2810,14 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={visualFontSize}
                         onChange={(e) => setVisualFontSize(e.target.value)}
                         placeholder="1.15rem"
-                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                     </div>
                   </div>
 
                   {isJsxSourceSelected && (
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-[#CBD5E1]">
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                         className (JSX Prop)
                       </label>
                       <input
@@ -2825,13 +2825,13 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                         value={visualClassName}
                         onChange={(e) => setVisualClassName(e.target.value)}
                         placeholder="px-4 py-2 rounded-lg"
-                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+                        className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                       />
                     </div>
                   )}
 
                   <div className="space-y-1">
-                    <label className="block text-[11px] font-semibold text-[#9AA8C7]">
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)]">
                       Revision Message (optional)
                     </label>
                     <input
@@ -2839,14 +2839,14 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                       value={visualCommitMsg}
                       onChange={(e) => setVisualCommitMsg(e.target.value)}
                       placeholder={`Visual Edit: ${selectedVisualNode.zId}`}
-                      className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-xs text-white focus:outline-none focus:border-[#00F0FF]"
+                      className="w-full min-h-[36px] px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isApplyingVisual}
-                    className="w-full min-h-[40px] px-3 py-2 rounded-xl bg-[#00F0FF] hover:bg-[#33F3FF] text-[#070B19] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="w-full min-h-[40px] px-3 py-2 rounded-xl bg-[var(--app-accent)] hover:bg-[var(--app-accent)] text-[var(--app-bg)] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>
@@ -2859,12 +2859,12 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   </button>
 
                   {lastVisualEvidence && (
-                    <div className="p-2.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[10px] font-mono text-[#9AA8C7] space-y-0.5 tabular-nums">
+                    <div className="p-2.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[10px] font-mono text-[var(--app-text-secondary)] space-y-0.5 tabular-nums">
                       <div>
-                        Revision: <span className="text-[#CCFF00] font-bold">{lastVisualEvidence.revisionId}</span>
+                        Revision: <span className="text-[var(--z-ok)] font-bold">{lastVisualEvidence.revisionId}</span>
                       </div>
                       <div className="truncate" title={lastVisualEvidence.evidenceHash}>
-                        SHA-256: <span className="text-[#00F0FF]">{lastVisualEvidence.evidenceHash}</span>
+                        SHA-256: <span className="text-[var(--app-accent)]">{lastVisualEvidence.evidenceHash}</span>
                       </div>
                     </div>
                   )}
@@ -2877,11 +2877,11 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
       />
 
       {/* BOTTOM EVIDENCE & NATIVE INTELLIGENCE GATES STRIP */}
-      <section className="rounded-2xl bg-[#0D1326] border border-[#1E294A] p-4 space-y-4">
+      <section className="rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] p-4 space-y-4">
         {/* Row 1: Application Execution & Deployment Verification Strip */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="space-y-1">
-            <div className="text-xs font-bold text-[#F4F7FF]">
+            <div className="text-xs font-bold text-[var(--app-text-primary)]">
               Application Verification &amp; Release Evidence
             </div>
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono tabular-nums">
@@ -2892,7 +2892,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
               >
                 Build: {selectedProject?.lastBuild?.status || 'EVIDENCE REQUIRED'}
               </div>
-              <span className="text-[#475569]" aria-hidden="true">
+              <span className="text-[var(--app-text-secondary)]" aria-hidden="true">
                 &rarr;
               </span>
               <div
@@ -2905,7 +2905,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   ? `${selectedProject.lastTests.status} (${selectedProject.lastTests.passed}/${selectedProject.lastTests.total})`
                   : 'EVIDENCE REQUIRED'}
               </div>
-              <span className="text-[#475569]" aria-hidden="true">
+              <span className="text-[var(--app-text-secondary)]" aria-hidden="true">
                 &rarr;
               </span>
               <div
@@ -2915,7 +2915,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
               >
                 Security: {selectedProject?.lastSecurityScan?.status || 'EVIDENCE REQUIRED'}
               </div>
-              <span className="text-[#475569]" aria-hidden="true">
+              <span className="text-[var(--app-text-secondary)]" aria-hidden="true">
                 &rarr;
               </span>
               <div
@@ -2935,7 +2935,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                   type="button"
                   onClick={() => void handleDeploy()}
                   disabled={isDeploying}
-                  className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#00F0FF] hover:bg-[#33F3FF] text-[#070B19] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50"
+                  className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[var(--app-accent)] hover:bg-[var(--app-accent)] text-[var(--app-bg)] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50"
                 >
                   <Rocket className="w-3.5 h-3.5" />
                   <span>
@@ -2948,7 +2948,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
               <button
                 type="button"
                 onClick={() => setSubTab('deploy')}
-                className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-xs font-semibold text-[#CBD5E1] whitespace-nowrap cursor-pointer"
+                className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-xs font-semibold text-[var(--app-text-secondary)] whitespace-nowrap cursor-pointer"
               >
                 Inspect Timeline &amp; Hashes
               </button>
@@ -2957,17 +2957,17 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
         </div>
 
         {/* Row 2: Honest Native Intelligence & Production Gates (TruthDashboard-Backed) */}
-        <div className="pt-3 border-t border-[#1E294A] space-y-2">
+        <div className="pt-3 border-t border-[var(--app-card-border)] space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <span className="font-bold text-[#F4F7FF]">
+            <span className="font-bold text-[var(--app-text-primary)]">
               Native Intelligence &amp; Production Readiness Gates
             </span>
-            <span className="text-[11px] font-mono text-[#9AA8C7]">
+            <span className="text-[11px] font-mono text-[var(--app-text-secondary)]">
               Truth-First Runtime Telemetry · Never inferred from Cloud App Engine status
             </span>
           </div>
           {nativeIntelligenceGates.length === 0 ? (
-            <div className="text-xs font-mono text-[#9AA8C7] px-3 py-2 rounded-lg border border-dashed border-[#475569] bg-[#0B1124]">
+            <div className="text-xs font-mono text-[var(--app-text-secondary)] px-3 py-2 rounded-lg border border-dashed border-[var(--app-text-secondary)] bg-[var(--app-bg-secondary)]">
               EVIDENCE REQUIRED: Native Intelligence gate telemetry unavailable in current session snapshot.
             </div>
           ) : (

@@ -1,10 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ModuleId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth, AuthRole } from '../context/AuthContext';
 import {
   LayoutDashboard,
-  Workflow,
   Cpu,
   Code2,
   FlaskConical,
@@ -19,13 +18,8 @@ import {
   ShieldCheck,
   Settings,
   Sliders,
-  Sparkles,
-  LogOut,
-  Brain,
-  Search,
+  Sparkles
 } from 'lucide-react';
-import { NavGroupLabel, NavItemButton } from './ui/NavigationPrimitives';
-import { StatusDot } from './ui/StatusBadge';
 
 interface SidebarProps {
   activeModule: ModuleId;
@@ -66,68 +60,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile
 }) => {
   const { t } = useLanguage();
-  const { role, session, logout } = useAuth();
-  const [query, setQuery] = useState('');
+  const { role } = useAuth();
 
   const allGroups: NavGroup[] = [
     {
       groupKey: 'group.operations',
       items: [
-        { id: 'command_center', labelKey: 'nav.command_center', icon: LayoutDashboard, accentColor: '#00F0FF' },
-        { id: 'autonomous_execution', labelKey: 'nav.autonomous_execution', icon: Workflow, accentColor: '#CCFF00' },
-        { id: 'cognitive_operations', labelKey: 'nav.cognitive_operations', icon: Brain, accentColor: '#00F0FF' },
-        { id: 'dev_studio', labelKey: 'nav.dev_studio', icon: Code2, accentColor: '#2563EB', minRole: 'Developer' },
-        { id: 'automation_center', labelKey: 'nav.automation_center', icon: Zap, accentColor: '#FF5E3A' },
-        { id: 'intelligence_core', labelKey: 'nav.intelligence_core', icon: Cpu, accentColor: '#7B2CBF' }
+        { id: 'command_center', labelKey: 'nav.command_center', icon: LayoutDashboard, accentColor: 'var(--app-accent)' },
+        { id: 'conversational_intelligence', labelKey: 'nav.conversational_intelligence', icon: Sparkles, accentColor: 'var(--app-amber)' },
+        { id: 'intelligence_core', labelKey: 'nav.intelligence_core', icon: Cpu, accentColor: 'var(--app-accent)' },
+        { id: 'model_laboratory', labelKey: 'nav.model_laboratory', icon: Binary, accentColor: 'var(--app-accent)', minRole: 'Developer' }
       ]
     },
     {
       groupKey: 'group.engineering',
       items: [
-        { id: 'model_laboratory', labelKey: 'nav.model_laboratory', icon: Binary, accentColor: '#00F0FF', minRole: 'Developer' },
-        { id: 'api_platform', labelKey: 'nav.api_platform', icon: Terminal, accentColor: '#2563EB', minRole: 'Developer' }
+        { id: 'dev_studio', labelKey: 'nav.dev_studio', icon: Code2, accentColor: 'var(--app-accent)', minRole: 'Developer' },
+        { id: 'automation_center', labelKey: 'nav.automation_center', icon: Zap, accentColor: 'var(--app-amber)' },
+        { id: 'api_platform', labelKey: 'nav.api_platform', icon: Terminal, accentColor: 'var(--app-accent)', minRole: 'Developer' }
       ]
     },
     {
       groupKey: 'group.reasoning',
       items: [
-        { id: 'research_lab', labelKey: 'nav.research_lab', icon: FlaskConical, accentColor: '#FF007F' },
-        { id: 'knowledge_hub', labelKey: 'nav.knowledge_hub', icon: BookOpen, accentColor: '#00F0FF' },
-        { id: 'experiment_center', labelKey: 'nav.experiment_center', icon: Microscope, accentColor: '#FF5E3A', minRole: 'Developer' },
-        { id: 'conversational_intelligence', labelKey: 'nav.conversational_intelligence', icon: Sparkles, accentColor: '#9AA8C7' }
+        { id: 'research_lab', labelKey: 'nav.research_lab', icon: FlaskConical, accentColor: 'var(--app-amber)' },
+        { id: 'knowledge_hub', labelKey: 'nav.knowledge_hub', icon: BookOpen, accentColor: 'var(--app-accent)' },
+        { id: 'experiment_center', labelKey: 'nav.experiment_center', icon: Microscope, accentColor: 'var(--app-amber)', minRole: 'Developer' }
       ]
     },
     {
       groupKey: 'group.business',
       items: [
-        { id: 'marketplace', labelKey: 'nav.marketplace', icon: ShoppingBag, accentColor: '#00F0FF' },
-        { id: 'subscription_billing', labelKey: 'nav.subscription_billing', icon: CreditCard, accentColor: '#FF007F' },
-        { id: 'analytics_bi', labelKey: 'nav.analytics_bi', icon: BarChart3, accentColor: '#7B2CBF' }
+        { id: 'marketplace', labelKey: 'nav.marketplace', icon: ShoppingBag, accentColor: 'var(--app-accent)' },
+        { id: 'subscription_billing', labelKey: 'nav.subscription_billing', icon: CreditCard, accentColor: 'var(--app-amber)' },
+        { id: 'analytics_bi', labelKey: 'nav.analytics_bi', icon: BarChart3, accentColor: 'var(--app-accent)' }
       ]
     },
     {
       groupKey: 'group.trust',
       items: [
-        { id: 'governance_security', labelKey: 'nav.governance_security', icon: ShieldCheck, accentColor: '#CCFF00', minRole: 'Developer' },
-        { id: 'admin_console', labelKey: 'nav.admin_console', icon: Sliders, accentColor: '#FF007F', minRole: 'Administrator' },
-        { id: 'user_settings', labelKey: 'nav.user_settings', icon: Settings, accentColor: '#9AA8C7' }
+        { id: 'governance_security', labelKey: 'nav.governance_security', icon: ShieldCheck, accentColor: 'var(--app-accent)', minRole: 'Developer' },
+        { id: 'admin_console', labelKey: 'nav.admin_console', icon: Sliders, accentColor: 'var(--app-amber)', minRole: 'Administrator' },
+        { id: 'user_settings', labelKey: 'nav.user_settings', icon: Settings, accentColor: 'var(--app-text-secondary)' }
       ]
     }
   ];
 
   // Physically remove items the current role cannot access (no client-side discovery).
   const groups = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase();
     return allGroups
       .map((g) => ({
         ...g,
-        items: g.items.filter((item) =>
-          roleAllows(role, item.minRole) &&
-          (!normalizedQuery || t(item.labelKey).toLocaleLowerCase().includes(normalizedQuery))
-        )
+        items: g.items.filter((item) => roleAllows(role, item.minRole))
       }))
       .filter((g) => g.items.length > 0);
-  }, [role, query, t]);
+  }, [role]);
 
   const handleItemClick = (id: ModuleId) => {
     onSelectModule(id);
@@ -138,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onCloseMobile}
           aria-hidden
         />
@@ -146,11 +133,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <aside
         className={`
-          fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-[272px] shrink-0 flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-64 flex flex-col
           transform transition-transform duration-200 ease-out
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
-        aria-label="Primary navigation"
         style={{
           backgroundColor: 'var(--app-sidebar)',
           borderRight: '1px solid var(--app-card-border)'
@@ -158,48 +144,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark"><img src="/assets/zyntheor-icon.svg" alt="ZYNTHEOR" /></div>
-          <div>
-            <strong>ZYNTHEOR</strong>
-            <small>NATIVE INTELLIGENCE</small>
-          </div>
+          <div><strong>ZYNTHEOR</strong><small>Intelligence first</small></div>
         </div>
-        <div className="sidebar-search-wrap">
-          <label className="sidebar-search" htmlFor="workspace-navigation-search">
-            <Search className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <input
-              id="workspace-navigation-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t('nav.search', 'Find a workspace')}
-              aria-label={t('nav.search', 'Find a workspace')}
-            />
-          </label>
-        </div>
-        <div className="flex-1 overflow-y-auto py-3 px-3 space-y-5">
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
           {groups.map((group) => (
-            <div key={group.groupKey} className="space-y-1">
-              <NavGroupLabel>{t(group.groupKey)}</NavGroupLabel>
+            <div key={group.groupKey}>
+              <div
+                className="px-3 mb-1.5 text-xs font-semibold"
+                style={{ color: 'var(--app-text-secondary)' }}
+              >
+                {t(group.groupKey)}
+              </div>
               {group.items.map((item) => {
                 const Icon = item.icon;
+                const isActive = activeModule === item.id;
                 return (
-                  <NavItemButton
+                  <button
                     key={item.id}
-                    label={t(item.labelKey)}
-                    icon={<Icon className="w-4 h-4" />}
-                    active={activeModule === item.id}
-                    accentColor={item.accentColor}
                     onClick={() => handleItemClick(item.id)}
-                  />
+                    className="w-full flex items-center justify-between pl-3 pr-2 py-2 rounded-[10px] text-[13px] font-medium transition-colors duration-150 text-left cursor-pointer"
+                    style={{
+                      backgroundColor: isActive ? 'color-mix(in srgb, var(--app-accent) 14%, transparent)' : 'transparent',
+                      boxShadow: isActive ? 'inset 3px 0 0 var(--app-accent)' : 'none',
+                      color: isActive ? 'var(--app-text-primary)' : 'var(--app-text-secondary)',
+                      fontWeight: isActive ? 600 : 500
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <Icon
+                        className="w-4 h-4 shrink-0 transition-colors"
+                        style={{
+                          color: isActive ? 'var(--app-accent)' : 'var(--app-text-secondary)'
+                        }}
+                      />
+                      <span className="truncate">{t(item.labelKey)}</span>
+                    </div>
+                    
+                  </button>
                 );
               })}
             </div>
           ))}
-          {groups.length === 0 && (
-            <p className="px-3 py-5 text-xs leading-relaxed text-[var(--app-text-secondary)]">
-              {t('nav.no_results', 'No workspaces match your search.')}
-            </p>
-          )}
         </div>
 
         <div
@@ -209,32 +194,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             backgroundColor: 'var(--app-card)'
           }}
         >
-          <div className="flex items-center justify-between gap-2 text-xs">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 font-semibold truncate" style={{ color: 'var(--app-text-primary)' }}>
-                <span>Role: {role}</span>
-                {session.authMode === 'development' && (
-                  <StatusDot status="PARTIAL" label="Dev" detail="Development authentication mode" />
-                )}
-              </div>
-              {session.email && (
-                <div className="text-[10px] truncate" style={{ color: 'var(--app-text-secondary)' }}>
-                  {session.email}
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={logout}
-              title="Sign out"
-              aria-label="Sign out"
-              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-rose-300 hover:border-rose-500/40 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign out</span>
-            </button>
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold" style={{ color: 'var(--app-text-primary)' }}>
+              Role: {role}
+            </span>
+            <span className="text-[11px] font-mono font-bold" style={{ color: 'var(--status-verified)' }}>
+              SOVEREIGN
+            </span>
           </div>
-          <div className="text-[10px] mt-1.5 truncate" style={{ color: 'var(--app-text-secondary)' }}>
+          <div className="text-[10px] mt-0.5 truncate" style={{ color: 'var(--app-text-secondary)' }}>
             {t('footer.sovereign_desc')}
           </div>
         </div>

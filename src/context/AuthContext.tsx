@@ -4,9 +4,6 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
-import { auth, googleAuthProvider } from '../lib/firebase';
-import { apiUrl } from '../lib/apiClient';
 
 export type AuthRole = 'User' | 'Developer' | 'Administrator';
 
@@ -16,13 +13,7 @@ export interface AuthSession {
   tenantId: string;
   authenticatedAt: string;
   sovereignRole?: string;
-  authMode?: 'google' | 'development';
   exp?: number;
-}
-
-export interface AuthErrorInfo {
-  code: string;
-  message: string;
 }
 
 interface AuthContextValue {
@@ -33,11 +24,7 @@ interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
   authReady: boolean;
-  devAccessEnabled: boolean;
-  authError: AuthErrorInfo | null;
-  clearAuthError: () => void;
   login: (role?: AuthRole, opts?: { userId?: string; tenantId?: string }) => Promise<boolean>;
-  loginWithGoogle: () => Promise<boolean>;
   logout: () => void;
   authHeaders: () => Record<string, string>;
 }
@@ -56,40 +43,6 @@ function loadStoredToken(): string | null {
   }
 }
 
-function loadStoredMeta(): { email: string; authMode?: 'google' | 'development' } {
-  if (typeof window === 'undefined') return { email: '' };
-  try {
-    const rawMeta = localStorage.getItem(SESSION_KEY);
-    if (!rawMeta) return { email: '' };
-    const parsed = JSON.parse(rawMeta);
-    const email = typeof parsed?.session?.email === 'string' ? parsed.session.email : '';
-    const authMode = parsed?.session?.authMode === 'development' || parsed?.session?.authMode === 'google'
-      ? parsed.session.authMode
-      : undefined;
-    return { email, authMode };
-  } catch {
-    return { email: '' };
-  }
-}
-
-export function getStoredAuthHeaders(): Record<string, string> {
-  const h: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (typeof window === 'undefined') return h;
-  try {
-    const tok = localStorage.getItem(TOKEN_KEY);
-    if (tok) h['Authorization'] = `Bearer ${tok}`;
-    const rawMeta = localStorage.getItem(SESSION_KEY);
-    if (rawMeta) {
-      const parsed = JSON.parse(rawMeta);
-      const tenantId = parsed?.session?.tenantId;
-      if (tenantId) h['x-zyntheor-tenant'] = tenantId;
-    }
-  } catch {
-    /* storage optional */
-  }
-  return h;
-}
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(() => loadStoredToken());
   const [role, setRoleState] = useState<AuthRole>('User');
@@ -100,18 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authenticatedAt: ''
   });
   const [authReady, setAuthReady] = useState(false);
-  const [devAccessEnabled, setDevAccessEnabled] = useState(false);
-  const [authError, setAuthError] = useState<AuthErrorInfo | null>(null);
-
-  const clearAuthError = useCallback(() => {
-    setAuthError(null);
-  }, []);
 
   const applySession = useCallback((tok: string, sess: AuthSession, uiRole: AuthRole) => {
     setToken(tok);
     setSession(sess);
     setRoleState(uiRole);
-    setAuthError(null);
     try {
       localStorage.setItem(TOKEN_KEY, tok);
       localStorage.setItem(SESSION_KEY, JSON.stringify({ session: sess, role: uiRole }));
@@ -120,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const clearLocalSession = useCallback(() => {
+  const logout = useCallback(() => {
     setToken(null);
     setRoleState('User');
     setSession({
@@ -137,31 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const logout = useCallback(() => {
-    const currentToken = loadStoredToken();
-    clearLocalSession();
-    setAuthError(null);
-    if (currentToken) {
-      void fetch(apiUrl('/api/auth/logout'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${currentToken}`
-        }
-      }).catch(() => {
-        /* best-effort server revocation */
-      });
-    }
-    void signOut(auth).catch(() => {
-      /* best-effort Firebase sign-out */
-    });
-  }, [clearLocalSession]);
-
   const login = useCallback(
-    async (requestedRole: AuthRole = 'User', opts?: { userId?: string; tenantId?: string }) => {
-      setAuthError(null);
+    async (requestedRole: AuthRole = 'Administrator', opts?: { userId?: string; tenantId?: string }) => {
       try {
-        const res = await fetch(apiUrl('/api/auth/login'), {
+        const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -170,92 +95,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             tenantId: opts?.tenantId
           })
         });
-        const data = await res.json().catch(() => ({}));
+        const data = await res.json();
         if (!res.ok || !data.success || !data.token) {
-          clearLocalSession();
-          setAuthError({
-            code: data?.code || `http/${res.status}`,
-            message: data?.error || `Development login rejected (HTTP ${res.status}).`
-          });
+          logout();
           return false;
         }
         const sess: AuthSession = {
           userId: data.session.userId,
-          email: '',
+          email: `${data.session.userId}@zyntheor.local`,
           tenantId: data.session.tenantId,
           authenticatedAt: data.session.authenticatedAt,
           sovereignRole: data.session.sovereignRole,
-          authMode: 'development',
           exp: data.expiresAt
         };
         applySession(data.token, sess, data.session.role as AuthRole);
         return true;
-      } catch (err: any) {
-        clearLocalSession();
-        setAuthError({
-          code: 'auth/network-error',
-          message: err?.message || 'Unable to reach development authentication endpoint.'
-        });
+      } catch {
+        logout();
         return false;
       }
     },
-    [applySession, clearLocalSession]
+    [applySession, logout]
   );
 
-  // Sync Firebase Auth email if Firebase user is loaded asynchronously after page reload
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-      if (fbUser?.email) {
-        setSession((prev) => {
-          if (prev.userId === fbUser.uid && prev.email !== fbUser.email) {
-            return { ...prev, email: fbUser.email || prev.email };
-          }
-          return prev;
-        });
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Bootstrap: discover auth mode (dev vs prod) and validate any stored token against server
+  // Bootstrap: validate stored token or obtain a fresh session
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const modeRes = await fetch(apiUrl('/api/auth/mode'));
-        if (modeRes.ok) {
-          const modeData = await modeRes.json();
-          if (!cancelled) {
-            setDevAccessEnabled(Boolean(modeData?.devAccessEnabled));
-          }
-        }
-      } catch {
-        if (!cancelled) setDevAccessEnabled(false);
-      }
-
       const existing = loadStoredToken();
       if (existing) {
         try {
-          const res = await fetch(apiUrl('/api/auth/session'), {
+          const res = await fetch('/api/auth/session', {
             headers: { Authorization: `Bearer ${existing}` }
           });
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.session && !cancelled) {
-              const storedMeta = loadStoredMeta();
-              const resolvedAuthMode: 'google' | 'development' =
-                storedMeta.authMode || (auth.currentUser ? 'google' : 'development');
-              const preservedEmail =
-                auth.currentUser?.email ||
-                storedMeta.email ||
-                '';
               const sess: AuthSession = {
                 userId: data.session.userId,
-                email: preservedEmail,
+                email: `${data.session.userId}@zyntheor.local`,
                 tenantId: data.session.tenantId,
                 authenticatedAt: new Date((data.session.iat || 0) * 1000).toISOString(),
                 sovereignRole: data.session.sovereignRole,
-                authMode: resolvedAuthMode,
                 exp: data.session.exp
               };
               applySession(existing, sess, data.session.role as AuthRole);
@@ -263,31 +144,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               return;
             }
           }
-          // Server rejected the stored token (expired, revoked, or invalid signature) — fail closed
-          if (!cancelled) {
-            clearLocalSession();
-          }
         } catch {
-          if (!cancelled) {
-            clearLocalSession();
-          }
+          /* fall through to login */
         }
       }
-      // Never mint a privileged session automatically. Require an explicit identity-provider sign-in.
-      if (!cancelled) setAuthReady(true);
+      // Fresh login as Administrator for local-first operator UX (server still issues real token)
+      if (!cancelled) {
+        await login('Administrator');
+        setAuthReady(true);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [applySession, clearLocalSession]);
+  }, [applySession, login]);
 
-  /** UI role switcher: re-login to obtain a token with the requested role (only when devAccessEnabled). */
+  /** UI role switcher: re-login to obtain a token with the requested role (server-issued). */
   const setRole = useCallback(
     (next: AuthRole) => {
-      if (!devAccessEnabled) return;
       void login(next, { userId: session.userId !== 'anonymous' ? session.userId : undefined, tenantId: session.tenantId || undefined });
     },
-    [devAccessEnabled, login, session.tenantId, session.userId]
+    [login, session.tenantId, session.userId]
   );
 
   const authHeaders = useCallback((): Record<string, string> => {
@@ -297,51 +174,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return h;
   }, [token, session.tenantId]);
 
-  const loginWithGoogle = useCallback(async () => {
-    setAuthError(null);
-    try {
-      const cred = await signInWithPopup(auth, googleAuthProvider);
-      const idToken = await cred.user.getIdToken();
-      const res = await fetch(apiUrl('/api/auth/firebase-session'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`
-        }
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success || !data.token) {
-        const errInfo: AuthErrorInfo = {
-          code: data?.code || `http/${res.status}`,
-          message: data?.error || `Backend Firebase session exchange failed (HTTP ${res.status}).`
-        };
-        console.error('[ZYNTHEOR Auth] Backend session exchange failed:', errInfo);
-        setAuthError(errInfo);
-        return false;
-      }
-      const sess: AuthSession = {
-        userId: data.session.userId,
-        email: data.session.email || cred.user.email || '',
-        tenantId: data.session.tenantId,
-        authenticatedAt: data.session.authenticatedAt,
-        sovereignRole: data.session.sovereignRole,
-        authMode: 'google',
-        exp: data.expiresAt
-      };
-      applySession(data.token, sess, data.session.role as AuthRole);
-      return true;
-    } catch (err: any) {
-      const code = typeof err?.code === 'string' ? err.code : 'auth/unknown';
-      const message =
-        typeof err?.message === 'string'
-          ? err.message
-          : 'Google sign-in failed unexpectedly.';
-      console.error('[ZYNTHEOR Auth] Firebase Google sign-in error:', { code, message, err });
-      setAuthError({ code, message });
-      return false;
-    }
-  }, [applySession]);
-
   const value = useMemo(
     () => ({
       role,
@@ -350,15 +182,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       token,
       isAuthenticated: Boolean(token),
       authReady,
-      devAccessEnabled,
-      authError,
-      clearAuthError,
       login,
-      loginWithGoogle,
       logout,
       authHeaders
     }),
-    [role, setRole, session, token, authReady, devAccessEnabled, authError, clearAuthError, login, loginWithGoogle, logout, authHeaders]
+    [role, setRole, session, token, authReady, login, logout, authHeaders]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

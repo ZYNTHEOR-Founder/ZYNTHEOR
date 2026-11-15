@@ -1,17 +1,5 @@
 import React from 'react';
 
-export type MetricAccentColor =
-  | 'emerald'
-  | 'amber'
-  | 'cyan'
-  | 'blue'
-  | 'purple'
-  | 'violet'
-  | 'magenta'
-  | 'coral'
-  | 'orange'
-  | 'lime';
-
 interface MetricCardProps {
   title: string;
   value: string | number;
@@ -21,7 +9,7 @@ interface MetricCardProps {
     value: string;
     isPositive: boolean;
   };
-  accentColor?: MetricAccentColor;
+  accentColor?: 'emerald' | 'amber' | 'cyan' | 'blue' | 'purple' | 'violet' | 'magenta' | 'coral' | 'orange' | 'lime';
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -30,62 +18,62 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   subtitle,
   icon,
   trend,
-  accentColor = 'cyan',
+  accentColor = 'emerald'
 }) => {
-  const getIconContainerStyle = (): string => {
+  const getIconContainerStyle = () => {
     switch (accentColor) {
+      case 'emerald':
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]';
+      case 'amber':
+        return 'bg-[color-mix(in_srgb,var(--app-amber)_15%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_30%,transparent)]';
       case 'cyan':
-        return 'bg-[#00F0FF]/12 text-[#00F0FF] border-[#00F0FF]/35';
       case 'blue':
-        return 'bg-[#2563EB]/15 text-[#60A5FA] border-[#2563EB]/40';
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]';
       case 'purple':
       case 'violet':
-        return 'bg-[#7B2CBF]/18 text-[#C084FC] border-[#7B2CBF]/45';
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]';
       case 'magenta':
-        return 'bg-[#FF007F]/15 text-[#FF4FA3] border-[#FF007F]/40';
       case 'coral':
+        return 'bg-[color-mix(in_srgb,var(--app-amber)_15%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_30%,transparent)]';
       case 'orange':
-      case 'amber':
-        return 'bg-[#FF5E3A]/15 text-[#FF7D5F] border-[#FF5E3A]/40';
+        return 'bg-[color-mix(in_srgb,var(--app-amber)_15%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_30%,transparent)]';
       case 'lime':
-      case 'emerald':
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]';
       default:
-        return 'bg-[#CCFF00]/12 text-[#CCFF00] border-[#CCFF00]/35';
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]';
     }
   };
 
   return (
-    <div
-      className="platform-metric-card rounded-2xl p-4 sm:p-5 border shadow-sm transition-all duration-200 flex flex-col justify-between min-w-0"
+    <div 
+      className="rounded-2xl p-5 border shadow-sm transition-all duration-200 flex flex-col justify-between"
       style={{
         backgroundColor: 'var(--app-card)',
         borderColor: 'var(--app-card-border)',
-        color: 'var(--app-text-primary)',
+        color: 'var(--app-text-primary)'
       }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <span
-          className="text-[11px] font-semibold uppercase tracking-wider leading-snug"
+      <div className="flex items-start justify-between">
+        <span 
+          className="text-xs font-medium "
           style={{ color: 'var(--app-text-secondary)' }}
         >
           {title}
         </span>
-        <div
-          className={`w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 ${getIconContainerStyle()}`}
-        >
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 ${getIconContainerStyle()}`}>
           {icon}
         </div>
       </div>
-      <div className="mt-3 min-w-0">
-        <div
-          className="text-xl sm:text-2xl font-bold tracking-tight font-mono tabular-nums truncate"
+      <div className="mt-3">
+        <div 
+          className="text-2xl font-bold tracking-tight font-mono tabular-nums"
           style={{ color: 'var(--app-text-primary)' }}
         >
           {value}
         </div>
-        <div className="flex items-center justify-between gap-2 mt-1 text-xs">
+        <div className="flex items-center justify-between mt-1 text-xs">
           {subtitle && (
-            <span
+            <span 
               className="truncate"
               style={{ color: 'var(--app-text-secondary)' }}
             >
@@ -94,8 +82,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           )}
           {trend && (
             <span
-              className={`font-semibold ml-auto shrink-0 font-mono ${
-                trend.isPositive ? 'text-[#CCFF00]' : 'text-[#FF007F]'
+              className={`font-semibold ml-auto shrink-0 ${
+                trend.isPositive ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
               }`}
             >
               {trend.value}

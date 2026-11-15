@@ -1,28 +1,13 @@
 import React from 'react';
 
-export type VividGradientAccent =
-  | 'emerald'
-  | 'amber'
-  | 'emerald-amber'
-  | 'cyan'
-  | 'blue'
-  | 'purple'
-  | 'violet'
-  | 'magenta'
-  | 'coral'
-  | 'lime'
-  | 'sunset'
-  | 'energy'
-  | 'none';
-
-export interface VividCardProps {
+interface VividCardProps {
   children: React.ReactNode;
   className?: string;
   headerAction?: React.ReactNode;
   title?: string;
   subtitle?: string;
-  gradientAccent?: VividGradientAccent;
-  variant?: 'white' | 'navy' | 'midnight' | 'elevated';
+  gradientAccent?: 'emerald' | 'amber' | 'emerald-amber' | 'cyan' | 'purple' | 'sunset' | 'energy' | 'none';
+  variant?: 'white' | 'navy';
 }
 
 export const VividCard: React.FC<VividCardProps> = ({
@@ -32,64 +17,62 @@ export const VividCard: React.FC<VividCardProps> = ({
   title,
   subtitle,
   gradientAccent = 'none',
-  variant = 'white',
+  variant = 'white'
 }) => {
-  const getGradientLine = (): string | null => {
+  const getGradientLine = () => {
     switch (gradientAccent) {
-      case 'cyan':
-      case 'blue':
-        return 'h-0.5 w-full bg-gradient-to-r from-[#00F0FF] via-[#2563EB] to-[#7B2CBF]';
-      case 'violet':
-      case 'purple':
-        return 'h-0.5 w-full bg-gradient-to-r from-[#7B2CBF] via-[#FF007F] to-[#00F0FF]';
-      case 'magenta':
-        return 'h-0.5 w-full bg-gradient-to-r from-[#FF007F] via-[#7B2CBF] to-[#FF5E3A]';
-      case 'coral':
-      case 'sunset':
-      case 'amber':
-        return 'h-0.5 w-full bg-gradient-to-r from-[#FF5E3A] via-[#FF007F] to-[#CCFF00]';
-      case 'lime':
       case 'emerald':
-      case 'energy':
-        return 'h-0.5 w-full bg-gradient-to-r from-[#00F0FF] via-[#CCFF00] to-[#2563EB]';
+        return 'h-1 w-full bg-[var(--app-accent)]';
+      case 'amber':
+        return 'h-1 w-full bg-[var(--app-amber)]';
       case 'emerald-amber':
-        return 'h-0.5 w-full bg-gradient-to-r from-[#00F0FF] via-[#7B2CBF] to-[#FF5E3A]';
+      case 'cyan':
+        return 'h-1 w-full bg-[var(--app-accent)]';
+      case 'purple':
+        return 'h-1 w-full bg-[var(--app-accent)]';
+      case 'sunset':
+        return 'h-1 w-full bg-[var(--app-amber)]';
+      case 'energy':
+        return 'h-1 w-full bg-[var(--app-accent)]';
       default:
         return null;
     }
   };
 
-  const isElevated = variant === 'elevated';
-  const gradientClass = getGradientLine();
+  const isNavy = variant === 'navy';
 
   return (
     <div
-      className={`platform-card rounded-2xl transition-all duration-200 overflow-hidden shadow-sm border ${className}`}
-      style={{
-        backgroundColor: isElevated ? 'var(--app-surface-elevated)' : 'var(--app-card)',
+      className={`rounded-2xl transition-all duration-200 overflow-hidden shadow-sm ${
+        isNavy
+          ? 'bg-[var(--app-surface)] text-[var(--app-text-primary)] border border-[color-mix(in_srgb,var(--app-card-border)_60%,transparent)] '
+          : 'border '
+      } ${className}`}
+      style={!isNavy ? {
+        backgroundColor: 'var(--app-card)',
         borderColor: 'var(--app-card-border)',
-        color: 'var(--app-text-primary)',
-      }}
+        color: 'var(--app-text-primary)'
+      } : undefined}
     >
-      {gradientClass && <div className={gradientClass} />}
+      {getGradientLine() && <div className={getGradientLine()!} />}
       {(title || headerAction) && (
-        <div
-          className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3 border-b"
-          style={{ borderColor: 'var(--app-card-border)' }}
+        <div 
+          className={`px-6 py-4 flex items-center justify-between border-b ${isNavy ? 'border-[var(--app-card-border)]' : ''}`}
+          style={!isNavy ? { borderColor: 'var(--app-card-border)' } : undefined}
         >
-          <div className="min-w-0">
+          <div>
             {title && (
-              <h3
-                className="font-semibold text-sm sm:text-base tracking-tight truncate"
-                style={{ color: 'var(--app-text-primary)' }}
+              <h3 
+                className="font-semibold text-base tracking-tight"
+                style={!isNavy ? { color: 'var(--app-text-primary)' } : undefined}
               >
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p
-                className="text-xs mt-0.5 leading-snug"
-                style={{ color: 'var(--app-text-secondary)' }}
+              <p 
+                className="text-xs mt-0.5"
+                style={!isNavy ? { color: 'var(--app-text-secondary)' } : undefined}
               >
                 {subtitle}
               </p>
@@ -98,7 +81,7 @@ export const VividCard: React.FC<VividCardProps> = ({
           {headerAction && <div className="shrink-0">{headerAction}</div>}
         </div>
       )}
-      <div className="p-4 sm:p-6 min-w-0">{children}</div>
+      <div className="p-6">{children}</div>
     </div>
   );
 };

@@ -691,14 +691,14 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
     <div className="space-y-6 p-1">
       <PrintableSessionAudit payload={printPayload} />
       {/* Header */}
-      <div className="rounded-2xl border border-[#1E294A] bg-gradient-to-br from-[#070B19] via-[#0D1326] to-[#15173B] p-5 sm:p-6 text-[#F4F7FF] shadow-lg shadow-black/25">
+      <div className="rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-5 sm:p-6 text-[var(--app-text-primary)] shadow-lg shadow-black/25">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="mb-2 text-xs font-mono font-semibold uppercase tracking-[0.16em] text-[#00F0FF]">ZYNTHEOR · Autonomous Execution</p>
+            <p className="mb-2 text-xs font-mono font-semibold text-[var(--app-accent)]">ZYNTHEOR · Autonomous Execution</p>
             <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
               Task Command Platform
             </h1>
-            <p className="mt-1 max-w-2xl text-sm text-[#9AA8C7]">
+            <p className="mt-1 max-w-2xl text-sm text-[var(--app-text-secondary)]">
               สั่งงาน AI ให้ลงมือวิเคราะห์ วางแผน สร้าง ทดสอบ ซ่อมแซม และส่งมอบจริง
               — ไม่ใช่หน้าต่างแชท เชื่อมต่อ API จริงเท่านั้น ไม่จำลองสถานะสำเร็จ
             </p>
@@ -706,9 +706,9 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           <div className="flex gap-2">
             <button
               onClick={() => { loadTasks(); loadMetrics(); loadWorkspace(); }}
-              className="min-h-[44px] flex items-center gap-2 rounded-xl border border-[#1E294A] bg-[#131B36] px-4 py-2 text-sm font-medium text-[#F4F7FF] hover:border-[#00F0FF]/60 transition-colors cursor-pointer"
+              className="min-h-[44px] flex items-center gap-2 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] px-4 py-2 text-sm font-medium text-[var(--app-text-primary)] hover:border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] transition-colors cursor-pointer"
             >
-              <RefreshCw className="h-4 w-4 text-[#00F0FF]" /> Refresh
+              <RefreshCw className="h-4 w-4 text-[var(--app-accent)]" /> Refresh
             </button>
           </div>
         </div>
@@ -716,8 +716,8 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
 
       {/* Error banner (honest) */}
       {lastError && (
-        <div className="flex items-start gap-3 rounded-xl border border-[#FF007F]/45 bg-[#FF007F]/10 px-4 py-3 text-sm text-[#FF99C8]">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#FF007F]" />
+        <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] px-4 py-3 text-sm text-[var(--z-danger)]">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--z-danger)]" />
           <div>
             <div className="font-semibold">Execution / API Error</div>
             <div className="mt-0.5 opacity-90">{lastError}</div>
@@ -727,16 +727,16 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
 
       {/* Informational Priority Queue Notice */}
       {queueNotice && !lastError && (
-        <div className="flex items-start gap-3 rounded-xl border border-[#00F0FF]/40 bg-[#00F0FF]/10 px-4 py-3 text-sm text-[#D6FAFF]">
-          <ListOrdered className="mt-0.5 h-5 w-5 shrink-0 text-[#00F0FF]" />
+        <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] px-4 py-3 text-sm text-[var(--app-accent)]">
+          <ListOrdered className="mt-0.5 h-5 w-5 shrink-0 text-[var(--app-accent)]" />
           <div className="flex-1">
-            <div className="font-semibold text-[#00F0FF]">Priority Queue Empty</div>
+            <div className="font-semibold text-[var(--app-accent)]">Priority Queue Empty</div>
             <div className="mt-0.5 opacity-90">{queueNotice}</div>
           </div>
           <button
             type="button"
             onClick={() => setQueueNotice(null)}
-            className="text-xs font-mono text-[#9AA8C7] hover:text-white cursor-pointer"
+            className="text-xs font-mono text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
           >
             Dismiss
           </button>
@@ -751,7 +751,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           {/* Task Command Center */}
           <VividCard gradientAccent="cyan">
             <div className="mb-3 flex items-center gap-2">
-              <Terminal className="h-5 w-5 text-[#00F0FF]" />
+              <Terminal className="h-5 w-5 text-[var(--app-accent)]" />
               <h2 className="text-lg font-bold text-[var(--app-text-primary)]">Task Command Center</h2>
             </div>
             <p className="mb-3 text-xs text-[var(--app-text-secondary)]">
@@ -762,7 +762,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
               onChange={(e) => setGoal(e.target.value)}
               placeholder="Example: Build a resilient in-memory LRU cache with TTL and unit tests"
               rows={3}
-              className="w-full resize-none rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-4 py-3 text-sm text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:border-[#00F0FF] focus:outline-none"
+              className="w-full resize-none rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-4 py-3 text-sm text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:border-[var(--app-accent)] focus:outline-none"
               disabled={isRunning}
             />
             <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -782,12 +782,12 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                 onChange={(e) => setApprovalRequestIdInput(e.target.value)}
                 disabled={isRunning}
                 placeholder="Optional Approval ID (apr_...)"
-                className="min-h-[44px] w-48 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-3 py-2 text-xs font-mono text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:border-[#00F0FF] focus:outline-none"
+                className="min-h-[44px] w-48 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-3 py-2 text-xs font-mono text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:border-[var(--app-accent)] focus:outline-none"
               />
               <button
                 onClick={() => runGoal('execute')}
                 disabled={isRunning || !goal.trim()}
-                className="min-h-[44px] flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00F0FF] to-[#CCFF00] px-5 py-2.5 text-sm font-bold text-[#070B19] hover:brightness-105 disabled:opacity-40 cursor-pointer"
+                className="min-h-[44px] flex items-center gap-2 rounded-xl bg-[var(--app-accent)] px-5 py-2.5 text-sm font-bold text-[var(--app-bg)] hover:brightness-105 disabled:opacity-40 cursor-pointer"
               >
                 {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
                 {isRunning ? 'Executing…' : 'Execute Now'}
@@ -795,9 +795,9 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
               <button
                 onClick={() => runGoal('queue')}
                 disabled={isRunning || !goal.trim()}
-                className="min-h-[44px] flex items-center gap-2 rounded-xl border border-[#7B2CBF]/60 bg-[#7B2CBF]/15 px-4 py-2.5 text-sm font-semibold text-[#F4F7FF] hover:bg-[#7B2CBF]/25 disabled:opacity-40 cursor-pointer"
+                className="min-h-[44px] flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--app-accent-deep)_60%,transparent)] bg-[color-mix(in_srgb,var(--app-accent-deep)_15%,transparent)] px-4 py-2.5 text-sm font-semibold text-[var(--app-text-primary)] hover:bg-[color-mix(in_srgb,var(--app-accent-deep)_25%,transparent)] disabled:opacity-40 cursor-pointer"
               >
-                <ListOrdered className="h-4 w-4 text-[#00F0FF]" /> Enqueue
+                <ListOrdered className="h-4 w-4 text-[var(--app-accent)]" /> Enqueue
               </button>
               <button
                 onClick={runNextQueued}
@@ -807,14 +807,14 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                     ? 'No Planned tasks in queue — enter a goal and click Enqueue first'
                     : `Run highest-priority Planned task (${plannedTasks.length} queued)`
                 }
-                className="min-h-[44px] flex items-center gap-2 rounded-xl border border-[#CCFF00]/45 bg-[#CCFF00]/10 px-4 py-2.5 text-sm font-semibold text-[#CCFF00] hover:bg-[#CCFF00]/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="min-h-[44px] flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] px-4 py-2.5 text-sm font-semibold text-[var(--z-ok)] hover:bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <ChevronRight className="h-4 w-4" /> Run Next Queued ({plannedTasks.length})
               </button>
             </div>
             {plannedTasks.length === 0 && !isRunning && (
               <p className="mt-2.5 text-[11px] font-mono text-[var(--app-text-secondary)]">
-                คิวว่าง (0 Planned) — พิมพ์โจทย์ด้านบนแล้วกด <span className="text-[#00F0FF]">Enqueue</span> เพื่อเพิ่มงานเข้าคิว หรือกด <span className="text-[#CCFF00]">Execute Now</span> เพื่อรันทันที
+                คิวว่าง (0 Planned) — พิมพ์โจทย์ด้านบนแล้วกด <span className="text-[var(--app-accent)]">Enqueue</span> เพื่อเพิ่มงานเข้าคิว หรือกด <span className="text-[var(--z-ok)]">Execute Now</span> เพื่อรันทันที
               </p>
             )}
           </VividCard>
@@ -822,7 +822,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           {/* Execution Pipeline */}
           <VividCard gradientAccent="violet">
             <div className="mb-4 flex items-center gap-2">
-              <Activity className="h-5 w-5 text-[#7B2CBF]" />
+              <Activity className="h-5 w-5 text-[var(--app-accent-deep)]" />
               <h2 className="text-lg font-bold text-[var(--app-text-primary)]">Execution Pipeline</h2>
               <span className="ml-auto text-xs font-mono text-[var(--app-text-secondary)]">8-Stage Cycle</span>
             </div>
@@ -832,11 +832,11 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                 const shortEn = s.labelEn.split(' ')[0];
                 const color =
                   st === 'done'
-                    ? 'border-[#CCFF00]/55 bg-[#CCFF00]/10 text-[#CCFF00]'
+                    ? 'border-[color-mix(in_srgb,var(--z-ok)_55%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] text-[var(--z-ok)]'
                     : st === 'active'
-                    ? 'border-[#00F0FF] bg-[#00F0FF]/12 text-[#00F0FF] ring-1 ring-[#00F0FF]/40'
+                    ? 'border-[var(--app-accent)] bg-[color-mix(in_srgb,var(--app-accent)_12%,transparent)] text-[var(--app-accent)] ring-1 ring-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]'
                     : st === 'error'
-                    ? 'border-[#FF007F]/60 bg-[#FF007F]/15 text-[#FF007F]'
+                    ? 'border-[color-mix(in_srgb,var(--z-danger)_60%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_15%,transparent)] text-[var(--z-danger)]'
                     : 'border-[var(--app-card-border)] bg-[var(--app-input-bg)] text-[var(--app-text-secondary)]';
                 return (
                   <div
@@ -868,19 +868,19 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
               })}
             </div>
             {activePlan && (
-              <div className="mt-4 rounded-xl border border-[#1E294A] bg-[#070B19] p-3.5 space-y-2.5 text-xs">
+              <div className="mt-4 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-3.5 space-y-2.5 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Wrench className="h-3.5 w-3.5 text-[#00F0FF]" />
-                    <span className="font-mono font-bold text-[#F4F7FF]">
+                    <Wrench className="h-3.5 w-3.5 text-[var(--app-accent)]" />
+                    <span className="font-mono font-bold text-[var(--app-text-primary)]">
                       DAG Plan: {activePlan.planId}
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-[#131B36] border border-[#1E294A] font-mono text-[10px] text-[#00F0FF]">
+                    <span className="px-2 py-0.5 rounded bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] font-mono text-[10px] text-[var(--app-accent)]">
                       {activePlan.status}
                     </span>
                   </div>
                   {activePlan.budget && (
-                    <span className="font-mono text-[11px] tabular-nums text-[#9AA8C7]">
+                    <span className="font-mono text-[11px] tabular-nums text-[var(--app-text-secondary)]">
                       Tools {activePlan.budget.usedToolCalls}/{activePlan.budget.maxToolCalls} · Retries{' '}
                       {activePlan.budget.usedRetries}/{activePlan.budget.maxRetries} · Revisions{' '}
                       {Array.isArray(activePlan.revisions) ? activePlan.revisions.length : 0}
@@ -892,19 +892,19 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                     {activePlan.steps.map((st: any) => (
                       <div
                         key={st.id}
-                        className="flex items-center justify-between gap-2 rounded-lg border border-[#1E294A] bg-[#0D1326] px-2.5 py-1.5"
+                        className="flex items-center justify-between gap-2 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-2.5 py-1.5"
                       >
-                        <span className="truncate text-[#F4F7FF]">
-                          <span className="font-mono text-[10px] text-[#9AA8C7] mr-1.5">P{st.priority}</span>
+                        <span className="truncate text-[var(--app-text-primary)]">
+                          <span className="font-mono text-[10px] text-[var(--app-text-secondary)] mr-1.5">P{st.priority}</span>
                           {st.title}
                         </span>
                         <span
                           className={`shrink-0 font-mono text-[10px] font-bold ${
                             st.status === 'COMPLETED'
-                              ? 'text-[#CCFF00]'
+                              ? 'text-[var(--z-ok)]'
                               : st.status === 'FAILED'
-                              ? 'text-[#FF007F]'
-                              : 'text-[#00F0FF]'
+                              ? 'text-[var(--z-danger)]'
+                              : 'text-[var(--app-accent)]'
                           }`}
                         >
                           {st.status}
@@ -920,17 +920,17 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           {/* Live Execution Monitor */}
           <VividCard gradientAccent="coral">
             <div className="mb-3 flex flex-wrap items-center gap-2.5">
-              <Terminal className="h-5 w-5 text-[#FF5E3A]" />
+              <Terminal className="h-5 w-5 text-[var(--z-warn)]" />
               <h2 className="text-lg font-bold text-[var(--app-text-primary)]">Live Execution Monitor</h2>
               <div className="ml-auto flex items-center gap-2.5">
                 {events.length > 0 && (
                   <button
                     type="button"
                     onClick={handleExportSessionPdf}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[#00F0FF] text-[11px] font-semibold text-[var(--app-text-primary)] transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[var(--app-accent)] text-[11px] font-semibold text-[var(--app-text-primary)] transition-colors cursor-pointer"
                     title="Export current session log & metadata as high-contrast PDF"
                   >
-                    <Printer className="h-3.5 w-3.5 text-[#00F0FF]" />
+                    <Printer className="h-3.5 w-3.5 text-[var(--app-accent)]" />
                     <span>Export PDF Audit</span>
                   </button>
                 )}
@@ -941,9 +941,9 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                 />
               </div>
             </div>
-            <div className="max-h-80 overflow-y-auto rounded-xl border border-[#1E294A] bg-[#070B19] p-3 font-mono text-xs leading-relaxed space-y-1.5">
+            <div className="max-h-80 overflow-y-auto rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-3 font-mono text-xs leading-relaxed space-y-1.5">
               {events.length === 0 && !isRunning && (
-                <div className="py-8 text-center text-[#9AA8C7]">
+                <div className="py-8 text-center text-[var(--app-text-secondary)]">
                   ยังไม่มี event — กด Execute Now เพื่อเริ่มงานจริงผ่าน API
                 </div>
               )}
@@ -952,17 +952,17 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                   key={i}
                   className={`rounded-lg border px-3 py-1.5 ${
                     ev.type === 'error'
-                      ? 'border-[#FF007F]/40 bg-[#FF007F]/10 text-[#FF99C8]'
+                      ? 'border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] text-[var(--z-danger)]'
                       : ev.type === 'done' || ev.type === 'final_result'
-                      ? 'border-[#CCFF00]/40 bg-[#CCFF00]/10 text-[#CCFF00]'
-                      : 'border-[#1E294A] bg-[#0D1326] text-[#F4F7FF]'
+                      ? 'border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] text-[var(--z-ok)]'
+                      : 'border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-primary)]'
                   }`}
                 >
-                  <span className="text-[#9AA8C7] tabular-nums">
+                  <span className="text-[var(--app-text-secondary)] tabular-nums">
                     {ev.timestamp ? new Date(ev.timestamp).toLocaleTimeString() : ''}
                   </span>{' '}
                   {ev.role && (
-                    <span className="font-semibold text-[#00F0FF]">[{ev.role}] </span>
+                    <span className="font-semibold text-[var(--app-accent)]">[{ev.role}] </span>
                   )}
                   <span>{ev.message}</span>
                 </div>
@@ -974,7 +974,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           {/* Verification & Delivery */}
           <VividCard gradientAccent="lime">
             <div className="mb-3 flex items-center gap-2">
-              <Package className="h-5 w-5 text-[#CCFF00]" />
+              <Package className="h-5 w-5 text-[var(--z-ok)]" />
               <h2 className="text-lg font-bold text-[var(--app-text-primary)]">Verification & Delivery</h2>
             </div>
             {!finalResult && !lastError && (
@@ -985,7 +985,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
             {finalResult && (
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-3 items-center">
-                  <span className={`inline-flex items-center gap-2 text-sm font-semibold ${finalResult.success ? 'text-[#CCFF00]' : 'text-[#FF007F]'}`}>
+                  <span className={`inline-flex items-center gap-2 text-sm font-semibold ${finalResult.success ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'}`}>
                     {finalResult.success ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                     {finalResult.success ? 'Completed' : 'Failed'}
                   </span>
@@ -999,7 +999,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                 {finalResult.plan && (
                   <div>
                     <div className="mb-1 text-xs font-semibold text-[var(--app-text-secondary)]">Plan</div>
-                    <pre className="max-h-32 overflow-auto rounded-lg border border-[#1E294A] bg-[#070B19] p-3 text-xs text-[#F4F7FF]">
+                    <pre className="max-h-32 overflow-auto rounded-lg border border-[var(--app-card-border)] bg-[var(--app-bg)] p-3 text-xs text-[var(--app-text-primary)]">
                       {typeof finalResult.plan === 'string'
                         ? finalResult.plan
                         : JSON.stringify(finalResult.plan, null, 2)}
@@ -1009,7 +1009,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                 {finalResult.testResult && (
                   <div>
                     <div className="mb-1 text-xs font-semibold text-[var(--app-text-secondary)]">Test Result</div>
-                    <pre className="max-h-40 overflow-auto rounded-lg border border-[#1E294A] bg-[#070B19] p-3 text-xs text-[#F4F7FF]">
+                    <pre className="max-h-40 overflow-auto rounded-lg border border-[var(--app-card-border)] bg-[var(--app-bg)] p-3 text-xs text-[var(--app-text-primary)]">
                       exitCode: {finalResult.testResult.exitCode}
                       {'\n'}
                       {finalResult.testResult.stdout || ''}
@@ -1021,7 +1021,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                     <button
                       onClick={() => downloadDeliverable(deliveredFilename)}
-                      className="inline-flex items-center gap-2 font-semibold text-[#CCFF00] hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-2 font-semibold text-[var(--z-ok)] hover:underline cursor-pointer"
                     >
                       <Download className="h-4 w-4" />
                       Download {deliveredFilename}
@@ -1044,7 +1044,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           {metrics && (
             <VividCard gradientAccent="blue">
               <div className="mb-3 flex items-center gap-2">
-                <Activity className="h-4 w-4 text-[#00F0FF]" />
+                <Activity className="h-4 w-4 text-[var(--app-accent)]" />
                 <h3 className="font-bold text-[var(--app-text-primary)]">Execution Metrics</h3>
               </div>
               <div className="grid grid-cols-2 gap-2 text-center text-xs tabular-nums">
@@ -1055,19 +1055,19 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                   <div className="text-[var(--app-text-secondary)]">Total cycles</div>
                 </div>
                 <div className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] p-2.5">
-                  <div className="text-lg font-bold font-mono text-[#CCFF00]">
+                  <div className="text-lg font-bold font-mono text-[var(--z-ok)]">
                     {metrics.succeededCycles ?? '—'}
                   </div>
                   <div className="text-[var(--app-text-secondary)]">Succeeded</div>
                 </div>
                 <div className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] p-2.5">
-                  <div className="text-lg font-bold font-mono text-[#FF5E3A]">
+                  <div className="text-lg font-bold font-mono text-[var(--z-warn)]">
                     {metrics.selfRepairsAttempted ?? '—'}
                   </div>
                   <div className="text-[var(--app-text-secondary)]">Repairs</div>
                 </div>
                 <div className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)] p-2.5">
-                  <div className="text-lg font-bold font-mono text-[#00F0FF]">
+                  <div className="text-lg font-bold font-mono text-[var(--app-accent)]">
                     {Array.isArray(metrics.recentCycles) && metrics.recentCycles.length > 0
                       ? `${Math.round(metrics.recentCycles.reduce((sum: number, cycle: any) => sum + (Number(cycle.durationMs) || 0), 0) / metrics.recentCycles.length)}ms`
                       : '—'}
@@ -1082,7 +1082,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           {role !== 'User' && <VividCard gradientAccent="coral">
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FolderOpen className="h-4 w-4 text-[#FF5E3A]" />
+                <FolderOpen className="h-4 w-4 text-[var(--z-warn)]" />
                 <h3 className="font-bold text-[var(--app-text-primary)]">Project Workspace</h3>
               </div>
               <button
@@ -1104,7 +1104,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                   key={f.name}
                   onClick={() => openFile(f.name)}
                   className={`flex w-full items-center gap-2 border-b border-[var(--app-card-border)] px-3 py-2 text-left text-xs hover:bg-[var(--app-surface-elevated)] cursor-pointer ${
-                    selectedFile === f.name ? 'bg-[var(--app-surface-elevated)] text-[#00F0FF] font-semibold' : 'text-[var(--app-text-primary)]'
+                    selectedFile === f.name ? 'bg-[var(--app-surface-elevated)] text-[var(--app-accent)] font-semibold' : 'text-[var(--app-text-primary)]'
                   }`}
                 >
                   <FileCode2 className="h-3.5 w-3.5 shrink-0 opacity-70" />
@@ -1113,7 +1113,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
               ))}
             </div>
             {selectedFile && (
-              <pre className="mt-2 max-h-40 overflow-auto rounded-xl border border-[#1E294A] bg-[#070B19] p-2.5 text-[10px] leading-relaxed text-[#9AA8C7]">
+              <pre className="mt-2 max-h-40 overflow-auto rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-2.5 text-[10px] leading-relaxed text-[var(--app-text-secondary)]">
                 {fileContent || '// empty'}
               </pre>
             )}
@@ -1123,7 +1123,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
           <VividCard gradientAccent="magenta">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-[#00F0FF]" />
+                <Clock className="h-4 w-4 text-[var(--app-accent)]" />
                 <h3 className="font-bold text-[var(--app-text-primary)]">Task History</h3>
               </div>
               <div className="flex items-center gap-2">
@@ -1140,8 +1140,8 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                   }
                   className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                     isSelectMode
-                      ? 'border-[#00F0FF]/60 bg-[#00F0FF]/15 text-[#00F0FF] hover:bg-[#00F0FF]/25'
-                      : 'border-[var(--app-card-border)] bg-[var(--app-input-bg)] text-[var(--app-text-primary)] hover:border-[#00F0FF]/50'
+                      ? 'border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_25%,transparent)]'
+                      : 'border-[var(--app-card-border)] bg-[var(--app-input-bg)] text-[var(--app-text-primary)] hover:border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
                   }`}
                 >
                   {isSelectMode ? <X className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}
@@ -1159,12 +1159,12 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
             </div>
 
             {batchNotice && (
-              <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-[#CCFF00]/45 bg-[#CCFF00]/10 px-3 py-2 text-xs text-[#CCFF00]">
+              <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] px-3 py-2 text-xs text-[var(--z-ok)]">
                 <span>{batchNotice}</span>
                 <button
                   type="button"
                   onClick={() => setBatchNotice(null)}
-                  className="rounded p-0.5 hover:bg-white/10 cursor-pointer"
+                  className="rounded p-0.5 hover:bg-[color-mix(in_srgb,var(--app-text-primary)_10%,transparent)] cursor-pointer"
                   aria-label="Dismiss notice"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -1173,9 +1173,9 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
             )}
 
             {isSelectMode && (
-              <div className="mb-3 space-y-2 rounded-xl border border-[#1E294A] bg-[#070B19] p-2.5 text-xs">
+              <div className="mb-3 space-y-2 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-2.5 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-mono font-medium text-[#00F0FF] tabular-nums">
+                  <span className="font-mono font-medium text-[var(--app-accent)] tabular-nums">
                     {selectedTaskIds.size}/{completedTasks.length} completed selected
                   </span>
                   <div className="flex items-center gap-2">
@@ -1183,7 +1183,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                       type="button"
                       onClick={toggleSelectAllCompleted}
                       disabled={completedTasks.length === 0 || isBatchDeleting}
-                      className="rounded-md border border-[#1E294A] bg-[#131B36] px-2 py-1 text-[11px] font-medium text-[#F4F7FF] hover:border-[#00F0FF]/50 cursor-pointer disabled:opacity-40"
+                      className="rounded-md border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] px-2 py-1 text-[11px] font-medium text-[var(--app-text-primary)] hover:border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)] cursor-pointer disabled:opacity-40"
                     >
                       {allCompletedSelected ? 'Deselect All' : 'Select All Completed'}
                     </button>
@@ -1191,7 +1191,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                       type="button"
                       onClick={() => setConfirmBatchDelete(true)}
                       disabled={selectedTaskIds.size === 0 || isBatchDeleting}
-                      className="flex items-center gap-1 rounded-md border border-[#FF007F]/50 bg-[#FF007F]/20 px-2.5 py-1 text-[11px] font-semibold text-[#FF99C8] hover:bg-[#FF007F]/30 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1 rounded-md border border-[color-mix(in_srgb,var(--z-danger)_50%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] px-2.5 py-1 text-[11px] font-semibold text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="h-3 w-3" />
                       Delete Selected ({selectedTaskIds.size})
@@ -1199,7 +1199,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                   </div>
                 </div>
                 {confirmBatchDelete && selectedTaskIds.size > 0 && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FF007F]/45 bg-[#FF007F]/15 px-2.5 py-2 text-[11px] text-[#FF99C8]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_15%,transparent)] px-2.5 py-2 text-[11px] text-[var(--z-danger)]">
                     <span>
                       Delete {selectedTaskIds.size} completed task{selectedTaskIds.size === 1 ? '' : 's'}?
                     </span>
@@ -1208,7 +1208,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                         type="button"
                         onClick={() => setConfirmBatchDelete(false)}
                         disabled={isBatchDeleting}
-                        className="rounded border border-[#1E294A] bg-[#131B36] px-2 py-0.5 text-[#F4F7FF] hover:bg-[#1E294A] cursor-pointer"
+                        className="rounded border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] px-2 py-0.5 text-[var(--app-text-primary)] hover:bg-[var(--app-card-border)] cursor-pointer"
                       >
                         Keep
                       </button>
@@ -1216,7 +1216,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                         type="button"
                         onClick={handleBatchDeleteCompleted}
                         disabled={isBatchDeleting}
-                        className="flex items-center gap-1 rounded bg-[#FF007F] px-2.5 py-0.5 font-semibold text-white hover:brightness-110 cursor-pointer disabled:opacity-50"
+                        className="flex items-center gap-1 rounded bg-[var(--z-danger)] px-2.5 py-0.5 font-semibold text-white hover:brightness-110 cursor-pointer disabled:opacity-50"
                       >
                         {isBatchDeleting && <Loader2 className="h-3 w-3 animate-spin" />}
                         {isBatchDeleting ? 'Deleting…' : 'Confirm Delete'}
@@ -1247,8 +1247,8 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                     className={`rounded-xl border p-3 text-xs transition-colors ${
                       isSelectMode && completed
                         ? selected
-                          ? 'cursor-pointer border-[#00F0FF]/70 bg-[#00F0FF]/10 ring-1 ring-[#00F0FF]/30'
-                          : 'cursor-pointer border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[#00F0FF]/40'
+                          ? 'cursor-pointer border-[color-mix(in_srgb,var(--app-accent)_70%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)]'
+                          : 'cursor-pointer border-[var(--app-card-border)] bg-[var(--app-input-bg)] hover:border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]'
                         : isSelectMode && !completed
                         ? 'border-[var(--app-card-border)] bg-[var(--app-input-bg)] opacity-60'
                         : 'border-[var(--app-card-border)] bg-[var(--app-input-bg)]'
@@ -1274,7 +1274,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                             className="shrink-0 text-[var(--app-text-secondary)] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
                           >
                             {selected ? (
-                              <CheckSquare className="h-4 w-4 text-[#00F0FF]" />
+                              <CheckSquare className="h-4 w-4 text-[var(--app-accent)]" />
                             ) : (
                               <Square className="h-4 w-4" />
                             )}
@@ -1285,9 +1285,9 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                       <span
                         className={`shrink-0 text-[10px] font-semibold ${
                           t.lifecycleStatus === 'Delivered' || t.success
-                            ? 'text-[#CCFF00]'
+                            ? 'text-[var(--z-ok)]'
                             : t.lifecycleStatus === 'Failed' || t.success === false
-                            ? 'text-[#FF007F]'
+                            ? 'text-[var(--z-danger)]'
                             : 'text-[var(--app-text-secondary)]'
                         }`}
                       >
@@ -1304,7 +1304,7 @@ export const AutonomousExecutionDashboard: React.FC<{ statusData?: SystemStatusD
                             e.stopPropagation();
                             downloadDeliverable((t.packageArtifact!.zipFilename || t.packageArtifact!.filename)!);
                           }}
-                          className="flex items-center gap-1 text-[#00F0FF] hover:underline cursor-pointer"
+                          className="flex items-center gap-1 text-[var(--app-accent)] hover:underline cursor-pointer"
                         >
                           <Download className="h-3 w-3" /> Artifact
                         </button>

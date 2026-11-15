@@ -32,7 +32,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch {
       // ignore
     }
-    return 'midnight-navy'; // Default to Batch 25 Midnight Navy foundation
+    return 'emerald-amber'; // Default to Flagship Emerald Amber
   });
 
   const [customAccent, setCustomAccentState] = useState<string>(() => {
@@ -60,7 +60,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getResolvedTheme = (mode: ThemeMode): 'emerald-amber' | 'light' | 'dark' | 'midnight-navy' | 'vivid-cyan' | 'royal-purple' => {
     if (mode === 'system') {
       const isDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return isDark ? 'midnight-navy' : 'light';
+      return isDark ? 'emerald-amber' : 'light';
     }
     return mode;
   };
@@ -143,7 +143,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const resetThemeDefaults = () => {
-    setTheme('midnight-navy');
+    setTheme('emerald-amber');
     setCustomAccent('');
     setAccentIntensity(1.0);
     try {

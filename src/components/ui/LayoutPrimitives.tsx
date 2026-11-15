@@ -127,7 +127,7 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     }}
   >
     {icon && (
-      <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/25">
+      <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_25%,transparent)]">
         {icon}
       </div>
     )}

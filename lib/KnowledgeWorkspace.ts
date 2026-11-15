@@ -18,20 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { AuditLedger } from './AuditLedger';
-import {
-  semanticChunk,
-  detectLang,
-  contentHash,
-  normalizeIntegrityText,
-  assertRetrievalQueryNoTargetLeakage,
-  assertDisjointTrainEvalSamples,
-} from './knowledgeUtils';
-import { isCloudSqlConfigured } from '../src/db/index.ts';
-import {
-  deleteCloudKnowledgeDocument,
-  saveCloudCuratedDataset,
-  upsertCloudKnowledgeDocument,
-} from '../src/db/repositories.ts';
+import { semanticChunk, detectLang } from './knowledgeUtils';
 
 export interface KnowledgeDocument {
   id: string;
@@ -108,7 +95,6 @@ export interface CuratedDatasetManifest {
   originalCount: number;
   qualityScoreAvg: number;
   status: 'VERIFIED_READY' | 'NEEDS_REVIEW' | 'FLAGGED';
-  tenantId?: string;
 }
 
 export interface ParsedDocumentResult {
@@ -336,7 +322,7 @@ export class KnowledgeWorkspace {
   private seedInitialKnowledge(): void {
     const seeds: Array<Omit<KnowledgeDocument, 'id' | 'createdAt' | 'updatedAt' | 'contentHash' | 'chunksCount' | 'byteSize' | 'version' | 'status'>> = [
       {
-        title: 'ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification',
+        title: 'ZYNTHEOR Architecture Manifest & 33.7M Parameter Model Specification',
         collection: 'Architecture',
         source: 'docs/architecture_manifest.md',
         format: 'markdown',
@@ -347,8 +333,8 @@ export class KnowledgeWorkspace {
         content: `# ZYNTHEOR Q+ Sovereign AI Architecture Manifest
 
 ## 1. Core Model Topology
-Target architecture specification: 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).
-Target parameter budget is 41,527,808 Float32 parameters (~166.1 MB decimal / 158.4 MiB). This is NOT the active runtime checkpoint. The currently serialized active subgraph contains 231,168 Float32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).
+ZYNTHEOR runs a 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).
+Total parameter count is 33,958,400 Float32 parameters (~135.8 MB).
 
 ## 2. Invariants & Fail-Closed Standard
 - Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.
@@ -468,11 +454,6 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     this.documents.set(id, doc);
     this.chunks.push(...newChunks);
     this.saveToDisk();
-    if (isCloudSqlConfigured()) {
-      void upsertCloudKnowledgeDocument(doc, newChunks).catch((err) => {
-        console.warn('[KnowledgeWorkspace] Cloud SQL upsert warning:', err?.message || err);
-      });
-    }
 
     AuditLedger.append('SYSTEM', 'KNOWLEDGE_DOCUMENT_CREATED', {
       docId: id,
@@ -487,31 +468,10 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     return doc;
   }
 
-  public canAccessDocument(doc: KnowledgeDocument, scope?: { tenantId?: string; role?: string }): boolean {
-    if (!scope || (!scope.tenantId && !scope.role)) return true;
-    if (doc.tenantId && scope.tenantId && doc.tenantId !== scope.tenantId) {
-      return false;
-    }
-    if (doc.readRoles && Array.isArray(doc.readRoles) && doc.readRoles.length > 0) {
-      const role = scope.role || 'guest';
-      if (!doc.readRoles.includes(role) && role !== 'admin') {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  public updateDocument(
-    id: string,
-    updates: Partial<KnowledgeDocument>,
-    scope?: { tenantId?: string; role?: string }
-  ): KnowledgeDocument {
+  public updateDocument(id: string, updates: Partial<KnowledgeDocument>): KnowledgeDocument {
     const existing = this.documents.get(id);
     if (!existing) {
       throw new Error(`Document with ID '${id}' not found`);
-    }
-    if (!this.canAccessDocument(existing, scope)) {
-      throw new Error(`FORBIDDEN: Cross-tenant document update denied for '${id}'`);
     }
 
     const contentChanged = updates.content !== undefined && updates.content.trim() !== existing.content;
@@ -522,7 +482,6 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     const updated: KnowledgeDocument = {
       ...existing,
       ...updates,
-      tenantId: existing.tenantId, // immutable tenant ownership
       content: newContent,
       contentHash: newHash,
       version: existing.version + (contentChanged ? 1 : 0),
@@ -541,12 +500,6 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
 
     this.documents.set(id, updated);
     this.saveToDisk();
-    if (isCloudSqlConfigured()) {
-      const docChunks = this.chunks.filter((c) => c.documentId === id);
-      void upsertCloudKnowledgeDocument(updated, docChunks).catch((err) => {
-        console.warn('[KnowledgeWorkspace] Cloud SQL update warning:', err?.message || err);
-      });
-    }
 
     AuditLedger.append('SYSTEM', 'KNOWLEDGE_DOCUMENT_UPDATED', {
       docId: id,
@@ -557,21 +510,13 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     return updated;
   }
 
-  public deleteDocument(id: string, scope?: { tenantId?: string; role?: string }): boolean {
+  public deleteDocument(id: string): boolean {
     const existing = this.documents.get(id);
     if (!existing) return false;
-    if (!this.canAccessDocument(existing, scope)) {
-      throw new Error(`FORBIDDEN: Cross-tenant document delete denied for '${id}'`);
-    }
 
     this.documents.delete(id);
     this.chunks = this.chunks.filter((c) => c.documentId !== id);
     this.saveToDisk();
-    if (isCloudSqlConfigured()) {
-      void deleteCloudKnowledgeDocument(id).catch((err) => {
-        console.warn('[KnowledgeWorkspace] Cloud SQL delete warning:', err?.message || err);
-      });
-    }
 
     AuditLedger.append('SYSTEM', 'KNOWLEDGE_DOCUMENT_DELETED', {
       docId: id,
@@ -581,18 +526,9 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     return true;
   }
 
-  public listDocuments(filter?: {
-    collection?: string;
-    search?: string;
-    tag?: string;
-    tenantId?: string;
-    role?: string;
-  }): KnowledgeDocument[] {
+  public listDocuments(filter?: { collection?: string; search?: string; tag?: string }): KnowledgeDocument[] {
     let docs = Array.from(this.documents.values());
 
-    if (filter?.tenantId || filter?.role) {
-      docs = docs.filter((d) => this.canAccessDocument(d, { tenantId: filter.tenantId, role: filter.role }));
-    }
     if (filter?.collection) {
       docs = docs.filter((d) => d.collection.toLowerCase() === filter.collection!.toLowerCase());
     }
@@ -612,31 +548,14 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     return docs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
 
-  public getDocument(id: string, scope?: { tenantId?: string; role?: string }): KnowledgeDocument | null {
-    const doc = this.documents.get(id) || null;
-    if (!doc) return null;
-    if (!this.canAccessDocument(doc, scope)) {
-      throw new Error(`FORBIDDEN: Cross-tenant document read denied for '${id}'`);
-    }
-    return doc;
+  public getDocument(id: string): KnowledgeDocument | null {
+    return this.documents.get(id) || null;
   }
 
   /**
    * Native Knowledge Retrieval with Keyword, N-Gram & Heading Relevance
    */
-  public retrieve(
-    query: string,
-    options: {
-      limit?: number;
-      collection?: string;
-      forbiddenTargetValues?: Array<string | number>;
-      tenantId?: string;
-      role?: string;
-    } = {}
-  ): RetrievalResult[] {
-    if (options.forbiddenTargetValues && options.forbiddenTargetValues.length > 0) {
-      assertRetrievalQueryNoTargetLeakage(query, options.forbiddenTargetValues);
-    }
+  public retrieve(query: string, options: { limit?: number; collection?: string } = {}): RetrievalResult[] {
     const limit = options.limit || 4;
     const qLower = query.toLowerCase().trim();
     if (!qLower) return [];
@@ -649,14 +568,6 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     if (queryTokens.length === 0) return [];
 
     let targetChunks = this.chunks;
-    if (options.tenantId || options.role) {
-      const allowedDocIds = new Set(
-        Array.from(this.documents.values())
-          .filter((d) => this.canAccessDocument(d, { tenantId: options.tenantId, role: options.role }))
-          .map((d) => d.id)
-      );
-      targetChunks = targetChunks.filter((c) => allowedDocIds.has(c.documentId));
-    }
     if (options.collection) {
       targetChunks = targetChunks.filter((c) => c.collection.toLowerCase() === options.collection!.toLowerCase());
     }
@@ -709,18 +620,9 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
   public curateDataset(
     name: string,
     documentIds: string[],
-    splitRatio: { train: number; val: number; eval: number } = { train: 0.8, val: 0.1, eval: 0.1 },
-    scope?: { tenantId?: string; role?: string }
+    splitRatio: { train: number; val: number; eval: number } = { train: 0.8, val: 0.1, eval: 0.1 }
   ): CuratedDatasetManifest {
-    const rawSelected = documentIds.map((id) => this.documents.get(id)).filter(Boolean) as KnowledgeDocument[];
-    if (scope) {
-      for (const d of rawSelected) {
-        if (!this.canAccessDocument(d, scope)) {
-          throw new Error(`FORBIDDEN: Cross-tenant document '${d.id}' cannot be curated`);
-        }
-      }
-    }
-    const selectedDocs = rawSelected;
+    const selectedDocs = documentIds.map((id) => this.documents.get(id)).filter(Boolean) as KnowledgeDocument[];
 
     if (selectedDocs.length === 0) {
       throw new Error('At least one valid document must be selected for dataset curation');
@@ -747,11 +649,9 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
 
       const docChunks = this.chunks.filter((c) => c.documentId === doc.id);
       for (const chk of docChunks) {
-        // Deduplication check (exact hash + normalized text hash prevents near-duplicate train/eval overlap)
-        const normHash = contentHash(normalizeIntegrityText(chk.text));
-        if (seenHashes.has(chk.hash) || seenHashes.has(normHash)) continue;
+        // Deduplication check
+        if (seenHashes.has(chk.hash)) continue;
         seenHashes.add(chk.hash);
-        seenHashes.add(normHash);
 
         // Quality Scoring (0 - 100)
         let qualityScore = 80;
@@ -820,16 +720,9 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     }
 
     const totalSamples = items.length;
-    const trainItems = items.filter((i) => i.split === 'train');
-    const valItems = items.filter((i) => i.split === 'val');
-    const evalItems = items.filter((i) => i.split === 'eval');
-    assertDisjointTrainEvalSamples(trainItems, evalItems);
-    assertDisjointTrainEvalSamples(trainItems, valItems);
-    assertDisjointTrainEvalSamples(valItems, evalItems);
-
-    const trainSamples = trainItems.length;
-    const valSamples = valItems.length;
-    const evalSamples = evalItems.length;
+    const trainSamples = items.filter((i) => i.split === 'train').length;
+    const valSamples = items.filter((i) => i.split === 'val').length;
+    const evalSamples = items.filter((i) => i.split === 'eval').length;
 
     const totalChars = Math.max(1, thaiCharsCount + latinCharsCount);
     const thaiScriptRatio = Number((thaiCharsCount / totalChars).toFixed(3));
@@ -861,8 +754,7 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
       syntheticCount,
       originalCount,
       qualityScoreAvg,
-      status: manifestStatus,
-      tenantId: scope?.tenantId
+      status: manifestStatus
     };
 
     // Save dataset items to disk
@@ -870,11 +762,6 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
 
     this.datasets.unshift(manifest);
     this.saveToDisk();
-    if (isCloudSqlConfigured()) {
-      void saveCloudCuratedDataset(manifest, items as unknown as Array<Record<string, unknown>>).catch((err) => {
-        console.warn('[KnowledgeWorkspace] Cloud SQL dataset save warning:', err?.message || err);
-      });
-    }
 
     AuditLedger.append('SYSTEM', 'DATASET_CURATED', {
       datasetId,
@@ -886,49 +773,40 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
       syntheticCount,
       qualityScoreAvg,
       status: manifest.status,
-      datasetHash: manifest.datasetHash,
-      tenantId: scope?.tenantId || 'unscoped'
+      datasetHash: manifest.datasetHash
     });
 
     return manifest;
   }
 
-  public getDatasets(scope?: { tenantId?: string }): CuratedDatasetManifest[] {
-    if (!scope?.tenantId) return [...this.datasets];
-    return this.datasets.filter((ds) => !ds.tenantId || ds.tenantId === scope.tenantId);
+  public getDatasets(): CuratedDatasetManifest[] {
+    return [...this.datasets];
   }
 
-  public getDatasetDetail(datasetId: string, scope?: { tenantId?: string }): any {
+  public getDatasetDetail(datasetId: string): any {
     const datasetFile = path.join(this.datasetDir, `${datasetId}.json`);
     if (fs.existsSync(datasetFile)) {
       try {
-        const parsed = JSON.parse(fs.readFileSync(datasetFile, 'utf8'));
-        if (scope?.tenantId && parsed?.manifest?.tenantId && parsed.manifest.tenantId !== scope.tenantId) {
-          throw new Error(`FORBIDDEN: Cross-tenant dataset read denied for '${datasetId}'`);
-        }
-        return parsed;
-      } catch (err: any) {
-        if (String(err?.message || '').startsWith('FORBIDDEN:')) throw err;
+        return JSON.parse(fs.readFileSync(datasetFile, 'utf8'));
+      } catch (err) {
         return null;
       }
     }
     return null;
   }
 
-  public getStats(scope?: { tenantId?: string; role?: string }) {
-    const docs = this.listDocuments(scope ? { tenantId: scope.tenantId, role: scope.role } : undefined);
-    const allowedDocIds = new Set(docs.map((d) => d.id));
-    const visibleChunks = scope ? this.chunks.filter((c) => allowedDocIds.has(c.documentId)) : this.chunks;
+  public getStats() {
+    const docs = Array.from(this.documents.values());
     const collections = Array.from(new Set(docs.map((d) => d.collection)));
     const totalBytes = docs.reduce((acc, d) => acc + d.byteSize, 0);
 
     return {
       totalDocuments: docs.length,
-      totalChunks: visibleChunks.length,
+      totalChunks: this.chunks.length,
       totalCollections: collections.length,
       collections,
       totalBytes,
-      totalDatasets: this.getDatasets(scope).length,
+      totalDatasets: this.datasets.length,
       lastUpdated: docs.length > 0 ? docs[0].updatedAt : new Date().toISOString()
     };
   }

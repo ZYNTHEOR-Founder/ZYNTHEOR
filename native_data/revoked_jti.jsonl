@@ -1,6 +1,1 @@
-{"jti":"6edb0e2f-80c5-44fb-9ac6-421395aaf740","revokedAt":"2026-11-14T18:29:27.728Z","sub":"user_rbac","reason":"logout"}
-{"jti":"673c2071-9993-4690-819e-69715d93e635","revokedAt":"2026-11-15T08:01:24.940Z","sub":"user_rbac","reason":"logout"}
-{"jti":"6e446328-5179-47ff-a8d1-f95b895b78fa","revokedAt":"2026-11-15T08:05:45.758Z","sub":"dev_developer","reason":"logout"}
-{"jti":"a0f113be-b6e3-471c-ad50-848eb570294d","revokedAt":"2026-11-15T08:06:48.106Z","sub":"dev_developer","reason":"logout"}
-{"jti":"4388fd50-652f-4919-a56a-78d3ddca963d","revokedAt":"2026-11-15T08:18:56.359Z","sub":"user_rbac","reason":"logout"}
-{"jti":"fd156246-fd7a-4617-96ba-a65027942312","revokedAt":"2026-11-15T08:19:27.567Z","sub":"dev_developer","reason":"logout"}
+{"jti":"407b93d1-ee3e-4761-af4c-818a3a919e17","revokedAt":"2026-11-11T17:16:02.018Z","sub":"user_rbac","reason":"logout"}

@@ -1,8 +1,8 @@
 [
   {
-    "id": "doc_1794679634569_4tn2c",
-    "title": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
-    "content": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nTarget architecture specification: 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).\nTarget parameter budget is 41,527,808 Float32 parameters (~166.1 MB decimal / 158.4 MiB). This is NOT the active runtime checkpoint. The currently serialized active subgraph contains 231,168 Float32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).\n\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.\n- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.\n- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.\n- Memory Isolation: Episodic memory persisted separately from static model weights.",
+    "id": "doc_1794398039733_p78a9",
+    "title": "ZYNTHEOR Architecture Manifest & 33.7M Parameter Model Specification",
+    "content": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nZYNTHEOR runs a 10-layer decoder-only Transformer with 8 Multi-Head Attention heads (d_k=64, d_model=512) and SwiGLU intermediate feed-forward dimension (d_ffn=1,472).\nTotal parameter count is 33,958,400 Float32 parameters (~135.8 MB).\n\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No third-party network egress in the reasoning loop.\n- Cryptographic Integrity: Every block sealed in append-only SHA-256 chained audit ledger.\n- Fail-Closed: Missing or corrupted model checkpoints trigger immediate safe halting.\n- Memory Isolation: Episodic memory persisted separately from static model weights.",
     "source": "docs/architecture_manifest.md",
     "format": "markdown",
     "collection": "Architecture",
@@ -15,20 +15,17 @@
     ],
     "language": "mixed",
     "version": 1,
-    "createdAt": "2026-11-14T18:07:14.570Z",
-    "updatedAt": "2026-11-14T18:07:14.570Z",
-    "contentHash": "e8162067d9b3dba51f940517ab7930fd00a392e832f1738e66267dc7502c3ee5",
+    "createdAt": "2026-11-11T11:53:59.733Z",
+    "updatedAt": "2026-11-11T11:53:59.733Z",
+    "contentHash": "57d6764dd5694bd1613982e2e98e38babf0a4a413b3a1ce3164e33e0402ff95a",
     "status": "indexed",
     "chunksCount": 2,
-    "byteSize": 924,
+    "byteSize": 700,
     "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
-    "curatedForTraining": true,
-    "parsedMetadata": {
-      "headingCount": 3
-    }
+    "curatedForTraining": true
   },
   {
-    "id": "doc_1794679634571_qdvqf",
+    "id": "doc_1794398039734_igy57",
     "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
     "content": "# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR Sovereign Tokenizer\n\n## 1. ขอบเขตพจนานุกรม (Vocabulary Scope)\nพจนานุกรมขนาด 16,384 โทเค็น ครอบคลุมชุดอักขระภาษาไทยทุกตัวตั้งแต่ U+0E01 (ก) ถึง U+0E5B (๙) รวมสระ วรรณยุกต์ และเครื่องหมายวรรคตอน\nรับประกัน 0% UNK Loss (อัตราการหลุดเป็น [UNK] เท่ากับศูนย์)\n\n## 2. การตัดคำและการสลับภาษา (Code-Switching)\nรองรับการประมวลผลประโยคที่ผสมผสานระหว่างภาษาไทยและภาษาอังกฤษ เช่น \"รัน Docker container ด้วยคำสั่ง compose up\" โดยไม่ทำลายโครงสร้างไวยากรณ์",
     "source": "docs/bilingual_tokenizer.md",
@@ -43,20 +40,17 @@
     ],
     "language": "th",
     "version": 1,
-    "createdAt": "2026-11-14T18:07:14.571Z",
-    "updatedAt": "2026-11-14T18:07:14.571Z",
+    "createdAt": "2026-11-11T11:53:59.734Z",
+    "updatedAt": "2026-11-11T11:53:59.734Z",
     "contentHash": "cf040279ee6302f9c62b41809364c233cdde1283191ed31197806e1bbbb7a27a",
     "status": "indexed",
     "chunksCount": 1,
     "byteSize": 1097,
     "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
-    "curatedForTraining": true,
-    "parsedMetadata": {
-      "headingCount": 3
-    }
+    "curatedForTraining": true
   },
   {
-    "id": "doc_1794679634572_js1vf",
+    "id": "doc_1794398039735_aph6y",
     "title": "Sovereign Token Verification & Constant-Time Security Specification",
     "content": "# Sovereign HMAC Token Verification Standard\n\n## 1. Timing-Attack Defense\nToken verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks.\nUnder no circumstances may plain string equality (===) be used on HMAC signatures.\n\n## 2. Minimum Entropy & Tenant Isolation\nSecret keys must have at least 32 bytes of cryptographic entropy loaded from environment variables.\nEach token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits.",
     "source": "docs/security_token_verification.md",
@@ -71,20 +65,17 @@
     ],
     "language": "en",
     "version": 1,
-    "createdAt": "2026-11-14T18:07:14.572Z",
-    "updatedAt": "2026-11-14T18:07:14.572Z",
+    "createdAt": "2026-11-11T11:53:59.735Z",
+    "updatedAt": "2026-11-11T11:53:59.735Z",
     "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
     "status": "indexed",
     "chunksCount": 1,
     "byteSize": 526,
     "provenance": "Hardened cryptographic authentication protocol specification",
-    "curatedForTraining": true,
-    "parsedMetadata": {
-      "headingCount": 3
-    }
+    "curatedForTraining": true
   },
   {
-    "id": "doc_1794679634573_utvpq",
+    "id": "doc_1794398039736_umc9j",
     "title": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
     "content": "# รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard\n\n## 1. กฎเหล็ก 7 ข้อ\n1. ห้ามสร้างโมเดลจำลองหรือรายงานผล benchmark เท็จ\n2. แยกแยะอย่างชัดเจนระหว่าง INITIALIZED WEIGHTS (ค่าน้ำหนักเริ่มต้น/สัญลักษณ์) และ LEARNED WEIGHTS (ค่าน้ำหนักที่ผ่านการฝึกจริง)\n3. การอัปโหลดเอกสารเข้า Knowledge Workspace ไม่ถือว่าเป็นการฝึก Model Weights\n4. จำแนกสถานะตามความเป็นจริง: VERIFIED, IMPLEMENTED, PARTIAL, BLOCKED, NOT IMPLEMENTED, MOCK\n5. ทุกการเปลี่ยนแปลงต้องตรวจสอบผ่านหลักฐานจริงใน Filesystem และ Runtime Logs",
     "source": "docs/zero_fake_constitution.md",
@@ -98,72 +89,163 @@
     ],
     "language": "mixed",
     "version": 1,
-    "createdAt": "2026-11-14T18:07:14.573Z",
-    "updatedAt": "2026-11-14T18:07:14.573Z",
+    "createdAt": "2026-11-11T11:53:59.736Z",
+    "updatedAt": "2026-11-11T11:53:59.736Z",
     "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
     "status": "indexed",
     "chunksCount": 1,
     "byteSize": 1011,
     "provenance": "Foundational operating charter of the ZYNTHEOR project",
-    "curatedForTraining": true,
-    "parsedMetadata": {
-      "headingCount": 2
-    }
+    "curatedForTraining": true
   },
   {
-    "id": "doc_1794680967598_3el9u",
-    "title": "TenantA Secret 1794680967587",
-    "content": "cross-tenant isolation probe content unique e742adf7",
+    "id": "doc_1794400643128_p3pun",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
     "source": "Knowledge Workspace Upload",
     "format": "markdown",
-    "collection": "RBAC",
+    "collection": "Synthetic_Test",
     "tags": [
-      "rbac"
+      "general"
     ],
     "language": "en",
     "version": 1,
-    "createdAt": "2026-11-14T18:29:27.598Z",
-    "updatedAt": "2026-11-14T18:29:27.598Z",
-    "contentHash": "e9f7bfea4b76b2d500e6cb1e9cb717a4f9139ccdb4b1b86b836879f86077cca3",
+    "createdAt": "2026-11-11T12:37:23.128Z",
+    "updatedAt": "2026-11-11T12:37:23.128Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
     "status": "indexed",
     "chunksCount": 1,
-    "byteSize": 52,
-    "provenance": "rbac-test",
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
     "curatedForTraining": false,
-    "tenantId": "tenant_a",
     "parsedMetadata": {
       "headingCount": 0
     }
   },
   {
-    "id": "doc_1794729684868_xswfo",
-    "title": "TenantA Secret 1794729684860",
-    "content": "cross-tenant isolation probe content unique 9d8a28f6",
+    "id": "doc_1794400668036_qipgn",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
     "source": "Knowledge Workspace Upload",
     "format": "markdown",
-    "collection": "RBAC",
+    "collection": "Synthetic_Test",
     "tags": [
-      "rbac"
+      "general"
     ],
     "language": "en",
     "version": 1,
-    "createdAt": "2026-11-15T08:01:24.868Z",
-    "updatedAt": "2026-11-15T08:01:24.868Z",
-    "contentHash": "f6ca13d4b8a0755fc4461e40d43999cfea2ef909d62d5cbf916103b7a796b1fb",
+    "createdAt": "2026-11-11T12:37:48.036Z",
+    "updatedAt": "2026-11-11T12:37:48.036Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
     "status": "indexed",
     "chunksCount": 1,
-    "byteSize": 52,
-    "provenance": "rbac-test",
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
     "curatedForTraining": false,
-    "tenantId": "tenant_a",
     "parsedMetadata": {
       "headingCount": 0
     }
   },
   {
-    "id": "doc_1794730736259_ix050",
-    "title": "TenantA Secret 1794730736248",
-    "content": "cross-tenant isolation probe content unique ed45cd95",
+    "id": "doc_1794400809715_mljct",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T12:40:09.715Z",
+    "updatedAt": "2026-11-11T12:40:09.715Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794401856020_56xxl",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T12:57:36.020Z",
+    "updatedAt": "2026-11-11T12:57:36.020Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794401912406_uy6xl",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T12:58:32.407Z",
+    "updatedAt": "2026-11-11T12:58:32.407Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794405924002_oos3b",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T14:05:24.002Z",
+    "updatedAt": "2026-11-11T14:05:24.002Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794417142794_rdczp",
+    "title": "TenantA Secret 1794417142789",
+    "content": "cross-tenant isolation probe content unique a6d082fa",
     "source": "Knowledge Workspace Upload",
     "format": "markdown",
     "collection": "RBAC",
@@ -172,15 +254,86 @@
     ],
     "language": "en",
     "version": 1,
-    "createdAt": "2026-11-15T08:18:56.259Z",
-    "updatedAt": "2026-11-15T08:18:56.259Z",
-    "contentHash": "8810ab11941542093168831cc8a44ef249191a539b3a64326afcecbe34a4acc2",
+    "createdAt": "2026-11-11T17:12:22.795Z",
+    "updatedAt": "2026-11-11T17:12:22.795Z",
+    "contentHash": "b62a85a9daecab63ab89717c9a9a468e1fff9dc271167404daf308632d8c95ec",
     "status": "indexed",
     "chunksCount": 1,
     "byteSize": 52,
     "provenance": "rbac-test",
     "curatedForTraining": false,
-    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794417361977_n0jiv",
+    "title": "TenantA Secret 1794417361972",
+    "content": "cross-tenant isolation probe content unique 48991151",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T17:16:01.977Z",
+    "updatedAt": "2026-11-11T17:16:01.977Z",
+    "contentHash": "a72d2579cfafdb088d9f703a2485048024e371f243a6f6a2a6d1896cdcf1014f",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794429292841_nqf09",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T20:34:52.841Z",
+    "updatedAt": "2026-11-11T20:34:52.841Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1794430310769_38fq2",
+    "title": "Synthetic Test Benchmark Generation",
+    "content": "Synthetic machine generated data for testing quarantine protocol.",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "Synthetic_Test",
+    "tags": [
+      "general"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-11T20:51:50.769Z",
+    "updatedAt": "2026-11-11T20:51:50.769Z",
+    "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 65,
+    "provenance": "Synthetic LLM generation",
+    "curatedForTraining": false,
     "parsedMetadata": {
       "headingCount": 0
     }

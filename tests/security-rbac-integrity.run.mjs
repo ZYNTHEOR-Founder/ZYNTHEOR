@@ -1,6 +1,6 @@
 /**
  * Security RBAC + Integrity Recovery acceptance.
- * Online: static route audit of server.ts
+ * Offline: static route audit of server.ts
  * Live: HTTP role matrix, forged headers, restore-logs rules
  */
 import fs from 'fs';
@@ -19,8 +19,8 @@ const ok = (n,d='')=>{console.log('✔',n,d||'');evidence.push('PASS:'+n+(d?'|'+
 const bad = (n,d='')=>{console.error('✖',n,d||'');evidence.push('FAIL:'+n+(d?'|'+d:''));failed++;};
 const blk = (n,d='')=>{console.log('△',n,d||'');evidence.push('BLOCKED:'+n+(d?'|'+d:''));blocked++;};
 
-function onlineRouteAudit() {
-  console.log('\n=== Online route RBAC audit ===');
+function offlineRouteAudit() {
+  console.log('\n=== Offline route RBAC audit ===');
   const sensitive = [
     ["/api/workspace/files", "requireAuth"],
     ["/api/workspace/file", "requireAuth"],
@@ -235,7 +235,7 @@ async function live() {
   }
 }
 
-onlineRouteAudit();
+offlineRouteAudit();
 await live();
 
 const report = { suite: 'security-rbac-integrity', timestamp: new Date().toISOString(), passed, failed, blocked, evidence };

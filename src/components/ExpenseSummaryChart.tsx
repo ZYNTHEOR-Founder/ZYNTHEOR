@@ -34,12 +34,12 @@ type ChartViewMode = 'categories' | 'timeline';
 type CategoryTypeFilter = 'all' | 'expense';
 
 const CATEGORY_PALETTE = [
-  '#00F0FF', // Electric Cyan
-  '#FF5E3A', // Coral Orange
-  '#7B2CBF', // Brilliant Violet
-  '#FF007F', // Vivid Magenta
-  '#2563EB', // Neon Blue
-  '#CCFF00', // Luminous Lime
+  'var(--app-accent)', // Electric Cyan
+  'var(--z-warn)', // Coral Orange
+  'var(--app-accent-deep)', // Brilliant Violet
+  'var(--z-danger)', // Vivid Magenta
+  'var(--app-accent-deep)', // Neon Blue
+  'var(--z-ok)', // Luminous Lime
 ];
 
 function formatCurrency(amount: number, currency = 'USD'): string {
@@ -185,8 +185,8 @@ export const ExpenseSummaryChart: React.FC = () => {
 
     svg.attr('viewBox', `0 0 ${chartWidth} ${chartHeight}`).attr('height', chartHeight);
 
-    const axisTextColor = '#9AA8C7';
-    const gridColor = 'rgba(154, 168, 199, 0.14)';
+    const axisTextColor = 'var(--app-text-secondary)';
+    const gridColor = 'color-mix(in srgb, var(--app-accent) 14%, transparent)';
 
     if (viewMode === 'categories') {
       const topItems = categories.slice(0, 8);
@@ -225,7 +225,7 @@ export const ExpenseSummaryChart: React.FC = () => {
             .ticks(4)
             .tickFormat((v) => `$${d3.format('~s')(Number(v))}`)
         )
-        .call((axisG) => axisG.select('.domain').attr('stroke', 'rgba(30, 41, 74, 0.9)'))
+        .call((axisG) => axisG.select('.domain').attr('stroke', 'color-mix(in srgb, var(--app-accent) 90%, transparent)'))
         .call((axisG) => axisG.selectAll('.tick line').remove())
         .call((axisG) =>
           axisG
@@ -241,7 +241,7 @@ export const ExpenseSummaryChart: React.FC = () => {
         .call((axisG) =>
           axisG
             .selectAll('text')
-            .attr('fill', '#F4F7FF')
+            .attr('fill', 'var(--app-text-primary)')
             .style('font-size', '11px')
             .style('font-weight', '600')
             .text((label) => {
@@ -259,7 +259,7 @@ export const ExpenseSummaryChart: React.FC = () => {
         .attr('width', innerW)
         .attr('height', yScale.bandwidth())
         .attr('rx', 6)
-        .attr('fill', 'rgba(19, 27, 54, 0.72)');
+        .attr('fill', 'color-mix(in srgb, var(--app-accent) 72%, transparent)');
 
       g.selectAll('.bar-value')
         .data(topItems)
@@ -271,7 +271,7 @@ export const ExpenseSummaryChart: React.FC = () => {
         .attr('height', yScale.bandwidth())
         .attr('rx', 6)
         .attr('fill', (d, idx) =>
-          d.type === 'income' ? '#CCFF00' : CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length]
+          d.type === 'income' ? 'var(--z-ok)' : CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length]
         )
         .attr('fill-opacity', 0.9)
         .style('cursor', 'pointer')
@@ -290,7 +290,7 @@ export const ExpenseSummaryChart: React.FC = () => {
         .append('text')
         .attr('x', (d) => xScale(d.totalAmount) + 8)
         .attr('y', (d) => (yScale(yKey(d)) ?? 0) + yScale.bandwidth() / 2 + 4)
-        .attr('fill', '#F4F7FF')
+        .attr('fill', 'var(--app-text-primary)')
         .style('font-family', 'JetBrains Mono, monospace')
         .style('font-size', '11px')
         .style('font-weight', '600')
@@ -332,7 +332,7 @@ export const ExpenseSummaryChart: React.FC = () => {
       .attr('x2', innerW)
       .attr('y1', (d) => yScale(d))
       .attr('y2', (d) => yScale(d))
-      .attr('stroke', (d) => (d === 0 ? 'rgba(0, 240, 255, 0.35)' : gridColor))
+      .attr('stroke', (d) => (d === 0 ? 'color-mix(in srgb, var(--app-accent) 35%, transparent)' : gridColor))
       .attr('stroke-dasharray', (d) => (d === 0 ? 'none' : '3,3'));
 
     const maxTicks = Math.max(2, Math.floor(innerW / 80));
@@ -344,7 +344,7 @@ export const ExpenseSummaryChart: React.FC = () => {
     g.append('g')
       .attr('transform', `translate(0,${innerH})`)
       .call(d3.axisBottom(xBand).tickValues(tickValues))
-      .call((axisG) => axisG.select('.domain').attr('stroke', 'rgba(30, 41, 74, 0.9)'))
+      .call((axisG) => axisG.select('.domain').attr('stroke', 'color-mix(in srgb, var(--app-accent) 90%, transparent)'))
       .call((axisG) => axisG.selectAll('.tick line').remove())
       .call((axisG) =>
         axisG
@@ -384,7 +384,7 @@ export const ExpenseSummaryChart: React.FC = () => {
       .attr('width', subWidth)
       .attr('height', (d) => Math.max(0, zeroY - yScale(d.income)))
       .attr('rx', 3)
-      .attr('fill', '#CCFF00')
+      .attr('fill', 'var(--z-ok)')
       .attr('fill-opacity', 0.85);
 
     g.selectAll('.bar-expense')
@@ -396,7 +396,7 @@ export const ExpenseSummaryChart: React.FC = () => {
       .attr('width', subWidth)
       .attr('height', (d) => Math.max(0, zeroY - yScale(d.expenses)))
       .attr('rx', 3)
-      .attr('fill', '#FF5E3A')
+      .attr('fill', 'var(--z-warn)')
       .attr('fill-opacity', 0.9);
 
     const lineGen = d3
@@ -408,7 +408,7 @@ export const ExpenseSummaryChart: React.FC = () => {
     g.append('path')
       .datum(timeline)
       .attr('fill', 'none')
-      .attr('stroke', '#00F0FF')
+      .attr('stroke', 'var(--app-accent)')
       .attr('stroke-width', 2.4)
       .attr('d', lineGen);
 
@@ -419,8 +419,8 @@ export const ExpenseSummaryChart: React.FC = () => {
       .attr('cx', (d) => (xBand(d.date) ?? 0) + xBand.bandwidth() / 2)
       .attr('cy', (d) => yScale(d.cumulativeBalance))
       .attr('r', 4.5)
-      .attr('fill', '#070B19')
-      .attr('stroke', '#00F0FF')
+      .attr('fill', 'var(--app-accent)')
+      .attr('stroke', 'var(--app-accent)')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
       .on('mouseenter', (_event, d) => {
@@ -561,14 +561,14 @@ export const ExpenseSummaryChart: React.FC = () => {
       gradientAccent={threshold?.exceeded ? 'magenta' : threshold?.warningTriggered ? 'coral' : 'sunset'}
       headerAction={
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-xl border border-[#1E294A] bg-[#070B19] p-0.5">
+          <div className="inline-flex rounded-xl border border-[var(--app-card-border)] bg-[var(--app-bg)] p-0.5">
             <button
               type="button"
               onClick={() => setViewMode('categories')}
               className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-colors cursor-pointer ${
                 viewMode === 'categories'
-                  ? 'bg-[#00F0FF]/15 text-[#00F0FF]'
-                  : 'text-[#9AA8C7] hover:text-white'
+                  ? 'bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)]'
+                  : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
               }`}
             >
               {lang === 'th' ? 'หมวดหมู่' : 'Categories'}
@@ -578,8 +578,8 @@ export const ExpenseSummaryChart: React.FC = () => {
               onClick={() => setViewMode('timeline')}
               className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-colors cursor-pointer ${
                 viewMode === 'timeline'
-                  ? 'bg-[#7B2CBF]/25 text-[#E9D5FF]'
-                  : 'text-[#9AA8C7] hover:text-white'
+                  ? 'bg-[color-mix(in_srgb,var(--app-accent-deep)_25%,transparent)] text-[var(--app-accent)]'
+                  : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
               }`}
             >
               {lang === 'th' ? 'กระแสเงินสด' : 'Cashflow'}
@@ -603,16 +603,16 @@ export const ExpenseSummaryChart: React.FC = () => {
             role="alert"
             className={`rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
               threshold.exceeded
-                ? 'border-[#FF007F]/65 bg-gradient-to-r from-[#FF007F]/18 via-[#7B2CBF]/15 to-[#0D1326]'
-                : 'border-[#FF5E3A]/60 bg-gradient-to-r from-[#FF5E3A]/18 via-[#FF007F]/10 to-[#0D1326]'
+                ? 'border-[color-mix(in_srgb,var(--z-danger)_65%,transparent)] bg-gradient-to-r from-[color-mix(in_srgb,var(--z-danger)_18%,transparent)] via-[color-mix(in_srgb,var(--app-accent-deep)_15%,transparent)] to-[var(--app-surface)]'
+                : 'border-[color-mix(in_srgb,var(--z-warn)_60%,transparent)] bg-gradient-to-r from-[color-mix(in_srgb,var(--z-warn)_18%,transparent)] via-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] to-[var(--app-surface)]'
             }`}
           >
             <div className="flex items-start gap-3 min-w-0">
               <div
                 className={`mt-0.5 p-2 rounded-xl border shrink-0 ${
                   threshold.exceeded
-                    ? 'bg-[#FF007F]/20 border-[#FF007F]/50 text-[#FF66B2]'
-                    : 'bg-[#FF5E3A]/20 border-[#FF5E3A]/50 text-[#FF8C73]'
+                    ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] border-[color-mix(in_srgb,var(--z-danger)_50%,transparent)] text-[var(--z-danger)]'
+                    : 'bg-[color-mix(in_srgb,var(--z-warn)_20%,transparent)] border-[color-mix(in_srgb,var(--z-warn)_50%,transparent)] text-[var(--z-warn)]'
                 }`}
               >
                 {threshold.exceeded ? (
@@ -624,8 +624,8 @@ export const ExpenseSummaryChart: React.FC = () => {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span
-                    className={`text-xs font-extrabold uppercase tracking-wider font-mono ${
-                      threshold.exceeded ? 'text-[#FF66B2]' : 'text-[#FF8C73]'
+                    className={`text-xs font-extrabold font-mono ${
+                      threshold.exceeded ? 'text-[var(--z-danger)]' : 'text-[var(--z-warn)]'
                     }`}
                   >
                     {threshold.exceeded
@@ -636,12 +636,12 @@ export const ExpenseSummaryChart: React.FC = () => {
                       ? 'แจ้งเตือน: รายจ่ายใกล้ถึงขีดจำกัดงบประมาณ'
                       : 'APPROACHING BUDGET THRESHOLD'}
                   </span>
-                  <span className="text-[11px] font-mono text-[#F4F7FF]">
+                  <span className="text-[11px] font-mono text-[var(--app-text-primary)]">
                     {threshold.utilizationPct}% ({formatCurrency(threshold.totalExpenses, threshold.currency)} /{' '}
                     {formatCurrency(threshold.budgetLimit, threshold.currency)})
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-[#F4F7FF]/90">{threshold.message}</p>
+                <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--app-text-primary)_90%,transparent)]">{threshold.message}</p>
               </div>
             </div>
             <Button
@@ -657,68 +657,68 @@ export const ExpenseSummaryChart: React.FC = () => {
 
         {/* Live SQLite Balance & Budget KPI Strip */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="rounded-xl border border-[#1E294A] bg-[#070B19]/75 p-3.5">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7]">
+          <div className="rounded-xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3.5">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)]">
               <span>{lang === 'th' ? 'ยอดคงเหลือสุทธิ' : 'Net Balance'}</span>
-              <Wallet className="h-3.5 w-3.5 text-[#00F0FF]" />
+              <Wallet className="h-3.5 w-3.5 text-[var(--app-accent)]" />
             </div>
             <div
               className="mt-1.5 font-mono text-lg sm:text-xl font-bold tabular-nums"
               style={{
                 color:
                   (balance?.netBalance ?? 0) < 0
-                    ? '#FF007F'
+                    ? 'var(--z-danger)'
                     : (balance?.netBalance ?? 0) > 0
-                    ? '#CCFF00'
-                    : '#F4F7FF',
+                    ? 'var(--z-ok)'
+                    : 'var(--app-text-primary)',
               }}
             >
               {balance ? formatCurrency(balance.netBalance, currency) : '—'}
             </div>
-            <div className="mt-1 text-[10px] font-mono text-[#9AA8C7]">
+            <div className="mt-1 text-[10px] font-mono text-[var(--app-text-secondary)]">
               {balance ? `${balance.recordCount} ${lang === 'th' ? 'รายการที่ตรงเงื่อนไข' : 'matching records'}` : 'Loading...'}
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#1E294A] bg-[#070B19]/75 p-3.5">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7]">
+          <div className="rounded-xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3.5">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)]">
               <span>{lang === 'th' ? 'รายจ่ายรวม' : 'Total Expenses'}</span>
-              <ArrowDownRight className="h-3.5 w-3.5 text-[#FF5E3A]" />
+              <ArrowDownRight className="h-3.5 w-3.5 text-[var(--z-warn)]" />
             </div>
-            <div className="mt-1.5 font-mono text-lg sm:text-xl font-bold tabular-nums text-[#FF7D5F]">
+            <div className="mt-1.5 font-mono text-lg sm:text-xl font-bold tabular-nums text-[var(--z-danger)]">
               {balance ? formatCurrency(balance.totalExpenses, currency) : '—'}
             </div>
-            <div className="mt-1 text-[10px] font-mono text-[#9AA8C7]">
+            <div className="mt-1 text-[10px] font-mono text-[var(--app-text-secondary)]">
               {balance ? `${balance.expenseCount} ${lang === 'th' ? 'รายการจ่าย' : 'expense entries'}` : '—'}
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#1E294A] bg-[#070B19]/75 p-3.5">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7]">
+          <div className="rounded-xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3.5">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)]">
               <span>{lang === 'th' ? 'รายรับรวม' : 'Total Income'}</span>
-              <ArrowUpRight className="h-3.5 w-3.5 text-[#CCFF00]" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-[var(--z-ok)]" />
             </div>
-            <div className="mt-1.5 font-mono text-lg sm:text-xl font-bold tabular-nums text-[#CCFF00]">
+            <div className="mt-1.5 font-mono text-lg sm:text-xl font-bold tabular-nums text-[var(--z-ok)]">
               {balance ? formatCurrency(balance.totalIncome, currency) : '—'}
             </div>
-            <div className="mt-1 text-[10px] font-mono text-[#9AA8C7]">
+            <div className="mt-1 text-[10px] font-mono text-[var(--app-text-secondary)]">
               {balance ? `${balance.incomeCount} ${lang === 'th' ? 'รายการรับ' : 'income entries'}` : '—'}
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#1E294A] bg-[#070B19]/75 p-3.5">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7]">
+          <div className="rounded-xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3.5">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)]">
               <span>{lang === 'th' ? 'วงเงินงบประมาณ' : 'Budget Monitor'}</span>
               <button
                 type="button"
                 onClick={() => setBudgetEditorOpen((v) => !v)}
-                className="text-[#00F0FF] hover:underline font-mono text-[10px] cursor-pointer"
+                className="text-[var(--app-accent)] hover:underline font-mono text-[10px] cursor-pointer"
               >
                 {budgetEditorOpen ? (lang === 'th' ? 'ปิด' : 'Close') : (lang === 'th' ? 'แก้ไข' : 'Edit')}
               </button>
             </div>
             <div className="mt-1.5 flex items-center justify-between gap-2">
-              <span className="font-mono text-sm sm:text-base font-bold text-[#F4F7FF] tabular-nums">
+              <span className="font-mono text-sm sm:text-base font-bold text-[var(--app-text-primary)] tabular-nums">
                 {threshold ? formatCurrency(threshold.budgetLimit, threshold.currency) : '—'}
               </span>
               <StatusDot
@@ -732,16 +732,16 @@ export const ExpenseSummaryChart: React.FC = () => {
                 label={threshold?.level || 'OK'}
               />
             </div>
-            <div className="mt-2 h-1.5 w-full rounded-full bg-[#131B36] overflow-hidden">
+            <div className="mt-2 h-1.5 w-full rounded-full bg-[var(--app-surface-elevated)] overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{
                   width: `${utilizationClamped}%`,
                   backgroundColor: threshold?.exceeded
-                    ? '#FF007F'
+                    ? 'var(--z-danger)'
                     : threshold?.warningTriggered
-                    ? '#FF5E3A'
-                    : '#00F0FF',
+                    ? 'var(--z-warn)'
+                    : 'var(--app-accent)',
                 }}
               />
             </div>
@@ -752,10 +752,10 @@ export const ExpenseSummaryChart: React.FC = () => {
         {budgetEditorOpen && (
           <form
             onSubmit={(e) => void handleSaveBudgetLimit(e)}
-            className="rounded-xl border border-[#00F0FF]/35 bg-[#070B19]/90 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            className="rounded-xl border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)] bg-[color-mix(in_srgb,var(--app-bg)_90%,transparent)] p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
           >
-            <div className="text-xs text-[#9AA8C7]">
-              <span className="font-semibold text-[#F4F7FF]">
+            <div className="text-xs text-[var(--app-text-secondary)]">
+              <span className="font-semibold text-[var(--app-text-primary)]">
                 {lang === 'th' ? 'กำหนดเพดานงบประมาณรายจ่าย (SQLite):' : 'Configure Expense Budget Limit (SQLite):'}
               </span>{' '}
               <span className="font-mono text-[11px]">
@@ -770,7 +770,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                 required
                 value={budgetLimitInput}
                 onChange={(e) => setBudgetLimitInput(e.target.value)}
-                className="w-32 rounded-lg border border-[#1E294A] bg-[#0D1326] px-3 py-1.5 text-xs font-mono text-[#F4F7FF]"
+                className="w-32 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-1.5 text-xs font-mono text-[var(--app-text-primary)]"
                 aria-label="Budget Limit"
               />
               <Button type="submit" size="sm" variant="primary" loading={savingBudget}>
@@ -781,10 +781,10 @@ export const ExpenseSummaryChart: React.FC = () => {
         )}
 
         {/* Date-Range Filter & Category Sorting Toolbar */}
-        <div className="rounded-2xl border border-[#1E294A] bg-[#070B19]/75 p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="rounded-2xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#9AA8C7] mr-1">
-              <Calendar className="h-3.5 w-3.5 text-[#00F0FF]" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--app-text-secondary)] mr-1">
+              <Calendar className="h-3.5 w-3.5 text-[var(--app-accent)]" />
               {lang === 'th' ? 'ช่วงวันที่' : 'Date Range'}
             </span>
             <input
@@ -792,15 +792,15 @@ export const ExpenseSummaryChart: React.FC = () => {
               value={fromDateInput}
               onChange={(e) => setFromDateInput(e.target.value)}
               aria-label="From date"
-              className="rounded-lg border border-[#1E294A] bg-[#0D1326] px-2.5 py-1 text-[11px] font-mono text-[#F4F7FF]"
+              className="rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-2.5 py-1 text-[11px] font-mono text-[var(--app-text-primary)]"
             />
-            <span className="text-[11px] text-[#6D7B9D]">→</span>
+            <span className="text-[11px] text-[var(--app-text-secondary)]">→</span>
             <input
               type="date"
               value={toDateInput}
               onChange={(e) => setToDateInput(e.target.value)}
               aria-label="To date"
-              className="rounded-lg border border-[#1E294A] bg-[#0D1326] px-2.5 py-1 text-[11px] font-mono text-[#F4F7FF]"
+              className="rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-2.5 py-1 text-[11px] font-mono text-[var(--app-text-primary)]"
             />
             <div className="inline-flex items-center gap-1 ml-1">
               {(
@@ -817,8 +817,8 @@ export const ExpenseSummaryChart: React.FC = () => {
                   onClick={() => applyDatePreset(preset.id)}
                   className={`px-2 py-1 rounded-md text-[10px] font-mono font-semibold border transition-colors cursor-pointer ${
                     preset.id === 'all' && !hasDateFilter
-                      ? 'border-[#00F0FF]/50 bg-[#00F0FF]/12 text-[#00F0FF]'
-                      : 'border-[#1E294A] bg-[#0D1326] text-[#9AA8C7] hover:text-white'
+                      ? 'border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_12%,transparent)] text-[var(--app-accent)]'
+                      : 'border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                   }`}
                 >
                   {preset.label}
@@ -828,15 +828,15 @@ export const ExpenseSummaryChart: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#9AA8C7]">
-              <ArrowUpDown className="h-3.5 w-3.5 text-[#7B2CBF]" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--app-text-secondary)]">
+              <ArrowUpDown className="h-3.5 w-3.5 text-[var(--app-accent-deep)]" />
               {lang === 'th' ? 'เรียงหมวดหมู่' : 'Category Sort'}
             </span>
             <select
               value={categorySort}
               onChange={(e) => setCategorySort(e.target.value as LedgerCategorySort)}
               aria-label="Sort categories"
-              className="rounded-lg border border-[#1E294A] bg-[#0D1326] px-2.5 py-1 text-[11px] font-semibold text-[#F4F7FF]"
+              className="rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-2.5 py-1 text-[11px] font-semibold text-[var(--app-text-primary)]"
             >
               <option value="amount_desc">{lang === 'th' ? 'ยอดรวม: สูง → ต่ำ' : 'Amount: High → Low'}</option>
               <option value="amount_asc">{lang === 'th' ? 'ยอดรวม: ต่ำ → สูง' : 'Amount: Low → High'}</option>
@@ -844,14 +844,14 @@ export const ExpenseSummaryChart: React.FC = () => {
               <option value="name_desc">{lang === 'th' ? 'ชื่อหมวดหมู่: Z → A' : 'Category: Z → A'}</option>
               <option value="count_desc">{lang === 'th' ? 'จำนวนรายการมากสุด' : 'Entry Count: High → Low'}</option>
             </select>
-            <div className="inline-flex rounded-lg border border-[#1E294A] bg-[#0D1326] p-0.5">
+            <div className="inline-flex rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] p-0.5">
               <button
                 type="button"
                 onClick={() => setCategoryTypeFilter('expense')}
                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-md cursor-pointer ${
                   categoryTypeFilter === 'expense'
-                    ? 'bg-[#FF5E3A]/20 text-[#FF7D5F]'
-                    : 'text-[#9AA8C7] hover:text-white'
+                    ? 'bg-[color-mix(in_srgb,var(--z-warn)_20%,transparent)] text-[var(--z-danger)]'
+                    : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                 }`}
               >
                 {lang === 'th' ? 'เฉพาะรายจ่าย' : 'Expenses'}
@@ -861,8 +861,8 @@ export const ExpenseSummaryChart: React.FC = () => {
                 onClick={() => setCategoryTypeFilter('all')}
                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-md cursor-pointer ${
                   categoryTypeFilter === 'all'
-                    ? 'bg-[#00F0FF]/15 text-[#00F0FF]'
-                    : 'text-[#9AA8C7] hover:text-white'
+                    ? 'bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)]'
+                    : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                 }`}
               >
                 {lang === 'th' ? 'ทั้งหมด' : 'All Types'}
@@ -872,7 +872,7 @@ export const ExpenseSummaryChart: React.FC = () => {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-[#FF007F]/45 bg-[#FF007F]/10 px-4 py-3 text-xs font-mono text-[#FF85B8]">
+          <div className="rounded-xl border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] px-4 py-3 text-xs font-mono text-[var(--z-danger)]">
             {error}
           </div>
         )}
@@ -880,11 +880,11 @@ export const ExpenseSummaryChart: React.FC = () => {
         {/* D3 Interactive Chart + Recent Records & Quick Entry Split */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
           {/* D3 Visualization Surface */}
-          <div className="xl:col-span-7 rounded-2xl border border-[#1E294A] bg-[#070B19]/80 p-4">
+          <div className="xl:col-span-7 rounded-2xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_80%,transparent)] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-[#00F0FF]" />
-                <span className="text-xs font-semibold text-[#F4F7FF]">
+                <TrendingUp className="h-4 w-4 text-[var(--app-accent)]" />
+                <span className="text-xs font-semibold text-[var(--app-text-primary)]">
                   {viewMode === 'categories'
                     ? lang === 'th'
                       ? 'สัดส่วนค่าใช้จ่ายและรายรับตามหมวดหมู่ (D3)'
@@ -895,22 +895,22 @@ export const ExpenseSummaryChart: React.FC = () => {
                 </span>
               </div>
               {hoverInfo ? (
-                <div className="text-[11px] font-mono text-[#00F0FF] flex items-center gap-2">
+                <div className="text-[11px] font-mono text-[var(--app-accent)] flex items-center gap-2">
                   <span className="font-bold">{hoverInfo.title}:</span>
-                  <span className="text-[#F4F7FF]">{hoverInfo.primary}</span>
-                  <span className="text-[#9AA8C7]">({hoverInfo.secondary})</span>
+                  <span className="text-[var(--app-text-primary)]">{hoverInfo.primary}</span>
+                  <span className="text-[var(--app-text-secondary)]">({hoverInfo.secondary})</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 text-[10px] font-mono text-[#9AA8C7]">
+                <div className="flex items-center gap-3 text-[10px] font-mono text-[var(--app-text-secondary)]">
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-[#FF5E3A]" /> Expense
+                    <span className="h-2 w-2 rounded-full bg-[var(--z-warn)]" /> Expense
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-[#CCFF00]" /> Income
+                    <span className="h-2 w-2 rounded-full bg-[var(--z-ok)]" /> Income
                   </span>
                   {viewMode === 'timeline' && (
                     <span className="inline-flex items-center gap-1">
-                      <span className="h-2 w-2 rounded-full bg-[#00F0FF]" /> Net Curve
+                      <span className="h-2 w-2 rounded-full bg-[var(--app-accent)]" /> Net Curve
                     </span>
                   )}
                 </div>
@@ -926,9 +926,9 @@ export const ExpenseSummaryChart: React.FC = () => {
                   aria-label="Live SQLite Expense Ledger D3 Visualization"
                 />
               ) : (
-                <div className="flex min-h-[210px] flex-col items-center justify-center rounded-xl border border-dashed border-[#1E294A] p-6 text-center">
-                  <Database className="h-7 w-7 text-[#00F0FF]/70 mb-2" />
-                  <p className="text-sm font-semibold text-[#F4F7FF]">
+                <div className="flex min-h-[210px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--app-card-border)] p-6 text-center">
+                  <Database className="h-7 w-7 text-[color-mix(in_srgb,var(--app-accent)_70%,transparent)] mb-2" />
+                  <p className="text-sm font-semibold text-[var(--app-text-primary)]">
                     {hasDateFilter
                       ? lang === 'th'
                         ? 'ไม่พบรายการในช่วงวันที่ที่เลือก'
@@ -937,7 +937,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                       ? 'ยังไม่มีข้อมูลในฐานข้อมูล SQLite Ledger'
                       : 'No ledger records stored in SQLite yet'}
                   </p>
-                  <p className="mt-1 max-w-md text-xs text-[#9AA8C7]">
+                  <p className="mt-1 max-w-md text-xs text-[var(--app-text-secondary)]">
                     {hasDateFilter
                       ? lang === 'th'
                         ? 'ปรับช่วงวันที่หรือกดปุ่ม "ทั้งหมด" เพื่อดูข้อมูลทั้งหมด'
@@ -955,20 +955,20 @@ export const ExpenseSummaryChart: React.FC = () => {
           <div className="xl:col-span-5 space-y-4">
             <form
               onSubmit={(e) => void handleInsertRecord(e)}
-              className="rounded-2xl border border-[#1E294A] bg-[#070B19]/80 p-4 space-y-3"
+              className="rounded-2xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_80%,transparent)] p-4 space-y-3"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-[#F4F7FF]">
+                <span className="text-xs font-semibold text-[var(--app-text-primary)]">
                   {lang === 'th' ? 'บันทึกรายการลง SQLite' : 'Record Ledger Entry'}
                 </span>
-                <div className="inline-flex rounded-lg border border-[#1E294A] bg-[#0D1326] p-0.5">
+                <div className="inline-flex rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] p-0.5">
                   <button
                     type="button"
                     onClick={() => setRecordType('expense')}
                     className={`px-2.5 py-1 text-[11px] font-semibold rounded-md cursor-pointer ${
                       recordType === 'expense'
-                        ? 'bg-[#FF5E3A]/20 text-[#FF7D5F]'
-                        : 'text-[#9AA8C7] hover:text-white'
+                        ? 'bg-[color-mix(in_srgb,var(--z-warn)_20%,transparent)] text-[var(--z-danger)]'
+                        : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                     }`}
                   >
                     {lang === 'th' ? 'รายจ่าย' : 'Expense'}
@@ -978,8 +978,8 @@ export const ExpenseSummaryChart: React.FC = () => {
                     onClick={() => setRecordType('income')}
                     className={`px-2.5 py-1 text-[11px] font-semibold rounded-md cursor-pointer ${
                       recordType === 'income'
-                        ? 'bg-[#CCFF00]/20 text-[#CCFF00]'
-                        : 'text-[#9AA8C7] hover:text-white'
+                        ? 'bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)]'
+                        : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                     }`}
                   >
                     {lang === 'th' ? 'รายรับ' : 'Income'}
@@ -996,7 +996,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                   value={amountInput}
                   onChange={(e) => setAmountInput(e.target.value)}
                   placeholder={lang === 'th' ? 'จำนวนเงิน (เช่น 45.50)' : 'Amount (e.g. 45.50)'}
-                  className="w-full rounded-xl border border-[#1E294A] bg-[#0D1326] px-3 py-2 text-xs font-mono text-[#F4F7FF] placeholder:text-[#6D7B9D]"
+                  className="w-full rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-mono text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)]"
                 />
                 <input
                   type="text"
@@ -1004,7 +1004,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                   value={categoryInput}
                   onChange={(e) => setCategoryInput(e.target.value)}
                   placeholder={lang === 'th' ? 'หมวดหมู่ (เช่น Compute)' : 'Category (e.g. Compute)'}
-                  className="w-full rounded-xl border border-[#1E294A] bg-[#0D1326] px-3 py-2 text-xs text-[#F4F7FF] placeholder:text-[#6D7B9D]"
+                  className="w-full rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-2 text-xs text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)]"
                 />
               </div>
 
@@ -1014,7 +1014,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                   value={descriptionInput}
                   onChange={(e) => setDescriptionInput(e.target.value)}
                   placeholder={lang === 'th' ? 'รายละเอียดเพิ่มเติม (ไม่บังคับ)' : 'Description (optional)'}
-                  className="flex-1 rounded-xl border border-[#1E294A] bg-[#0D1326] px-3 py-2 text-xs text-[#F4F7FF] placeholder:text-[#6D7B9D]"
+                  className="flex-1 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-2 text-xs text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)]"
                 />
                 <Button
                   type="submit"
@@ -1028,40 +1028,40 @@ export const ExpenseSummaryChart: React.FC = () => {
               </div>
 
               {mutationError && (
-                <p className="text-[11px] font-mono text-[#FF85B8]">{mutationError}</p>
+                <p className="text-[11px] font-mono text-[var(--z-danger)]">{mutationError}</p>
               )}
             </form>
 
             {/* Recent Persisted Records */}
-            <div className="rounded-2xl border border-[#1E294A] bg-[#070B19]/80 p-4">
+            <div className="rounded-2xl border border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_80%,transparent)] p-4">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-semibold text-[#F4F7FF]">
+                <span className="text-xs font-semibold text-[var(--app-text-primary)]">
                   {lang === 'th' ? 'รายการล่าสุดใน SQLite' : 'Recent SQLite Records'}
                 </span>
-                <span className="text-[10px] font-mono text-[#9AA8C7]">
+                <span className="text-[10px] font-mono text-[var(--app-text-secondary)]">
                   {summary?.recentRecords.length ?? 0} / {summary?.totalRecords ?? 0}
                 </span>
               </div>
               {summary && summary.recentRecords.length > 0 ? (
-                <div className="max-h-44 overflow-y-auto divide-y divide-[#1E294A]">
+                <div className="max-h-44 overflow-y-auto divide-y divide-[var(--app-card-border)]">
                   {summary.recentRecords.slice(0, 6).map((rec) => (
                     <div key={rec.id} className="flex items-center justify-between gap-2 py-2 first:pt-0 last:pb-0">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span
                             className={`h-2 w-2 rounded-full shrink-0 ${
-                              rec.type === 'income' ? 'bg-[#CCFF00]' : 'bg-[#FF5E3A]'
+                              rec.type === 'income' ? 'bg-[var(--z-ok)]' : 'bg-[var(--z-warn)]'
                             }`}
                           />
-                          <span className="text-xs font-semibold text-[#F4F7FF] truncate">
+                          <span className="text-xs font-semibold text-[var(--app-text-primary)] truncate">
                             {rec.category}
                           </span>
-                          <span className="text-[10px] font-mono text-[#6D7B9D]">
+                          <span className="text-[10px] font-mono text-[var(--app-text-secondary)]">
                             {rec.occurredAt.slice(0, 10)}
                           </span>
                         </div>
                         {rec.description && (
-                          <div className="text-[11px] text-[#9AA8C7] truncate pl-4">
+                          <div className="text-[11px] text-[var(--app-text-secondary)] truncate pl-4">
                             {rec.description}
                           </div>
                         )}
@@ -1069,7 +1069,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                       <div className="flex items-center gap-2 shrink-0">
                         <span
                           className={`font-mono text-xs font-bold tabular-nums ${
-                            rec.type === 'income' ? 'text-[#CCFF00]' : 'text-[#FF7D5F]'
+                            rec.type === 'income' ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
                           }`}
                         >
                           {rec.type === 'income' ? '+' : '-'}
@@ -1080,7 +1080,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                           onClick={() => void handleDeleteRecord(rec.id)}
                           disabled={deletingId === rec.id}
                           title={lang === 'th' ? 'ลบรายการ' : 'Delete record'}
-                          className="p-1 rounded-lg text-[#9AA8C7] hover:text-[#FF007F] hover:bg-[#FF007F]/10 transition-colors cursor-pointer disabled:opacity-40"
+                          className="p-1 rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] transition-colors cursor-pointer disabled:opacity-40"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -1089,7 +1089,7 @@ export const ExpenseSummaryChart: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#9AA8C7]">
+                <p className="text-xs text-[var(--app-text-secondary)]">
                   {hasDateFilter
                     ? lang === 'th'
                       ? 'ไม่พบรายการในช่วงวันที่ที่เลือก'

@@ -27,12 +27,12 @@ export const FormField: React.FC<FormFieldProps> = ({
         style={{ color: 'var(--app-text-secondary)' }}
       >
         {label}
-        {required && <span className="ml-1 text-[#FF007F]">*</span>}
+        {required && <span className="ml-1 text-[var(--z-danger)]">*</span>}
       </label>
     )}
     {children}
     {error ? (
-      <p className="text-[11px] font-medium text-[#FF007F]" role="alert">
+      <p className="text-[11px] font-medium text-[var(--z-danger)]" role="alert">
         {error}
       </p>
     ) : hint ? (
@@ -44,7 +44,7 @@ export const FormField: React.FC<FormFieldProps> = ({
 );
 
 const CONTROL_BASE =
-  'w-full rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-colors border focus:outline-none focus:ring-2 focus:ring-[#00F0FF]/40 disabled:opacity-50 disabled:cursor-not-allowed';
+  'w-full rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-colors border focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] disabled:opacity-50 disabled:cursor-not-allowed';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   hasError?: boolean;
@@ -57,7 +57,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       className={`${CONTROL_BASE} ${className}`}
       style={{
         backgroundColor: 'var(--app-input-bg)',
-        borderColor: hasError ? '#FF007F' : 'var(--app-card-border)',
+        borderColor: hasError ? 'var(--z-danger)' : 'var(--app-card-border)',
         color: 'var(--app-text-primary)',
         ...style,
       }}
@@ -78,7 +78,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       className={`${CONTROL_BASE} resize-y ${className}`}
       style={{
         backgroundColor: 'var(--app-input-bg)',
-        borderColor: hasError ? '#FF007F' : 'var(--app-card-border)',
+        borderColor: hasError ? 'var(--z-danger)' : 'var(--app-card-border)',
         color: 'var(--app-text-primary)',
         ...style,
       }}
@@ -99,7 +99,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       className={`${CONTROL_BASE} cursor-pointer ${className}`}
       style={{
         backgroundColor: 'var(--app-input-bg)',
-        borderColor: hasError ? '#FF007F' : 'var(--app-card-border)',
+        borderColor: hasError ? 'var(--z-danger)' : 'var(--app-card-border)',
         color: 'var(--app-text-primary)',
         ...style,
       }}

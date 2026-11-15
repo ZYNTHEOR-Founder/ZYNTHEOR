@@ -124,16 +124,16 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
       {/* Header Controls */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-[#00F0FF]" />
+          <Clock className="w-4 h-4 text-[var(--app-accent)]" />
           <div>
-            <div className="text-xs font-bold text-white">
+            <div className="text-xs font-bold text-[var(--app-text-primary)]">
               Deployment History Timeline &amp; Verification Evidence
             </div>
-            <div className="text-[10px] font-mono text-[#9AA8C7] tabular-nums">
+            <div className="text-[10px] font-mono text-[var(--app-text-secondary)] tabular-nums">
               Source: GET /api/deployment/history · {items.length} event(s) ·{' '}
-              <span className="text-[#CCFF00]">{verifiedCount} VERIFIED</span> ·{' '}
-              <span className="text-[#FBBF24]">{unverifiedCount} UNVERIFIED</span> ·{' '}
-              <span className="text-[#FF66B2]">{blockedCount} BLOCKED</span>
+              <span className="text-[var(--z-ok)]">{verifiedCount} VERIFIED</span> ·{' '}
+              <span className="text-[var(--z-warn)]">{unverifiedCount} UNVERIFIED</span> ·{' '}
+              <span className="text-[var(--z-danger)]">{blockedCount} BLOCKED</span>
             </div>
           </div>
         </div>
@@ -146,8 +146,8 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
               onClick={() => setFilter(f)}
               className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border cursor-pointer transition-colors ${
                 filter === f
-                  ? 'bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF]/50'
-                  : 'bg-[#0D1326] text-[#9AA8C7] border-[#1E294A] hover:text-white'
+                  ? 'bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
+                  : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
               }`}
             >
               {f}
@@ -156,17 +156,17 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
           <button
             type="button"
             onClick={() => setOrder((o) => (o === 'desc' ? 'asc' : 'desc'))}
-            className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-[#131B36] text-[#CBD5E1] border border-[#1E294A] hover:border-[#00F0FF] flex items-center gap-1 cursor-pointer"
+            className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] flex items-center gap-1 cursor-pointer"
             title="Toggle chronological sort direction"
           >
-            <ArrowDownUp className="w-3 h-3 text-[#00F0FF]" />
+            <ArrowDownUp className="w-3 h-3 text-[var(--app-accent)]" />
             <span>{order === 'desc' ? 'Newest First' : 'Chronological'}</span>
           </button>
           <button
             type="button"
             onClick={() => void fetchHistory()}
             disabled={loading}
-            className="p-1.5 rounded-lg bg-[#131B36] text-[#9AA8C7] border border-[#1E294A] hover:text-white cursor-pointer disabled:opacity-50"
+            className="p-1.5 rounded-lg bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
             title="Refresh deployment timeline"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -175,20 +175,20 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-[#FF007F]/12 border border-[#FF007F]/45 text-xs font-mono text-[#FF99C8]">
+        <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] text-xs font-mono text-[var(--z-danger)]">
           {error}
         </div>
       )}
 
       {!loading && filteredItems.length === 0 ? (
-        <div className="p-5 rounded-xl bg-[#0D1326] border border-[#1E294A] text-xs font-mono text-[#9AA8C7]">
+        <div className="p-5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-secondary)]">
           {items.length === 0
             ? 'No deployment events recorded yet. Trigger a cloud deployment workflow to record chronological verification evidence.'
             : `No deployment events match filter '${filter}'.`}
         </div>
       ) : (
-        <div className="rounded-xl bg-[#0D1326] border border-[#1E294A] p-4">
-          <ol className="relative border-l border-[#1E294A] ml-2 space-y-6">
+        <div className="rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] p-4">
+          <ol className="relative border-l border-[var(--app-card-border)] ml-2 space-y-6">
             {filteredItems.map((item) => {
               const itemKey = `${item.deploymentId}_${item.executionId}`;
               const isExpanded = expandedLogsId === itemKey;
@@ -197,10 +197,10 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
 
               const nodeColor =
                 item.verificationState === 'VERIFIED'
-                  ? 'bg-[#CCFF00]'
+                  ? 'bg-[var(--z-ok)]'
                   : item.verificationState === 'BLOCKED'
-                    ? 'bg-[#FF007F]'
-                    : 'bg-[#F59E0B]';
+                    ? 'bg-[var(--z-danger)]'
+                    : 'bg-[var(--app-amber)]';
 
               const evidence = item.verificationEvidence;
 
@@ -208,11 +208,11 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                 <li
                   key={itemKey}
                   className={`pl-5 relative rounded-lg transition-colors ${
-                    isHighlighted ? 'bg-[#00F0FF]/5 py-2 pr-2' : ''
+                    isHighlighted ? 'bg-[color-mix(in_srgb,var(--app-accent)_5%,transparent)] py-2 pr-2' : ''
                   }`}
                 >
                   <span
-                    className={`absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full border border-[#070B19] ${nodeColor}`}
+                    className={`absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full border border-[var(--app-bg)] ${nodeColor}`}
                   />
 
                   {/* Event Header */}
@@ -224,17 +224,17 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                           status={item.verificationState}
                           label={`EVIDENCE: ${item.verificationState}`}
                         />
-                        <span className="text-white font-bold tabular-nums">{item.timestamp}</span>
+                        <span className="text-[var(--app-text-primary)] font-bold tabular-nums">{item.timestamp}</span>
                         {!projectId && (
-                          <span className="text-[#C084FC] font-semibold">{item.projectName}</span>
+                          <span className="text-[var(--app-accent)] font-semibold">{item.projectName}</span>
                         )}
-                        <span className="text-[#00F0FF]">{item.revisionId}</span>
-                        <span className="text-[#9AA8C7]">{item.deploymentId}</span>
+                        <span className="text-[var(--app-accent)]">{item.revisionId}</span>
+                        <span className="text-[var(--app-text-secondary)]">{item.deploymentId}</span>
                       </div>
 
-                      <div className="text-xs text-[#CBD5E1]">{item.reason}</div>
+                      <div className="text-xs text-[var(--app-text-secondary)]">{item.reason}</div>
 
-                      <div className="text-[10px] font-mono text-[#9AA8C7] tabular-nums flex flex-wrap gap-x-2 gap-y-0.5">
+                      <div className="text-[10px] font-mono text-[var(--app-text-secondary)] tabular-nums flex flex-wrap gap-x-2 gap-y-0.5">
                         <span>exec:{item.executionId}</span>
                         {item.targetProvider && <span>· provider:{item.targetProvider}</span>}
                         {item.approvalRequestId && <span>· gate:{item.approvalRequestId}</span>}
@@ -248,8 +248,8 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         onClick={() => void handleToggleRuntimeLogs(item)}
                         className={`px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold border flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors ${
                           isExpanded || isHighlighted
-                            ? 'bg-[#00F0FF]/15 border-[#00F0FF] text-[#00F0FF]'
-                            : 'bg-[#131B36] border-[#1E294A] hover:border-[#00F0FF] text-[#CBD5E1] hover:text-white'
+                            ? 'bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] border-[var(--app-accent)] text-[var(--app-accent)]'
+                            : 'bg-[var(--app-surface-elevated)] border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                         }`}
                       >
                         <Terminal className="w-3 h-3" />
@@ -259,7 +259,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         <a
                           href="#project-runtime-logs"
                           onClick={() => onViewProjectLogs(item)}
-                          className="p-1.5 rounded-lg bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-[#9AA8C7] hover:text-[#00F0FF]"
+                          className="p-1.5 rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-secondary)] hover:text-[var(--app-accent)]"
                           title="Jump to project runtime logs panel"
                         >
                           <ExternalLink className="w-3 h-3" />
@@ -269,23 +269,23 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                   </div>
 
                   {/* Verification Evidence Section */}
-                  <div className="mt-3 p-3 rounded-xl bg-[#070B19] border border-[#1E294A] space-y-2">
-                    <div className="flex items-center justify-between gap-2 text-[10px] font-mono uppercase tracking-wider text-[#9AA8C7]">
-                      <span className="font-bold text-[#F4F7FF] flex items-center gap-1.5">
+                  <div className="mt-3 p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-2">
+                    <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-[var(--app-text-secondary)]">
+                      <span className="font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
                         {item.verificationState === 'VERIFIED' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#CCFF00]" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)]" />
                         ) : (
-                          <ShieldAlert className="w-3.5 h-3.5 text-[#FF8C73]" />
+                          <ShieldAlert className="w-3.5 h-3.5 text-[var(--z-warn)]" />
                         )}
                         Verification Evidence
                       </span>
                       <span
                         className={`font-bold ${
                           item.verificationState === 'VERIFIED'
-                            ? 'text-[#CCFF00]'
+                            ? 'text-[var(--z-ok)]'
                             : item.verificationState === 'BLOCKED'
-                              ? 'text-[#FF66B2]'
-                              : 'text-[#FBBF24]'
+                              ? 'text-[var(--z-danger)]'
+                              : 'text-[var(--z-warn)]'
                         }`}
                       >
                         STATE: {item.verificationState}
@@ -294,10 +294,10 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-[11px] font-mono">
                       {/* 1. Verified Deployment Hash */}
-                      <div className="p-2.5 rounded-lg bg-[#0D1326] border border-[#1E294A] space-y-1 min-w-0">
+                      <div className="p-2.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="text-[#CBD5E1] font-sans font-semibold flex items-center gap-1">
-                            <Hash className="w-3 h-3 text-[#00F0FF]" />
+                          <span className="text-[var(--app-text-secondary)] font-sans font-semibold flex items-center gap-1">
+                            <Hash className="w-3 h-3 text-[var(--app-accent)]" />
                             Deployment Hash
                           </span>
                           <StatusDot
@@ -305,25 +305,25 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                             label={evidence.deploymentHash.hashVerified ? 'VERIFIED' : 'UNVERIFIED'}
                           />
                         </div>
-                        <div className="text-[10px] text-[#9AA8C7] truncate" title={evidence.deploymentHash.evidenceHash}>
+                        <div className="text-[10px] text-[var(--app-text-secondary)] truncate" title={evidence.deploymentHash.evidenceHash}>
                           ev: {evidence.deploymentHash.evidenceHash}
                         </div>
                         <div
-                          className="text-[10px] text-[#00F0FF] truncate"
+                          className="text-[10px] text-[var(--app-accent)] truncate"
                           title={evidence.deploymentHash.artifactSha256 || 'No bundle artifact hash'}
                         >
                           zip-sha256: {evidence.deploymentHash.artifactSha256 || 'NONE (UNVERIFIED)'}
                         </div>
-                        <div className="text-[10px] text-[#64748B] truncate">
+                        <div className="text-[10px] text-[var(--app-text-secondary)] truncate">
                           bundle: {evidence.deploymentHash.artifactZip || 'Not bundled'} · {evidence.deploymentHash.revisionId}
                         </div>
                       </div>
 
                       {/* 2. Cloud Runtime Response */}
-                      <div className="p-2.5 rounded-lg bg-[#0D1326] border border-[#1E294A] space-y-1 min-w-0">
+                      <div className="p-2.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="text-[#CBD5E1] font-sans font-semibold flex items-center gap-1">
-                            <Server className="w-3 h-3 text-[#C084FC]" />
+                          <span className="text-[var(--app-text-secondary)] font-sans font-semibold flex items-center gap-1">
+                            <Server className="w-3 h-3 text-[var(--app-accent)]" />
                             Cloud Runtime Response
                           </span>
                           <StatusDot
@@ -331,7 +331,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                             label={evidence.cloudRuntimeResponse.state}
                           />
                         </div>
-                        <div className="text-[10px] text-[#F4F7FF] tabular-nums">
+                        <div className="text-[10px] text-[var(--app-text-primary)] tabular-nums">
                           {evidence.cloudRuntimeResponse.httpStatus !== null
                             ? `HTTP ${evidence.cloudRuntimeResponse.httpStatus}${
                                 evidence.cloudRuntimeResponse.latencyMs !== null
@@ -341,7 +341,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                             : 'No live HTTP response'}
                         </div>
                         <div
-                          className="text-[10px] text-[#9AA8C7] truncate"
+                          className="text-[10px] text-[var(--app-text-secondary)] truncate"
                           title={evidence.cloudRuntimeResponse.responseSha256 || ''}
                         >
                           resp-sha256:{' '}
@@ -349,16 +349,16 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                             ? evidence.cloudRuntimeResponse.responseSha256.slice(0, 18) + '…'
                             : 'N/A'}
                         </div>
-                        <div className="text-[10px] text-[#64748B] line-clamp-2 font-sans">
+                        <div className="text-[10px] text-[var(--app-text-secondary)] line-clamp-2 font-sans">
                           {evidence.cloudRuntimeResponse.summary}
                         </div>
                       </div>
 
                       {/* 3. Automated Test Results */}
-                      <div className="p-2.5 rounded-lg bg-[#0D1326] border border-[#1E294A] space-y-1 min-w-0">
+                      <div className="p-2.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="text-[#CBD5E1] font-sans font-semibold flex items-center gap-1">
-                            <Activity className="w-3 h-3 text-[#CCFF00]" />
+                          <span className="text-[var(--app-text-secondary)] font-sans font-semibold flex items-center gap-1">
+                            <Activity className="w-3 h-3 text-[var(--z-ok)]" />
                             Automated Test Results
                           </span>
                           <StatusDot
@@ -370,16 +370,16 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                             }
                           />
                         </div>
-                        <div className="text-[10px] text-[#F4F7FF] tabular-nums">
+                        <div className="text-[10px] text-[var(--app-text-primary)] tabular-nums">
                           Status: {evidence.automatedTestResults.status} ({evidence.automatedTestResults.passed}/
                           {evidence.automatedTestResults.total})
                         </div>
-                        <div className="text-[10px] text-[#9AA8C7] truncate">
+                        <div className="text-[10px] text-[var(--app-text-secondary)] truncate">
                           {evidence.automatedTestResults.executedAt
                             ? `Executed ${evidence.automatedTestResults.executedAt}`
                             : 'Not executed before deployment'}
                         </div>
-                        <div className="text-[10px] text-[#64748B] line-clamp-2 font-sans">
+                        <div className="text-[10px] text-[var(--app-text-secondary)] line-clamp-2 font-sans">
                           {evidence.automatedTestResults.summary}
                         </div>
                       </div>
@@ -387,8 +387,8 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
 
                     {/* Expandable Cloud Runtime Logs Drawer */}
                     {isExpanded && (
-                      <div className="mt-2 pt-2 border-t border-[#1E294A] space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-mono text-[#00F0FF]">
+                      <div className="mt-2 pt-2 border-t border-[var(--app-card-border)] space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] font-mono text-[var(--app-accent)]">
                           <span className="flex items-center gap-1">
                             <FileText className="w-3 h-3" />
                             Cloud Runtime Logs ({item.logsUrl})
@@ -396,28 +396,28 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                           {loadingLogsId === itemKey && <span>Fetching logs…</span>}
                         </div>
                         {logs.length === 0 ? (
-                          <div className="text-[10px] font-mono text-[#9AA8C7] py-1">
+                          <div className="text-[10px] font-mono text-[var(--app-text-secondary)] py-1">
                             No cloud runtime log entries linked directly to {item.deploymentId}.
                           </div>
                         ) : (
-                          <div className="max-h-40 overflow-y-auto divide-y divide-[#1E294A] rounded-lg bg-[#0D1326] border border-[#1E294A] font-mono text-[10px]">
+                          <div className="max-h-40 overflow-y-auto divide-y divide-[var(--app-card-border)] rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-[10px]">
                             {logs.map((lg, idx) => (
                               <div key={lg.logId || idx} className="px-2.5 py-1.5 flex items-start justify-between gap-2">
-                                <span className="text-[#CBD5E1] min-w-0">
+                                <span className="text-[var(--app-text-secondary)] min-w-0">
                                   <span
                                     className={
                                       lg.level === 'ERROR'
-                                        ? 'text-[#FF66B2] font-bold'
+                                        ? 'text-[var(--z-danger)] font-bold'
                                         : lg.level === 'WARN'
-                                          ? 'text-[#FF8C73] font-bold'
-                                          : 'text-[#00F0FF] font-bold'
+                                          ? 'text-[var(--z-warn)] font-bold'
+                                          : 'text-[var(--app-accent)] font-bold'
                                     }
                                   >
                                     [{lg.level}]
                                   </span>{' '}
-                                  <span className="text-[#9AA8C7]">({lg.source})</span> {lg.message}
+                                  <span className="text-[var(--app-text-secondary)]">({lg.source})</span> {lg.message}
                                 </span>
-                                <span className="text-[#64748B] shrink-0 tabular-nums">
+                                <span className="text-[var(--app-text-secondary)] shrink-0 tabular-nums">
                                   {lg.timestamp.slice(11, 19)}
                                 </span>
                               </div>

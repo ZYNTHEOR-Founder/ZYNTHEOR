@@ -1,6 +1,6 @@
 /**
  * Knowledge E2E — parse-binary → extract text → optional ingest.
- * Prefers live server (SERVER_URL) and runs the binary parser checks through the online test harness.
+ * Prefers live server (SERVER_URL). Falls back to offline binary parser checks.
  * Does not use mocks for extraction results.
  */
 import fs from 'fs';
@@ -64,8 +64,8 @@ startxref
   };
 }
 
-async function binaryPipeline() {
-  console.log('\n=== Online binary pipeline ===');
+async function offline() {
+  console.log('\n=== Offline binary pipeline ===');
   const caps = await parserCapabilityReport();
   if (caps.pdf) ok('PDF capability', JSON.stringify(caps.engines));
   else bad('PDF capability');
@@ -76,15 +76,15 @@ async function binaryPipeline() {
 
   const fx = await ensureFixtures();
   const pdf = await parsePdfBuffer(fx.pdf);
-  if (pdf.success && pdf.extracted && /ZYNTHEOR|Hello/.test(pdf.text)) ok('PDF extract online', pdf.text.slice(0, 40));
-  else bad('PDF extract online', JSON.stringify(pdf.errors));
+  if (pdf.success && pdf.extracted && /ZYNTHEOR|Hello/.test(pdf.text)) ok('PDF extract offline', pdf.text.slice(0, 40));
+  else bad('PDF extract offline', JSON.stringify(pdf.errors));
 
   if (fx.docx) {
     const docx = await parseDocxBuffer(fx.docx);
-    if (docx.success && docx.extracted) ok('DOCX extract online', docx.text.slice(0, 40));
-    else bad('DOCX extract online', JSON.stringify(docx.errors));
+    if (docx.success && docx.extracted) ok('DOCX extract offline', docx.text.slice(0, 40));
+    else bad('DOCX extract offline', JSON.stringify(docx.errors));
   } else {
-    ok('DOCX fixture skipped (create with python-docx online)');
+    ok('DOCX fixture skipped (create with python-docx offline)');
   }
 
   // multipart framing
@@ -155,7 +155,7 @@ async function live() {
 }
 
 async function main() {
-  await binaryPipeline();
+  await offline();
   await live();
   fs.writeFileSync(
     path.join(root, 'native_data', 'knowledge_e2e_report.json'),

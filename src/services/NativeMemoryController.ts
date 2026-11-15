@@ -5,9 +5,6 @@
  * Every write operation is permanently recorded as a transaction in the SystemAuditLedger with SHA-256 digests.
  */
 
-import { getStoredAuthHeaders } from '../context/AuthContext';
-import { apiUrl } from '../lib/apiClient';
-
 export interface EpisodicMemoryItem {
   key: string;
   value: any;
@@ -15,12 +12,6 @@ export interface EpisodicMemoryItem {
   createdAt: string;
   updatedAt: string;
   readCount: number;
-  tenantId?: string;
-  ownerUserId?: string;
-  version?: number;
-  ttlSeconds?: number;
-  expiresAt?: string;
-  history?: Array<{ version: number; updatedAt: string; contentDigest: string }>;
   metadata?: Record<string, any>;
   contentDigest: string; // SHA-256 digest of value
 }
@@ -30,15 +21,6 @@ export interface MemoryStats {
   totalCategories: Record<string, number>;
   storeSizeBytes: number;
   lastPersisted: string;
-}
-
-export interface MemoryIntegrityReport {
-  valid: boolean;
-  totalItems: number;
-  corruptedKeys: string[];
-  expiredPurgedCount: number;
-  storeSha256: string;
-  checkedAt: string;
 }
 
 export class NativeMemoryControllerService {
@@ -59,13 +41,12 @@ export class NativeMemoryControllerService {
     key: string,
     value: any,
     category: string = 'episodic',
-    metadata?: Record<string, any>,
-    ttlSeconds?: number
+    metadata?: Record<string, any>
   ): Promise<EpisodicMemoryItem> {
-    const res = await fetch(apiUrl('/api/memory/episodic'), {
+    const res = await fetch('/api/memory/episodic', {
       method: 'POST',
-      headers: getStoredAuthHeaders(),
-      body: JSON.stringify({ key, value, category, metadata, ttlSeconds })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value, category, metadata })
     });
     const data = await res.json();
     if (!data.success) {
@@ -79,9 +60,7 @@ export class NativeMemoryControllerService {
    * Increments readCount and records a MEMORY_READ_OP audit event.
    */
   public async retrieveMemory(key: string): Promise<EpisodicMemoryItem | null> {
-    const res = await fetch(apiUrl(`/api/memory/episodic/${encodeURIComponent(key)}`), {
-      headers: getStoredAuthHeaders()
-    });
+    const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`);
     if (res.status === 404) return null;
     const data = await res.json();
     if (!data.success) {
@@ -98,13 +77,12 @@ export class NativeMemoryControllerService {
     key: string,
     value: any,
     category?: string,
-    metadata?: Record<string, any>,
-    ttlSeconds?: number
+    metadata?: Record<string, any>
   ): Promise<EpisodicMemoryItem> {
-    const res = await fetch(apiUrl(`/api/memory/episodic/${encodeURIComponent(key)}`), {
+    const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`, {
       method: 'PUT',
-      headers: getStoredAuthHeaders(),
-      body: JSON.stringify({ value, category, metadata, ttlSeconds })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value, category, metadata })
     });
     const data = await res.json();
     if (!data.success) {
@@ -118,9 +96,8 @@ export class NativeMemoryControllerService {
    * Records a MEMORY_DELETE_OP transaction into SystemAuditLedger.
    */
   public async deleteMemory(key: string): Promise<boolean> {
-    const res = await fetch(apiUrl(`/api/memory/episodic/${encodeURIComponent(key)}`), {
-      method: 'DELETE',
-      headers: getStoredAuthHeaders()
+    const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`, {
+      method: 'DELETE'
     });
     const data = await res.json();
     if (!data.success) {
@@ -133,9 +110,7 @@ export class NativeMemoryControllerService {
    * LIST: Lists all persisted episodic memory entries.
    */
   public async listAll(): Promise<EpisodicMemoryItem[]> {
-    const res = await fetch(apiUrl('/api/memory/episodic'), {
-      headers: getStoredAuthHeaders()
-    });
+    const res = await fetch('/api/memory/episodic');
     const data = await res.json();
     if (!data.success) {
       throw new Error(data.error || 'Failed to list episodic memories');
@@ -147,9 +122,7 @@ export class NativeMemoryControllerService {
    * STATS: Returns storage health, item counts, and disk size metrics.
    */
   public async getStats(): Promise<MemoryStats> {
-    const res = await fetch(apiUrl('/api/memory/episodic'), {
-      headers: getStoredAuthHeaders()
-    });
+    const res = await fetch('/api/memory/episodic');
     const data = await res.json();
     if (!data.success) {
       throw new Error(data.error || 'Failed to get episodic memory stats');
@@ -160,20 +133,6 @@ export class NativeMemoryControllerService {
       storeSizeBytes: 0,
       lastPersisted: new Date().toISOString()
     };
-  }
-
-  /**
-   * INTEGRITY: Verifies SHA-256 digests and expired TTL purge state on the backend store.
-   */
-  public async verifyIntegrity(): Promise<MemoryIntegrityReport> {
-    const res = await fetch(apiUrl('/api/memory/verify-integrity'), {
-      headers: getStoredAuthHeaders()
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to verify memory store integrity');
-    }
-    return data.integrity;
   }
 
   /**

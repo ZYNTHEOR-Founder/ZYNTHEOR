@@ -84,9 +84,9 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
     const innerH = Math.max(50, height - margin.top - margin.bottom);
 
     const strokeHex =
-      effectiveTone === 'rose' ? '#FF007F' : effectiveTone === 'amber' ? '#FF5E3A' : '#00F0FF';
-    const gridStroke = theme === 'dark' ? 'rgba(154, 168, 199, 0.16)' : 'rgba(15, 23, 42, 0.1)';
-    const axisColor = theme === 'dark' ? '#9AA8C7' : '#475569';
+      effectiveTone === 'rose' ? 'var(--z-danger)' : effectiveTone === 'amber' ? 'var(--z-warn)' : 'var(--app-accent)';
+    const gridStroke = theme === 'dark' ? 'color-mix(in srgb, var(--app-accent) 16%, transparent)' : 'color-mix(in srgb, var(--app-accent) 10%, transparent)';
+    const axisColor = theme === 'dark' ? 'var(--app-text-secondary)' : 'var(--app-accent)';
 
     const defs = svg.append('defs');
     const gradId = `rolling-integrity-grad-${effectiveTone}-${theme}`;
@@ -116,7 +116,7 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
       .attr('x2', innerW)
       .attr('y1', (d) => yScale(d))
       .attr('y2', (d) => yScale(d))
-      .attr('stroke', (d) => (d === 80 ? 'rgba(255, 180, 84, 0.38)' : gridStroke))
+      .attr('stroke', (d) => (d === 80 ? 'color-mix(in srgb, var(--z-warn) 38%, transparent)' : gridStroke))
       .attr('stroke-dasharray', (d) => (d === 80 || d === 50 ? '3,3' : 'none'))
       .attr('stroke-width', 1);
 
@@ -195,12 +195,12 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
       .attr('r', ({ pt, i }) => (pt.severity === 'tampered' ? 4.5 : i === points.length - 1 ? 3.5 : 3))
       .attr('fill', ({ pt }) =>
         pt.severity === 'tampered' || pt.severity === 'error'
-          ? '#FF007F'
+          ? 'var(--z-danger)'
           : pt.severity === 'warning'
-          ? '#FF5E3A'
+          ? 'var(--z-warn)'
           : strokeHex
       )
-      .attr('stroke', theme === 'dark' ? '#070B19' : '#FFFFFF')
+      .attr('stroke', theme === 'dark' ? 'var(--app-accent)' : '#FFFFFF')
       .attr('stroke-width', 1.5);
 
     // Hover focus indicator + overlay
@@ -217,7 +217,7 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
       .append('circle')
       .attr('r', 4)
       .attr('fill', strokeHex)
-      .attr('stroke', theme === 'dark' ? '#F0F7F3' : '#0F172A')
+      .attr('stroke', theme === 'dark' ? '#F0F7F3' : 'var(--app-accent)')
       .attr('stroke-width', 1.5)
       .style('opacity', 0);
 
@@ -251,21 +251,21 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
   return (
     <div
       className={`rounded-xl border font-mono ${
-        isDark ? 'bg-[#0D1326] border-[#1E294A] text-[#F4F7FF]' : 'bg-slate-50/90 border-slate-200 text-slate-900'
+        isDark ? 'bg-[var(--app-surface)] border-[var(--app-card-border)] text-[var(--app-text-primary)]' : 'bg-[color-mix(in_srgb,var(--app-surface-elevated)_90%,transparent)] border-[var(--app-card-border)] text-[var(--app-text-primary)]'
       } ${className}`}
     >
       <div
         className={`px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 border-b ${
-          isDark ? 'border-[#1E294A]' : 'border-slate-200'
+          isDark ? 'border-[var(--app-card-border)]' : 'border-[var(--app-card-border)]'
         }`}
       >
         <div className="flex items-center gap-2 min-w-0">
           {effectiveTone === 'rose' ? (
-            <ShieldAlert className="w-4 h-4 text-[#FF007F] shrink-0" />
+            <ShieldAlert className="w-4 h-4 text-[var(--z-danger)] shrink-0" />
           ) : effectiveTone === 'amber' ? (
-            <AlertTriangle className="w-4 h-4 text-[#FF5E3A] shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-[var(--z-warn)] shrink-0" />
           ) : (
-            <Activity className="w-4 h-4 text-[#00F0FF] shrink-0" />
+            <Activity className="w-4 h-4 text-[var(--app-accent)] shrink-0" />
           )}
           <div className="min-w-0">
             <div className="text-[11px] font-bold tracking-tight flex items-center gap-2">
@@ -278,41 +278,41 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
               <span
                 className={`px-1.5 py-0.5 rounded text-[10px] font-bold border tabular-nums ${
                   effectiveTone === 'rose'
-                    ? 'bg-[#FF007F]/15 text-[#FF007F] border-[#FF007F]/40'
+                    ? 'bg-[color-mix(in_srgb,var(--z-danger)_15%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]'
                     : effectiveTone === 'amber'
-                    ? 'bg-[#FF5E3A]/15 text-[#FF5E3A] border-[#FF5E3A]/40'
-                    : 'bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF]/40'
+                    ? 'bg-[color-mix(in_srgb,var(--z-warn)_15%,transparent)] text-[var(--z-warn)] border-[color-mix(in_srgb,var(--z-warn)_40%,transparent)]'
+                    : 'bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]'
                 }`}
               >
                 {points.length > 0 ? `${stats.latest}%` : 'EMPTY'}
               </span>
             </div>
             {subtitle && (
-              <div className={`text-[10px] truncate ${isDark ? 'text-[#9AA8C7]' : 'text-slate-500'}`}>{subtitle}</div>
+              <div className={`text-[10px] truncate ${isDark ? 'text-[var(--app-text-secondary)]' : 'text-[var(--app-text-secondary)]'}`}>{subtitle}</div>
             )}
           </div>
         </div>
 
-        <div className={`flex flex-wrap items-center gap-3 text-[10px] tabular-nums ${isDark ? 'text-[#9AA8C7]' : 'text-slate-600'}`}>
+        <div className={`flex flex-wrap items-center gap-3 text-[10px] tabular-nums ${isDark ? 'text-[var(--app-text-secondary)]' : 'text-[var(--app-text-primary)]'}`}>
           <span>
             {lang === 'th' ? 'หน้าต่าง' : 'Window'}:{' '}
-            <strong className={isDark ? 'text-[#F4F7FF]' : 'text-slate-900'}>{points.length}/50</strong>
+            <strong className={isDark ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-text-primary)]'}>{points.length}/50</strong>
           </span>
           <span>
             {lang === 'th' ? 'เฉลี่ย' : 'Avg'}:{' '}
-            <strong className={isDark ? 'text-[#F4F7FF]' : 'text-slate-900'}>
+            <strong className={isDark ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-text-primary)]'}>
               {points.length > 0 ? `${stats.avg}%` : '—'}
             </strong>
           </span>
           <span>
             {lang === 'th' ? 'ต่ำสุด' : 'Min'}:{' '}
-            <strong className={stats.min < 80 && points.length > 0 ? 'text-[#FF007F]' : isDark ? 'text-[#F4F7FF]' : 'text-slate-900'}>
+            <strong className={stats.min < 80 && points.length > 0 ? 'text-[var(--z-danger)]' : isDark ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-text-primary)]'}>
               {points.length > 0 ? `${stats.min}%` : '—'}
             </strong>
           </span>
           <span>
             {lang === 'th' ? 'จุดผิดปกติ' : 'Anomalies'}:{' '}
-            <strong className={stats.anomalies > 0 ? 'text-[#FF5E3A]' : 'text-[#CCFF00]'}>{stats.anomalies}</strong>
+            <strong className={stats.anomalies > 0 ? 'text-[var(--z-warn)]' : 'text-[var(--z-ok)]'}>{stats.anomalies}</strong>
           </span>
         </div>
       </div>
@@ -322,7 +322,7 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
           <div
             style={{ height }}
             className={`flex items-center justify-center text-[11px] italic ${
-              isDark ? 'text-[#9AA8C7]/70' : 'text-slate-400'
+              isDark ? 'text-[color-mix(in_srgb,var(--app-text-secondary)_70%,transparent)]' : 'text-[var(--app-text-secondary)]'
             }`}
           >
             {lang === 'th'
@@ -337,20 +337,20 @@ export const RollingIntegrityChart: React.FC<RollingIntegrityChartProps> = ({
       {activePoint && (
         <div
           className={`px-3.5 py-1.5 flex flex-wrap items-center justify-between gap-2 border-t text-[10px] ${
-            isDark ? 'border-[#1E294A] bg-[#070B19]/60 text-[#9AA8C7]' : 'border-slate-200 bg-white/70 text-slate-600'
+            isDark ? 'border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] text-[var(--app-text-secondary)]' : 'border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-text-primary)_70%,transparent)] text-[var(--app-text-primary)]'
           }`}
         >
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <ShieldCheck
               className={`w-3.5 h-3.5 shrink-0 ${
                 activePoint.severity === 'tampered' || activePoint.severity === 'error'
-                  ? 'text-[#FF007F]'
+                  ? 'text-[var(--z-danger)]'
                   : activePoint.severity === 'warning'
-                  ? 'text-[#FF5E3A]'
-                  : 'text-[#CCFF00]'
+                  ? 'text-[var(--z-warn)]'
+                  : 'text-[var(--z-ok)]'
               }`}
             />
-            <span className={`font-bold shrink-0 tabular-nums ${isDark ? 'text-[#F4F7FF]' : 'text-slate-900'}`}>
+            <span className={`font-bold shrink-0 tabular-nums ${isDark ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-text-primary)]'}`}>
               {activePoint.label} ({activePoint.score}%)
             </span>
             <span className="truncate">{activePoint.summary}</span>

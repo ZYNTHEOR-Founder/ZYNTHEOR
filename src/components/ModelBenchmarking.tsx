@@ -103,7 +103,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
         subtitle="Side-by-side checkpoint evaluation telemetry"
         gradientAccent="amber"
       >
-        <div className="p-3 rounded-xl bg-rose-950/30 border border-rose-700/60 text-xs text-rose-300 font-mono">
+        <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_60%,transparent)] text-xs text-[var(--z-danger)] font-mono">
           {error}
         </div>
       </VividCard>
@@ -131,7 +131,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
       headerAction={
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <div className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
-            <GitCompare className="w-3.5 h-3.5 text-[#00F0FF]" />
+            <GitCompare className="w-3.5 h-3.5 text-[var(--app-accent)]" />
             <span>{data?.activeCheckpoint?.label || data?.activeCheckpoint?.key || 'Active checkpoint not reported'}</span>
           </div>
           {!isV2Active && (
@@ -139,7 +139,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
               type="button"
               onClick={handlePromote}
               disabled={isPromoting}
-              className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-white bg-gradient-to-r from-[#FF5E3A] to-[#FF007F] hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
+              className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-white bg-[var(--z-warn)] hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
             >
               {isPromoting ? 'Promoting...' : 'Promote 2.0M v2'}
             </button>
@@ -151,7 +151,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
             className="p-1.5 rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] transition-colors cursor-pointer"
             title="Refresh benchmarking metrics"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#00F0FF]' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--app-accent)]' : ''}`} />
           </button>
         </div>
       }
@@ -167,7 +167,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
                 key={m.key}
                 className={`min-w-0 p-4 rounded-xl border transition-all space-y-3 overflow-hidden ${
                   isActive
-                    ? 'bg-[#00F0FF]/8 border-[#00F0FF]'
+                    ? 'bg-[color-mix(in_srgb,var(--app-accent)_8%,transparent)] border-[var(--app-accent)]'
                     : 'bg-[var(--app-input-bg)] border-[var(--app-card-border)]'
                 }`}
               >
@@ -175,7 +175,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-bold text-[var(--app-text-primary)]">{m.label}</span>
-                      {isActive && <span className="text-[10px] font-mono font-bold text-[#CCFF00]">Active runtime</span>}
+                      {isActive && <span className="text-[10px] font-mono font-bold text-[var(--z-ok)]">Active runtime</span>}
                     </div>
                     <div className="text-[11px] font-mono text-[var(--app-text-secondary)] mt-0.5 break-all">
                       {isV2 && m.promotedCheckpointPath
@@ -190,7 +190,7 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
 
                 <div className="grid grid-cols-3 gap-2 text-xs font-mono tabular-nums min-w-0">
                   <div className="min-w-0 p-2.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase truncate">Parameters</div>
+                    <div className="text-[10px] text-[var(--app-text-secondary)] truncate">Parameters</div>
                     <div className="text-sm font-bold text-[var(--app-text-primary)] mt-1 truncate">
                       {formatNumber(m.totalParams)}
                     </div>
@@ -200,10 +200,10 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
                   </div>
 
                   <div className="min-w-0 p-2.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase truncate">
+                    <div className="text-[10px] text-[var(--app-text-secondary)] truncate">
                       {isV2 ? 'v2 Eval Loss' : 'Target Val Loss'}
                     </div>
-                    <div className={`text-sm font-bold mt-1 truncate ${isV2 ? 'text-[#CCFF00]' : 'text-[#FF007F]'}`}>
+                    <div className={`text-sm font-bold mt-1 truncate ${isV2 ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'}`}>
                       {m.lastEvaluatedLoss}
                     </div>
                     <div className="text-[10px] text-[var(--app-text-secondary)] mt-0.5 truncate">
@@ -212,8 +212,8 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
                   </div>
 
                   <div className="min-w-0 p-2.5 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase truncate">Perplexity</div>
-                    <div className={`text-sm font-bold mt-1 truncate ${isV2 ? 'text-[#00F0FF]' : 'text-[#FF007F]'}`}>
+                    <div className="text-[10px] text-[var(--app-text-secondary)] truncate">Perplexity</div>
+                    <div className={`text-sm font-bold mt-1 truncate ${isV2 ? 'text-[var(--app-accent)]' : 'text-[var(--z-danger)]'}`}>
                       {m.lastEvaluatedPerplexity}
                     </div>
                     <div className="text-[10px] text-[var(--app-text-secondary)] mt-0.5 truncate">
@@ -223,13 +223,13 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
                 </div>
 
                 {isV2 && (
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono tabular-nums text-[#CCFF00] bg-[var(--app-bg)] px-3 py-2 rounded-lg border border-[var(--app-card-border)]">
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono tabular-nums text-[var(--z-ok)] bg-[var(--app-bg)] px-3 py-2 rounded-lg border border-[var(--app-card-border)]">
                     <span className="flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Top-1: {m.top1AccuracyPct}%
                     </span>
-                    <span className="text-[#00F0FF]">Top-5: {m.top5AccuracyPct}%</span>
-                    <span className="text-[#FF5E3A]">Bigram Baseline PPL: {m.bigramBaselinePpl} (4.4x worse)</span>
+                    <span className="text-[var(--app-accent)]">Top-5: {m.top5AccuracyPct}%</span>
+                    <span className="text-[var(--z-warn)]">Bigram Baseline PPL: {m.bigramBaselinePpl} (4.4x worse)</span>
                   </div>
                 )}
 
@@ -261,16 +261,16 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
               <tr>
                 <td className="py-2.5 px-3 font-sans text-[var(--app-text-primary)]">Parameter Count</td>
                 <td className="py-2.5 px-3 text-right text-[var(--app-text-primary)]">{target41m?.totalParams?.toLocaleString()}</td>
-                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.totalParams?.toLocaleString()}</td>
-                <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.totalParams?.toLocaleString()}</td>
-                <td className="py-2.5 px-3 text-right text-[#FF5E3A]">82.6x smaller</td>
+                <td className="py-2.5 px-3 text-right text-[var(--app-accent)]">{v2Model?.totalParams?.toLocaleString()}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-ok)] font-bold">{v2Model?.totalParams?.toLocaleString()}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-warn)]">82.6x smaller</td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-sans text-[var(--app-text-primary)]">Float32 Memory Footprint</td>
                 <td className="py-2.5 px-3 text-right text-[var(--app-text-primary)]">{target41m?.memoryFootprintMb} MiB</td>
-                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.memoryFootprintMb} MiB</td>
-                <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.memoryFootprintMb} MiB</td>
-                <td className="py-2.5 px-3 text-right text-[#FF5E3A]">
+                <td className="py-2.5 px-3 text-right text-[var(--app-accent)]">{v2Model?.memoryFootprintMb} MiB</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-ok)] font-bold">{v2Model?.memoryFootprintMb} MiB</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-warn)]">
                   {typeof target41m?.memoryFootprintMb === 'number' && typeof v2Model?.memoryFootprintMb === 'number'
                     ? `-${(target41m.memoryFootprintMb - v2Model.memoryFootprintMb).toFixed(2)} MiB`
                     : '—'}
@@ -278,10 +278,10 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-sans text-[var(--app-text-primary)]">Evaluated Loss (Held-Out NLL)</td>
-                <td className="py-2.5 px-3 text-right text-[#FF007F]">{target41m?.lastEvaluatedLoss ?? '—'}</td>
-                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.lastEvaluatedLoss ?? '—'}</td>
-                <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.gatedBestLoss ?? '—'}</td>
-                <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">
+                <td className="py-2.5 px-3 text-right text-[var(--z-danger)]">{target41m?.lastEvaluatedLoss ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--app-accent)]">{v2Model?.lastEvaluatedLoss ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-ok)] font-bold">{v2Model?.gatedBestLoss ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-ok)] font-bold">
                   <span className="inline-flex items-center gap-0.5">
                     <ArrowDownRight className="w-3.5 h-3.5" />
                     {gatedLossDelta ?? lossDelta} NLL
@@ -290,10 +290,10 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-sans text-[var(--app-text-primary)]">Evaluated Perplexity (exp(NLL))</td>
-                <td className="py-2.5 px-3 text-right text-[#FF007F]">{target41m?.lastEvaluatedPerplexity ?? '—'}</td>
-                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.lastEvaluatedPerplexity ?? '—'}</td>
-                <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.gatedBestPerplexity ?? '—'}</td>
-                <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">
+                <td className="py-2.5 px-3 text-right text-[var(--z-danger)]">{target41m?.lastEvaluatedPerplexity ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--app-accent)]">{v2Model?.lastEvaluatedPerplexity ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-ok)] font-bold">{v2Model?.gatedBestPerplexity ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[var(--z-ok)] font-bold">
                   {typeof target41m?.lastEvaluatedPerplexity === 'number' && typeof v2Model?.gatedBestPerplexity === 'number'
                     ? `-${(target41m.lastEvaluatedPerplexity - v2Model.gatedBestPerplexity).toFixed(2)} PPL`
                     : `${pplDelta} PPL`}
