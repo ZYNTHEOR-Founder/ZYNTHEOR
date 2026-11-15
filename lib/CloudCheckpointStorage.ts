@@ -5,6 +5,8 @@
  * into memory without relying on local disk persistence.
  */
 
+import fs from 'fs';
+import path from 'path';
 import crypto from 'crypto';
 import {
   S3Client,
@@ -23,6 +25,15 @@ export interface CloudStorageConfig {
   defaultKey: string;
 }
 
+export interface CloudRuntimeConfigValidation {
+  configValid: boolean;
+  provider: 'presigned_url' | 's3' | 'cloud_runtime_url' | 'none';
+  missingKeys: string[];
+  validationError: string | null;
+  sourceUri: string | null;
+  normalizedEnv: Record<string, string>;
+}
+
 export interface ParsedCloudCheckpoint {
   magic: string;
   metadata: Record<string, any>;
@@ -34,27 +45,260 @@ export interface ParsedCloudCheckpoint {
 
 const MAGIC = 'ZYNTHEOR_QPLUS_PT';
 
+const CLOUD_ENV_KEYS = [
+  'S3_BUCKET',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
+  'S3_ENDPOINT',
+  'S3_REGION',
+  'S3_FORCE_PATH_STYLE',
+  'S3_CHECKPOINT_KEY',
+  'CHECKPOINT_PRESIGNED_URL',
+  'CLOUD_RUNTIME_URL',
+  'ZYNTHEOR_CONNECTIVITY_PROBE_URL',
+  'CHECKPOINT_UPLOAD_URL',
+  'ZYNTHEOR_ALLOW_LOOPBACK_CLOUD',
+] as const;
+
+function cleanEnvValue(raw: string | undefined): string {
+  if (!raw) return '';
+  let trimmed = raw.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length >= 2) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'") && trimmed.length >= 2)
+  ) {
+    trimmed = trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function readDotenvFileMap(filePath: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  try {
+    if (!fs.existsSync(filePath)) return out;
+    const raw = fs.readFileSync(filePath, 'utf8');
+    for (const line of raw.split(/\r?\n/)) {
+      const stripped = line.trim();
+      if (!stripped || stripped.startsWith('#')) continue;
+      const eqIdx = stripped.indexOf('=');
+      if (eqIdx <= 0) continue;
+      const k = stripped.slice(0, eqIdx).trim().replace(/^export\s+/, '');
+      const v = cleanEnvValue(stripped.slice(eqIdx + 1));
+      if (k && v) out[k] = v;
+    }
+  } catch {
+    // Fail gracefully if env file is unreadable
+  }
+  return out;
+}
+
+/**
+ * Hydrates unset cloud runtime environment variables from `.env.local` / `.env`
+ * and strips accidental surrounding quotes/whitespace from process.env entries
+ * without ever overriding explicitly supplied runtime environment variables.
+ */
+export function hydrateCloudRuntimeEnv(overrides?: Partial<Record<string, string | undefined>>): Record<string, string> {
+  const cwd = process.cwd();
+  const dotenvBase = readDotenvFileMap(path.join(cwd, '.env'));
+  const dotenvLocal = readDotenvFileMap(path.join(cwd, '.env.local'));
+  const normalized: Record<string, string> = {};
+
+  for (const key of CLOUD_ENV_KEYS) {
+    const overrideVal = overrides && Object.prototype.hasOwnProperty.call(overrides, key)
+      ? cleanEnvValue(overrides[key])
+      : undefined;
+    if (overrideVal !== undefined) {
+      if (overrideVal) normalized[key] = overrideVal;
+      continue;
+    }
+    const existing = cleanEnvValue(process.env[key]);
+    if (existing) {
+      process.env[key] = existing;
+      normalized[key] = existing;
+      continue;
+    }
+    const fallback = dotenvLocal[key] || dotenvBase[key] || '';
+    if (fallback) {
+      process.env[key] = fallback;
+      normalized[key] = fallback;
+    }
+  }
+  return normalized;
+}
+
+/**
+ * Pre-bind validated configuration check before attempting to bind/load model weights.
+ */
+export function validateCloudRuntimeConfig(overrides?: {
+  presignedUrl?: string;
+  objectKey?: string;
+}): CloudRuntimeConfigValidation {
+  const envOverrides: Record<string, string | undefined> = {};
+  if (overrides?.presignedUrl !== undefined) {
+    envOverrides.CHECKPOINT_PRESIGNED_URL = overrides.presignedUrl;
+  }
+  if (overrides?.objectKey !== undefined) {
+    envOverrides.S3_CHECKPOINT_KEY = overrides.objectKey;
+  }
+  const normalizedEnv = hydrateCloudRuntimeEnv(envOverrides);
+  const presignedUrl = normalizedEnv.CHECKPOINT_PRESIGNED_URL || '';
+  const probeUrl = normalizedEnv.ZYNTHEOR_CONNECTIVITY_PROBE_URL || '';
+  const runtimeUrl = normalizedEnv.CLOUD_RUNTIME_URL || '';
+  const bucket = normalizedEnv.S3_BUCKET || '';
+  const accessKey = normalizedEnv.S3_ACCESS_KEY_ID || '';
+  const secretKey = normalizedEnv.S3_SECRET_ACCESS_KEY || '';
+  const endpoint = normalizedEnv.S3_ENDPOINT || '';
+  const key = normalizedEnv.S3_CHECKPOINT_KEY || 'checkpoints/model_checkpoint.pt';
+
+  if (presignedUrl) {
+    try {
+      const parsed = new URL(presignedUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return {
+          configValid: false,
+          provider: 'presigned_url',
+          missingKeys: [],
+          validationError: `Invalid CHECKPOINT_PRESIGNED_URL scheme '${parsed.protocol}'`,
+          sourceUri: presignedUrl,
+          normalizedEnv,
+        };
+      }
+      return {
+        configValid: true,
+        provider: 'presigned_url',
+        missingKeys: [],
+        validationError: null,
+        sourceUri: presignedUrl,
+        normalizedEnv,
+      };
+    } catch {
+      return {
+        configValid: false,
+        provider: 'presigned_url',
+        missingKeys: [],
+        validationError: 'Malformed CHECKPOINT_PRESIGNED_URL',
+        sourceUri: presignedUrl,
+        normalizedEnv,
+      };
+    }
+  }
+
+  if (bucket) {
+    const missingKeys: string[] = [];
+    if (!accessKey) missingKeys.push('S3_ACCESS_KEY_ID');
+    if (!secretKey) missingKeys.push('S3_SECRET_ACCESS_KEY');
+    if (endpoint) {
+      try {
+        const ep = new URL(endpoint);
+        if (ep.protocol !== 'http:' && ep.protocol !== 'https:') {
+          return {
+            configValid: false,
+            provider: 's3',
+            missingKeys,
+            validationError: `Invalid S3_ENDPOINT scheme '${ep.protocol}'`,
+            sourceUri: `s3://${bucket}/${key}`,
+            normalizedEnv,
+          };
+        }
+      } catch {
+        return {
+          configValid: false,
+          provider: 's3',
+          missingKeys,
+          validationError: 'Malformed S3_ENDPOINT URL',
+          sourceUri: `s3://${bucket}/${key}`,
+          normalizedEnv,
+        };
+      }
+    }
+    if (missingKeys.length > 0) {
+      return {
+        configValid: false,
+        provider: 's3',
+        missingKeys,
+        validationError: `S3_BUCKET is set but required credentials are missing: ${missingKeys.join(', ')}`,
+        sourceUri: `s3://${bucket}/${key}`,
+        normalizedEnv,
+      };
+    }
+    return {
+      configValid: true,
+      provider: 's3',
+      missingKeys: [],
+      validationError: null,
+      sourceUri: `s3://${bucket}/${key}`,
+      normalizedEnv,
+    };
+  }
+
+  const fallbackUrl = probeUrl || runtimeUrl;
+  if (fallbackUrl) {
+    try {
+      const parsed = new URL(fallbackUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return {
+          configValid: false,
+          provider: 'cloud_runtime_url',
+          missingKeys: [],
+          validationError: `Invalid CLOUD_RUNTIME_URL scheme '${parsed.protocol}'`,
+          sourceUri: fallbackUrl,
+          normalizedEnv,
+        };
+      }
+      return {
+        configValid: true,
+        provider: 'cloud_runtime_url',
+        missingKeys: [],
+        validationError: null,
+        sourceUri: fallbackUrl,
+        normalizedEnv,
+      };
+    } catch {
+      return {
+        configValid: false,
+        provider: 'cloud_runtime_url',
+        missingKeys: [],
+        validationError: 'Malformed CLOUD_RUNTIME_URL',
+        sourceUri: fallbackUrl,
+        normalizedEnv,
+      };
+    }
+  }
+
+  return {
+    configValid: false,
+    provider: 'none',
+    missingKeys: ['CHECKPOINT_PRESIGNED_URL', 'S3_BUCKET', 'CLOUD_RUNTIME_URL'],
+    validationError: 'No Cloud Object Storage (CHECKPOINT_PRESIGNED_URL / S3_BUCKET) or CLOUD_RUNTIME_URL configured',
+    sourceUri: null,
+    normalizedEnv,
+  };
+}
+
 export function isCloudCheckpointStorageConfigured(): boolean {
-  return Boolean(process.env.S3_BUCKET && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY);
+  const norm = hydrateCloudRuntimeEnv();
+  return Boolean(norm.S3_BUCKET && norm.S3_ACCESS_KEY_ID && norm.S3_SECRET_ACCESS_KEY);
 }
 
 export function getCloudStorageConfig(): CloudStorageConfig {
-  const bucket = process.env.S3_BUCKET || '';
+  const norm = hydrateCloudRuntimeEnv();
+  const bucket = norm.S3_BUCKET || '';
   if (!bucket) {
     throw new Error('FAIL_CLOSED: S3_BUCKET environment variable is not configured.');
   }
   return {
     bucket,
-    region: process.env.S3_REGION || 'auto',
-    endpoint: process.env.S3_ENDPOINT || undefined,
-    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-    defaultKey: process.env.S3_CHECKPOINT_KEY || 'checkpoints/model_checkpoint.pt',
+    region: norm.S3_REGION || 'auto',
+    endpoint: norm.S3_ENDPOINT || undefined,
+    forcePathStyle: norm.S3_FORCE_PATH_STYLE === 'true',
+    defaultKey: norm.S3_CHECKPOINT_KEY || 'checkpoints/model_checkpoint.pt',
   };
 }
 
 function createS3Client(cfg: CloudStorageConfig): S3Client {
-  const accessKeyId = process.env.S3_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+  const norm = hydrateCloudRuntimeEnv();
+  const accessKeyId = norm.S3_ACCESS_KEY_ID;
+  const secretAccessKey = norm.S3_SECRET_ACCESS_KEY;
   if (!accessKeyId || !secretAccessKey) {
     throw new Error('FAIL_CLOSED: S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required for Cloud Object Storage.');
   }

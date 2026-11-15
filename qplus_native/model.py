@@ -26,6 +26,7 @@ from qplus_native.engine import (
 from qplus_native.cloud_storage import (
     load_checkpoint_container_from_cloud,
     parse_checkpoint_container,
+    validate_cloud_runtime_config,
 )
 
 MAGIC_HEADER = b"ZYNTHEOR_QPLUS_PT"
@@ -294,6 +295,15 @@ class NativeNeuralModel:
                 raw_container = cloud_bytes
                 source_uri = self.presigned_url or (f"s3://{os.environ.get('S3_BUCKET', 'cloud')}/{self.object_key}" if self.object_key else "cloud://memory-stream")
             else:
+                cfg_check = validate_cloud_runtime_config(
+                    object_key=self.object_key,
+                    presigned_url=self.presigned_url,
+                )
+                if not cfg_check.get("config_valid"):
+                    self.runtime_state = str(cfg_check.get("runtime_state_hint") or "NOT_CONFIGURED")
+                    raise RuntimeError(
+                        str(cfg_check.get("validation_error") or "FAIL_CLOSED: Online Connectivity Required — Cloud configuration invalid.")
+                    )
                 metadata, payload, actual_sha256, raw_container, source_uri = load_checkpoint_container_from_cloud(
                     object_key=self.object_key,
                     presigned_url=self.presigned_url,

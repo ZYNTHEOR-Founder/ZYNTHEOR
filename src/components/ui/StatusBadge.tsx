@@ -6,6 +6,10 @@ export type MinimalIndicatorState =
   | StatusLevel
   | RuntimeLifecycleState
   | BridgeLifecycleState
+  | 'UNVERIFIED'
+  | 'NOT_IMPLEMENTED'
+  | 'UNAVAILABLE'
+  | 'NOT_ENOUGH_DATA'
   | 'CHECKING'
   | 'FAIL_CLOSED';
 
@@ -87,6 +91,18 @@ const INDICATOR_STYLES: Record<
     textHex: '#FF66B2',
     isError: true,
   },
+  'Initialization Error': {
+    hex: '#FF007F',
+    glow: '0 0 9px rgba(255, 0, 127, 0.60)',
+    textHex: '#FF66B2',
+    isError: true,
+  },
+  'Session Timeout': {
+    hex: '#FF5E3A',
+    glow: '0 0 9px rgba(255, 94, 58, 0.60)',
+    textHex: '#FF8C73',
+    isError: true,
+  },
   'Service Error': {
     hex: ZYNTHEOR_STATUS_TOKENS.FAILED.hex,
     glow: ZYNTHEOR_STATUS_TOKENS.FAILED.glow,
@@ -97,6 +113,11 @@ const INDICATOR_STYLES: Record<
     hex: ZYNTHEOR_STATUS_TOKENS.PARTIAL.hex,
     glow: ZYNTHEOR_STATUS_TOKENS.PARTIAL.glow,
     textHex: '#FF8C73',
+  },
+  UNVERIFIED: {
+    hex: '#F59E0B',
+    glow: '0 0 8px rgba(245, 158, 11, 0.45)',
+    textHex: '#FBBF24',
   },
   NOT_TRAINED: {
     hex: '#FF5E3A',
@@ -122,6 +143,12 @@ const INDICATOR_STYLES: Record<
     textHex: '#9AA8C7',
     isError: true,
   },
+  UNAVAILABLE: {
+    hex: '#FF5E3A',
+    glow: '0 0 8px rgba(255, 94, 58, 0.45)',
+    textHex: '#FF8C73',
+    isError: true,
+  },
   NOT_FOUND: {
     hex: '#FF007F',
     glow: '0 0 9px rgba(255, 0, 127, 0.60)',
@@ -145,6 +172,16 @@ const INDICATOR_STYLES: Record<
     glow: '0 0 9px rgba(255, 0, 127, 0.60)',
     textHex: '#FF66B2',
     isError: true,
+  },
+  NOT_IMPLEMENTED: {
+    hex: ZYNTHEOR_STATUS_TOKENS['NOT IMPLEMENTED'].hex,
+    glow: 'none',
+    textHex: '#9AA8C7',
+  },
+  NOT_ENOUGH_DATA: {
+    hex: ZYNTHEOR_STATUS_TOKENS['NOT RUN'].hex,
+    glow: 'none',
+    textHex: '#9AA8C7',
   },
   'NOT IMPLEMENTED': {
     hex: ZYNTHEOR_STATUS_TOKENS['NOT IMPLEMENTED'].hex,

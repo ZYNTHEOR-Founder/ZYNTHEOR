@@ -873,7 +873,33 @@ export class ActionDrivenEngine {
         evidence: { runtimeState: perception.connectivity.runtimeState, weightsLoaded: false },
       });
       failureReason = `BLOCKED_NATIVE_MODEL_REQUIRED: ${perception.connectivity.reason}`;
+      const startTimestamp = new Date(tStart).toISOString();
+      const finishTimestamp = new Date().toISOString();
+      const executionDurationMs = Math.max(1, Date.now() - tStart);
+      const executionId = `exec_${missionId}`;
+      const executionEvidenceHash = computeExecutionEvidenceHash({
+        executionId,
+        taskId: missionId,
+        startTimestamp,
+        finishTimestamp,
+        executionDurationMs,
+        executionResult: 'BLOCKED',
+        artifacts,
+        testsPassed: 0,
+        testsTotal: 0,
+      });
+      const truthClaims = enforceTruthClaims([
+        classifyTruthClaim({
+          domain: 'execution_orchestrator',
+          statement: `Action mission ${executionId} blocked: native model weights unavailable (${perception.connectivity.runtimeState})`,
+          classification: 'UNVERIFIED',
+          basis: failureReason,
+          evidenceRefs: [executionEvidenceHash],
+        }),
+      ]);
+      const truthSummary = summarizeTruthClaims(truthClaims);
       const record: ActionMissionRecord = {
+        executionId,
         missionId,
         tenantId: scope.tenantId,
         ownerUserId: scope.userId,
@@ -882,11 +908,16 @@ export class ActionDrivenEngine {
         priority,
         runtime: runtimeHint,
         status: 'BLOCKED',
+        executionResult: 'BLOCKED',
         attribution: 'deterministic_action_engine',
         nativeNeuralState: perception.connectivity.runtimeState,
-        createdAt: new Date(tStart).toISOString(),
-        completedAt: new Date().toISOString(),
-        durationMs: Date.now() - tStart,
+        createdAt: startTimestamp,
+        startTimestamp,
+        finishTimestamp,
+        completedAt: finishTimestamp,
+        executionDurationMs,
+        durationMs: executionDurationMs,
+        executionEvidenceHash,
         pillars,
         perception,
         reasoningOutcome,
@@ -896,10 +927,13 @@ export class ActionDrivenEngine {
         acceptanceCriteria,
         artifacts,
         failureReason,
+        truthClaims,
+        truthSummary,
         auditEntryHash: AuditLedger.append('SYSTEM', 'ACTION_MISSION_BLOCKED', {
           missionId,
           tenantId: scope.tenantId,
           reason: failureReason,
+          executionEvidenceHash,
         }).entry_hash,
       };
       this.missions.unshift(record);
@@ -994,7 +1028,33 @@ export class ActionDrivenEngine {
           summary: failureReason,
           evidence: { approvalRequestId: reqRec.requestId, actionType: impact.actionType },
         });
+        const startTimestamp = new Date(tStart).toISOString();
+        const finishTimestamp = new Date().toISOString();
+        const executionDurationMs = Math.max(1, Date.now() - tStart);
+        const executionId = `exec_${missionId}`;
+        const executionEvidenceHash = computeExecutionEvidenceHash({
+          executionId,
+          taskId: missionId,
+          startTimestamp,
+          finishTimestamp,
+          executionDurationMs,
+          executionResult: 'BLOCKED',
+          artifacts,
+          testsPassed: 0,
+          testsTotal: 0,
+        });
+        const truthClaims = enforceTruthClaims([
+          classifyTruthClaim({
+            domain: 'execution_orchestrator',
+            statement: `Action mission ${executionId} blocked pending ApprovalGate (${impact.actionType})`,
+            classification: 'UNVERIFIED',
+            basis: failureReason,
+            evidenceRefs: [executionEvidenceHash, reqRec.requestId],
+          }),
+        ]);
+        const truthSummary = summarizeTruthClaims(truthClaims);
         const blockedRecord: ActionMissionRecord = {
+          executionId,
           missionId,
           tenantId: scope.tenantId,
           ownerUserId: scope.userId,
@@ -1003,11 +1063,16 @@ export class ActionDrivenEngine {
           priority,
           runtime: runtimeHint,
           status: 'BLOCKED',
+          executionResult: 'BLOCKED',
           attribution: 'deterministic_action_engine',
           nativeNeuralState: perception.connectivity.runtimeState,
-          createdAt: new Date(tStart).toISOString(),
-          completedAt: new Date().toISOString(),
-          durationMs: Date.now() - tStart,
+          createdAt: startTimestamp,
+          startTimestamp,
+          finishTimestamp,
+          completedAt: finishTimestamp,
+          executionDurationMs,
+          durationMs: executionDurationMs,
+          executionEvidenceHash,
           pillars,
           perception,
           reasoningOutcome,
@@ -1018,11 +1083,14 @@ export class ActionDrivenEngine {
           artifacts,
           approvalRequestId: reqRec.requestId,
           failureReason,
+          truthClaims,
+          truthSummary,
           auditEntryHash: AuditLedger.append('GOVERNANCE', 'ACTION_MISSION_APPROVAL_REQUIRED', {
             missionId,
             tenantId: scope.tenantId,
             approvalRequestId: reqRec.requestId,
             actionType: impact.actionType,
+            executionEvidenceHash,
           }).entry_hash,
         };
         this.missions.unshift(blockedRecord);

@@ -5,6 +5,7 @@
  */
 
 import 'dotenv/config';
+import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -45,6 +46,7 @@ import {
   isCloudCheckpointStorageConfigured,
   loadCheckpointFromCloudStorage,
   statCheckpointInCloudStorage,
+  validateCloudRuntimeConfig,
 } from './lib/CloudCheckpointStorage.ts';
 import {
   ConnectivityMonitor,
@@ -79,7 +81,15 @@ import {
   type ActionMissionMode,
   type ActionMissionRequest,
 } from './lib/ActionDrivenEngine.ts';
+import { SoftwareProjectManager } from './lib/SoftwareProjectManager.ts';
+import { buildTruthDashboardSnapshot } from './lib/DashboardTruth.ts';
 import { LedgerService, type LedgerCategorySort } from './src/services/LedgerService.ts';
+
+// Hydrate .env.local if present (without overriding explicit runtime environment variables)
+const envLocalPath = path.resolve(process.cwd(), '.env.local');
+if (fs.existsSync(envLocalPath)) {
+  dotenv.config({ path: envLocalPath, override: false });
+}
 
 function resolveServerPort(): number {
   const args = process.argv.slice(2);
@@ -146,6 +156,36 @@ function requireRole(allowedRoles: Array<'User' | 'Developer' | 'Administrator'>
 // Resource history buffer using authentic OS and process telemetry (nullable inference telemetry until measured)
 let lastRecordedTokensPerSec: number | null = null;
 let lastRecordedLatencyMs: number | null = null;
+const apiLatencySamples: number[] = [];
+let liveWsClientCount = 0;
+let lastWsFrameAt: string | null = null;
+
+app.use('/api', (_req: Request, res: Response, next) => {
+  const startNs = process.hrtime.bigint();
+  res.on('finish', () => {
+    const ms = Number(process.hrtime.bigint() - startNs) / 1_000_000;
+    apiLatencySamples.push(Number(ms.toFixed(2)));
+    if (apiLatencySamples.length > 50) {
+      apiLatencySamples.shift();
+    }
+  });
+  next();
+});
+
+function getMeasuredTransportTelemetry() {
+  const avg =
+    apiLatencySamples.length > 0
+      ? Number((apiLatencySamples.reduce((a, b) => a + b, 0) / apiLatencySamples.length).toFixed(2))
+      : null;
+  return {
+    wsClientCount: liveWsClientCount,
+    wsLastFrameAt: lastWsFrameAt,
+    apiAvgLatencyMs: avg,
+    apiSampleCount: apiLatencySamples.length,
+    lastRecordedTokensPerSec,
+    lastInferenceLatencyMs: lastRecordedLatencyMs,
+  };
+}
 
 interface RealResourceSample {
   timestamp: string;
@@ -361,6 +401,11 @@ async function buildSystemStatusPayload() {
         runtimeBridgeSource: null,
       };
 
+  const truthDashboard = await buildTruthDashboardSnapshot(
+    connectivity,
+    getMeasuredTransportTelemetry()
+  );
+
   return {
     success: true,
     connectivity,
@@ -380,6 +425,7 @@ async function buildSystemStatusPayload() {
       current: resourceHistory[resourceHistory.length - 1],
       history: resourceHistory
     },
+    truthDashboard,
     serverTime: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime())
   };
@@ -390,6 +436,20 @@ app.get('/api/system/status', async (_req: Request, res: Response) => {
   try {
     const payload = await buildSystemStatusPayload();
     res.json(payload);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 1b. Truth-First Dashboard Snapshot API
+app.get('/api/truth/dashboard', async (_req: Request, res: Response) => {
+  try {
+    const connectivity = await ConnectivityMonitor.getInstance().checkNow();
+    const truthDashboard = await buildTruthDashboardSnapshot(
+      connectivity,
+      getMeasuredTransportTelemetry()
+    );
+    res.json({ success: true, truthDashboard });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -4747,9 +4807,226 @@ app.get('/api/action/missions/:missionId', requireAuth('guest'), (req: Authentic
   }
 });
 
+// ==========================================
+// SECTION 10: NATIVE APP CREATION & SOFTWARE ENGINEERING WORKSPACE
+// ==========================================
+
+function resolveEngineeringScope(req: AuthenticatedRequest) {
+  return {
+    tenantId: req.sovereignTenantId || 'default-tenant',
+    userId: req.sovereignUserId || 'guest',
+    role: req.sovereignRole || ('guest' as const),
+  };
+}
+
+app.get('/api/engineering/capabilities', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const snapshot = await SoftwareProjectManager.getInstance().getSoftwareCapabilitiesSnapshot();
+    res.json({ success: true, ...snapshot });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const projects = mgr.listProjects(scope);
+    const recentEvidence = mgr.listRecentEvidence(scope, 20);
+    res.json({ success: true, projects, recentEvidence });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (hasUnsafePrototypeKeys(req.body)) {
+      return res.status(400).json({ success: false, error: 'INVALID_PAYLOAD: disallowed prototype key' });
+    }
+    const prompt = sanitizeCognitiveText(req.body?.prompt, 4000).trim();
+    const name = typeof req.body?.name === 'string' ? sanitizeCognitiveText(req.body.name, 120).trim() : undefined;
+    const rawStack = req.body?.stack;
+    const stack =
+      rawStack === 'node_api' || rawStack === 'python_service' || rawStack === 'static_web' || rawStack === 'node_fullstack'
+        ? rawStack
+        : 'node_fullstack';
+    const project = await SoftwareProjectManager.getInstance().createAndScaffoldProject(
+      {
+        name,
+        prompt,
+        stack,
+        runChecks: req.body?.runChecks !== false,
+      },
+      resolveEngineeringScope(req)
+    );
+    res.json({ success: true, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const project = SoftwareProjectManager.getInstance().getProject(
+      String(req.params.projectId || ''),
+      resolveEngineeringScope(req)
+    );
+    if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
+    res.json({ success: true, project });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/file', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const relPath = String(req.query.path || '');
+    if (!relPath) return res.status(400).json({ success: false, error: 'path query parameter is required' });
+    const content = SoftwareProjectManager.getInstance().readProjectFile(
+      String(req.params.projectId || ''),
+      relPath,
+      resolveEngineeringScope(req)
+    );
+    res.json({ success: true, path: relPath, content });
+  } catch (err: any) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/file', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const relPath = String(req.body?.path || '');
+    const content = req.body?.content;
+    const message = sanitizeCognitiveText(req.body?.message || '', 240).trim();
+    if (!relPath || typeof content !== 'string') {
+      return res.status(400).json({ success: false, error: 'path and string content are required' });
+    }
+    const result = SoftwareProjectManager.getInstance().writeProjectFile(
+      String(req.params.projectId || ''),
+      relPath,
+      content,
+      message,
+      resolveEngineeringScope(req)
+    );
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/engineering/projects/:projectId/file', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const relPath = String(req.query.path || req.body?.path || '');
+    if (!relPath) return res.status(400).json({ success: false, error: 'path is required' });
+    const project = SoftwareProjectManager.getInstance().deleteProjectFile(
+      String(req.params.projectId || ''),
+      relPath,
+      resolveEngineeringScope(req)
+    );
+    res.json({ success: true, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/build', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const evidence = await mgr.runBuild(String(req.params.projectId || ''), scope);
+    const project = mgr.getProject(String(req.params.projectId || ''), scope);
+    res.json({ success: true, evidence, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/test', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const evidence = await mgr.runTests(String(req.params.projectId || ''), scope);
+    const project = mgr.getProject(String(req.params.projectId || ''), scope);
+    res.json({ success: true, evidence, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/security-validate', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const evidence = await mgr.runSecurityValidation(String(req.params.projectId || ''), scope);
+    const project = mgr.getProject(String(req.params.projectId || ''), scope);
+    res.json({ success: true, evidence, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/deploy', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const approvalRequestId = typeof req.body?.approvalRequestId === 'string' ? req.body.approvalRequestId.trim() : undefined;
+    const result = await SoftwareProjectManager.getInstance().requestOrExecuteDeploy(
+      String(req.params.projectId || ''),
+      { approvalRequestId },
+      scope
+    );
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/rollback', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const revisionId = String(req.body?.revisionId || '').trim();
+    if (!revisionId) return res.status(400).json({ success: false, error: 'revisionId is required' });
+    const project = SoftwareProjectManager.getInstance().rollbackToRevision(
+      String(req.params.projectId || ''),
+      revisionId,
+      resolveEngineeringScope(req)
+    );
+    res.json({ success: true, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/preview', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const project = mgr.getProject(String(req.params.projectId || ''), scope);
+    if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
+    let html = '';
+    try {
+      html = mgr.readProjectFile(project.projectId, 'public/index.html', scope);
+    } catch {
+      html = `<!DOCTYPE html><html><body style="background:#070B19;color:#E2E8F0;font-family:sans-serif;padding:24px;"><h2>${project.name}</h2><p>Stack: ${project.stack} (no public/index.html entrypoint; inspect API endpoints in Inspector tab)</p></body></html>`;
+    }
+    res.json({ success: true, html, endpoints: project.requirementsSpec.endpoints });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Mount Vite middleware in development or serve static in production.
 // ZYNTHEOR_API_ONLY=1 skips Vite for live API acceptance tests.
 async function startServer() {
+  // Pre-bind validated configuration check before runtime binding (sanitized audit, never logs secrets)
+  const startupCloudCfg = validateCloudRuntimeConfig();
+  AuditLedger.append('SYSTEM', 'CLOUD_RUNTIME_PREBIND_CHECK', {
+    configValid: startupCloudCfg.configValid,
+    provider: startupCloudCfg.provider,
+    missingKeys: startupCloudCfg.missingKeys,
+    validationError: startupCloudCfg.validationError,
+  });
+
   await ConnectivityMonitor.getInstance().checkNow().catch(() => null);
   if (isCloudSqlConfigured()) {
     await AuditLedger.syncWithCloud().catch((err) => {
@@ -4819,10 +5096,12 @@ async function startServer() {
   const runtimeWss = new WebSocketServer({ server: httpServer, path: '/ws/runtime' });
 
   const broadcastRuntimeState = (state: Awaited<ReturnType<ConnectivityMonitor['getStatus']>>) => {
+    lastWsFrameAt = new Date().toISOString();
+    liveWsClientCount = runtimeWss.clients.size;
     const frame = JSON.stringify({
       type: 'runtime_state',
       data: state,
-      timestamp: new Date().toISOString(),
+      timestamp: lastWsFrameAt,
     });
     for (const client of runtimeWss.clients) {
       if (client.readyState === WebSocket.OPEN) {
@@ -4841,6 +5120,8 @@ async function startServer() {
   ConnectivityMonitor.getInstance().startBackgroundMonitor(15000);
 
   runtimeWss.on('connection', (ws) => {
+    liveWsClientCount = runtimeWss.clients.size;
+    lastWsFrameAt = new Date().toISOString();
     void ConnectivityMonitor.getInstance()
       .getStatus()
       .then((state) => {
@@ -4856,12 +5137,17 @@ async function startServer() {
       })
       .catch(() => null);
 
+    ws.on('close', () => {
+      liveWsClientCount = runtimeWss.clients.size;
+    });
+
     ws.on('message', (raw) => {
       try {
         const msg = JSON.parse(String(raw));
+        lastWsFrameAt = new Date().toISOString();
         if (msg?.type === 'ping') {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+            ws.send(JSON.stringify({ type: 'pong', timestamp: lastWsFrameAt }));
           }
         } else if (msg?.type === 'refresh') {
           void ConnectivityMonitor.getInstance()
@@ -4886,6 +5172,7 @@ async function startServer() {
   });
 
   httpServer.on('close', () => {
+    liveWsClientCount = 0;
     unsubscribeConnectivity();
     ConnectivityMonitor.getInstance().stopBackgroundMonitor();
     runtimeWss.close();

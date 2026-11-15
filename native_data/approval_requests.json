@@ -1,0 +1,44 @@
+[
+  {
+    "requestId": "apr_1794733733482_3bb2ff",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhm4ix8_b11a08_rev_3",
+    "description": "Cloud deployment of 'Incident Telemetry Service' (rev_3)",
+    "requestedByUserId": "dev-user-1",
+    "requestedByRole": "developer",
+    "tenantId": "test-tenant-sec10",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:08:53.482Z",
+    "expiresAt": "2026-11-16T09:08:53.482Z",
+    "requestDigest": "13f8cde23a38bc223aa06aed174bed63e28ccfd3acba1db33e27b1e4193b0f3d"
+  },
+  {
+    "requestId": "apr_1794733580986_2dcd25",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhm1928_dd2d17_rev_3",
+    "description": "Cloud deployment of 'Incident Telemetry Service' (rev_3)",
+    "requestedByUserId": "dev-user-1",
+    "requestedByRole": "developer",
+    "tenantId": "test-tenant-sec10",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:06:20.986Z",
+    "expiresAt": "2026-11-16T09:06:20.986Z",
+    "requestDigest": "c667be06341a3ef45a94ba0f3408f47c0e3ae84d0e0d578dc9f84705a46b7bb1"
+  },
+  {
+    "requestId": "apr_1794733540610_20b5d1",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhm0drp_861c23_rev_3",
+    "description": "Cloud deployment of 'Incident Telemetry Service' (rev_3)",
+    "requestedByUserId": "dev-user-1",
+    "requestedByRole": "developer",
+    "tenantId": "test-tenant-sec10",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:05:40.610Z",
+    "expiresAt": "2026-11-16T09:05:40.610Z",
+    "requestDigest": "155d3c7cc34b0396356a98200adb3f8b28fddfbb96c43ce67a796530b397fbfa"
+  }
+]

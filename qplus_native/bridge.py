@@ -24,8 +24,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from qplus_native.architecture import TARGET_TOTAL_PARAMS
 from qplus_native.cloud_storage import (
     check_cloud_connectivity,
+    hydrate_cloud_env_from_dotenv,
     parse_checkpoint_container,
     upload_checkpoint_bytes_to_cloud,
+    validate_cloud_runtime_config,
 )
 from qplus_native.model import (
     NativeNeuralModel,
@@ -963,9 +965,16 @@ def _classify_runtime_state(model: Optional[NativeNeuralModel], boot_error: Opti
 def main():
     model: NativeNeuralModel | None = None
     boot_error: str | None = None
+    hydrate_cloud_env_from_dotenv()
+    startup_cfg = validate_cloud_runtime_config()
     try:
-        # Strictly online-only: loads exclusively from CHECKPOINT_PRESIGNED_URL or S3_BUCKET
-        model = NativeNeuralModel()
+        if not startup_cfg.get("config_valid"):
+            boot_error = str(startup_cfg.get("validation_error") or "FAIL_CLOSED: Cloud runtime not configured")
+            sys.stderr.write(f"FAIL_CLOSED_BOOT: {boot_error}\n")
+            sys.stderr.flush()
+        else:
+            # Strictly online-only: loads exclusively from validated CHECKPOINT_PRESIGNED_URL or S3_BUCKET
+            model = NativeNeuralModel()
     except Exception as e:
         boot_error = str(e)
         sys.stderr.write(f"FAIL_CLOSED_BOOT: {boot_error}\n")
@@ -1062,9 +1071,21 @@ def main():
 
             elif cmd == "reload_cloud_weights":
                 try:
+                    req_presigned = params.get("presigned_url")
+                    req_obj_key = params.get("object_key")
+                    if req_presigned:
+                        os.environ["CHECKPOINT_PRESIGNED_URL"] = str(req_presigned).strip()
+                    if req_obj_key:
+                        os.environ["S3_CHECKPOINT_KEY"] = str(req_obj_key).strip()
+                    reload_cfg = validate_cloud_runtime_config(
+                        object_key=req_obj_key,
+                        presigned_url=req_presigned,
+                    )
+                    if not reload_cfg.get("config_valid"):
+                        raise RuntimeError(str(reload_cfg.get("validation_error") or "FAIL_CLOSED: Invalid cloud configuration"))
                     new_model = NativeNeuralModel(
-                        presigned_url=params.get("presigned_url"),
-                        object_key=params.get("object_key"),
+                        presigned_url=req_presigned,
+                        object_key=req_obj_key,
                     )
                     model = new_model
                     boot_error = None
@@ -1106,6 +1127,7 @@ def main():
                     sys.stdout.flush()
 
             elif cmd == "ping":
+                cfg_diag = validate_cloud_runtime_config()
                 rt_state = _classify_runtime_state(model, boot_error)
                 is_ready = bool(model is not None and model.weights_loaded and model.execution_verified and rt_state == "READY")
                 if not is_ready:
@@ -1121,6 +1143,8 @@ def main():
                         "status": "fail_closed",
                         "fail_closed": True,
                         "runtime_state": rt_state,
+                        "config_valid": bool(cfg_diag.get("config_valid")),
+                        "missing_keys": cfg_diag.get("missing_keys", []),
                         "execution_verified": bool(model is not None and model.execution_verified),
                         "execution_error": model.execution_verification_error if model else boot_error,
                         "tensor_validation_ok": bool(model is not None and model.tensor_validation_ok),

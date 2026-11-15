@@ -9,17 +9,26 @@ import { AuditLedger } from './AuditLedger.ts';
 import {
   isCloudCheckpointStorageConfigured,
   statCheckpointInCloudStorage,
+  validateCloudRuntimeConfig,
 } from './CloudCheckpointStorage.ts';
 import {
   NativeNeuralLMProvider,
+  classifyBridgeFailureCategory,
   type InferenceEvidence,
   type RuntimeLifecycleState,
   type BridgeLifecycleState,
+  type BridgeFailureCategory,
   type BridgeLifecycleTelemetry,
 } from './providers.ts';
 import net from 'net';
 
-export type { InferenceEvidence, RuntimeLifecycleState, BridgeLifecycleState, BridgeLifecycleTelemetry };
+export type {
+  InferenceEvidence,
+  RuntimeLifecycleState,
+  BridgeLifecycleState,
+  BridgeFailureCategory,
+  BridgeLifecycleTelemetry,
+};
 
 export interface BackendConnectivityState {
   online: boolean;
@@ -36,6 +45,10 @@ export interface BackendConnectivityState {
   weightsRole: string | null;
   cloudStorageConfigured: boolean;
   cloudStorageReachable: boolean;
+  cloudConfigValid: boolean;
+  cloudConfigProvider: 'presigned_url' | 's3' | 'cloud_runtime_url' | 'none';
+  cloudConfigMissingKeys: string[];
+  cloudConfigError: string | null;
   cloudSourceUri: string | null;
   pythonBridgeReachable: boolean;
   bridgeLifecycle: BridgeLifecycleTelemetry;
@@ -270,6 +283,7 @@ export class ConnectivityMonitor {
 
   public setPresignedUrlOverride(url?: string): void {
     this.overridePresignedUrl = url?.trim() || undefined;
+    NativeNeuralLMProvider.getInstance().setCloudOverrides({ presignedUrl: this.overridePresignedUrl });
   }
 
   public getLastPingResult(): Awaited<ReturnType<NativeNeuralLMProvider['ping']>> | null {
@@ -278,23 +292,26 @@ export class ConnectivityMonitor {
 
   public async checkNow(presignedUrlOverride?: string): Promise<BackendConnectivityState> {
     const started = Date.now();
+    const effectiveOverride = presignedUrlOverride?.trim() || this.overridePresignedUrl;
+    const cfgCheck = validateCloudRuntimeConfig({ presignedUrl: effectiveOverride });
     const activeUrl =
-      presignedUrlOverride?.trim() ||
-      this.overridePresignedUrl ||
-      process.env.CHECKPOINT_PRESIGNED_URL ||
-      process.env.ZYNTHEOR_CONNECTIVITY_PROBE_URL ||
-      process.env.CLOUD_RUNTIME_URL ||
+      effectiveOverride ||
+      cfgCheck.normalizedEnv.CHECKPOINT_PRESIGNED_URL ||
+      cfgCheck.normalizedEnv.ZYNTHEOR_CONNECTIVITY_PROBE_URL ||
+      cfgCheck.normalizedEnv.CLOUD_RUNTIME_URL ||
       '';
 
     const s3Configured = isCloudCheckpointStorageConfigured();
     const cloudStorageConfigured = Boolean(activeUrl || s3Configured);
 
     let cloudStorageReachable = false;
-    let cloudSourceUri: string | null = activeUrl || null;
+    let cloudSourceUri: string | null = activeUrl || cfgCheck.sourceUri || null;
     let cloudErrorReason = '';
     let lastHttpStatus: number | undefined;
 
-    if (activeUrl) {
+    if (!cfgCheck.configValid && cloudStorageConfigured && cfgCheck.validationError) {
+      cloudErrorReason = cfgCheck.validationError;
+    } else if (activeUrl) {
       const httpRes = await probeHttpEndpoint(activeUrl, 3000);
       cloudStorageReachable = httpRes.ok;
       lastHttpStatus = httpRes.status;
@@ -312,6 +329,7 @@ export class ConnectivityMonitor {
       }
     } else {
       cloudErrorReason =
+        cfgCheck.validationError ||
         'No Cloud Object Storage (S3_BUCKET / CHECKPOINT_PRESIGNED_URL) or CLOUD_RUNTIME_URL configured';
     }
 
@@ -394,18 +412,24 @@ export class ConnectivityMonitor {
       : cloudErrorReason || bridgeReason || 'Online Connectivity Required';
 
     const bridgeTelemetryBefore = provider.getLifecycleTelemetry();
+    const bridgeErrCat = pythonBridgeReachable ? 'none' : classifyBridgeFailureCategory(bridgeReason);
     const targetBridgeState: BridgeLifecycleState = online
       ? 'Connected'
       : pythonBridgeReachable
         ? 'Degraded'
         : bridgeTelemetryBefore.state === 'Reconnecting'
           ? 'Reconnecting'
-          : (bridgeReason.includes('timed out') || bridgeTelemetryBefore.reconnectAttempt >= bridgeTelemetryBefore.maxReconnectAttempts)
-            ? 'Unreachable'
-            : 'Service Error';
+          : bridgeErrCat === 'session_timeout'
+            ? 'Session Timeout'
+            : bridgeErrCat === 'initialization_error'
+              ? 'Initialization Error'
+              : bridgeTelemetryBefore.reconnectAttempt >= bridgeTelemetryBefore.maxReconnectAttempts
+                ? 'Unreachable'
+                : 'Unreachable';
     const bridgeLifecycle = provider.reconcileLifecycleState(
       targetBridgeState,
-      online ? null : reason
+      online ? null : reason,
+      online ? 'none' : bridgeErrCat
     );
 
     const nowIso = new Date().toISOString();
@@ -446,6 +470,10 @@ export class ConnectivityMonitor {
       weightsRole,
       cloudStorageConfigured,
       cloudStorageReachable,
+      cloudConfigValid: cfgCheck.configValid,
+      cloudConfigProvider: cfgCheck.provider,
+      cloudConfigMissingKeys: cfgCheck.missingKeys,
+      cloudConfigError: cfgCheck.validationError,
       cloudSourceUri,
       pythonBridgeReachable,
       bridgeLifecycle: {

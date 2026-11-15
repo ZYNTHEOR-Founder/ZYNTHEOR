@@ -118,7 +118,15 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-full workspace-runtime">
             <StatusDot
-              status={(bridgeState === 'Reconnecting' || bridgeState === 'Unreachable' || bridgeState === 'Service Error' ? bridgeState : headerStatus) as any}
+              status={(
+                bridgeState === 'Reconnecting' ||
+                bridgeState === 'Unreachable' ||
+                bridgeState === 'Initialization Error' ||
+                bridgeState === 'Session Timeout' ||
+                bridgeState === 'Service Error'
+                  ? bridgeState
+                  : headerStatus
+              ) as any}
               label={headerLabel}
               detail={modelTitle}
               pulse={headerStatus === 'CHECKING' || headerStatus === 'INITIALIZING' || bridgeState === 'Initializing' || bridgeState === 'Connecting' || bridgeState === 'Reconnecting'}

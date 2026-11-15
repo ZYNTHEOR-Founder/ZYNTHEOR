@@ -130,21 +130,175 @@ class _SSRFRedirectBlocker(urllib.request.HTTPRedirectHandler):
 _SAFE_URL_OPENER = urllib.request.build_opener(_SSRFRedirectBlocker())
 
 
+_CLOUD_ENV_KEYS = (
+    "S3_BUCKET",
+    "S3_ACCESS_KEY_ID",
+    "S3_SECRET_ACCESS_KEY",
+    "S3_ENDPOINT",
+    "S3_REGION",
+    "S3_FORCE_PATH_STYLE",
+    "S3_CHECKPOINT_KEY",
+    "CHECKPOINT_PRESIGNED_URL",
+    "CLOUD_RUNTIME_URL",
+    "ZYNTHEOR_CONNECTIVITY_PROBE_URL",
+    "CHECKPOINT_UPLOAD_URL",
+    "ZYNTHEOR_ALLOW_LOOPBACK_CLOUD",
+)
+
+
+def _clean_env_val(val: Optional[str]) -> str:
+    if not val or not isinstance(val, str):
+        return ""
+    s = val.strip()
+    if len(s) >= 2 and ((s[0] == '"' and s[-1] == '"') or (s[0] == "'" and s[-1] == "'")):
+        s = s[1:-1].strip()
+    return s
+
+
+def hydrate_cloud_env_from_dotenv() -> Dict[str, str]:
+    """
+    Normalizes active process environment variables (stripping quotes/whitespace)
+    and populates unset cloud configuration keys from `.env` / `.env.local` so
+    child/standalone Python bridge processes reliably receive Sovereign Cloud config.
+    """
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_vals: Dict[str, str] = {}
+    for fname in (".env", ".env.local"):
+        fpath = os.path.join(root_dir, fname)
+        if not os.path.isfile(fpath):
+            continue
+        try:
+            with open(fpath, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("#") or "=" not in stripped:
+                        continue
+                    k, v = stripped.split("=", 1)
+                    k = k.strip()
+                    if k.startswith("export "):
+                        k = k[7:].strip()
+                    cleaned = _clean_env_val(v)
+                    if k in _CLOUD_ENV_KEYS and cleaned:
+                        file_vals[k] = cleaned
+        except Exception:
+            pass
+
+    resolved: Dict[str, str] = {}
+    for key in _CLOUD_ENV_KEYS:
+        existing = _clean_env_val(os.environ.get(key))
+        if existing:
+            os.environ[key] = existing
+            resolved[key] = existing
+        elif key in file_vals:
+            os.environ[key] = file_vals[key]
+            resolved[key] = file_vals[key]
+    return resolved
+
+
+def validate_cloud_runtime_config(
+    object_key: Optional[str] = None,
+    presigned_url: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Pre-bind validated configuration check executed BEFORE attempting to fetch
+    or bind cloud model weights. Returns structured diagnostics without exposing secrets.
+    """
+    env = hydrate_cloud_env_from_dotenv()
+    url = _clean_env_val(presigned_url) or env.get("CHECKPOINT_PRESIGNED_URL", "")
+    probe_url = env.get("ZYNTHEOR_CONNECTIVITY_PROBE_URL", "")
+    runtime_url = env.get("CLOUD_RUNTIME_URL", "")
+    bucket = env.get("S3_BUCKET", "")
+    access_key = env.get("S3_ACCESS_KEY_ID", "")
+    secret_key = env.get("S3_SECRET_ACCESS_KEY", "")
+    endpoint = env.get("S3_ENDPOINT", "")
+    key = _clean_env_val(object_key) or env.get("S3_CHECKPOINT_KEY") or "checkpoints/model_checkpoint.pt"
+
+    if url:
+        ok, err = validate_cloud_url(url)
+        return {
+            "config_valid": ok,
+            "provider": "presigned_url",
+            "missing_keys": [],
+            "validation_error": None if ok else err,
+            "source_uri": url,
+            "runtime_state_hint": "NOT_LOADED" if ok else "FAILED",
+        }
+
+    if bucket:
+        source_uri = f"s3://{bucket}/{key}"
+        missing = []
+        if not access_key:
+            missing.append("S3_ACCESS_KEY_ID")
+        if not secret_key:
+            missing.append("S3_SECRET_ACCESS_KEY")
+        if endpoint:
+            ep_ok, ep_err = validate_cloud_url(endpoint)
+            if not ep_ok:
+                return {
+                    "config_valid": False,
+                    "provider": "s3",
+                    "missing_keys": missing,
+                    "validation_error": ep_err,
+                    "source_uri": source_uri,
+                    "runtime_state_hint": "FAILED",
+                }
+        if missing:
+            return {
+                "config_valid": False,
+                "provider": "s3",
+                "missing_keys": missing,
+                "validation_error": f"FAIL_CLOSED: Online Connectivity Required — S3_BUCKET configured without required credentials ({', '.join(missing)})",
+                "source_uri": source_uri,
+                "runtime_state_hint": "NOT_CONFIGURED",
+            }
+        try:
+            import boto3  # type: ignore  # noqa: F401
+        except ImportError:
+            return {
+                "config_valid": False,
+                "provider": "s3",
+                "missing_keys": ["boto3"],
+                "validation_error": "FAIL_CLOSED: Online Connectivity Required — S3_BUCKET configured but boto3 dependency is missing.",
+                "source_uri": source_uri,
+                "runtime_state_hint": "NOT_CONFIGURED",
+            }
+        return {
+            "config_valid": True,
+            "provider": "s3",
+            "missing_keys": [],
+            "validation_error": None,
+            "source_uri": source_uri,
+            "runtime_state_hint": "NOT_LOADED",
+        }
+
+    fallback_url = probe_url or runtime_url
+    if fallback_url:
+        ok, err = validate_cloud_url(fallback_url)
+        return {
+            "config_valid": ok,
+            "provider": "cloud_runtime_url",
+            "missing_keys": [],
+            "validation_error": None if ok else err,
+            "source_uri": fallback_url,
+            "runtime_state_hint": "NOT_LOADED" if ok else "FAILED",
+        }
+
+    return {
+        "config_valid": False,
+        "provider": "none",
+        "missing_keys": ["CHECKPOINT_PRESIGNED_URL", "S3_BUCKET"],
+        "validation_error": "FAIL_CLOSED: Online Connectivity Required — neither CHECKPOINT_PRESIGNED_URL nor S3_BUCKET is configured.",
+        "source_uri": None,
+        "runtime_state_hint": "NOT_CONFIGURED",
+    }
+
+
 def get_cloud_source_description(
     object_key: Optional[str] = None,
     presigned_url: Optional[str] = None,
 ) -> Optional[str]:
-    url = presigned_url or os.environ.get("CHECKPOINT_PRESIGNED_URL")
-    if url:
-        return url
-    bucket = os.environ.get("S3_BUCKET")
-    if bucket:
-        key = object_key or os.environ.get("S3_CHECKPOINT_KEY") or "checkpoints/model_checkpoint.pt"
-        return f"s3://{bucket}/{key}"
-    runtime_url = os.environ.get("CLOUD_RUNTIME_URL")
-    if runtime_url:
-        return runtime_url
-    return None
+    cfg = validate_cloud_runtime_config(object_key=object_key, presigned_url=presigned_url)
+    return cfg.get("source_uri")
 
 
 def check_cloud_connectivity(
@@ -155,10 +309,29 @@ def check_cloud_connectivity(
     Probes actual network reachability of the configured Cloud Object Storage / Cloud Runtime.
     Fails closed (`online: False`, `code: 'FAIL_CLOSED'`) when unconfigured or unreachable.
     """
-    url = presigned_url or os.environ.get("CHECKPOINT_PRESIGNED_URL") or os.environ.get("ZYNTHEOR_CONNECTIVITY_PROBE_URL") or os.environ.get("CLOUD_RUNTIME_URL")
-    bucket = os.environ.get("S3_BUCKET")
-    key = os.environ.get("S3_CHECKPOINT_KEY") or "checkpoints/model_checkpoint.pt"
+    cfg = validate_cloud_runtime_config(presigned_url=presigned_url)
+    env = hydrate_cloud_env_from_dotenv()
+    url = _clean_env_val(presigned_url) or env.get("CHECKPOINT_PRESIGNED_URL") or env.get("ZYNTHEOR_CONNECTIVITY_PROBE_URL") or env.get("CLOUD_RUNTIME_URL") or ""
+    bucket = env.get("S3_BUCKET") or ""
+    key = env.get("S3_CHECKPOINT_KEY") or "checkpoints/model_checkpoint.pt"
     t0 = time.perf_counter()
+
+    if not cfg.get("config_valid"):
+        err_msg = str(cfg.get("validation_error") or "FAIL_CLOSED: Cloud runtime configuration invalid.")
+        is_ssrf = "SSRF_BLOCKED" in err_msg
+        hint = str(cfg.get("runtime_state_hint") or "NOT_CONFIGURED")
+        return {
+            "online": False,
+            "status": "ONLINE_CONNECTIVITY_REQUIRED",
+            "code": "FAIL_CLOSED",
+            "error_code": "SSRF_BLOCKED" if is_ssrf else ("NOT_CONFIGURED" if hint == "NOT_CONFIGURED" else "INVALID_CONFIG"),
+            "runtime_state_hint": hint,
+            "config_valid": False,
+            "missing_keys": cfg.get("missing_keys", []),
+            "reason": f"{err_msg} (Online Connectivity Required)" if is_ssrf else err_msg,
+            "source_uri": cfg.get("source_uri"),
+            "latency_ms": round((time.perf_counter() - t0) * 1000.0, 2),
+        }
 
     if url:
         url_ok, url_err = validate_cloud_url(url)
@@ -369,16 +542,24 @@ def load_checkpoint_container_from_cloud(
 ) -> Tuple[Dict[str, Any], bytes, str, bytes, str]:
     """
     Downloads and validates a ZYNTHEOR `.pt` checkpoint directly from Cloud Object Storage
-    into memory. Strictly online-only: zero local file fallbacks.
+    into memory. Runs validated configuration pre-check BEFORE attempting download.
+    Strictly online-only: zero local file fallbacks.
     Returns (metadata, payload_bytes, payload_sha256, raw_container_bytes, source_uri).
     """
-    url = presigned_url or os.environ.get("CHECKPOINT_PRESIGNED_URL")
+    cfg = validate_cloud_runtime_config(object_key=object_key, presigned_url=presigned_url)
+    if not cfg.get("config_valid"):
+        raise RuntimeError(
+            str(cfg.get("validation_error") or "FAIL_CLOSED: Online Connectivity Required — Cloud Runtime configuration is invalid.")
+        )
+
+    env = hydrate_cloud_env_from_dotenv()
+    url = _clean_env_val(presigned_url) or env.get("CHECKPOINT_PRESIGNED_URL") or ""
     if url:
         source_uri = url
         raw = _fetch_bytes_via_https(url, timeout_s=timeout_s)
     else:
-        bucket = os.environ.get("S3_BUCKET")
-        key = object_key or os.environ.get("S3_CHECKPOINT_KEY") or "checkpoints/model_checkpoint.pt"
+        bucket = env.get("S3_BUCKET") or ""
+        key = _clean_env_val(object_key) or env.get("S3_CHECKPOINT_KEY") or "checkpoints/model_checkpoint.pt"
         if not bucket:
             raise RuntimeError(
                 "FAIL_CLOSED: Online Connectivity Required — neither CHECKPOINT_PRESIGNED_URL nor S3_BUCKET is configured."

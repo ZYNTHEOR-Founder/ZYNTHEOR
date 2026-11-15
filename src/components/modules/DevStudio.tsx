@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { apiUrl } from '../../lib/apiClient';
 import { consumeNdjsonStream } from '../../lib/ndjson';
+import { SoftwareProjectWorkspace } from './SoftwareProjectWorkspace';
 import {
   Code2,
   Play,
@@ -81,9 +82,9 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
   const [newFileName, setNewFileName] = useState('');
   const [isCreatingFile, setIsCreatingFile] = useState(false);
 
-  // Active Role State Tracker
+  const [studioMode, setStudioMode] = useState<'project_workspace' | 'agent_ide'>('project_workspace');
   const [activeAgentRole, setActiveAgentRole] = useState<'IDLE' | 'PLANNER' | 'CODER' | 'REVIEWER' | 'TESTER'>('IDLE');
-  const [roleStatuses, setRoleStatuses] = useState<Record<string, 'IDLE' | 'ACTIVE' | 'SUCCESS' | 'RETRY' | 'ERROR'>>({
+  const [roleStatuses, setRoleStatuses] = useState<Record<string, 'IDLE' | 'ACTIVE' | 'VERIFIED' | 'RETRY' | 'ERROR'>>({
     PLANNER: 'IDLE',
     CODER: 'IDLE',
     REVIEWER: 'IDLE',
@@ -382,23 +383,23 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
               setRoleStatuses((prev) => {
                 const updated = { ...prev };
                 if (ev.role === 'PLANNER') {
-                  updated.PLANNER = ev.type === 'step' && ev.message.includes('ready') ? 'SUCCESS' : 'ACTIVE';
+                  updated.PLANNER = ev.type === 'step' && ev.message.includes('ready') ? 'VERIFIED' : 'ACTIVE';
                 } else if (ev.role === 'CODER') {
-                  updated.PLANNER = 'SUCCESS';
+                  updated.PLANNER = 'VERIFIED';
                   updated.CODER = 'ACTIVE';
                 } else if (ev.role === 'REVIEWER') {
-                  updated.CODER = 'SUCCESS';
+                  updated.CODER = 'VERIFIED';
                   if (ev.data?.reviewStatus === 'APPROVED') {
-                    updated.REVIEWER = 'SUCCESS';
+                    updated.REVIEWER = 'VERIFIED';
                   } else if (ev.data?.reviewStatus === 'REJECTED') {
                     updated.REVIEWER = 'RETRY';
                   } else {
                     updated.REVIEWER = 'ACTIVE';
                   }
                 } else if (ev.role === 'TESTER') {
-                  updated.REVIEWER = 'SUCCESS';
+                  updated.REVIEWER = 'VERIFIED';
                   if (ev.type === 'test') {
-                    updated.TESTER = ev.data?.exitCode === 0 ? 'SUCCESS' : 'ERROR';
+                    updated.TESTER = ev.data?.exitCode === 0 ? 'VERIFIED' : 'ERROR';
                   } else {
                     updated.TESTER = 'ACTIVE';
                   }
@@ -421,7 +422,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
               setActiveAgentRole('IDLE');
               setRoleStatuses((prev) => ({
                 ...prev,
-                TESTER: ev.data?.success === false ? 'ERROR' : 'SUCCESS'
+                TESTER: ev.data?.success === false ? 'ERROR' : 'VERIFIED'
               }));
               if (ev.data?.success !== false && !toastedRun) {
                 toastedRun = true;
@@ -551,6 +552,53 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
 
   return (
     <div className="space-y-6">
+      {/* Studio Workspace Mode Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-[#0D1326] border border-[#1E294A]">
+        <div className="text-xs">
+          <div className="font-bold text-white flex items-center gap-2">
+            <Code2 className="w-4 h-4 text-[#00F0FF]" />
+            <span>Creation Studio · Cloud Software Engineering &amp; Multi-Agent IDE</span>
+          </div>
+          <div className="text-[11px] text-[#9AA8C7] mt-0.5">
+            Switch between full-stack Section 10 Software Project Workspace and Single-Artifact Multi-Agent / Benchmark IDE
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setStudioMode('project_workspace')}
+            className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
+              studioMode === 'project_workspace'
+                ? 'bg-[#00F0FF] text-[#070B19]'
+                : 'bg-[#131B36] text-[#CBD5E1] border border-[#1E294A]'
+            }`}
+          >
+            Project Workspace (Section 10)
+          </button>
+          <button
+            type="button"
+            onClick={() => setStudioMode('agent_ide')}
+            className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
+              studioMode === 'agent_ide'
+                ? 'bg-[#00F0FF] text-[#070B19]'
+                : 'bg-[#131B36] text-[#CBD5E1] border border-[#1E294A]'
+            }`}
+          >
+            Multi-Agent &amp; Benchmark IDE
+          </button>
+        </div>
+      </div>
+
+      {studioMode === 'project_workspace' ? (
+        <SoftwareProjectWorkspace
+          initialCapabilities={statusData?.truthDashboard?.softwareEngineering?.capabilities}
+          onAuditUpdated={() => {
+            void fetchAuditRecords();
+            onStatusChanged?.();
+          }}
+        />
+      ) : (
+        <>
       {/* Developer Training Loss Deviation Notification Banner */}
       {alertsEnabled && activeAlerts.length > 0 && (
         <div className="p-3.5 rounded-2xl bg-[#FF5E3A]/15 border border-[#FF5E3A]/55 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -767,14 +815,14 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
               <div className={`p-2.5 rounded-xl border transition-all ${
                 roleStatuses.PLANNER === 'ACTIVE'
                   ? 'bg-[#00F0FF]/12 border-[#00F0FF]/60 shadow-sm shadow-[#00F0FF]/15'
-                  : roleStatuses.PLANNER === 'SUCCESS'
+                  : roleStatuses.PLANNER === 'VERIFIED'
                   ? 'bg-[#CCFF00]/8 border-[#CCFF00]/35'
                   : 'bg-[var(--app-surface)] border-[var(--app-card-border)]'
               }`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-[#00F0FF]">1. PLANNER</span>
                   <StatusDot
-                    status={roleStatuses.PLANNER === 'ACTIVE' ? 'ACTIVE' : roleStatuses.PLANNER === 'SUCCESS' ? 'VERIFIED' : 'NOT RUN'}
+                    status={roleStatuses.PLANNER === 'ACTIVE' ? 'ACTIVE' : roleStatuses.PLANNER === 'VERIFIED' ? 'VERIFIED' : 'NOT RUN'}
                     label={roleStatuses.PLANNER}
                    
                     pulse={roleStatuses.PLANNER === 'ACTIVE'}
@@ -787,14 +835,14 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
               <div className={`p-2.5 rounded-xl border transition-all ${
                 roleStatuses.CODER === 'ACTIVE'
                   ? 'bg-[#7B2CBF]/20 border-[#C084FC]/60 shadow-sm shadow-[#7B2CBF]/20'
-                  : roleStatuses.CODER === 'SUCCESS'
+                  : roleStatuses.CODER === 'VERIFIED'
                   ? 'bg-[#CCFF00]/8 border-[#CCFF00]/35'
                   : 'bg-[var(--app-surface)] border-[var(--app-card-border)]'
               }`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-[#C084FC]">2. CODER</span>
                   <StatusDot
-                    status={roleStatuses.CODER === 'ACTIVE' ? 'ACTIVE' : roleStatuses.CODER === 'SUCCESS' ? 'VERIFIED' : 'NOT RUN'}
+                    status={roleStatuses.CODER === 'ACTIVE' ? 'ACTIVE' : roleStatuses.CODER === 'VERIFIED' ? 'VERIFIED' : 'NOT RUN'}
                     label={roleStatuses.CODER}
                    
                     pulse={roleStatuses.CODER === 'ACTIVE'}
@@ -809,7 +857,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
                   ? 'bg-[#FF007F]/12 border-[#FF007F]/60 shadow-sm shadow-[#FF007F]/15'
                   : roleStatuses.REVIEWER === 'RETRY'
                   ? 'bg-[#FF5E3A]/12 border-[#FF5E3A]/50'
-                  : roleStatuses.REVIEWER === 'SUCCESS'
+                  : roleStatuses.REVIEWER === 'VERIFIED'
                   ? 'bg-[#CCFF00]/8 border-[#CCFF00]/35'
                   : 'bg-[var(--app-surface)] border-[var(--app-card-border)]'
               }`}>
@@ -821,7 +869,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
                         ? 'ACTIVE'
                         : roleStatuses.REVIEWER === 'RETRY'
                         ? 'PARTIAL'
-                        : roleStatuses.REVIEWER === 'SUCCESS'
+                        : roleStatuses.REVIEWER === 'VERIFIED'
                         ? 'VERIFIED'
                         : 'NOT RUN'
                     }
@@ -837,7 +885,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
               <div className={`p-2.5 rounded-xl border transition-all ${
                 roleStatuses.TESTER === 'ACTIVE'
                   ? 'bg-[#00F0FF]/12 border-[#00F0FF]/60 shadow-sm shadow-[#00F0FF]/15'
-                  : roleStatuses.TESTER === 'SUCCESS'
+                  : roleStatuses.TESTER === 'VERIFIED'
                   ? 'bg-[#CCFF00]/8 border-[#CCFF00]/35'
                   : roleStatuses.TESTER === 'ERROR'
                   ? 'bg-[#FF007F]/12 border-[#FF007F]/50'
@@ -849,7 +897,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
                     status={
                       roleStatuses.TESTER === 'ACTIVE'
                         ? 'ACTIVE'
-                        : roleStatuses.TESTER === 'SUCCESS'
+                        : roleStatuses.TESTER === 'VERIFIED'
                         ? 'VERIFIED'
                         : roleStatuses.TESTER === 'ERROR'
                         ? 'FAILED'
@@ -1876,6 +1924,8 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
           </VividCard>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

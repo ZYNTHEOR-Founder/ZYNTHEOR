@@ -108,15 +108,31 @@ export type BridgeLifecycleState =
   | 'Degraded'
   | 'Reconnecting'
   | 'Unreachable'
+  | 'Initialization Error'
+  | 'Session Timeout'
   | 'Service Error';
+
+export type BridgeFailureCategory =
+  | 'none'
+  | 'unreachable'
+  | 'initialization_error'
+  | 'session_timeout';
 
 export interface BridgeLifecycleTelemetry {
   state: BridgeLifecycleState;
   previousState: BridgeLifecycleState | null;
+  failureCategory?: BridgeFailureCategory;
+  backoffPolicy?: {
+    category: BridgeFailureCategory;
+    baseDelayMs: number;
+    maxDelayMs: number;
+    multiplier: number;
+  };
   transitionAt: string;
   pid: number | null;
   heartbeatIntervalMs: number;
   lastHeartbeatAt: string | null;
+  lastVerifiedHeartbeatAt?: string | null;
   lastHeartbeatLatencyMs: number | null;
   reconnectAttempt: number;
   maxReconnectAttempts: number;
@@ -126,6 +142,9 @@ export interface BridgeLifecycleTelemetry {
   totalPings: number;
   totalFailures: number;
   lastError: string | null;
+  cloudConfigValid?: boolean;
+  cloudConfigMissingKeys?: string[];
+  cloudConfigError?: string | null;
 }
 
 export interface ConnectivityHealthState {
@@ -143,6 +162,10 @@ export interface ConnectivityHealthState {
   cloudSource?: string | null;
   cloudStorageConfigured?: boolean;
   cloudStorageReachable?: boolean;
+  cloudConfigValid?: boolean;
+  cloudConfigProvider?: string;
+  cloudConfigMissingKeys?: string[];
+  cloudConfigError?: string | null;
   pythonBridgeReachable?: boolean;
   bridgeLifecycle?: BridgeLifecycleTelemetry;
   weightsLoaded: boolean;
@@ -164,6 +187,252 @@ export interface ConnectivityHealthState {
   latencyMs?: number;
   lastCheckedAt?: string | null;
   lastOnlineAt?: string | null;
+}
+
+export type TruthOperationalState =
+  | 'VERIFIED'
+  | 'UNVERIFIED'
+  | 'BLOCKED'
+  | 'NOT_IMPLEMENTED'
+  | 'NOT_CONFIGURED'
+  | 'UNAVAILABLE';
+
+export type SubsystemImplementationState =
+  | 'IMPLEMENTED'
+  | 'PARTIAL'
+  | 'BLOCKED'
+  | 'UNVERIFIED'
+  | 'NOT_IMPLEMENTED'
+  | 'NOT_CONFIGURED';
+
+export interface SoftwareCapabilityStatusEntry {
+  id: string;
+  name: string;
+  status: SubsystemImplementationState;
+  evidenceSource: string;
+  lastVerifiedAt: string;
+  detail: string;
+  missingDependency?: string;
+}
+
+export interface ProjectExecutionEvidenceRecord {
+  projectId: string;
+  taskId: string;
+  executionId: string;
+  sourceRevision: string;
+  operationType: string;
+  startTimestamp: string;
+  completionTimestamp: string;
+  actualDurationMs: number;
+  buildOrTestResult: string;
+  artifactReference: string;
+  evidenceHash: string;
+  verificationStatus: 'VERIFIED' | 'BLOCKED' | 'FAILED' | 'UNVERIFIED';
+  stdoutSnippet?: string;
+  stderrSnippet?: string;
+  exitCode?: number | null;
+}
+
+export interface SoftwareProjectRecord {
+  projectId: string;
+  tenantId: string;
+  ownerUserId: string;
+  name: string;
+  slug: string;
+  description: string;
+  stack: 'node_fullstack' | 'node_api' | 'python_service' | 'static_web';
+  attribution: string;
+  nativeNeuralState: string;
+  workspaceDir: string;
+  currentRevision: string;
+  createdAt: string;
+  updatedAt: string;
+  requirementsSpec: {
+    rawPrompt: string;
+    objectives: string[];
+    endpoints: Array<{ method: string; path: string; purpose: string }>;
+    dependencies: string[];
+    risks: string[];
+    architectureSummary: string;
+  };
+  stages: Array<{
+    stage: string;
+    order: number;
+    label: string;
+    status: string;
+    completedAt: string | null;
+    summary: string;
+    artifactReference: string | null;
+    evidenceHash: string | null;
+  }>;
+  revisions: Array<{
+    revisionId: string;
+    revisionNumber: number;
+    createdAt: string;
+    createdBy: string;
+    message: string;
+    treeSha256: string;
+    files: Array<{ relativePath: string; bytes: number; sha256: string; snapshotId: string | null }>;
+  }>;
+  evidenceHistory: ProjectExecutionEvidenceRecord[];
+  lastBuild: {
+    status: 'VERIFIED' | 'FAILED' | 'UNVERIFIED';
+    executedAt: string | null;
+    durationMs: number;
+    checkedFiles: number;
+    summary: string;
+    output: string;
+  } | null;
+  lastTests: {
+    status: 'VERIFIED' | 'FAILED' | 'UNVERIFIED';
+    executedAt: string | null;
+    durationMs: number;
+    passed: number;
+    total: number;
+    summary: string;
+    output: string;
+  } | null;
+  lastSecurityScan: {
+    status: 'VERIFIED' | 'BLOCKED' | 'UNVERIFIED';
+    scannedAt: string | null;
+    findings: Array<{ severity: 'HIGH' | 'MEDIUM' | 'LOW'; file: string; rule: string; detail: string }>;
+    summary: string;
+  } | null;
+  deployment: {
+    status: 'NOT_CONFIGURED' | 'BLOCKED' | 'PENDING_APPROVAL' | 'DEPLOYED' | 'FAILED';
+    approvalRequestId: string | null;
+    targetProvider: string | null;
+    targetEndpoint: string | null;
+    artifactZip: string | null;
+    artifactSha256: string | null;
+    deployedAt: string | null;
+    runtimeVerifiedAt: string | null;
+    runtimeHttpStatus: number | null;
+    reason: string;
+  };
+  runtimeLogs: Array<{ timestamp: string; level: 'INFO' | 'WARN' | 'ERROR'; source: string; message: string }>;
+}
+
+export interface TruthDashboardSnapshot {
+  generatedAt: string;
+  policy: string;
+  systemStatusOverview: Array<{
+    id: string;
+    label: string;
+    state: TruthOperationalState;
+    lastVerifiedAt: string;
+    evidenceSource: string;
+    failureReason: string | null;
+  }>;
+  nativeIntelligenceGates: Array<{
+    id: string;
+    order: number;
+    name: string;
+    state: TruthOperationalState;
+    lastVerifiedAt: string | null;
+    evidenceSource: string;
+    reason: string;
+  }>;
+  activeBlockers: Array<{
+    id: string;
+    component: string;
+    currentState: TruthOperationalState;
+    reason: string;
+    requiredDependency: string;
+    verificationStatus: TruthOperationalState;
+  }>;
+  realRuntimeMetrics: Array<{
+    id: string;
+    label: string;
+    value: number | string | null;
+    unit: string;
+    status: 'VERIFIED' | 'UNAVAILABLE' | 'NOT_CONFIGURED';
+    source: string;
+    collectedAt: string;
+  }>;
+  cognitiveSystems: Array<{
+    id: string;
+    name: string;
+    status: SubsystemImplementationState;
+    evidence: string;
+    lastVerifiedAt: string;
+  }>;
+  executionAndAutonomy: {
+    status: SubsystemImplementationState;
+    taskSuccessRatePct: number | null;
+    recoverySuccessRatePct: number | null;
+    verificationSuccessRatePct: number | null;
+    dataAvailability: 'VERIFIED' | 'NOT_ENOUGH_DATA';
+    activeJobs: Array<{ jobId: string; goal: string; state: string; updatedAt: string }>;
+    history: Array<{
+      executionId: string;
+      taskId: string;
+      source: string;
+      startTimestamp: string;
+      completionTimestamp: string;
+      actualDurationMs: number;
+      executionResult: string;
+      evidenceHash: string;
+      verificationResult: TruthOperationalState;
+    }>;
+  };
+  truthAndAudit: {
+    totalRecords: number;
+    chainValid: boolean;
+    headHash: string;
+    evidenceRecordsCount: number;
+    rejectedEvidenceCount: number;
+    classificationSummary: {
+      totalClaims: number;
+      verifiedFacts: number;
+      inferred: number;
+      unverified: number;
+      blocked: number;
+    };
+    recentVerificationEvents: Array<{
+      id: number;
+      timestamp: string;
+      eventType: string;
+      actor: string;
+      entryHash: string;
+    }>;
+  };
+  multimodalCapabilities: Array<{
+    id: string;
+    label: string;
+    status: 'PARTIAL' | 'NOT_IMPLEMENTED' | 'IMPLEMENTED';
+    evidenceSource: string;
+    notes: string;
+  }>;
+  onlineRuntimeConnectivity: {
+    configured: boolean;
+    connected: boolean;
+    operational: boolean;
+    lastSuccessfulOnlineVerification: string | null;
+    items: Array<{
+      id: string;
+      label: string;
+      configured: boolean;
+      connected: boolean;
+      operational: boolean;
+      state: TruthOperationalState;
+      detail: string;
+    }>;
+  };
+  softwareEngineering: {
+    checkedAt: string;
+    capabilities: SoftwareCapabilityStatusEntry[];
+    summary: {
+      implemented: number;
+      partial: number;
+      blocked: number;
+      notConfigured: number;
+      notImplemented: number;
+      total: number;
+    };
+    projectsCount: number;
+    recentEvidence: ProjectExecutionEvidenceRecord[];
+  };
 }
 
 export interface SystemStatusData {
@@ -232,6 +501,7 @@ export interface SystemStatusData {
     current: ResourceSample;
     history: ResourceSample[];
   };
+  truthDashboard?: TruthDashboardSnapshot;
   serverTime: string;
   uptimeSeconds: number;
 }

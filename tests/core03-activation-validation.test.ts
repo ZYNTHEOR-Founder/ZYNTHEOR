@@ -125,7 +125,7 @@ vocab = real_vocab_size(tok)
 cfg = SeqLMConfig(vocab=vocab, d_model=16, n_layers=1, n_heads=2, d_ffn=32, ctx=12)
 lm = PureSeqLM(cfg, seed=7, tokenizer_profile="v2_base")
 
-ids = tok.encode("ZYNTHEOR Native Intelligence Core ทดสอบ", add_special=True)[:cfg.ctx]
+ids = tok.encode("ZYNTHEOR Native Intelligence Core ทดสอบ")[:cfg.ctx]
 inp = ids[:-1]
 tgt = ids[1:]
 loss_val = 0.0
@@ -238,15 +238,17 @@ async function runUnitAndEngineSuites(tmpDir: string) {
   // OBJECTIVE 2 + OBJECTIVE 3 (after verified execution): Real ActionDrivenEngine cycle
   const actionEngine = ActionDrivenEngine.getInstance();
   const scope = { tenantId: 'core03_unit_tenant', userId: 'core03_dev', role: 'developer' as const };
-  const mission = await actionEngine.executeMission({
-    goal: 'Create deterministic SHA-256 cache helper with unit tests',
-    mode: 'engineering_blueprint_execute',
-    runtime: 'node',
-    priority: 'High',
-    scope,
-  });
+  const mission = await actionEngine.executeActionMission(
+    {
+      goal: 'Create deterministic SHA-256 cache helper with unit tests',
+      mode: 'engineering_blueprint_execute',
+      runtime: 'node',
+      priority: 'High',
+    },
+    scope
+  );
   trackMissionArtifacts(mission);
-  assert.equal(mission.deliveryStatus, 'DELIVERED');
+  assert.equal(mission.status, 'DELIVERED');
   assert.equal(mission.executionResult, 'DELIVERED');
   assert.ok(mission.executionId && mission.executionId.length > 0);
   assert.ok(mission.startTimestamp && mission.finishTimestamp);
@@ -254,7 +256,7 @@ async function runUnitAndEngineSuites(tmpDir: string) {
   assert.match(mission.executionEvidenceHash, /^[a-f0-9]{64}$/);
   assert.ok(Array.isArray(mission.truthClaims) && mission.truthClaims.length >= 1);
 
-  const summary = TaskOrchestrator.getExecutionMetrics();
+  const summary = TaskOrchestrator.getInstance().getExecutionMetrics();
   assert.ok(summary.recentCycles.length >= 1);
   const latestCycle = summary.recentCycles[0];
   assert.equal(latestCycle.executionId, mission.executionId);
@@ -285,7 +287,7 @@ async function runUnitAndEngineSuites(tmpDir: string) {
   });
   assert.ok(rsnOutcome.truthClaims.length >= 1);
   assert.ok(rsnOutcome.truthClaims.every((c) => VALID_TRUTH_CLASSES.has(c.classification)));
-  assert.equal(typeof rsnOutcome.winningHypothesis.latency_ms, 'number');
+  assert.equal(typeof rsnOutcome.reasoningMetadata.durationMs, 'number');
 
   const kgSummary = KnowledgeGraphEngine.getInstance().getGraphSummary({ tenantId: scope.tenantId, role: 'developer' });
   const kgConsistency = KnowledgeGraphEngine.getInstance().verifyGraphConsistency({ tenantId: scope.tenantId, role: 'developer' });
@@ -314,6 +316,10 @@ async function runUnitAndEngineSuites(tmpDir: string) {
       weightsRole: 'unloaded',
       cloudStorageConfigured: false,
       cloudStorageReachable: false,
+      cloudConfigValid: false,
+      cloudConfigProvider: 'none',
+      cloudConfigMissingKeys: [],
+      cloudConfigError: null,
       cloudSourceUri: null,
       pythonBridgeReachable: true,
       bridgeLifecycle: {
@@ -332,6 +338,12 @@ async function runUnitAndEngineSuites(tmpDir: string) {
         totalPings: 1,
         totalFailures: 0,
         lastError: null,
+        failureCategory: 'none',
+        backoffPolicy: { category: 'none', baseDelayMs: 1000, maxDelayMs: 30000, multiplier: 2 },
+        lastVerifiedHeartbeatAt: null,
+        cloudConfigValid: false,
+        cloudConfigMissingKeys: [],
+        cloudConfigError: null,
       },
       checkpointPath: null,
       checkpointSha256: null,

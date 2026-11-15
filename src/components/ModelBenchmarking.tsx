@@ -110,15 +110,18 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
     );
   }
 
-  const lossDelta = target41m && v2Model
-    ? (v2Model.lastEvaluatedLoss - target41m.lastEvaluatedLoss).toFixed(4)
-    : '—';
-  const pplDelta = target41m && v2Model
-    ? (target41m.lastEvaluatedPerplexity - v2Model.lastEvaluatedPerplexity).toFixed(2)
-    : '—';
-  const gatedLossDelta = target41m && v2Model?.gatedBestLoss
-    ? (v2Model.gatedBestLoss - target41m.lastEvaluatedLoss).toFixed(4)
-    : null;
+  const lossDelta =
+    typeof target41m?.lastEvaluatedLoss === 'number' && typeof v2Model?.lastEvaluatedLoss === 'number'
+      ? (v2Model.lastEvaluatedLoss - target41m.lastEvaluatedLoss).toFixed(4)
+      : '—';
+  const pplDelta =
+    typeof target41m?.lastEvaluatedPerplexity === 'number' && typeof v2Model?.lastEvaluatedPerplexity === 'number'
+      ? (target41m.lastEvaluatedPerplexity - v2Model.lastEvaluatedPerplexity).toFixed(2)
+      : '—';
+  const gatedLossDelta =
+    typeof target41m?.lastEvaluatedLoss === 'number' && typeof v2Model?.gatedBestLoss === 'number'
+      ? (v2Model.gatedBestLoss - target41m.lastEvaluatedLoss).toFixed(4)
+      : null;
 
   return (
     <VividCard
@@ -268,13 +271,15 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
                 <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.memoryFootprintMb} MiB</td>
                 <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.memoryFootprintMb} MiB</td>
                 <td className="py-2.5 px-3 text-right text-[#FF5E3A]">
-                  -{target41m && v2Model ? (target41m.memoryFootprintMb - v2Model.memoryFootprintMb).toFixed(2) : '—'} MiB
+                  {typeof target41m?.memoryFootprintMb === 'number' && typeof v2Model?.memoryFootprintMb === 'number'
+                    ? `-${(target41m.memoryFootprintMb - v2Model.memoryFootprintMb).toFixed(2)} MiB`
+                    : '—'}
                 </td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-sans text-[var(--app-text-primary)]">Evaluated Loss (Held-Out NLL)</td>
-                <td className="py-2.5 px-3 text-right text-[#FF007F]">{target41m?.lastEvaluatedLoss}</td>
-                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.lastEvaluatedLoss}</td>
+                <td className="py-2.5 px-3 text-right text-[#FF007F]">{target41m?.lastEvaluatedLoss ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.lastEvaluatedLoss ?? '—'}</td>
                 <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.gatedBestLoss ?? '—'}</td>
                 <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">
                   <span className="inline-flex items-center gap-0.5">
@@ -285,11 +290,13 @@ export const ModelBenchmarking: React.FC<ModelBenchmarkingProps> = ({
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-sans text-[var(--app-text-primary)]">Evaluated Perplexity (exp(NLL))</td>
-                <td className="py-2.5 px-3 text-right text-[#FF007F]">{target41m?.lastEvaluatedPerplexity}</td>
-                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.lastEvaluatedPerplexity}</td>
+                <td className="py-2.5 px-3 text-right text-[#FF007F]">{target41m?.lastEvaluatedPerplexity ?? '—'}</td>
+                <td className="py-2.5 px-3 text-right text-[#00F0FF]">{v2Model?.lastEvaluatedPerplexity ?? '—'}</td>
                 <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">{v2Model?.gatedBestPerplexity ?? '—'}</td>
                 <td className="py-2.5 px-3 text-right text-[#CCFF00] font-bold">
-                  -{target41m && v2Model?.gatedBestPerplexity ? (target41m.lastEvaluatedPerplexity - v2Model.gatedBestPerplexity).toFixed(2) : pplDelta} PPL
+                  {typeof target41m?.lastEvaluatedPerplexity === 'number' && typeof v2Model?.gatedBestPerplexity === 'number'
+                    ? `-${(target41m.lastEvaluatedPerplexity - v2Model.gatedBestPerplexity).toFixed(2)} PPL`
+                    : `${pplDelta} PPL`}
                 </td>
               </tr>
             </tbody>

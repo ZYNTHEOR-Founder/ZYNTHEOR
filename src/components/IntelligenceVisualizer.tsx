@@ -25,10 +25,10 @@ interface IntelligenceVisualizerProps {
 }
 
 export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
-  weightsLoaded = true,
-  totalParams = 41527808,
+  weightsLoaded = false,
+  totalParams = 0,
   tokensPerSec = 0,
-  checkpointHash = '9165a3d7359e283a...',
+  checkpointHash = '',
   onNavigate
 }) => {
   const { lang, formatNumber } = useLanguage();
@@ -75,7 +75,9 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
               10L · 8H · 512D
             </div>
             <div className="text-[10px] text-[#CCFF00] font-bold mt-0.5">
-              Native Target {(totalParams / 1e6).toFixed(2)}M Float32
+              {totalParams > 0
+                ? `Native Target ${(totalParams / 1e6).toFixed(2)}M Float32`
+                : 'Awaiting verified weights'}
             </div>
           </div>
 
@@ -100,8 +102,8 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
             <div className="text-sm font-extrabold text-[var(--app-text-primary)] mt-1 font-mono">
               16,384 Subwords
             </div>
-            <div className="text-[10px] text-[#FF007F] font-bold mt-0.5">
-              Thai &amp; English 0% UNK
+            <div className="text-[10px] text-[#00F0FF] font-bold mt-0.5">
+              Tokenizer config loaded
             </div>
           </div>
 
@@ -251,11 +253,19 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
           {/* Real-time State Readout Footer */}
           <div className="mt-3 pt-3 border-t border-[#1E294A] flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono">
             <div className="flex items-center gap-2 text-[#94A3C4]">
-              <span className="w-2 h-2 rounded-full bg-[#CCFF00]" />
-              <span>Forward Pass: <span className="text-[#CCFF00] font-bold">ACTIVE DETERMINISTIC</span></span>
+              <span className={`w-2 h-2 rounded-full ${weightsLoaded ? 'bg-[#CCFF00]' : 'bg-[#FF5E3A]'}`} />
+              <span>
+                Forward Pass:{' '}
+                <span className={weightsLoaded ? 'text-[#CCFF00] font-bold' : 'text-[#FF8C73] font-bold'}>
+                  {weightsLoaded ? 'ACTIVE DETERMINISTIC' : 'UNLOADED / FAIL-CLOSED'}
+                </span>
+              </span>
             </div>
             <div className="text-[#94A3C4]">
-              Checkpoint SHA-256: <span className="text-[#00F0FF]">{checkpointHash.slice(0, 16)}...</span>
+              Checkpoint SHA-256:{' '}
+              <span className="text-[#00F0FF]">
+                {checkpointHash ? `${checkpointHash.slice(0, 16)}...` : 'UNAVAILABLE'}
+              </span>
             </div>
             <div className="text-[#94A3C4]">
               Feed Forward: <span className="text-[#FF007F] font-bold">SwiGLU</span>

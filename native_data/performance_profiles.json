@@ -1,0 +1,69 @@
+{
+  "version": "ZYNTHEOR_PERF_V1",
+  "updatedAt": "2026-11-15T09:08:52.801Z",
+  "config": {
+    "retrievalLimit": 5,
+    "contextMaxChars": 1200,
+    "cacheEnabled": true,
+    "cacheTtlMs": 30000,
+    "batchSize": 8,
+    "multiPathMaxCandidates": 3,
+    "graphMaxHops": 2
+  },
+  "samples": [
+    {
+      "sampleId": "perf_1794733499791_82c0",
+      "timestamp": "2026-11-15T09:04:59.791Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 149.401,
+      "heapDeltaKb": 220.98,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1794733539605_d840",
+      "timestamp": "2026-11-15T09:05:39.605Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 150.625,
+      "heapDeltaKb": 218.54,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1794733580111_3eb3",
+      "timestamp": "2026-11-15T09:06:20.111Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 129.721,
+      "heapDeltaKb": 218.54,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1794733732801_98ec",
+      "timestamp": "2026-11-15T09:08:52.801Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 116.468,
+      "heapDeltaKb": 224.65,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    }
+  ],
+  "snapshots": [],
+  "cacheStats": {
+    "hits": 0,
+    "misses": 0,
+    "invalidations": 0
+  }
+}

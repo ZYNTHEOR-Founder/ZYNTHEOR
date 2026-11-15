@@ -1,28 +1,30 @@
 import React from 'react';
-import { SystemStatusData, ModuleId } from '../../types';
+import {
+  SystemStatusData,
+  ModuleId,
+  TruthOperationalState,
+  SubsystemImplementationState,
+} from '../../types';
 import { VividCard } from '../ui/VividCard';
-import { MetricCard } from '../ui/MetricCard';
-import { PageContainer, SectionHeader, ResponsiveGrid, SplitPanel } from '../ui/LayoutPrimitives';
+import { StatusDot } from '../ui/StatusBadge';
+import { PageContainer, SectionHeader } from '../ui/LayoutPrimitives';
 import { Eyebrow, Heading, Text } from '../ui/Typography';
 import { ResourceMonitor } from '../ResourceMonitor';
 import { ExpenseSummaryChart } from '../ExpenseSummaryChart';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   Activity,
+  AlertTriangle,
   ArrowRight,
-  CheckCircle2,
-  CircleAlert,
+  BrainCircuit,
+  Code2,
   Cpu,
-  FolderOpen,
+  Database,
+  Eye,
   Play,
   ShieldCheck,
+  Wifi,
   Workflow,
-  BrainCircuit,
-  Eye,
-  Code2,
-  FlaskConical,
-  Network,
-  GraduationCap,
 } from 'lucide-react';
 
 interface CommandCenterProps {
@@ -31,10 +33,62 @@ interface CommandCenterProps {
   onOpenQuickTask: () => void;
 }
 
-const formatCount = (value: number | undefined, lang: 'th' | 'en') =>
-  typeof value === 'number' && Number.isFinite(value)
-    ? new Intl.NumberFormat(lang === 'th' ? 'th-TH' : 'en-US').format(value)
-    : '—';
+const formatTimestamp = (iso: string | null | undefined, lang: 'th' | 'en') => {
+  if (!iso) return 'UNAVAILABLE';
+  try {
+    return new Date(iso).toLocaleString(lang === 'th' ? 'th-TH' : 'en-US', {
+      hour12: false,
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const formatMetricValue = (
+  value: number | string | null | undefined,
+  unit: string,
+  lang: 'th' | 'en'
+) => {
+  if (value === null || value === undefined || value === '') return 'UNAVAILABLE';
+  if (typeof value === 'number') {
+    const formatted = new Intl.NumberFormat(lang === 'th' ? 'th-TH' : 'en-US', {
+      maximumFractionDigits: 2,
+    }).format(value);
+    return unit ? `${formatted} ${unit}` : formatted;
+  }
+  return unit ? `${value} ${unit}` : String(value);
+};
+
+const toStatusDotState = (
+  state: TruthOperationalState | SubsystemImplementationState | 'NOT_ENOUGH_DATA' | string
+) => {
+  switch (state) {
+    case 'VERIFIED':
+      return 'VERIFIED';
+    case 'IMPLEMENTED':
+      return 'IMPLEMENTED';
+    case 'PARTIAL':
+      return 'PARTIAL';
+    case 'BLOCKED':
+      return 'BLOCKED';
+    case 'NOT_CONFIGURED':
+      return 'NOT_CONFIGURED';
+    case 'NOT_IMPLEMENTED':
+      return 'NOT_IMPLEMENTED';
+    case 'UNAVAILABLE':
+      return 'UNAVAILABLE';
+    case 'NOT_ENOUGH_DATA':
+      return 'NOT_ENOUGH_DATA';
+    case 'UNVERIFIED':
+    default:
+      return 'UNVERIFIED';
+  }
+};
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
   statusData,
@@ -42,317 +96,630 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   onOpenQuickTask,
 }) => {
   const { lang } = useLanguage();
-  const model = statusData?.model;
-  const commercial = statusData?.commercial;
-  const audit = statusData?.audit;
-  const sandbox = statusData?.sandbox;
+  const truth = statusData?.truthDashboard;
   const resources = statusData?.resources;
-  const totalTasks = (commercial?.tasksCompleted ?? 0) + (commercial?.tasksFailed ?? 0);
-  const successRate = totalTasks > 0 && commercial
-    ? `${commercial.taskCompletionRate.toFixed(1)}%`
-    : '—';
-  const runtimeState =
-    model?.runtimeState ||
-    statusData?.connectivity?.runtimeState ||
-    (model?.weightsLoaded ? 'READY' : undefined);
-  const executionVerified =
-    model?.executionVerified ??
-    statusData?.connectivity?.executionVerified ??
-    false;
-  const modelReady = Boolean(model?.weightsLoaded && executionVerified && (!runtimeState || runtimeState === 'READY'));
-  const modelStatus = !model
-    ? (lang === 'th' ? 'รอข้อมูลจาก Runtime' : 'Awaiting runtime data')
-    : modelReady
-      ? (lang === 'th' ? 'READY (ผ่านการทดสอบ Inference)' : 'READY (Execution verified)')
-      : runtimeState
-        ? `${runtimeState}${model.executionError ? ` · ${model.executionError}` : ''}`
-        : (lang === 'th' ? 'ยังไม่ได้โหลดโมเดล' : 'Weights not loaded');
-  const auditStatus = !audit
-    ? (lang === 'th' ? 'ไม่มีข้อมูล' : 'No data')
-    : audit.chainValid
-      ? (lang === 'th' ? 'Integrity ผ่าน' : 'Integrity valid')
-      : (lang === 'th' ? 'ต้องตรวจสอบ' : 'Review required');
+
+  const systemOverview = truth?.systemStatusOverview ?? [];
+  const blockers = truth?.activeBlockers ?? [];
+  const intelligenceGates = truth?.nativeIntelligenceGates ?? [];
+  const runtimeMetrics = truth?.realRuntimeMetrics ?? [];
+  const cognitiveSystems = truth?.cognitiveSystems ?? [];
+  const executionAndAutonomy = truth?.executionAndAutonomy;
+  const multimodal = truth?.multimodalCapabilities ?? [];
+  const connectivity = truth?.onlineRuntimeConnectivity;
+  const swEng = truth?.softwareEngineering;
+  const truthAndAudit = truth?.truthAndAudit;
+
+  const cloudOperational = Boolean(connectivity?.operational);
+  const overallGateState = cloudOperational
+    ? 'VERIFIED'
+    : blockers.some((b) => b.currentState === 'BLOCKED')
+      ? 'BLOCKED'
+      : 'NOT_CONFIGURED';
 
   return (
-    <PageContainer className="command-center">
-      <section className="command-hero relative overflow-hidden rounded-3xl border p-6 md:p-9">
-        <div className="command-hero-orb" aria-hidden="true" />
-        <div className="relative z-10 max-w-3xl">
-          <Eyebrow color={modelReady ? 'cyan' : 'coral'} className="mb-3">
-            {modelReady
-              ? 'ZYNTHEOR · NATIVE MULTI-DOMAIN INTELLIGENCE (VERIFIED)'
-              : `ZYNTHEOR · SOVEREIGN NATIVE ARCHITECTURE (GATE: ${runtimeState || 'NOT_CONFIGURED'})`}
-          </Eyebrow>
-          <Heading as="h2" scale="display" className="max-w-3xl text-white">
-            {lang === 'th'
-              ? 'แกนปัญญา Native Multi-Domain บน Sovereign Cloud Runtime'
-              : 'Native Multi-Domain Intelligence on Sovereign Cloud Runtime.'}
-          </Heading>
-          <Text size="base" className="mt-3 max-w-2xl text-[#9AA8C7]">
-            {modelReady
-              ? (lang === 'th'
-                  ? 'Native Intelligence Core ออนไลน์และผ่านการยืนยัน Forward Execution แล้ว เชื่อมต่อ Reasoner, Knowledge, Research, Creation และ Evaluation ร่วมกัน'
-                  : 'Native Intelligence Core is online and execution-verified, connecting reasoning, knowledge, research, creation, and evidence-based evaluation.')
-              : (lang === 'th'
-                  ? 'โครงสร้างระบบออนไลน์พร้อมกลไก Fail-Closed: Deterministic Sandbox, Audit Ledger และ Workspace ทำงานปกติ ส่วน Neural Inference ถูกระงับจนกว่าจะตั้งค่าและยืนยัน Cloud Checkpoint'
-                  : 'Fail-closed Sovereign Cloud runtime: deterministic sandbox, Audit Ledger, and Knowledge Workspace are active, while neural inference remains gated until a signed Cloud Checkpoint is configured and verified.')}
-          </Text>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <button
-              onClick={() => onNavigate('autonomous_execution')}
-              className="command-primary-action"
-            >
-              <Workflow className="h-4 w-4" />
-              {lang === 'th' ? 'เริ่มทำงานจากโจทย์' : 'Start with an objective'}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            <button onClick={onOpenQuickTask} className="command-secondary-action">
-              <Play className="h-4 w-4" />
-              {lang === 'th' ? 'ส่งโจทย์ด่วน' : 'Quick objective'}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="command-capabilities" aria-labelledby="command-capabilities-title">
-        <div className="command-capabilities-heading">
-          <div>
-            <Eyebrow color="violet">{lang === 'th' ? 'ขอบเขตความสามารถ' : 'INTELLIGENCE DOMAINS'}</Eyebrow>
-            <Heading as="h3" scale="h2" id="command-capabilities-title">
-              {lang === 'th' ? 'โครงสร้าง 6 แขนง เชื่อมต่อบน Native Core เดียว' : 'Six capability domains unified by one Native Core.'}
-            </Heading>
-            <Text size="sm" className="mt-1" tone="secondary">
+    <PageContainer className="command-center space-y-6">
+      {/* Compact Truth-First Header Ribbon */}
+      <div className="rounded-2xl border border-[#1E294A] bg-[#0D1326] px-5 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="min-w-0 space-y-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <Eyebrow color={cloudOperational ? 'cyan' : 'coral'}>
               {lang === 'th'
-                ? 'ความสามารถเชิงประสาทเทียมแต่ละด้านถูกควบคุมด้วยหลักฐานจริงจาก Runtime และผลทดสอบ (Zero Simulation)'
-                : 'Each intelligence domain is execution-gated by live runtime verification and real evaluation evidence (Zero Simulation).'}
-            </Text>
+                ? 'ZYNTHEOR · แผงควบคุมออนไลน์เน้นหลักฐานจริง'
+                : 'ZYNTHEOR · TRUTH-FIRST ONLINE OPERATIONS DASHBOARD'}
+            </Eyebrow>
+            <StatusDot
+              status={toStatusDotState(overallGateState)}
+              label={`ONLINE RUNTIME: ${overallGateState}`}
+            />
           </div>
-          <div className="command-core-chip">
-            <BrainCircuit className="h-4 w-4" />
-            <span>
-              {modelReady
-                ? 'NATIVE CORE · EXECUTION VERIFIED'
-                : `NATIVE CORE GATE · ${runtimeState || 'NOT_CONFIGURED'}`}
-            </span>
-          </div>
+          <Heading as="h2" scale="h2" className="text-white">
+            {lang === 'th'
+              ? 'สถานะระบบจริง หลักฐานการทำงาน และเกตความพร้อมแบบ Online-Only'
+              : 'Evidence-Gated System Visibility & Online Cloud Operations'}
+          </Heading>
+          <Text size="xs" tone="secondary">
+            {lang === 'th'
+              ? 'Evidence > Claim · Runtime > Configuration · ไม่มีการจำลองค่าหรือ Fallback แบบออฟไลน์'
+              : 'Evidence > Claim · Runtime > Configuration · Zero Simulation · Strictly Online-Only Cloud Runtime'}
+          </Text>
         </div>
-        <div className="command-capability-grid">
-          <button className="command-capability-card capability-cyan" onClick={() => onNavigate('intelligence_core')}>
-            <span className="command-capability-icon"><BrainCircuit /></span>
-            <span className="command-capability-title">{lang === 'th' ? 'สมองและปัญญาหลัก' : 'Native Intelligence Core'}</span>
-            <span className="command-capability-copy">{lang === 'th' ? 'สถาปัตยกรรมโมเดล การรับรู้ ความเข้าใจ และเหตุผล' : 'Model architecture, perception, understanding and reasoning.'}</span>
-            <span className="command-capability-link">{lang === 'th' ? 'เปิด Intelligence Core' : 'Open Intelligence Core'} <ArrowRight /></span>
-          </button>
-          <button className="command-capability-card capability-violet" onClick={() => onNavigate('research_lab')}>
-            <span className="command-capability-icon"><Eye /></span>
-            <span className="command-capability-title">{lang === 'th' ? 'การรับรู้หลายรูปแบบ' : 'Multimodal Intelligence'}</span>
-            <span className="command-capability-copy">{lang === 'th' ? 'พื้นที่วิจัยการเข้าใจภาษา ภาพ เสียง เอกสาร และข้อมูล' : 'Workspace for language, image, audio, document and data understanding.'}</span>
-            <span className="command-capability-link">{lang === 'th' ? 'เปิด Research Lab' : 'Open Research Lab'} <ArrowRight /></span>
-          </button>
-          <button className="command-capability-card capability-blue" onClick={() => onNavigate('cognitive_operations')}>
-            <span className="command-capability-icon"><Network /></span>
-            <span className="command-capability-title">{lang === 'th' ? 'การให้เหตุผลและการเรียนรู้' : 'Reasoning & Learning'}</span>
-            <span className="command-capability-copy">{lang === 'th' ? 'วิเคราะห์ วางแผน จัดการความรู้ และประเมินการเรียนรู้' : 'Analysis, planning, knowledge operations and learning evaluation.'}</span>
-            <span className="command-capability-link">{lang === 'th' ? 'เปิด Cognitive Operations' : 'Open Cognitive Operations'} <ArrowRight /></span>
-          </button>
-          <button className="command-capability-card capability-coral" onClick={() => onNavigate('dev_studio')}>
-            <span className="command-capability-icon"><Code2 /></span>
-            <span className="command-capability-title">{lang === 'th' ? 'การสร้างและลงมือทำ' : 'Creation & Execution'}</span>
-            <span className="command-capability-copy">{lang === 'th' ? 'พัฒนาซอฟต์แวร์ สร้างผลงาน และตรวจสอบการทำงาน' : 'Build software and artifacts, execute tools and verify outcomes.'}</span>
-            <span className="command-capability-link">{lang === 'th' ? 'เปิด Creation Studio' : 'Open Creation Studio'} <ArrowRight /></span>
-          </button>
-          <button className="command-capability-card capability-lime" onClick={() => onNavigate('research_lab')}>
-            <span className="command-capability-icon"><FlaskConical /></span>
-            <span className="command-capability-title">{lang === 'th' ? 'การวิจัยและแก้ปัญหา' : 'Research & Problem Solving'}</span>
-            <span className="command-capability-copy">{lang === 'th' ? 'ค้นคว้า ทดลอง วิเคราะห์ และตรวจสอบข้อค้นพบ' : 'Investigate, experiment, analyze and validate findings.'}</span>
-            <span className="command-capability-link">{lang === 'th' ? 'เปิด Research Lab' : 'Open Research Lab'} <ArrowRight /></span>
-          </button>
-          <button className="command-capability-card capability-magenta" onClick={() => onNavigate('model_laboratory')}>
-            <span className="command-capability-icon"><GraduationCap /></span>
-            <span className="command-capability-title">{lang === 'th' ? 'ปัญญาปรับตัวและพัฒนาตนเอง' : 'Adaptive Intelligence'}</span>
-            <span className="command-capability-copy">{lang === 'th' ? 'ฝึกโมเดล ประเมินผล เปรียบเทียบ และปรับปรุงอย่างมีหลักฐาน' : 'Train, evaluate, compare and improve models with evidence.'}</span>
-            <span className="command-capability-link">{lang === 'th' ? 'เปิด Model Laboratory' : 'Open Model Laboratory'} <ArrowRight /></span>
-          </button>
-        </div>
-      </section>
 
-      <section aria-label={lang === 'th' ? 'ภาพรวมระบบ' : 'System overview'} className="space-y-4">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onNavigate('dev_studio')}
+            className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold text-[#070B19] bg-[#00F0FF] hover:bg-[#33F3FF] transition-colors flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <Code2 className="w-4 h-4" />
+            <span>{lang === 'th' ? 'เปิด Creation Studio' : 'Open Creation Studio'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate('autonomous_execution')}
+            className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-semibold text-[#F4F7FF] bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF]/50 transition-colors flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <Workflow className="w-4 h-4 text-[#00F0FF]" />
+            <span>{lang === 'th' ? 'Autonomous Execution' : 'Autonomous Execution'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onOpenQuickTask}
+            className="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold text-[#F4F7FF] bg-[#131B36] border border-[#1E294A] hover:border-[#CCFF00]/50 transition-colors flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <Play className="w-3.5 h-3.5 text-[#CCFF00]" />
+            <span>{lang === 'th' ? 'ส่งโจทย์ด่วน' : 'Quick Objective'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* SECTION 1 — SYSTEM STATUS OVERVIEW (TOP) */}
+      <section aria-label="Section 1: System Status Overview" className="space-y-3">
         <SectionHeader
-          title={lang === 'th' ? 'ภาพรวมจากระบบจริง' : 'Live system overview'}
-          subtitle={lang === 'th' ? 'แสดงเฉพาะข้อมูลที่ Runtime ส่งกลับมา' : 'Only values reported by the runtime are shown.'}
-          action={
-            <button
-              onClick={() => onNavigate('analytics_bi')}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#00F0FF] hover:brightness-110 cursor-pointer"
-            >
-              {lang === 'th' ? 'ดูตัวชี้วัด' : 'View analytics'} <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+          title={lang === 'th' ? '1. ภาพรวมสถานะระบบ (System Status Overview)' : '1. System Status Overview'}
+          subtitle={
+            truth?.generatedAt
+              ? `Measured snapshot · ${formatTimestamp(truth.generatedAt, lang)}`
+              : 'Awaiting live /api/system/status snapshot...'
           }
         />
-        <ResponsiveGrid cols={4}>
-          <MetricCard
-            title={lang === 'th' ? 'พารามิเตอร์โมเดลที่โหลด' : 'Loaded model parameters'}
-            value={modelReady ? formatCount(model?.totalParams, lang) : '—'}
-            subtitle={modelStatus}
-            icon={<Cpu className="h-5 w-5" />}
-            accentColor="cyan"
-          />
-          <MetricCard
-            title={lang === 'th' ? 'งานที่สำเร็จ' : 'Completed tasks'}
-            value={formatCount(commercial?.tasksCompleted, lang)}
-            subtitle={`${formatCount(commercial?.tasksFailed, lang)} ${lang === 'th' ? 'งานที่ไม่สำเร็จ' : 'failed'}`}
-            icon={<CheckCircle2 className="h-5 w-5" />}
-            accentColor="lime"
-          />
-          <MetricCard
-            title={lang === 'th' ? 'อัตราความสำเร็จ' : 'Task success rate'}
-            value={successRate}
-            subtitle={totalTasks > 0 ? `${formatCount(totalTasks, lang)} ${lang === 'th' ? 'งานที่บันทึก' : 'recorded tasks'}` : (lang === 'th' ? 'ยังไม่มีข้อมูลการทำงาน' : 'No task records yet')}
-            icon={<Activity className="h-5 w-5" />}
-            accentColor="violet"
-          />
-          <MetricCard
-            title={lang === 'th' ? 'รายการ Audit' : 'Audit records'}
-            value={formatCount(audit?.totalRecords, lang)}
-            subtitle={auditStatus}
-            icon={<ShieldCheck className="h-5 w-5" />}
-            accentColor="blue"
-          />
-        </ResponsiveGrid>
+        <VividCard gradientAccent="cyan" className="!p-0 overflow-hidden">
+          {systemOverview.length === 0 ? (
+            <div className="p-6 text-center text-xs font-mono text-[#9AA8C7]">
+              UNAVAILABLE · Loading system status telemetry from runtime...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 divide-y md:divide-y-0 md:gap-px bg-[#1E294A]">
+              {systemOverview.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-[#0D1326] p-4 flex flex-col justify-between gap-2 min-w-0"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-xs font-semibold text-[#F4F7FF] leading-snug">
+                      {item.label}
+                    </span>
+                    <StatusDot status={toStatusDotState(item.state)} label={item.state} />
+                  </div>
+                  <div className="text-[11px] font-mono text-[#9AA8C7] space-y-1 tabular-nums">
+                    <div className="truncate" title={item.evidenceSource}>
+                      Source: <span className="text-[#CBD5E1]">{item.evidenceSource}</span>
+                    </div>
+                    <div>
+                      Verified: <span className="text-[#CBD5E1]">{formatTimestamp(item.lastVerifiedAt, lang)}</span>
+                    </div>
+                    {item.failureReason && (
+                      <div className="text-[#FF8C73] break-words">
+                        Reason: {item.failureReason}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </VividCard>
       </section>
 
-      <SplitPanel
-        ratio="2:1"
-        primary={
+      {/* SECTION 3 — ACTIVE BLOCKERS (NEAR TOP) */}
+      <section aria-label="Section 3: Active Blockers" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '3. อุปสรรคและจุดติดขัดที่ทำงานอยู่ (Active Blockers)' : '3. Active Blockers'}
+          subtitle="Direct runtime and configuration inspection — never hidden or bypassed"
+        />
+        <VividCard gradientAccent={blockers.length > 0 ? 'coral' : 'emerald'} className="!p-0 overflow-hidden">
+          {blockers.length === 0 ? (
+            <div className="px-5 py-4 flex items-center justify-between text-xs font-mono text-[#CCFF00]">
+              <span>No active system blockers reported by current runtime inspection.</span>
+              <StatusDot status="VERIFIED" label="VERIFIED" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#0B1124] border-b border-[#1E294A] text-[11px] text-[#9AA8C7]">
+                  <tr>
+                    <th className="py-2.5 px-4 font-semibold">Component</th>
+                    <th className="py-2.5 px-4 font-semibold">Current State</th>
+                    <th className="py-2.5 px-4 font-semibold">Reason</th>
+                    <th className="py-2.5 px-4 font-semibold">Required Dependency</th>
+                    <th className="py-2.5 px-4 font-semibold">Verification Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1E294A] bg-[#0D1326]">
+                  {blockers.map((b) => (
+                    <tr key={b.id}>
+                      <td className="py-3 px-4 font-semibold text-[#F4F7FF] whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-[#FF5E3A] shrink-0" />
+                          {b.component}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <StatusDot status={toStatusDotState(b.currentState)} label={b.currentState} />
+                      </td>
+                      <td className="py-3 px-4 text-[#CBD5E1] min-w-[220px]">{b.reason}</td>
+                      <td className="py-3 px-4 font-mono text-[11px] text-[#00F0FF] min-w-[200px]">
+                        {b.requiredDependency}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <StatusDot
+                          status={toStatusDotState(b.verificationStatus)}
+                          label={b.verificationStatus}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </VividCard>
+      </section>
+
+      {/* SECTION 2 — NATIVE INTELLIGENCE GATES (7 STAGES) */}
+      <section aria-label="Section 2: Native Intelligence Gates" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '2. เกตยืนยันความพร้อม Native Intelligence (7 ขั้นตอน)' : '2. Native Intelligence Gates'}
+          subtitle="Truthful 7-stage pipeline — stages never advance without verified runtime/evaluation evidence"
+        />
+        <VividCard gradientAccent="purple" className="!p-4">
+          <div className="divide-y divide-[#1E294A]">
+            {intelligenceGates.map((gate) => (
+              <div
+                key={gate.id}
+                className="py-3 first:pt-0 last:pb-0 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2"
+              >
+                <div className="flex items-start gap-3 min-w-0">
+                  <span className="font-mono text-xs font-bold text-[#00F0FF] shrink-0 mt-0.5 tabular-nums">
+                    0{gate.order}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="text-xs font-bold text-[#F4F7FF]">{gate.name}</span>
+                      <StatusDot status={toStatusDotState(gate.state)} label={gate.state} />
+                    </div>
+                    <p className="text-[11px] text-[#9AA8C7] mt-1">{gate.reason}</p>
+                  </div>
+                </div>
+                <div className="text-[11px] font-mono text-[#9AA8C7] lg:text-right shrink-0 tabular-nums">
+                  <div>Source: {gate.evidenceSource}</div>
+                  <div>
+                    {gate.lastVerifiedAt
+                      ? `Verified: ${formatTimestamp(gate.lastVerifiedAt, lang)}`
+                      : 'Verified: UNAVAILABLE'}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </VividCard>
+      </section>
+
+      {/* SECTION 4 — REAL RUNTIME METRICS & HOST RESOURCE CHART */}
+      <section aria-label="Section 4: Real Runtime Metrics" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '4. ตัวชี้วัดจาก Runtime จริง (Real Runtime Metrics)' : '4. Real Runtime Metrics'}
+          subtitle="Zero synthetic telemetry — missing probes report UNAVAILABLE or NOT_CONFIGURED"
+        />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start">
+          <VividCard gradientAccent="cyan" className="xl:col-span-2 !p-0 overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#1E294A]">
+              {runtimeMetrics.map((m) => (
+                <div key={m.id} className="bg-[#0D1326] p-4 flex flex-col justify-between gap-2 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-wide text-[#9AA8C7] truncate">
+                      {m.label}
+                    </span>
+                    <StatusDot status={toStatusDotState(m.status)} dotOnly label={m.status} />
+                  </div>
+                  <div className="text-base font-bold font-mono tabular-nums text-[#F4F7FF] truncate">
+                    {formatMetricValue(m.value, m.unit, lang)}
+                  </div>
+                  <div className="text-[10px] font-mono text-[#9AA8C7] space-y-0.5 tabular-nums">
+                    <div className="truncate" title={m.source}>{m.source}</div>
+                    <div>{formatTimestamp(m.collectedAt, lang)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </VividCard>
+
           <VividCard
-            title={lang === 'th' ? 'ทรัพยากร Runtime' : 'Runtime resources'}
-            subtitle={lang === 'th' ? 'ตัวอย่างข้อมูลจากระบบปฏิบัติการและโปรเซสจริง' : 'Measured operating-system and process telemetry'}
-            gradientAccent="cyan"
+            title={lang === 'th' ? 'ทรัพยากร OS / Process จริง' : 'OS & Process Resources'}
+            subtitle="Live sampled telemetry"
+            gradientAccent="blue"
           >
             {resources ? (
               <ResourceMonitor history={resources.history} current={resources.current} />
             ) : (
-              <div className="flex min-h-48 flex-col items-center justify-center gap-2 text-center text-sm" style={{ color: 'var(--app-text-secondary)' }}>
-                <Activity className="h-6 w-6 opacity-60" />
-                {lang === 'th' ? 'ยังไม่มีข้อมูล Telemetry จาก Runtime' : 'Runtime telemetry is not available yet.'}
+              <div className="py-10 text-center text-xs font-mono text-[#9AA8C7]">
+                UNAVAILABLE · Waiting for OS sample
               </div>
             )}
           </VividCard>
-        }
-        secondary={
-          <div className="space-y-5">
-            <VividCard
-              title={lang === 'th' ? 'สถานะบริการ' : 'Service status'}
-              subtitle={lang === 'th' ? 'สรุปจากการตรวจสอบล่าสุด' : 'Latest runtime-reported state'}
-              gradientAccent="violet"
-            >
-              <div className="divide-y" style={{ borderColor: 'var(--app-card-border)' }}>
-                <div className="flex items-start gap-3 py-3 first:pt-0">
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${modelReady ? 'bg-[#CCFF00]' : runtimeState === 'FAILED' || runtimeState === 'NOT_FOUND' ? 'bg-[#FF007F]' : 'bg-[#FF5E3A]'}`} />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold">{lang === 'th' ? 'Native Model' : 'Native model'}</div>
-                    <div className="mt-1 break-words text-xs" style={{ color: 'var(--app-text-secondary)' }}>
-                      {model?.name || modelStatus}
-                      {model?.weightsRole ? ` · role: ${model.weightsRole}` : ''}
-                    </div>
+        </div>
+      </section>
+
+      {/* SECTION 5 (COGNITIVE) & SECTION 8 (MULTIMODAL) SIDE BY SIDE */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+        {/* SECTION 5 — COGNITIVE SYSTEMS */}
+        <section aria-label="Section 5: Cognitive Systems" className="space-y-3">
+          <SectionHeader
+            title={lang === 'th' ? '5. ระบบพุทธิปัญญา (Cognitive Systems)' : '5. Cognitive Systems'}
+            subtitle="Verified module inventory & evidence status"
+          />
+          <VividCard gradientAccent="blue" className="!p-4">
+            <div className="divide-y divide-[#1E294A]">
+              {cognitiveSystems.map((sys) => (
+                <div key={sys.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#F4F7FF] flex items-center gap-2">
+                      <BrainCircuit className="w-3.5 h-3.5 text-[#00F0FF] shrink-0" />
+                      {sys.name}
+                    </span>
+                    <StatusDot status={toStatusDotState(sys.status)} label={sys.status} />
                   </div>
-                  <span className="text-xs font-mono shrink-0" style={{ color: modelReady ? '#CCFF00' : '#FF8C73' }}>
-                    {runtimeState || (modelReady ? 'READY' : 'NOT_LOADED')}
+                  <p className="text-[11px] font-mono text-[#9AA8C7]">{sys.evidence}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-[#1E294A] flex justify-end">
+              <button
+                type="button"
+                onClick={() => onNavigate('cognitive_operations')}
+                className="text-xs font-semibold text-[#00F0FF] hover:brightness-110 inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <span>Open Cognitive Operations</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </VividCard>
+        </section>
+
+        {/* SECTION 8 — MULTIMODAL CAPABILITY STATUS */}
+        <section aria-label="Section 8: Multimodal Capability Status" className="space-y-3">
+          <SectionHeader
+            title={lang === 'th' ? '8. สถานะความสามารถ Multimodal' : '8. Multimodal Capability Status'}
+            subtitle="Strict distinction between partial document parsing and unimplemented media pipelines"
+          />
+          <VividCard gradientAccent="magenta" className="!p-4">
+            <div className="divide-y divide-[#1E294A]">
+              {multimodal.map((cap) => (
+                <div key={cap.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#F4F7FF] flex items-center gap-2">
+                      <Eye className="w-3.5 h-3.5 text-[#C084FC] shrink-0" />
+                      {cap.label}
+                    </span>
+                    <StatusDot status={toStatusDotState(cap.status)} label={cap.status} />
+                  </div>
+                  <div className="text-[11px] text-[#9AA8C7]">
+                    {cap.notes} <span className="font-mono text-[#64748B]">({cap.evidenceSource})</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </VividCard>
+        </section>
+      </div>
+
+      {/* SECTION 6 — EXECUTION & AUTONOMY */}
+      <section aria-label="Section 6: Execution and Autonomy" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '6. การดำเนินการอัตโนมัติและประวัติที่มีหลักฐาน (Execution & Autonomy)' : '6. Execution & Autonomy'}
+          subtitle="Verified outcomes only — reports NOT_ENOUGH_DATA when zero real executions exist"
+        />
+        <VividCard gradientAccent="lime" className="!p-4 space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono tabular-nums">
+            <div className="p-3 rounded-xl bg-[#070B19]">
+              <div className="text-[10px] uppercase text-[#9AA8C7]">Task Success Rate</div>
+              <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                {typeof executionAndAutonomy?.taskSuccessRatePct === 'number'
+                  ? `${executionAndAutonomy.taskSuccessRatePct.toFixed(1)}%`
+                  : 'NOT_ENOUGH_DATA'}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-[#070B19]">
+              <div className="text-[10px] uppercase text-[#9AA8C7]">Recovery Rate</div>
+              <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                {typeof executionAndAutonomy?.recoverySuccessRatePct === 'number'
+                  ? `${executionAndAutonomy.recoverySuccessRatePct.toFixed(1)}%`
+                  : 'NOT_ENOUGH_DATA'}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-[#070B19]">
+              <div className="text-[10px] uppercase text-[#9AA8C7]">Verification Rate</div>
+              <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                {typeof executionAndAutonomy?.verificationSuccessRatePct === 'number'
+                  ? `${executionAndAutonomy.verificationSuccessRatePct.toFixed(1)}%`
+                  : 'NOT_ENOUGH_DATA'}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-[#070B19]">
+              <div className="text-[10px] uppercase text-[#9AA8C7]">Active Jobs</div>
+              <div className="text-base font-bold text-[#00F0FF] mt-1">
+                {executionAndAutonomy ? executionAndAutonomy.activeJobs.length : 0}
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            {executionAndAutonomy && executionAndAutonomy.history.length > 0 ? (
+              <table className="w-full text-left text-xs font-mono tabular-nums">
+                <thead className="bg-[#0B1124] border-b border-[#1E294A] text-[11px] text-[#9AA8C7]">
+                  <tr>
+                    <th className="py-2 px-3 font-sans font-semibold">Execution ID</th>
+                    <th className="py-2 px-3 font-sans font-semibold">Start</th>
+                    <th className="py-2 px-3 font-sans font-semibold">Completion</th>
+                    <th className="py-2 px-3 font-sans font-semibold">Duration</th>
+                    <th className="py-2 px-3 font-sans font-semibold">Result</th>
+                    <th className="py-2 px-3 font-sans font-semibold">Evidence Hash</th>
+                    <th className="py-2 px-3 font-sans font-semibold">Verification</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1E294A]">
+                  {executionAndAutonomy.history.slice(0, 8).map((row) => (
+                    <tr key={row.executionId}>
+                      <td className="py-2 px-3 text-[#00F0FF]">{row.executionId}</td>
+                      <td className="py-2 px-3 text-[#9AA8C7]">{formatTimestamp(row.startTimestamp, lang)}</td>
+                      <td className="py-2 px-3 text-[#9AA8C7]">{formatTimestamp(row.completionTimestamp, lang)}</td>
+                      <td className="py-2 px-3 text-[#F4F7FF]">{row.actualDurationMs} ms</td>
+                      <td className="py-2 px-3 text-[#CBD5E1]">{row.executionResult}</td>
+                      <td className="py-2 px-3 text-[#9AA8C7]" title={row.evidenceHash}>
+                        {row.evidenceHash ? `${row.evidenceHash.slice(0, 14)}…` : 'UNAVAILABLE'}
+                      </td>
+                      <td className="py-2 px-3">
+                        <StatusDot
+                          status={toStatusDotState(row.verificationResult)}
+                          label={row.verificationResult}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="py-4 text-center text-xs font-mono text-[#9AA8C7]">
+                NOT_ENOUGH_DATA · No verified autonomous executions recorded in this ledger yet.
+              </div>
+            )}
+          </div>
+        </VividCard>
+      </section>
+
+      {/* SECTION 9 — ONLINE RUNTIME & CONNECTIVITY */}
+      <section aria-label="Section 9: Online Runtime and Connectivity" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '9. ความพร้อมออนไลน์และการเชื่อมต่อ (Online Runtime & Connectivity)' : '9. Online Runtime & Connectivity'}
+          subtitle="Explicit separation between Configured, Connected, and Operational states"
+        />
+        <VividCard gradientAccent="cyan" className="!p-4 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#1E294A]">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+              <span className="inline-flex items-center gap-1.5 text-[#CBD5E1]">
+                <Wifi className="w-4 h-4 text-[#00F0FF]" />
+                Configured: <strong className="text-white">{String(Boolean(connectivity?.configured))}</strong>
+              </span>
+              <span className="text-[#CBD5E1]">
+                Connected: <strong className="text-white">{String(Boolean(connectivity?.connected))}</strong>
+              </span>
+              <span className="text-[#CBD5E1]">
+                Operational: <strong className={cloudOperational ? 'text-[#CCFF00]' : 'text-[#FF8C73]'}>{String(cloudOperational)}</strong>
+              </span>
+            </div>
+            <div className="text-[11px] font-mono text-[#9AA8C7] tabular-nums">
+              Last Online Verification: {formatTimestamp(connectivity?.lastSuccessfulOnlineVerification, lang)}
+            </div>
+          </div>
+
+          <div className="divide-y divide-[#1E294A]">
+            {(connectivity?.items ?? []).map((item) => (
+              <div
+                key={item.id}
+                className="py-2.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+              >
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[#F4F7FF]">{item.label}</div>
+                  <div className="text-[11px] font-mono text-[#9AA8C7] break-words">{item.detail}</div>
+                </div>
+                <div className="flex items-center gap-4 font-mono text-[11px] shrink-0">
+                  <span className="text-[#9AA8C7]">
+                    cfg:{item.configured ? '1' : '0'} · conn:{item.connected ? '1' : '0'} · op:{item.operational ? '1' : '0'}
+                  </span>
+                  <StatusDot status={toStatusDotState(item.state)} label={item.state} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </VividCard>
+      </section>
+
+      {/* SECTION 10 — NATIVE APP CREATION & SOFTWARE ENGINEERING */}
+      <section aria-label="Section 10: Native App Creation and Software Engineering" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '10. การสร้างแอปพลิเคชันและวิศวกรรมซอฟต์แวร์ (Section 10)' : '10. Native App Creation & Software Engineering'}
+          subtitle="Full-stack cloud sandbox lifecycle backed by Planner, Coder, Reviewer, Tester & ApprovalGate"
+          action={
+            <button
+              type="button"
+              onClick={() => onNavigate('dev_studio')}
+              className="text-xs font-semibold text-[#00F0FF] hover:brightness-110 inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <span>Open Software Project Workspace</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          }
+        />
+        <VividCard gradientAccent="emerald" className="!p-4 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono pb-3 border-b border-[#1E294A]">
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="text-[#00F0FF]">
+                Implemented: <strong>{swEng?.summary.implemented ?? 0}</strong>
+              </span>
+              <span className="text-[#FF8C73]">
+                Partial: <strong>{swEng?.summary.partial ?? 0}</strong>
+              </span>
+              <span className="text-[#9AA8C7]">
+                Not Configured: <strong>{swEng?.summary.notConfigured ?? 0}</strong>
+              </span>
+              <span className="text-[#FF66B2]">
+                Blocked: <strong>{swEng?.summary.blocked ?? 0}</strong>
+              </span>
+            </div>
+            <div className="text-[#CBD5E1]">
+              Projects in Cloud Sandbox: <strong>{swEng?.projectsCount ?? 0}</strong>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 divide-y divide-[#1E294A] md:divide-y-0">
+            {(swEng?.capabilities ?? []).map((cap) => (
+              <div key={cap.id} className="py-2.5 border-b border-[#1E294A]/70 flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-[#F4F7FF] truncate" title={cap.name}>
+                    {cap.name}
+                  </span>
+                  <StatusDot status={toStatusDotState(cap.status)} label={cap.status} />
+                </div>
+                <p className="text-[11px] text-[#9AA8C7] line-clamp-2" title={cap.detail}>
+                  {cap.detail}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {swEng && swEng.recentEvidence.length > 0 && (
+            <div className="pt-2 border-t border-[#1E294A]">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#9AA8C7] mb-2">
+                Recent Software Execution Evidence
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[11px] font-mono tabular-nums">
+                  <thead className="text-[#9AA8C7] border-b border-[#1E294A]">
+                    <tr>
+                      <th className="py-1.5 px-2">Project / Op</th>
+                      <th className="py-1.5 px-2">Duration</th>
+                      <th className="py-1.5 px-2">Result</th>
+                      <th className="py-1.5 px-2">SHA-256 Digest</th>
+                      <th className="py-1.5 px-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1E294A]">
+                    {swEng.recentEvidence.slice(0, 5).map((ev) => (
+                      <tr key={ev.executionId}>
+                        <td className="py-1.5 px-2 text-[#00F0FF]">{ev.projectId} · {ev.operationType}</td>
+                        <td className="py-1.5 px-2 text-[#CBD5E1]">{ev.actualDurationMs} ms</td>
+                        <td className="py-1.5 px-2 text-[#CBD5E1] truncate max-w-[260px]">{ev.buildOrTestResult}</td>
+                        <td className="py-1.5 px-2 text-[#9AA8C7]">{ev.evidenceHash.slice(0, 14)}…</td>
+                        <td className="py-1.5 px-2">
+                          <StatusDot status={toStatusDotState(ev.verificationStatus)} label={ev.verificationStatus} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </VividCard>
+      </section>
+
+      {/* SECTION 7 — TRUTH & AUDIT (LOWER / SECONDARY) */}
+      <section aria-label="Section 7: Truth and Audit" className="space-y-3">
+        <SectionHeader
+          title={lang === 'th' ? '7. ระบบความจริงและห่วงโซ่การตรวจสอบ (Truth & Audit — Secondary)' : '7. Truth & Audit (Secondary Integrity Layer)'}
+          subtitle="Cryptographic SHA-256 chain verification & Truth Kernel evidence counts"
+          action={
+            <button
+              type="button"
+              onClick={() => onNavigate('governance_security')}
+              className="text-xs font-semibold text-[#00F0FF] hover:brightness-110 inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <span>Governance &amp; Audit</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          }
+        />
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+          <VividCard gradientAccent="purple" className="xl:col-span-2 !p-4 space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono tabular-nums">
+              <div className="p-3 rounded-xl bg-[#070B19]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Audit Records</div>
+                <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                  {truthAndAudit?.totalRecords ?? 0}
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-[#070B19]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Hash Chain</div>
+                <div className="mt-1">
+                  <StatusDot
+                    status={truthAndAudit?.chainValid ? 'VERIFIED' : 'BLOCKED'}
+                    label={truthAndAudit?.chainValid ? 'VERIFIED' : 'BLOCKED'}
+                  />
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-[#070B19]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Evidence Ledger</div>
+                <div className="text-base font-bold text-[#CCFF00] mt-1">
+                  {truthAndAudit?.evidenceRecordsCount ?? 0} verified
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-[#070B19]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Head Digest</div>
+                <div className="text-xs font-bold text-[#00F0FF] mt-1.5 truncate" title={truthAndAudit?.headHash}>
+                  {truthAndAudit?.headHash ? `${truthAndAudit.headHash.slice(0, 14)}…` : 'UNAVAILABLE'}
+                </div>
+              </div>
+            </div>
+
+            {truthAndAudit && (
+              <div className="text-[11px] font-mono text-[#9AA8C7] flex flex-wrap items-center gap-4 px-1">
+                <span>Truth Claims: <strong className="text-white">{truthAndAudit.classificationSummary.totalClaims}</strong></span>
+                <span>Verified Facts: <strong className="text-[#CCFF00]">{truthAndAudit.classificationSummary.verifiedFacts}</strong></span>
+                <span>Inferred: <strong className="text-[#00F0FF]">{truthAndAudit.classificationSummary.inferred}</strong></span>
+                <span>Unverified: <strong className="text-[#FBBF24]">{truthAndAudit.classificationSummary.unverified}</strong></span>
+                <span>Blocked: <strong className="text-[#FF66B2]">{truthAndAudit.classificationSummary.blocked}</strong></span>
+              </div>
+            )}
+
+            <div className="divide-y divide-[#1E294A] text-[11px] font-mono">
+              {(truthAndAudit?.recentVerificationEvents ?? []).slice(0, 6).map((ev) => (
+                <div key={ev.id} className="py-2 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[#F4F7FF]">
+                    <span className="text-[#00F0FF]">#{ev.id}</span> · {ev.eventType} ({ev.actor})
+                  </span>
+                  <span className="text-[#9AA8C7] tabular-nums">
+                    {formatTimestamp(ev.timestamp, lang)} · {ev.entryHash.slice(0, 12)}…
                   </span>
                 </div>
-                {statusData?.connectivity?.bridgeLifecycle && (
-                  <div className="flex items-start gap-3 py-3">
-                    <span
-                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                        statusData.connectivity.bridgeLifecycle.state === 'Connected'
-                          ? 'bg-[#CCFF00]'
-                          : statusData.connectivity.bridgeLifecycle.state === 'Degraded'
-                            ? 'bg-[#FF5E3A]'
-                            : statusData.connectivity.bridgeLifecycle.state === 'Initializing' ||
-                                statusData.connectivity.bridgeLifecycle.state === 'Connecting'
-                              ? 'bg-[#00F0FF]'
-                              : 'bg-[#FF007F]'
-                      }`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold">{lang === 'th' ? 'Native Python Bridge' : 'Native Python bridge'}</div>
-                      <div className="mt-1 break-words text-xs font-mono" style={{ color: 'var(--app-text-secondary)' }}>
-                        {statusData.connectivity.bridgeLifecycle.pid
-                          ? `PID ${statusData.connectivity.bridgeLifecycle.pid}`
-                          : 'No active PID'}
-                        {typeof statusData.connectivity.bridgeLifecycle.lastHeartbeatLatencyMs === 'number'
-                          ? ` · ${statusData.connectivity.bridgeLifecycle.lastHeartbeatLatencyMs}ms`
-                          : ''}
-                        {statusData.connectivity.bridgeLifecycle.reconnectAttempt > 0
-                          ? ` · retry ${statusData.connectivity.bridgeLifecycle.reconnectAttempt}/${statusData.connectivity.bridgeLifecycle.maxReconnectAttempts}`
-                          : ''}
-                      </div>
-                    </div>
-                    <span
-                      className="text-xs font-mono shrink-0"
-                      style={{
-                        color:
-                          statusData.connectivity.bridgeLifecycle.state === 'Connected'
-                            ? '#CCFF00'
-                            : statusData.connectivity.bridgeLifecycle.state === 'Degraded'
-                              ? '#FF8C73'
-                              : '#FF66B2',
-                      }}
-                    >
-                      {statusData.connectivity.bridgeLifecycle.state}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-start gap-3 py-3">
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${audit?.chainValid ? 'bg-[#CCFF00]' : 'bg-[#FF007F]'}`} />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold">Audit integrity</div>
-                    <div className="mt-1 text-xs font-mono" style={{ color: 'var(--app-text-secondary)' }}>{audit?.headHash ? `${audit.headHash.slice(0, 12)}…` : (lang === 'th' ? 'ไม่มี Hash head' : 'No hash head available')}</div>
-                  </div>
-                  <span className="text-xs shrink-0" style={{ color: 'var(--app-text-secondary)' }}>{auditStatus}</span>
-                </div>
-                <div className="flex items-start gap-3 py-3 last:pb-0">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#00F0FF]" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold">Workspace</div>
-                    <div className="mt-1 break-all text-xs font-mono" style={{ color: 'var(--app-text-secondary)' }}>{sandbox?.path || (lang === 'th' ? 'รอข้อมูล Workspace' : 'Workspace path unavailable')}</div>
-                  </div>
-                  <span className="text-xs font-mono tabular-nums shrink-0" style={{ color: 'var(--app-text-secondary)' }}>{sandbox ? `${formatCount(sandbox.fileCount, lang)} files` : '—'}</span>
-                </div>
-              </div>
-              {statusData?.serverTime && (
-                <p className="mt-4 border-t pt-3 text-[11px] font-mono" style={{ borderColor: 'var(--app-card-border)', color: 'var(--app-text-secondary)' }}>
-                  {lang === 'th' ? 'อัปเดตล่าสุด' : 'Last updated'}: {new Date(statusData.serverTime).toLocaleString(lang === 'th' ? 'th-TH' : 'en-US')}
-                </p>
-              )}
-            </VividCard>
+              ))}
+            </div>
+          </VividCard>
 
-            <VividCard title={lang === 'th' ? 'ไปยังพื้นที่ทำงาน' : 'Workspace shortcuts'}>
-              <div className="space-y-1">
-                <button onClick={() => onNavigate('autonomous_execution')} className="command-link-row">
-                  <span className="flex items-center gap-3"><Workflow className="h-4 w-4 text-[#00F0FF]" />{lang === 'th' ? 'สั่งงานและติดตาม Execution' : 'Create and monitor execution'}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                <button onClick={() => onNavigate('cognitive_operations')} className="command-link-row">
-                  <span className="flex items-center gap-3"><Cpu className="h-4 w-4 text-[#CCFF00]" />{lang === 'th' ? 'Action Engine 8 เสาหลัก & พุทธิปัญญา' : 'Action Engine (8 Pillars) & Cognitive'}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                <button onClick={() => onNavigate('knowledge_hub')} className="command-link-row">
-                  <span className="flex items-center gap-3"><FolderOpen className="h-4 w-4 text-[#7B2CBF]" />{lang === 'th' ? 'คลังความรู้' : 'Knowledge workspace'}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                <button onClick={() => onNavigate('governance_security')} className="command-link-row">
-                  <span className="flex items-center gap-3"><CircleAlert className="h-4 w-4 text-[#FF5E3A]" />{lang === 'th' ? 'การตรวจสอบและความปลอดภัย' : 'Governance and security'}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </VividCard>
+          <div className="space-y-4">
+            <ExpenseSummaryChart />
           </div>
-        }
-      />
-
-      <section aria-label={lang === 'th' ? 'สรุปค่าใช้จ่ายจาก SQLite Ledger' : 'Live SQLite expense ledger summary'}>
-        <ExpenseSummaryChart />
+        </div>
       </section>
     </PageContainer>
   );

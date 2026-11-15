@@ -3,9 +3,12 @@ import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { WebSocket } from 'ws';
 import {
+  classifyBridgeFailureCategory,
+  computeCategoryBackoffMs,
   computeExponentialBackoffMs,
   NativeNeuralLMProvider,
 } from '../lib/providers.ts';
+import { validateCloudRuntimeConfig } from '../lib/CloudCheckpointStorage.ts';
 import { ConnectivityMonitor } from '../lib/ConnectivityMonitor.ts';
 
 async function getFreePort(): Promise<number> {
@@ -50,7 +53,44 @@ async function run(): Promise<void> {
   assert.equal(computeExponentialBackoffMs(6, 1000, 30000, 0), 30000);
   assert.equal(computeExponentialBackoffMs(10, 1000, 30000, 500), 30000);
 
-  console.log('2) Testing NativeNeuralLMProvider 7-state lifecycle & ConnectivityMonitor reconciliation...');
+  console.log('1b) Testing failure-specific category backoff & pre-bind cloud validation...');
+  assert.equal(classifyBridgeFailureCategory('Bridge heartbeat timed out'), 'session_timeout');
+  assert.equal(classifyBridgeFailureCategory('Python bridge exited with code 1'), 'initialization_error');
+  assert.equal(classifyBridgeFailureCategory('ECONNREFUSED 127.0.0.1'), 'unreachable');
+
+  const t1 = computeCategoryBackoffMs(1, 'session_timeout', 0);
+  const t2 = computeCategoryBackoffMs(2, 'session_timeout', 0);
+  const u1 = computeCategoryBackoffMs(1, 'unreachable', 0);
+  const i1 = computeCategoryBackoffMs(1, 'initialization_error', 0);
+  assert.ok(t2 > t1, 'Session timeout backoff must grow exponentially');
+  assert.ok(t1 < u1 && u1 < i1, 'Expected session_timeout < unreachable < initialization_error initial backoff');
+
+  const prevBucket = process.env.S3_BUCKET;
+  const prevKey = process.env.S3_ACCESS_KEY_ID;
+  const prevSecret = process.env.S3_SECRET_ACCESS_KEY;
+  const prevPresigned = process.env.CHECKPOINT_PRESIGNED_URL;
+  try {
+    delete process.env.CHECKPOINT_PRESIGNED_URL;
+    process.env.S3_BUCKET = '  "zyntheor-test-bucket"  ';
+    delete process.env.S3_ACCESS_KEY_ID;
+    delete process.env.S3_SECRET_ACCESS_KEY;
+    const partialS3 = validateCloudRuntimeConfig();
+    assert.equal(partialS3.configValid, false);
+    assert.equal(partialS3.provider, 's3');
+    assert.ok(partialS3.missingKeys.includes('S3_ACCESS_KEY_ID'));
+    assert.ok(partialS3.missingKeys.includes('S3_SECRET_ACCESS_KEY'));
+  } finally {
+    if (prevBucket === undefined) delete process.env.S3_BUCKET;
+    else process.env.S3_BUCKET = prevBucket;
+    if (prevKey === undefined) delete process.env.S3_ACCESS_KEY_ID;
+    else process.env.S3_ACCESS_KEY_ID = prevKey;
+    if (prevSecret === undefined) delete process.env.S3_SECRET_ACCESS_KEY;
+    else process.env.S3_SECRET_ACCESS_KEY = prevSecret;
+    if (prevPresigned === undefined) delete process.env.CHECKPOINT_PRESIGNED_URL;
+    else process.env.CHECKPOINT_PRESIGNED_URL = prevPresigned;
+  }
+
+  console.log('2) Testing NativeNeuralLMProvider lifecycle, non-resetting attempts & ConnectivityMonitor reconciliation...');
   const provider = NativeNeuralLMProvider.getInstance();
   assert.equal(provider.getLifecycleTelemetry().state, 'Connecting');
   const observedStates: string[] = [];
