@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-SOVEREIGN",
-  "lastPersisted": "2026-11-15T09:19:55.180Z",
+  "lastPersisted": "2026-11-15T10:07:12.994Z",
   "verified_knowledge": {
     "architecture": "ZYNTHEOR Q+ Native Target 41.53M (41,527,808 parameters; 10L · 8H · 512D)",
     "sovereignty_rule": "Online-first Native neural inference on the Sovereign Cloud runtime",
@@ -724,6 +724,702 @@
           "version": 1,
           "updatedAt": "2026-11-15T09:19:54.304Z",
           "digest": "1e588d41bea8d449c0e25c533ffbdbdfba959dced76de6bfdd01ce57e35e4f2d"
+        }
+      ]
+    },
+    "eng_project_proj_mwhndbla_13dbc1": {
+      "key": "eng_project_proj_mwhndbla_13dbc1",
+      "value": {
+        "name": "Incident Telemetry Service",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhndbla_13dbc1",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:43:43.384Z",
+      "updatedAt": "2026-11-15T09:43:43.384Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "a003699f350cffef339b9e9261138b5988bc90dbf449598cd61406f4215cf8a8",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:43:43.384Z",
+          "digest": "a003699f350cffef339b9e9261138b5988bc90dbf449598cd61406f4215cf8a8"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnde2v_39250a": {
+      "key": "eng_project_proj_mwhnde2v_39250a",
+      "value": {
+        "name": "Bench L1_INTERACTIVE_PORTAL",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnde2v_39250a",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:43:46.389Z",
+      "updatedAt": "2026-11-15T09:43:46.389Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "ca9be8c6a046bb53634e54c740c0ee01421933123e9d16c126b26013505bb941",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:43:46.389Z",
+          "digest": "ca9be8c6a046bb53634e54c740c0ee01421933123e9d16c126b26013505bb941"
+        }
+      ]
+    },
+    "eng_project_proj_mwhndf22_dff06d": {
+      "key": "eng_project_proj_mwhndf22_dff06d",
+      "value": {
+        "name": "Bench L2_DATA_PERSISTENCE_FINANCE",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhndf22_dff06d",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:43:47.644Z",
+      "updatedAt": "2026-11-15T09:43:47.644Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "b6335a2df3270bd369fec9521facf7709c67616f3d45be134d463075785ce17d",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:43:47.644Z",
+          "digest": "b6335a2df3270bd369fec9521facf7709c67616f3d45be134d463075785ce17d"
+        }
+      ]
+    },
+    "eng_project_proj_mwhndfwg_5ae7ce": {
+      "key": "eng_project_proj_mwhndfwg_5ae7ce",
+      "value": {
+        "name": "Bench L3_MULTI_USER_SAAS",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhndfwg_5ae7ce",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:43:48.489Z",
+      "updatedAt": "2026-11-15T09:43:48.489Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "31a95fd889e6685c57be33a42d7578ac0dbcab75c5169f89acbfdbebdd4fa387",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:43:48.489Z",
+          "digest": "31a95fd889e6685c57be33a42d7578ac0dbcab75c5169f89acbfdbebdd4fa387"
+        }
+      ]
+    },
+    "eng_project_proj_mwhndguw_51effa": {
+      "key": "eng_project_proj_mwhndguw_51effa",
+      "value": {
+        "name": "Bench L4_PYTHON_SERVICE_INTEGRATION",
+        "stack": "python_service",
+        "workspaceDir": "projects/proj_mwhndguw_51effa",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:43:49.641Z",
+      "updatedAt": "2026-11-15T09:43:49.641Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 5,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "0e1822dbf46fb7c5d5a3d08e7ede7d2c9d07bee21105cbcb523f89830b005347",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:43:49.641Z",
+          "digest": "0e1822dbf46fb7c5d5a3d08e7ede7d2c9d07bee21105cbcb523f89830b005347"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnp55w_dccfec": {
+      "key": "eng_project_proj_mwhnp55w_dccfec",
+      "value": {
+        "name": "Incident Telemetry Service",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnp55w_dccfec",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:52:55.058Z",
+      "updatedAt": "2026-11-15T09:52:55.058Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "993c12a80200e3a9c52d92ef60656d2791b2d7ef14b338f48ec6ad671fcdf434",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:52:55.058Z",
+          "digest": "993c12a80200e3a9c52d92ef60656d2791b2d7ef14b338f48ec6ad671fcdf434"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnpvrg_9efe88": {
+      "key": "eng_project_proj_mwhnpvrg_9efe88",
+      "value": {
+        "name": "Incident Telemetry Service",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnpvrg_9efe88",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:53:29.114Z",
+      "updatedAt": "2026-11-15T09:53:29.114Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "5f10456d237ecfac52e40e3dabb146aae9b414b8831b200aff302b684d37c374",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:53:29.114Z",
+          "digest": "5f10456d237ecfac52e40e3dabb146aae9b414b8831b200aff302b684d37c374"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnqwu0_221cef": {
+      "key": "eng_project_proj_mwhnqwu0_221cef",
+      "value": {
+        "name": "Incident Telemetry Service",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnqwu0_221cef",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:54:17.670Z",
+      "updatedAt": "2026-11-15T09:54:17.670Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "9b2bc3a6e04de98068ccc7c65eb95e0c9eadfba26a8ba8de414d7582a6d5ddc8",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:54:17.670Z",
+          "digest": "9b2bc3a6e04de98068ccc7c65eb95e0c9eadfba26a8ba8de414d7582a6d5ddc8"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnr2nr_71332f": {
+      "key": "eng_project_proj_mwhnr2nr_71332f",
+      "value": {
+        "name": "Bench L1_INTERACTIVE_PORTAL",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnr2nr_71332f",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:54:24.655Z",
+      "updatedAt": "2026-11-15T09:54:24.655Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "da0e7a7a30d26ac71e90379998088ab9d5917229dc86746ebccc0f161e40cfd8",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:54:24.655Z",
+          "digest": "da0e7a7a30d26ac71e90379998088ab9d5917229dc86746ebccc0f161e40cfd8"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnr3da_5b41eb": {
+      "key": "eng_project_proj_mwhnr3da_5b41eb",
+      "value": {
+        "name": "Bench L2_DATA_PERSISTENCE_FINANCE",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnr3da_5b41eb",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:54:25.516Z",
+      "updatedAt": "2026-11-15T09:54:25.516Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "22dc03c96ab1ba810155fd8068a7d94771174152370812158eedaff3b47b382c",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:54:25.516Z",
+          "digest": "22dc03c96ab1ba810155fd8068a7d94771174152370812158eedaff3b47b382c"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnr40x_be0185": {
+      "key": "eng_project_proj_mwhnr40x_be0185",
+      "value": {
+        "name": "Bench L3_MULTI_USER_SAAS",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnr40x_be0185",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:54:26.419Z",
+      "updatedAt": "2026-11-15T09:54:26.419Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "d46b3f3335c2c5caf5d463132a8cb04839aaf2313e76600109dafc1770b51a8c",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:54:26.419Z",
+          "digest": "d46b3f3335c2c5caf5d463132a8cb04839aaf2313e76600109dafc1770b51a8c"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnr5a7_370cfb": {
+      "key": "eng_project_proj_mwhnr5a7_370cfb",
+      "value": {
+        "name": "Bench L4_PYTHON_SERVICE_INTEGRATION",
+        "stack": "python_service",
+        "workspaceDir": "projects/proj_mwhnr5a7_370cfb",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:54:27.899Z",
+      "updatedAt": "2026-11-15T09:54:27.899Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 5,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "285ea8ae050da23cdb3650132f3f56260b9e0e3128ac3aa82faa552d60e0750f",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:54:27.899Z",
+          "digest": "285ea8ae050da23cdb3650132f3f56260b9e0e3128ac3aa82faa552d60e0750f"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnthek_d484fb": {
+      "key": "eng_project_proj_mwhnthek_d484fb",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnthek_d484fb",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:56:17.054Z",
+      "updatedAt": "2026-11-15T09:56:17.054Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "b683433f8915fc99186e31581f61075a8d4047eb9a58e2cf11fe6cae87dd2d76",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:56:17.054Z",
+          "digest": "b683433f8915fc99186e31581f61075a8d4047eb9a58e2cf11fe6cae87dd2d76"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnu484_8db5d3": {
+      "key": "eng_project_proj_mwhnu484_8db5d3",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnu484_8db5d3",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:56:46.860Z",
+      "updatedAt": "2026-11-15T09:56:46.860Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "8eebac312c66b4490b2e106ab45d9af1d382b4220e05f60dfb075c89ac0875a1",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:56:46.860Z",
+          "digest": "8eebac312c66b4490b2e106ab45d9af1d382b4220e05f60dfb075c89ac0875a1"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnulot_e2328f": {
+      "key": "eng_project_proj_mwhnulot_e2328f",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnulot_e2328f",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:57:09.332Z",
+      "updatedAt": "2026-11-15T09:57:09.332Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "61b45e732c8307de56743f3f49d0700ce88fe02ea5f3a54feb2c90c4d95dc5ca",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:57:09.332Z",
+          "digest": "61b45e732c8307de56743f3f49d0700ce88fe02ea5f3a54feb2c90c4d95dc5ca"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnv6px_42ab2a": {
+      "key": "eng_project_proj_mwhnv6px_42ab2a",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnv6px_42ab2a",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:57:36.644Z",
+      "updatedAt": "2026-11-15T09:57:36.644Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "45e8ad94911b077194f1c6764d87239ff3c88b551d0b85d5e86da0ef64fd1228",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:57:36.644Z",
+          "digest": "45e8ad94911b077194f1c6764d87239ff3c88b551d0b85d5e86da0ef64fd1228"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnvmmu_71f2ea": {
+      "key": "eng_project_proj_mwhnvmmu_71f2ea",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnvmmu_71f2ea",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:57:57.360Z",
+      "updatedAt": "2026-11-15T09:57:57.360Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "7d8f153656d30ac27a3aa8006ebd34b5c9fc164398c3bd4161d387f3b8e808a0",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:57:57.360Z",
+          "digest": "7d8f153656d30ac27a3aa8006ebd34b5c9fc164398c3bd4161d387f3b8e808a0"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnwcqa_47def0": {
+      "key": "eng_project_proj_mwhnwcqa_47def0",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnwcqa_47def0",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:58:31.151Z",
+      "updatedAt": "2026-11-15T09:58:31.151Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "be2e1e6ef886fbc48e3343c1e31dc1934135237dd38c0382d419a2b4a93bbd89",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:58:31.151Z",
+          "digest": "be2e1e6ef886fbc48e3343c1e31dc1934135237dd38c0382d419a2b4a93bbd89"
+        }
+      ]
+    },
+    "eng_project_proj_mwhnwzp6_6dd9e6": {
+      "key": "eng_project_proj_mwhnwzp6_6dd9e6",
+      "value": {
+        "name": "Build an internal SaaS revenue",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwhnwzp6_6dd9e6",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T09:59:00.854Z",
+      "updatedAt": "2026-11-15T09:59:00.854Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "Sovereign Enterprise Prime",
+        "ownerUserId": "usr_sovereign_01"
+      },
+      "contentDigest": "126cfd002ef73b55247ee736e3eded90ef07be2ca80d5c53d748ecae22045b94",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T09:59:00.854Z",
+          "digest": "126cfd002ef73b55247ee736e3eded90ef07be2ca80d5c53d748ecae22045b94"
+        }
+      ]
+    },
+    "eng_project_proj_mwho7cp7_fb3e98": {
+      "key": "eng_project_proj_mwho7cp7_fb3e98",
+      "value": {
+        "name": "Incident Telemetry Service",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwho7cp7_fb3e98",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T10:07:04.326Z",
+      "updatedAt": "2026-11-15T10:07:04.326Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "d05fa779dfe3f74ed87776a872320692555488df25be9e6956e11d44b69d3280",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T10:07:04.326Z",
+          "digest": "d05fa779dfe3f74ed87776a872320692555488df25be9e6956e11d44b69d3280"
+        }
+      ]
+    },
+    "eng_project_proj_mwho7grn_0174ea": {
+      "key": "eng_project_proj_mwho7grn_0174ea",
+      "value": {
+        "name": "Bench L1_INTERACTIVE_PORTAL",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwho7grn_0174ea",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T10:07:09.496Z",
+      "updatedAt": "2026-11-15T10:07:09.496Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "e5464f9f973c7068b51a15e3018173de2d5f121f42106f631f76f169fd02f952",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T10:07:09.496Z",
+          "digest": "e5464f9f973c7068b51a15e3018173de2d5f121f42106f631f76f169fd02f952"
+        }
+      ]
+    },
+    "eng_project_proj_mwho7hie_0505e6": {
+      "key": "eng_project_proj_mwho7hie_0505e6",
+      "value": {
+        "name": "Bench L2_DATA_PERSISTENCE_FINANCE",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwho7hie_0505e6",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T10:07:10.472Z",
+      "updatedAt": "2026-11-15T10:07:10.472Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "fc5d969e336a4d52a356915e05e427918f90316934ccd0b4cecb4500a1bae7c1",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T10:07:10.472Z",
+          "digest": "fc5d969e336a4d52a356915e05e427918f90316934ccd0b4cecb4500a1bae7c1"
+        }
+      ]
+    },
+    "eng_project_proj_mwho7i8z_de31d9": {
+      "key": "eng_project_proj_mwho7i8z_de31d9",
+      "value": {
+        "name": "Bench L3_MULTI_USER_SAAS",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwho7i8z_de31d9",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T10:07:11.409Z",
+      "updatedAt": "2026-11-15T10:07:11.409Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 8,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "a8e1df66a5c0f5f58bc98a813a06133ab7480c627f261f719d1a268c55f70abb",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T10:07:11.409Z",
+          "digest": "a8e1df66a5c0f5f58bc98a813a06133ab7480c627f261f719d1a268c55f70abb"
+        }
+      ]
+    },
+    "eng_project_proj_mwho7jks_dbdcce": {
+      "key": "eng_project_proj_mwho7jks_dbdcce",
+      "value": {
+        "name": "Bench L4_PYTHON_SERVICE_INTEGRATION",
+        "stack": "python_service",
+        "workspaceDir": "projects/proj_mwho7jks_dbdcce",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-15T10:07:12.994Z",
+      "updatedAt": "2026-11-15T10:07:12.994Z",
+      "readCount": 0,
+      "metadata": {
+        "files": 5,
+        "tenantId": "test-tenant-sec10",
+        "ownerUserId": "dev-user-1"
+      },
+      "contentDigest": "6541a3373c53008c35dd7a2d5bf0c8bf7ea21c558c1c2a12330215ae162f3409",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T10:07:12.994Z",
+          "digest": "6541a3373c53008c35dd7a2d5bf0c8bf7ea21c558c1c2a12330215ae162f3409"
         }
       ]
     }

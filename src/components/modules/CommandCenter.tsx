@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SystemStatusData,
   ModuleId,
@@ -20,8 +20,10 @@ import {
   Code2,
   Cpu,
   Database,
+  DollarSign,
   Eye,
   Play,
+  RotateCcw,
   ShieldCheck,
   Wifi,
   Workflow,
@@ -90,6 +92,27 @@ const toStatusDotState = (
   }
 };
 
+interface SessionExpenditureBaseline {
+  startedAt: string;
+  nativeComputeCostUsd: number;
+  cloudApiCostUsd: number;
+  totalTokensProcessed: number;
+  tasksCompleted: number;
+  tasksFailed: number;
+}
+
+const SESSION_BASELINE_STORAGE_KEY = 'zyntheor_agent_session_cost_baseline';
+
+const formatUsd = (value: number | null | undefined, lang: 'th' | 'en') => {
+  if (value === null || value === undefined || Number.isNaN(value)) return 'UNAVAILABLE';
+  return new Intl.NumberFormat(lang === 'th' ? 'th-TH' : 'en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+  }).format(value);
+};
+
 export const CommandCenter: React.FC<CommandCenterProps> = ({
   statusData,
   onNavigate,
@@ -98,6 +121,114 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   const { lang } = useLanguage();
   const truth = statusData?.truthDashboard;
   const resources = statusData?.resources;
+  const commercial = statusData?.commercial;
+
+  const [sessionBaseline, setSessionBaseline] = useState<SessionExpenditureBaseline | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = window.sessionStorage.getItem(SESSION_BASELINE_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as SessionExpenditureBaseline;
+      if (
+        typeof parsed.nativeComputeCostUsd === 'number' &&
+        typeof parsed.cloudApiCostUsd === 'number' &&
+        typeof parsed.totalTokensProcessed === 'number'
+      ) {
+        return parsed;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (!commercial) return;
+    const currentSnapshot: SessionExpenditureBaseline = {
+      startedAt: new Date().toISOString(),
+      nativeComputeCostUsd: commercial.nativeComputeCostUsd ?? 0,
+      cloudApiCostUsd: commercial.cloudApiCostUsd ?? 0,
+      totalTokensProcessed: commercial.totalTokensProcessed ?? 0,
+      tasksCompleted: commercial.tasksCompleted ?? 0,
+      tasksFailed: commercial.tasksFailed ?? 0,
+    };
+
+    const needsReset =
+      !sessionBaseline ||
+      commercial.nativeComputeCostUsd < sessionBaseline.nativeComputeCostUsd ||
+      commercial.cloudApiCostUsd < sessionBaseline.cloudApiCostUsd ||
+      commercial.totalTokensProcessed < sessionBaseline.totalTokensProcessed;
+
+    if (needsReset) {
+      setSessionBaseline(currentSnapshot);
+      try {
+        window.sessionStorage.setItem(
+          SESSION_BASELINE_STORAGE_KEY,
+          JSON.stringify(currentSnapshot)
+        );
+      } catch {
+        // ignore storage quota errors
+      }
+    }
+  }, [
+    commercial?.nativeComputeCostUsd,
+    commercial?.cloudApiCostUsd,
+    commercial?.totalTokensProcessed,
+    commercial?.tasksCompleted,
+    commercial?.tasksFailed,
+  ]);
+
+  const handleResetSessionBaseline = () => {
+    if (!commercial) return;
+    const fresh: SessionExpenditureBaseline = {
+      startedAt: new Date().toISOString(),
+      nativeComputeCostUsd: commercial.nativeComputeCostUsd ?? 0,
+      cloudApiCostUsd: commercial.cloudApiCostUsd ?? 0,
+      totalTokensProcessed: commercial.totalTokensProcessed ?? 0,
+      tasksCompleted: commercial.tasksCompleted ?? 0,
+      tasksFailed: commercial.tasksFailed ?? 0,
+    };
+    setSessionBaseline(fresh);
+    try {
+      window.sessionStorage.setItem(SESSION_BASELINE_STORAGE_KEY, JSON.stringify(fresh));
+    } catch {
+      // ignore storage quota errors
+    }
+  };
+
+  const hasCommercialTelemetry = Boolean(commercial);
+  const cumulativeNativeUsd = commercial ? commercial.nativeComputeCostUsd : null;
+  const cumulativeCloudUsd = commercial ? commercial.cloudApiCostUsd : null;
+  const cumulativeTotalUsd =
+    cumulativeNativeUsd !== null && cumulativeCloudUsd !== null
+      ? cumulativeNativeUsd + cumulativeCloudUsd
+      : null;
+
+  const sessionNativeUsd =
+    commercial && sessionBaseline
+      ? Math.max(0, commercial.nativeComputeCostUsd - sessionBaseline.nativeComputeCostUsd)
+      : null;
+  const sessionCloudUsd =
+    commercial && sessionBaseline
+      ? Math.max(0, commercial.cloudApiCostUsd - sessionBaseline.cloudApiCostUsd)
+      : null;
+  const sessionTotalUsd =
+    sessionNativeUsd !== null && sessionCloudUsd !== null
+      ? sessionNativeUsd + sessionCloudUsd
+      : null;
+  const sessionTokens =
+    commercial && sessionBaseline
+      ? Math.max(0, commercial.totalTokensProcessed - sessionBaseline.totalTokensProcessed)
+      : null;
+  const sessionTasks =
+    commercial && sessionBaseline
+      ? Math.max(
+          0,
+          commercial.tasksCompleted +
+            commercial.tasksFailed -
+            (sessionBaseline.tasksCompleted + sessionBaseline.tasksFailed)
+        )
+      : null;
 
   const systemOverview = truth?.systemStatusOverview ?? [];
   const blockers = truth?.activeBlockers ?? [];
@@ -430,6 +561,118 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           subtitle="Verified outcomes only — reports NOT_ENOUGH_DATA when zero real executions exist"
         />
         <VividCard gradientAccent="lime" className="!p-4 space-y-4">
+          {/* Current Agent Execution Session Expenditure Tracker */}
+          <div
+            aria-label="Current Agent Execution Session Expenditure"
+            className="rounded-xl bg-[#070B19] border border-[#1E294A] p-4 space-y-3"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#1E294A]">
+              <div className="min-w-0 space-y-0.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold text-[#F4F7FF] inline-flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+                    <span>
+                      {lang === 'th'
+                        ? 'ค่าใช้จ่ายการประมวลผลเอเจนต์ในเซสชันปัจจุบัน (Session Expenditure)'
+                        : 'Agent Execution Session Expenditure'}
+                    </span>
+                  </span>
+                  <StatusDot
+                    status={hasCommercialTelemetry ? 'VERIFIED' : 'UNAVAILABLE'}
+                    label={hasCommercialTelemetry ? 'TELEMETRY_ACTIVE' : 'UNAVAILABLE'}
+                  />
+                </div>
+                <div className="text-[11px] font-mono text-[#9AA8C7] tabular-nums">
+                  {hasCommercialTelemetry
+                    ? `Source: statusData.commercial · Tenant: ${commercial?.activeTenantId} · Plan: ${commercial?.activePlanId} · Session start: ${formatTimestamp(sessionBaseline?.startedAt, lang)}`
+                    : 'UNAVAILABLE · Awaiting statusData.commercial cost telemetry from runtime'}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {hasCommercialTelemetry && (
+                  <button
+                    type="button"
+                    onClick={handleResetSessionBaseline}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF]/50 text-[#CBD5E1] text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap cursor-pointer"
+                    title="Reset current session expenditure baseline to zero"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset Session</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('analytics_bi')}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#131B36] border border-[#1E294A] hover:border-[#CCFF00]/50 text-[#CCFF00] text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap cursor-pointer"
+                >
+                  <span>Expense Ledger</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-mono tabular-nums">
+              <div className="p-3 rounded-xl bg-[#0B1124] border border-[#1E294A]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Session Total Spend</div>
+                <div className="text-base font-bold text-[#CCFF00] mt-1">
+                  {formatUsd(sessionTotalUsd, lang)}
+                </div>
+                <div className="text-[10px] text-[#64748B] mt-0.5">
+                  Cumulative: {formatUsd(cumulativeTotalUsd, lang)}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#0B1124] border border-[#1E294A]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Native Compute (Session)</div>
+                <div className="text-base font-bold text-[#00F0FF] mt-1">
+                  {formatUsd(sessionNativeUsd, lang)}
+                </div>
+                <div className="text-[10px] text-[#64748B] mt-0.5">
+                  Total: {formatUsd(cumulativeNativeUsd, lang)}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#0B1124] border border-[#1E294A]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Cloud API Spend (Session)</div>
+                <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                  {formatUsd(sessionCloudUsd, lang)}
+                </div>
+                <div className="text-[10px] text-[#64748B] mt-0.5">
+                  Total: {formatUsd(cumulativeCloudUsd, lang)}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#0B1124] border border-[#1E294A]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Session Tokens</div>
+                <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                  {sessionTokens !== null
+                    ? new Intl.NumberFormat(lang === 'th' ? 'th-TH' : 'en-US').format(sessionTokens)
+                    : 'UNAVAILABLE'}
+                </div>
+                <div className="text-[10px] text-[#64748B] mt-0.5">
+                  Total:{' '}
+                  {hasCommercialTelemetry
+                    ? new Intl.NumberFormat(lang === 'th' ? 'th-TH' : 'en-US').format(
+                        commercial?.totalTokensProcessed ?? 0
+                      )
+                    : 'UNAVAILABLE'}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#0B1124] border border-[#1E294A]">
+                <div className="text-[10px] uppercase text-[#9AA8C7]">Session Tasks</div>
+                <div className="text-base font-bold text-[#F4F7FF] mt-1">
+                  {sessionTasks !== null ? sessionTasks : 'UNAVAILABLE'}
+                </div>
+                <div className="text-[10px] text-[#64748B] mt-0.5">
+                  {hasCommercialTelemetry
+                    ? `${commercial?.tasksCompleted ?? 0} ok / ${commercial?.tasksFailed ?? 0} failed`
+                    : 'UNAVAILABLE'}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono tabular-nums">
             <div className="p-3 rounded-xl bg-[#070B19]">
               <div className="text-[10px] uppercase text-[#9AA8C7]">Task Success Rate</div>

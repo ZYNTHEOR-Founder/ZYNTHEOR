@@ -82,6 +82,7 @@ import {
   type ActionMissionRequest,
 } from './lib/ActionDrivenEngine.ts';
 import { SoftwareProjectManager } from './lib/SoftwareProjectManager.ts';
+import { InternetIntegrationEngine } from './lib/InternetIntegrationEngine.ts';
 import { buildTruthDashboardSnapshot } from './lib/DashboardTruth.ts';
 import { LedgerService, type LedgerCategorySort } from './src/services/LedgerService.ts';
 
@@ -5028,16 +5029,300 @@ app.post('/api/engineering/projects/:projectId/rollback', requireAuth('developer
 app.get('/api/engineering/projects/:projectId/preview', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
   try {
     const scope = resolveEngineeringScope(req);
-    const mgr = SoftwareProjectManager.getInstance();
-    const project = mgr.getProject(String(req.params.projectId || ''), scope);
-    if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
-    let html = '';
-    try {
-      html = mgr.readProjectFile(project.projectId, 'public/index.html', scope);
-    } catch {
-      html = `<!DOCTYPE html><html><body style="background:#070B19;color:#E2E8F0;font-family:sans-serif;padding:24px;"><h2>${project.name}</h2><p>Stack: ${project.stack} (no public/index.html entrypoint; inspect API endpoints in Inspector tab)</p></body></html>`;
+    const payload = SoftwareProjectManager.getInstance().getPreviewPayload(
+      String(req.params.projectId || ''),
+      scope
+    );
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.json({ success: true, ...payload });
+  } catch (err: any) {
+    const status = String(err.message || '').includes('PROJECT_NOT_FOUND') ? 404 : 500;
+    res.status(status).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/visual-elements', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const elements = SoftwareProjectManager.getInstance().inspectVisualElements(
+      String(req.params.projectId || ''),
+      scope
+    );
+    res.json({ success: true, elements });
+  } catch (err: any) {
+    const status = String(err.message || '').includes('PROJECT_NOT_FOUND') ? 404 : 500;
+    res.status(status).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/visual-patch', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (hasUnsafePrototypeKeys(req.body)) {
+      return res.status(400).json({ success: false, error: 'INVALID_PAYLOAD: disallowed prototype key' });
     }
-    res.json({ success: true, html, endpoints: project.requirementsSpec.endpoints });
+    const scope = resolveEngineeringScope(req);
+    const out = await SoftwareProjectManager.getInstance().applyVisualPropertyPatch(
+      String(req.params.projectId || ''),
+      {
+        targetId: String(req.body?.targetId || '').trim(),
+        textContent: typeof req.body?.textContent === 'string' ? req.body.textContent : undefined,
+        color: typeof req.body?.color === 'string' ? req.body.color : undefined,
+        backgroundColor: typeof req.body?.backgroundColor === 'string' ? req.body.backgroundColor : undefined,
+        padding: typeof req.body?.padding === 'string' ? req.body.padding : undefined,
+        fontSize: typeof req.body?.fontSize === 'string' ? req.body.fontSize : undefined,
+        message: typeof req.body?.message === 'string' ? sanitizeCognitiveText(req.body.message, 200) : undefined,
+        runChecks: req.body?.runChecks !== false,
+      },
+      scope
+    );
+    res.json({ success: true, ...out });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/repair', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const out = await SoftwareProjectManager.getInstance().diagnoseAndRepairProject(
+      String(req.params.projectId || ''),
+      scope
+    );
+    res.json({ success: true, ...out });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/deployment/history', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const projectId = typeof req.query.projectId === 'string' && req.query.projectId.trim()
+      ? req.query.projectId.trim()
+      : undefined;
+    const order = req.query.order === 'asc' ? 'asc' : 'desc';
+    const history = SoftwareProjectManager.getInstance().listDeploymentHistory(scope, { projectId, order });
+    res.json({
+      success: true,
+      total: history.length,
+      order,
+      projectId: projectId || null,
+      history,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/deployment/:deploymentId/logs', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const data = SoftwareProjectManager.getInstance().getDeploymentLogs(
+      String(req.params.projectId || ''),
+      String(req.params.deploymentId || ''),
+      scope
+    );
+    res.json({ success: true, ...data });
+  } catch (err: any) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/internet/policy', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const policy = InternetIntegrationEngine.getInstance().getPolicySnapshot(scope.tenantId);
+    res.json({ success: true, policy });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/internet/secrets', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (hasUnsafePrototypeKeys(req.body)) {
+      return res.status(400).json({ success: false, error: 'INVALID_PAYLOAD: disallowed prototype key' });
+    }
+    const scope = resolveEngineeringScope(req);
+    const alias = sanitizeCognitiveText(req.body?.alias || '', 64).trim();
+    const envVarName = typeof req.body?.envVarName === 'string' ? req.body.envVarName.trim() : undefined;
+    const provider = typeof req.body?.provider === 'string' ? sanitizeCognitiveText(req.body.provider, 48).trim() : undefined;
+    const secretValue = typeof req.body?.secretValue === 'string' ? req.body.secretValue : undefined;
+    const secret = InternetIntegrationEngine.getInstance().registerSecretRef(
+      { alias, envVarName, provider, secretValue },
+      scope.tenantId,
+      scope.userId
+    );
+    res.json({ success: true, secret });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/internet/fetch', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (hasUnsafePrototypeKeys(req.body)) {
+      return res.status(400).json({ success: false, error: 'INVALID_PAYLOAD: disallowed prototype key' });
+    }
+    const scope = resolveEngineeringScope(req);
+    const url = typeof req.body?.url === 'string' ? req.body.url.trim() : '';
+    if (!url) {
+      return res.status(400).json({ success: false, error: 'url is required' });
+    }
+    const method = req.body?.method === 'POST' || req.body?.method === 'HEAD' ? req.body.method : 'GET';
+    const result = await InternetIntegrationEngine.getInstance().fetchExternalUrl(
+      {
+        url,
+        method,
+        body: typeof req.body?.body === 'string' ? req.body.body : undefined,
+        secretRefAlias: typeof req.body?.secretRefAlias === 'string' ? req.body.secretRefAlias.trim() : undefined,
+        secretHeaderName: typeof req.body?.secretHeaderName === 'string' ? req.body.secretHeaderName.trim() : undefined,
+      },
+      { tenantId: scope.tenantId, userId: scope.userId }
+    );
+    res.status(result.blockedByPolicy ? 403 : 200).json({ success: result.ok, result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/internet/research', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const query = sanitizeCognitiveText(req.body?.query || '', 300).trim();
+    const research = await InternetIntegrationEngine.getInstance().researchWebTopic(query, {
+      tenantId: scope.tenantId,
+      userId: scope.userId,
+    });
+    res.json({ success: true, ...research });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/internet/registry-lookup', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const registry = req.body?.registry === 'pypi' ? 'pypi' : 'npm';
+    const packageName = typeof req.body?.packageName === 'string' ? req.body.packageName.trim() : '';
+    const pkg = await InternetIntegrationEngine.getInstance().lookupPackageRegistry(registry, packageName, {
+      tenantId: scope.tenantId,
+      userId: scope.userId,
+    });
+    res.json({ success: true, package: pkg });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/integrations', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (hasUnsafePrototypeKeys(req.body)) {
+      return res.status(400).json({ success: false, error: 'INVALID_PAYLOAD: disallowed prototype key' });
+    }
+    const scope = resolveEngineeringScope(req);
+    const rawType = req.body?.type;
+    const type =
+      rawType === 'websocket' || rawType === 'database' || rawType === 'auth' || rawType === 'registry_pkg'
+        ? rawType
+        : 'http_api';
+    const out = await SoftwareProjectManager.getInstance().attachIntegration(
+      String(req.params.projectId || ''),
+      {
+        type,
+        name: sanitizeCognitiveText(req.body?.name || '', 80),
+        endpoint: typeof req.body?.endpoint === 'string' ? req.body.endpoint.trim() : '',
+        secretRefAlias: typeof req.body?.secretRefAlias === 'string' ? req.body.secretRefAlias.trim() : undefined,
+        secretHeaderName: typeof req.body?.secretHeaderName === 'string' ? req.body.secretHeaderName.trim() : undefined,
+        notes: typeof req.body?.notes === 'string' ? sanitizeCognitiveText(req.body.notes, 300) : undefined,
+      },
+      scope
+    );
+    res.json({ success: true, ...out });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/integrations/:integrationId/test', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const out = await SoftwareProjectManager.getInstance().testProjectIntegration(
+      String(req.params.projectId || ''),
+      String(req.params.integrationId || ''),
+      scope
+    );
+    res.json({ success: true, ...out });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/research', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const project = SoftwareProjectManager.getInstance().attachResearchNote(
+      String(req.params.projectId || ''),
+      {
+        query: sanitizeCognitiveText(req.body?.query || '', 200),
+        source: sanitizeCognitiveText(req.body?.source || 'web', 40),
+        title: sanitizeCognitiveText(req.body?.title || '', 200),
+        url: typeof req.body?.url === 'string' ? req.body.url.trim() : '',
+        snippet: sanitizeCognitiveText(req.body?.snippet || '', 800),
+        sha256: typeof req.body?.sha256 === 'string' ? req.body.sha256.trim() : '',
+      },
+      scope
+    );
+    res.json({ success: true, project });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/iterate', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const out = await SoftwareProjectManager.getInstance().iterateProjectWithRequest(
+      String(req.params.projectId || ''),
+      {
+        instruction: sanitizeCognitiveText(req.body?.instruction || '', 1500),
+        runChecks: req.body?.runChecks !== false,
+      },
+      scope
+    );
+    res.json({ success: true, ...out });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/database', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const database = SoftwareProjectManager.getInstance().inspectProjectDatabase(
+      String(req.params.projectId || ''),
+      scope
+    );
+    res.json({ success: true, database });
+  } catch (err: any) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/engineering/benchmark', requireAuth('developer'), (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const report = SoftwareProjectManager.getInstance().getLatestBenchmarkReport();
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/benchmark', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const report = await SoftwareProjectManager.getInstance().runSoftwareBenchmarkSuite(scope);
+    res.json({ success: true, report });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }

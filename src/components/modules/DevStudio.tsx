@@ -7,6 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import { apiUrl } from '../../lib/apiClient';
 import { consumeNdjsonStream } from '../../lib/ndjson';
 import { SoftwareProjectWorkspace } from './SoftwareProjectWorkspace';
+import { DeploymentHistoryTimeline } from '../DeploymentHistoryTimeline';
 import {
   Code2,
   Play,
@@ -71,7 +72,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
   const [priority, setPriority] = useState<TaskPriority>('Medium');
   const [isRunning, setIsRunning] = useState(false);
   const [events, setEvents] = useState<OrchestrationEvent[]>([]);
-  const [activeTab, setActiveTab] = useState<'editor' | 'terminal' | 'sandbox' | 'audit' | 'benchmark' | 'training'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'terminal' | 'sandbox' | 'audit' | 'benchmark' | 'training' | 'deployments'>('editor');
   const [selectedFile, setSelectedFile] = useState<string>('solution.js');
   const [fileContent, setFileContent] = useState<string>('// Select or generate code to inspect');
   const [originalContent, setOriginalContent] = useState<string>('');
@@ -557,10 +558,10 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
         <div className="text-xs">
           <div className="font-bold text-white flex items-center gap-2">
             <Code2 className="w-4 h-4 text-[#00F0FF]" />
-            <span>Creation Studio · Cloud Software Engineering &amp; Multi-Agent IDE</span>
+            <span>Creation Studio · Native Application Development Engine &amp; Multi-Agent IDE</span>
           </div>
           <div className="text-[11px] text-[#9AA8C7] mt-0.5">
-            Switch between full-stack Section 10 Software Project Workspace and Single-Artifact Multi-Agent / Benchmark IDE
+            Switch between Application-First Workspace (Preview, Database, Internet, Benchmark &amp; Timeline) and Multi-Agent / Model IDE
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -573,7 +574,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
                 : 'bg-[#131B36] text-[#CBD5E1] border border-[#1E294A]'
             }`}
           >
-            Project Workspace (Section 10)
+            Application Workspace
           </button>
           <button
             type="button"
@@ -592,6 +593,7 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
       {studioMode === 'project_workspace' ? (
         <SoftwareProjectWorkspace
           initialCapabilities={statusData?.truthDashboard?.softwareEngineering?.capabilities}
+          statusData={statusData}
           onAuditUpdated={() => {
             void fetchAuditRecords();
             onStatusChanged?.();
@@ -1098,6 +1100,18 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
                 >
                   <TrendingDown className="w-3.5 h-3.5 text-[#FF5E3A]" />
                   <span>Training Curves</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('deployments')}
+                  className={`min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                    activeTab === 'deployments'
+                      ? 'bg-[#131B36] text-[#00F0FF] shadow-sm border border-[#00F0FF]/45'
+                      : 'text-[#9AA8C7] hover:text-[#F4F7FF]'
+                  }`}
+                >
+                  <Rocket className="w-3.5 h-3.5 text-[#CCFF00]" />
+                  <span>Deployment History</span>
                 </button>
               </div>
 
@@ -1826,6 +1840,13 @@ export const DevStudio: React.FC<DevStudioProps> = ({ statusData, onStatusChange
                     </div>
                   );
                 })()}
+              </div>
+            )}
+
+            {/* TAB 7: CLOUD DEPLOYMENT HISTORY TIMELINE */}
+            {activeTab === 'deployments' && (
+              <div className="p-4 bg-[#070B19] min-h-[460px] max-h-[600px] overflow-y-auto">
+                <DeploymentHistoryTimeline refreshKey={auditRecords.length} />
               </div>
             )}
           </div>

@@ -233,6 +233,14 @@ export interface ProjectExecutionEvidenceRecord {
   exitCode?: number | null;
 }
 
+export interface ProjectDeploymentTestsSnapshot {
+  status: 'VERIFIED' | 'FAILED' | 'UNVERIFIED';
+  passed: number;
+  total: number;
+  summary: string;
+  executedAt: string | null;
+}
+
 export interface ProjectDeploymentRecord {
   deploymentId: string;
   revisionId: string;
@@ -250,6 +258,150 @@ export interface ProjectDeploymentRecord {
   reason: string;
   evidenceHash: string;
   linkedLogIds: string[];
+  testsSnapshot?: ProjectDeploymentTestsSnapshot | null;
+}
+
+export interface DeploymentHistoryTimelineItem extends ProjectDeploymentRecord {
+  projectId: string;
+  projectName: string;
+  projectSlug: string;
+  stack: SoftwareProjectRecord['stack'];
+  verificationState: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
+  logsUrl: string;
+  linkedLogs: Array<{
+    logId?: string;
+    timestamp: string;
+    level: 'INFO' | 'WARN' | 'ERROR';
+    source: string;
+    message: string;
+    deploymentId?: string;
+    executionId?: string;
+    stage?: string;
+  }>;
+  verificationEvidence: {
+    deploymentHash: {
+      artifactSha256: string | null;
+      evidenceHash: string;
+      artifactZip: string | null;
+      revisionId: string;
+      hashVerified: boolean;
+    };
+    cloudRuntimeResponse: {
+      state: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
+      endpoint: string | null;
+      provider: string | null;
+      httpStatus: number | null;
+      responseSha256: string | null;
+      latencyMs: number | null;
+      summary: string;
+    };
+    automatedTestResults: {
+      state: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
+      status: 'VERIFIED' | 'FAILED' | 'UNVERIFIED';
+      passed: number;
+      total: number;
+      summary: string;
+      executedAt: string | null;
+    };
+  };
+}
+
+export interface ProjectIntegrationBinding {
+  integrationId: string;
+  type: 'http_api' | 'websocket' | 'database' | 'auth' | 'registry_pkg';
+  name: string;
+  endpoint: string;
+  secretRefAlias?: string | null;
+  secretHeaderName?: string | null;
+  notes?: string;
+  createdAt: string;
+  lastTestedAt?: string | null;
+  lastStatus?: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED' | 'FAILED';
+  lastHttpStatus?: number | null;
+  lastLatencyMs?: number | null;
+  lastResponseSha256?: string | null;
+  lastError?: string | null;
+}
+
+export interface ProjectResearchNote {
+  id: string;
+  query: string;
+  source: string;
+  title: string;
+  url: string;
+  snippet: string;
+  sha256: string;
+  attachedAt: string;
+}
+
+export interface SoftwareBenchmarkDimensionScore {
+  dimension: string;
+  status: 'VERIFIED' | 'PARTIAL' | 'BLOCKED' | 'FAILED';
+  scorePct: number | null;
+  measurement: string;
+  evidenceSource: string;
+}
+
+export interface SoftwareBenchmarkTaskResult {
+  level: number;
+  taskId: string;
+  title: string;
+  stack: 'node_fullstack' | 'node_api' | 'python_service' | 'static_web';
+  passed: boolean;
+  durationMs: number;
+  buildVerified: boolean;
+  testsPassed: number;
+  testsTotal: number;
+  securityFindingsHighMedium: number;
+  uiContractChecksPassed: number;
+  uiContractChecksTotal: number;
+  evidenceHash: string;
+  summary: string;
+}
+
+export interface SoftwareBenchmarkSuiteReport {
+  runId: string;
+  executedAt: string;
+  environment: string;
+  totalDurationMs: number;
+  levelsAttempted: number;
+  levelsPassed: number;
+  dimensions: SoftwareBenchmarkDimensionScore[];
+  tasks: SoftwareBenchmarkTaskResult[];
+  reproducibility: string;
+}
+
+export interface VisualElementNode {
+  zId: string;
+  tagName: string;
+  label: string;
+  textContent: string;
+  styles: {
+    color?: string;
+    backgroundColor?: string;
+    padding?: string;
+    fontSize?: string;
+  };
+}
+
+export interface VisualPropertyPatchInput {
+  targetId: string;
+  textContent?: string;
+  color?: string;
+  backgroundColor?: string;
+  padding?: string;
+  fontSize?: string;
+  message?: string;
+  runChecks?: boolean;
+}
+
+export interface ProjectRepairResult {
+  project: SoftwareProjectRecord;
+  revision: SoftwareProjectRecord['revisions'][number] | null;
+  repaired: boolean;
+  modifiedFiles: string[];
+  diagnoses: string[];
+  summary: string;
 }
 
 export interface ProjectStageExecutionRecord {
@@ -348,6 +500,8 @@ export interface SoftwareProjectRecord {
     reason: string;
   };
   deploymentHistory?: ProjectDeploymentRecord[];
+  integrations?: ProjectIntegrationBinding[];
+  researchNotes?: ProjectResearchNote[];
   runtimeLogs: Array<{
     logId?: string;
     timestamp: string;

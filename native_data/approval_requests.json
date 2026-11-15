@@ -1,5 +1,47 @@
 [
   {
+    "requestId": "apr_1794737228910_8c1fd3",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwho7cp7_fb3e98_rev_8",
+    "description": "Cloud deployment of 'Incident Telemetry Service' (rev_8)",
+    "requestedByUserId": "dev-user-1",
+    "requestedByRole": "developer",
+    "tenantId": "test-tenant-sec10",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T10:07:08.910Z",
+    "expiresAt": "2026-11-16T10:07:08.910Z",
+    "requestDigest": "fae9dd4eee76e4d3f3b56d125aa360fa83943cda5505a8faf675b2a14dbeb614"
+  },
+  {
+    "requestId": "apr_1794736464136_4fd718",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhnqwu0_221cef_rev_8",
+    "description": "Cloud deployment of 'Incident Telemetry Service' (rev_8)",
+    "requestedByUserId": "dev-user-1",
+    "requestedByRole": "developer",
+    "tenantId": "test-tenant-sec10",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:54:24.136Z",
+    "expiresAt": "2026-11-16T09:54:24.136Z",
+    "requestDigest": "6fa44ba44fa157d600ff2eddd859e7ec6161b96ab9c3bd46004e81b4202df631"
+  },
+  {
+    "requestId": "apr_1794735825766_e6fc08",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhndbla_13dbc1_rev_4",
+    "description": "Cloud deployment of 'Incident Telemetry Service' (rev_4)",
+    "requestedByUserId": "dev-user-1",
+    "requestedByRole": "developer",
+    "tenantId": "test-tenant-sec10",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:43:45.766Z",
+    "expiresAt": "2026-11-16T09:43:45.766Z",
+    "requestDigest": "685ef4e07839c8df63f2f61374f7b3c0cb1a6021078ac67a9b212b72a352814a"
+  },
+  {
     "requestId": "apr_1794734305822_086493",
     "actionType": "PUBLICATION",
     "resourceId": "deploy_proj_mwhmgdu9_9d9be2_rev_1",

@@ -1,0 +1,119 @@
+{
+  "runId": "bench_mwho99cz_b78d",
+  "executedAt": "2026-11-15T10:08:37.936Z",
+  "environment": "Node v22.23.2 (linux/x64)",
+  "totalDurationMs": 5261,
+  "levelsAttempted": 4,
+  "levelsPassed": 4,
+  "dimensions": [
+    {
+      "dimension": "Requirement & Application Completion",
+      "status": "VERIFIED",
+      "scorePct": 100,
+      "measurement": "4/4 benchmark levels completed end-to-end",
+      "evidenceSource": "SoftwareProjectManager.runSoftwareBenchmarkSuite"
+    },
+    {
+      "dimension": "Build Reliability",
+      "status": "VERIFIED",
+      "scorePct": 100,
+      "measurement": "4/4 syntax & manifest builds passed",
+      "evidenceSource": "node --check & python3 -m py_compile"
+    },
+    {
+      "dimension": "Test Quality & Execution",
+      "status": "VERIFIED",
+      "scorePct": 100,
+      "measurement": "4/4 automated test suites exited with code 0",
+      "evidenceSource": "ToolGateway sandboxed test runner"
+    },
+    {
+      "dimension": "UI / UX & Contract Integrity",
+      "status": "VERIFIED",
+      "scorePct": 100,
+      "measurement": "10/10 interactive DOM & navigation assertions satisfied",
+      "evidenceSource": "Generated public/index.html & module contract verification"
+    },
+    {
+      "dimension": "Security & SSRF Protection",
+      "status": "VERIFIED",
+      "scorePct": 100,
+      "measurement": "4/4 clean static scans · SSRF metadata probe blocked=true",
+      "evidenceSource": "Static security scanner + InternetIntegrationEngine"
+    },
+    {
+      "dimension": "Cloud Deployment Availability",
+      "status": "PARTIAL",
+      "scorePct": null,
+      "measurement": "ApprovalGate + SHA-256 ZIP bundling active; CLOUD_DEPLOY_WEBHOOK_URL not configured in this environment",
+      "evidenceSource": "ApprovalGate + ToolGateway.createZipDeliverable"
+    }
+  ],
+  "tasks": [
+    {
+      "level": 1,
+      "taskId": "L1_INTERACTIVE_PORTAL",
+      "title": "Level 1: Interactive Business Operations App",
+      "stack": "node_fullstack",
+      "passed": true,
+      "durationMs": 1107,
+      "buildVerified": true,
+      "testsPassed": 1,
+      "testsTotal": 1,
+      "securityFindingsHighMedium": 0,
+      "uiContractChecksPassed": 3,
+      "uiContractChecksTotal": 3,
+      "evidenceHash": "abe4f81b03801b69cbd18e3fb08d9d4ee4f31e8a3e50104dd1fa4eeeadd5e6f6",
+      "summary": "Build, 1/1 tests, 0 high/med security findings, 3/3 contract checks verified."
+    },
+    {
+      "level": 2,
+      "taskId": "L2_DATA_PERSISTENCE_FINANCE",
+      "title": "Level 2: Database-Backed Financial Ledger App",
+      "stack": "node_fullstack",
+      "passed": true,
+      "durationMs": 1107,
+      "buildVerified": true,
+      "testsPassed": 1,
+      "testsTotal": 1,
+      "securityFindingsHighMedium": 0,
+      "uiContractChecksPassed": 3,
+      "uiContractChecksTotal": 3,
+      "evidenceHash": "703ee578942e3cc5389619a6c0128f22aab46d6e03f17f44386ec62f47f72135",
+      "summary": "Build, 1/1 tests, 0 high/med security findings, 3/3 contract checks verified."
+    },
+    {
+      "level": 3,
+      "taskId": "L3_MULTI_USER_SAAS",
+      "title": "Level 3: Multi-User SaaS Operations Platform",
+      "stack": "node_fullstack",
+      "passed": true,
+      "durationMs": 2113,
+      "buildVerified": true,
+      "testsPassed": 1,
+      "testsTotal": 1,
+      "securityFindingsHighMedium": 0,
+      "uiContractChecksPassed": 3,
+      "uiContractChecksTotal": 3,
+      "evidenceHash": "b22158e859657dd37862c19b7981fca2222f1324576661a8ef229bb1206466da",
+      "summary": "Build, 1/1 tests, 0 high/med security findings, 3/3 contract checks verified."
+    },
+    {
+      "level": 4,
+      "taskId": "L4_PYTHON_SERVICE_INTEGRATION",
+      "title": "Level 4: Multi-Language Service & Security Verification",
+      "stack": "python_service",
+      "passed": true,
+      "durationMs": 925,
+      "buildVerified": true,
+      "testsPassed": 1,
+      "testsTotal": 1,
+      "securityFindingsHighMedium": 0,
+      "uiContractChecksPassed": 1,
+      "uiContractChecksTotal": 1,
+      "evidenceHash": "a9e8b86cddbc16edbaf8f95b347c81eca27ae2174b421be0576837e2aedb2081",
+      "summary": "Build, 1/1 tests, 0 high/med security findings, 1/1 contract checks verified."
+    }
+  ],
+  "reproducibility": "Deterministic task prompts executed in isolated /workspace/projects sandboxes via POST /api/engineering/benchmark."
+}

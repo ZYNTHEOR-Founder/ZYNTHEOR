@@ -1,0 +1,121 @@
+{
+  "planId": "plan_eng_task_proj_mwhnr3da_5b41eb",
+  "taskId": "eng_task_proj_mwhnr3da_5b41eb",
+  "tenantId": "test-tenant-sec10",
+  "ownerUserId": "dev-user-1",
+  "goal": "Create node_fullstack application: Bench L2_DATA_PERSISTENCE_FINANCE",
+  "priority": "High",
+  "runtime": "node",
+  "createdAt": "2026-11-15T09:54:25.224Z",
+  "updatedAt": "2026-11-15T09:54:25.224Z",
+  "status": "ACTIVE",
+  "steps": [
+    {
+      "id": "step_intake",
+      "title": "Decompose goal constraints and target runtime",
+      "stage": "01_INTAKE",
+      "dependsOn": [],
+      "priority": 1,
+      "estimatedMs": 120,
+      "status": "PENDING",
+      "attempts": 0
+    },
+    {
+      "id": "step_analyze_context",
+      "title": "Audit workspace files and retrieve grounded knowledge",
+      "stage": "02_ANALYZE",
+      "tool": "list_files",
+      "dependsOn": [
+        "step_intake"
+      ],
+      "priority": 2,
+      "estimatedMs": 250,
+      "status": "PENDING",
+      "attempts": 0
+    },
+    {
+      "id": "step_plan_architecture",
+      "title": "Formulate DAG execution steps & acceptance gates",
+      "stage": "03_PLAN",
+      "dependsOn": [
+        "step_analyze_context"
+      ],
+      "priority": 2,
+      "estimatedMs": 300,
+      "status": "PENDING",
+      "attempts": 0
+    },
+    {
+      "id": "step_build_source",
+      "title": "Synthesize Node.js entry & companion modules",
+      "stage": "04_BUILD",
+      "dependsOn": [
+        "step_plan_architecture"
+      ],
+      "priority": 3,
+      "estimatedMs": 800,
+      "status": "PENDING",
+      "attempts": 0
+    },
+    {
+      "id": "step_execute_sandbox",
+      "title": "Write artifacts into /workspace and run static syntax + security review",
+      "stage": "05_EXECUTE",
+      "tool": "write_file",
+      "dependsOn": [
+        "step_build_source"
+      ],
+      "priority": 3,
+      "estimatedMs": 600,
+      "status": "PENDING",
+      "attempts": 0
+    },
+    {
+      "id": "step_verify_tests",
+      "title": "Execute sandbox runtime and isolated unit test suite",
+      "stage": "06_TEST",
+      "tool": "run_command",
+      "dependsOn": [
+        "step_execute_sandbox"
+      ],
+      "priority": 3,
+      "estimatedMs": 900,
+      "status": "PENDING",
+      "attempts": 0
+    },
+    {
+      "id": "step_deliver_package",
+      "title": "Verify acceptance criteria and seal deliverable ZIP manifest",
+      "stage": "08_DELIVER",
+      "dependsOn": [
+        "step_verify_tests"
+      ],
+      "priority": 4,
+      "estimatedMs": 400,
+      "status": "PENDING",
+      "attempts": 0
+    }
+  ],
+  "executionOrder": [
+    "step_intake",
+    "step_analyze_context",
+    "step_plan_architecture",
+    "step_build_source",
+    "step_execute_sandbox",
+    "step_verify_tests",
+    "step_deliver_package"
+  ],
+  "revisions": [],
+  "budget": {
+    "maxToolCalls": 24,
+    "usedToolCalls": 0,
+    "maxRetries": 3,
+    "usedRetries": 0,
+    "maxDurationMs": 45000,
+    "elapsedMs": 0,
+    "maxTokens": 16384,
+    "usedTokens": 0,
+    "exhausted": false
+  },
+  "completionVerified": false
+}

@@ -1,0 +1,454 @@
+import React, { useMemo, useState } from 'react';
+import {
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FileJson,
+  FileText,
+  Folder,
+  FolderOpen,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+} from 'lucide-react';
+import { SoftwareProjectRecord } from '../../types';
+import { StatusDot, MinimalIndicatorState } from '../ui/StatusBadge';
+
+export interface ProjectFileEntry {
+  relativePath: string;
+  bytes: number;
+  sha256?: string;
+  snapshotId?: string | null;
+}
+
+interface TreeFolderNode {
+  kind: 'folder';
+  name: string;
+  path: string;
+  children: TreeNode[];
+}
+
+interface TreeFileNode {
+  kind: 'file';
+  name: string;
+  path: string;
+  file: ProjectFileEntry;
+}
+
+type TreeNode = TreeFolderNode | TreeFileNode;
+
+export interface ProjectExplorerProps {
+  projects: SoftwareProjectRecord[];
+  selectedProject: SoftwareProjectRecord | null;
+  onSelectProject: (projectId: string) => void;
+  onRefreshProjects?: () => void;
+  onNewApp?: () => void;
+  files: ProjectFileEntry[];
+  selectedFilePath: string;
+  loadingFilePath?: string | null;
+  onSelectFile: (relativePath: string) => void | Promise<void>;
+  onCreateFile?: (relativePath: string) => void | Promise<void>;
+  onDeleteFile?: (relativePath: string) => void | Promise<void>;
+  toDotState?: (raw: string | undefined | null) => MinimalIndicatorState;
+}
+
+function buildNestedTree(files: ProjectFileEntry[], filterQuery: string): TreeNode[] {
+  const query = filterQuery.trim().toLowerCase();
+  const filtered = query
+    ? files.filter((f) => f.relativePath.toLowerCase().includes(query))
+    : files;
+
+  const rootFolder: TreeFolderNode = {
+    kind: 'folder',
+    name: '',
+    path: '',
+    children: [],
+  };
+
+  for (const file of filtered) {
+    const clean = file.relativePath.replace(/^\/+/, '');
+    const parts = clean.split('/').filter(Boolean);
+    if (parts.length === 0) continue;
+
+    let current = rootFolder;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      const isLeaf = i === parts.length - 1;
+      const currentPath = parts.slice(0, i + 1).join('/');
+
+      if (isLeaf) {
+        current.children.push({
+          kind: 'file',
+          name: part,
+          path: file.relativePath,
+          file,
+        });
+      } else {
+        let folder = current.children.find(
+          (c): c is TreeFolderNode => c.kind === 'folder' && c.name === part
+        );
+        if (!folder) {
+          folder = {
+            kind: 'folder',
+            name: part,
+            path: currentPath,
+            children: [],
+          };
+          current.children.push(folder);
+        }
+        current = folder;
+      }
+    }
+  }
+
+  const sortNodes = (nodes: TreeNode[]): TreeNode[] => {
+    nodes.sort((a, b) => {
+      if (a.kind !== b.kind) return a.kind === 'folder' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    for (const node of nodes) {
+      if (node.kind === 'folder') sortNodes(node.children);
+    }
+    return nodes;
+  };
+
+  return sortNodes(rootFolder.children);
+}
+
+function collectFolderPaths(nodes: TreeNode[]): string[] {
+  const paths: string[] = [];
+  for (const node of nodes) {
+    if (node.kind === 'folder') {
+      paths.push(node.path, ...collectFolderPaths(node.children));
+    }
+  }
+  return paths;
+}
+
+function renderFileIcon(path: string) {
+  const lower = path.toLowerCase();
+  if (lower.endsWith('.json')) {
+    return <FileJson className="w-3.5 h-3.5 shrink-0 text-[#CCFF00]/90" />;
+  }
+  if (lower.endsWith('.md') || lower.endsWith('.txt') || lower.endsWith('.template')) {
+    return <FileText className="w-3.5 h-3.5 shrink-0 text-[#9AA8C7]" />;
+  }
+  return <FileCode className="w-3.5 h-3.5 shrink-0 text-[#00F0FF]/90" />;
+}
+
+export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
+  projects,
+  selectedProject,
+  onSelectProject,
+  onRefreshProjects,
+  onNewApp,
+  files,
+  selectedFilePath,
+  loadingFilePath,
+  onSelectFile,
+  onCreateFile,
+  onDeleteFile,
+  toDotState,
+}) => {
+  const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
+  const [fileFilter, setFileFilter] = useState('');
+  const [newFileRelPath, setNewFileRelPath] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [showPipelineDetails, setShowPipelineDetails] = useState(false);
+
+  const treeNodes = useMemo(() => buildNestedTree(files, fileFilter), [files, fileFilter]);
+  const allFolderPaths = useMemo(() => collectFolderPaths(treeNodes), [treeNodes]);
+
+  const handleToggleDir = (dirPath: string) => {
+    setCollapsedDirs((prev) => ({ ...prev, [dirPath]: !prev[dirPath] }));
+  };
+
+  const handleSetAllCollapsed = (collapsed: boolean) => {
+    const next: Record<string, boolean> = {};
+    for (const p of allFolderPaths) next[p] = collapsed;
+    setCollapsedDirs(next);
+  };
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleaned = newFileRelPath.trim().replace(/^\/+/, '');
+    if (!cleaned || !onCreateFile || isCreating) return;
+    setIsCreating(true);
+    try {
+      await onCreateFile(cleaned);
+      setNewFileRelPath('');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const renderTreeNodes = (nodes: TreeNode[], depth = 0): React.ReactNode =>
+    nodes.map((node) => {
+      if (node.kind === 'folder') {
+        const isCollapsed = fileFilter.trim() ? false : Boolean(collapsedDirs[node.path]);
+        return (
+          <div key={`folder:${node.path}`} className="space-y-0.5">
+            <button
+              type="button"
+              onClick={() => handleToggleDir(node.path)}
+              style={{ paddingLeft: `${depth * 12 + 6}px` }}
+              className="w-full flex items-center gap-1.5 pr-2 py-1 rounded-lg text-[11px] text-[#9AA8C7] hover:text-[#F4F7FF] hover:bg-[#131B36]/50 cursor-pointer transition-colors"
+            >
+              {isCollapsed ? (
+                <ChevronRight className="w-3 h-3 shrink-0" />
+              ) : (
+                <ChevronDown className="w-3 h-3 shrink-0" />
+              )}
+              {isCollapsed ? (
+                <Folder className="w-3.5 h-3.5 text-[#00F0FF] shrink-0" />
+              ) : (
+                <FolderOpen className="w-3.5 h-3.5 text-[#00F0FF] shrink-0" />
+              )}
+              <span className="truncate font-semibold">{node.name}</span>
+            </button>
+            {!isCollapsed && <div>{renderTreeNodes(node.children, depth + 1)}</div>}
+          </div>
+        );
+      }
+
+      const isSelected = node.path === selectedFilePath;
+      const isLoading = loadingFilePath === node.path;
+
+      return (
+        <div
+          key={`file:${node.path}`}
+          style={{ paddingLeft: `${depth * 12 + 18}px` }}
+          className={`group flex items-center justify-between gap-1.5 pr-1.5 py-1 rounded-lg transition-colors ${
+            isSelected
+              ? 'bg-[#00F0FF]/12 text-[#00F0FF] border border-[#00F0FF]/30'
+              : 'text-[#CBD5E1] hover:bg-[#131B36]/60 border border-transparent'
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => void onSelectFile(node.path)}
+            className="flex items-center gap-1.5 truncate text-left flex-1 cursor-pointer text-[11px] min-w-0"
+            title={node.path}
+          >
+            {renderFileIcon(node.path)}
+            <span className="truncate">{node.name}</span>
+            {isLoading && (
+              <span className="text-[9px] text-[#00F0FF] shrink-0 animate-pulse">loading</span>
+            )}
+          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="text-[10px] text-[#64748B] tabular-nums">
+              {node.file.bytes}B
+            </span>
+            {onDeleteFile && (
+              <button
+                type="button"
+                onClick={() => void onDeleteFile(node.path)}
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-0.5 text-[#9AA8C7] hover:text-[#FF007F] cursor-pointer transition-opacity"
+                title={`Delete ${node.path}`}
+                aria-label={`Delete ${node.path}`}
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    });
+
+  return (
+    <div className="h-full flex flex-col bg-[#0D1326] text-[#F4F7FF] min-w-0">
+      {/* Header */}
+      <div className="px-3.5 py-2.5 bg-[#0B1124] border-b border-[#1E294A] flex items-center justify-between gap-2 shrink-0">
+        <div className="min-w-0">
+          <div className="text-xs font-bold text-[#F4F7FF] truncate">Project Explorer</div>
+          <div className="text-[11px] font-mono text-[#9AA8C7] tabular-nums">
+            {projects.length} app(s) · {files.length} file(s)
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {onNewApp && (
+            <button
+              type="button"
+              onClick={onNewApp}
+              className="px-2 py-1 rounded-lg bg-[#00F0FF]/15 text-[#00F0FF] hover:bg-[#00F0FF]/25 text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap cursor-pointer"
+              title="Focus new app prompt"
+            >
+              <Plus className="w-3 h-3" />
+              <span>New App</span>
+            </button>
+          )}
+          {onRefreshProjects && (
+            <button
+              type="button"
+              onClick={onRefreshProjects}
+              className="p-1.5 rounded-lg text-[#9AA8C7] hover:text-white cursor-pointer"
+              title="Refresh projects"
+              aria-label="Refresh projects"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Application Selector List */}
+      <div className="p-2.5 border-b border-[#1E294A] max-h-44 overflow-y-auto divide-y divide-[#1E294A] shrink-0">
+        {projects.length === 0 ? (
+          <div className="py-4 text-center text-xs text-[#9AA8C7]">
+            No applications created yet. Describe an app above and click Execute Application Task.
+          </div>
+        ) : (
+          projects.map((p) => {
+            const active = p.projectId === selectedProject?.projectId;
+            return (
+              <button
+                key={p.projectId}
+                type="button"
+                onClick={() => onSelectProject(p.projectId)}
+                className={`w-full py-2 px-2 text-left transition-colors cursor-pointer flex items-center justify-between gap-2 ${
+                  active ? 'bg-[#00F0FF]/10 rounded-lg' : 'hover:bg-[#131B36]/60'
+                }`}
+              >
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-[#F4F7FF] truncate">{p.name}</div>
+                  <div className="text-[10px] font-mono text-[#9AA8C7] tabular-nums truncate">
+                    {p.stack} · {p.currentRevision}
+                  </div>
+                </div>
+                <StatusDot
+                  status={
+                    p.lastTests?.status === 'VERIFIED'
+                      ? 'VERIFIED'
+                      : p.lastBuild?.status === 'FAILED' ||
+                          p.lastTests?.status === 'FAILED' ||
+                          p.lastSecurityScan?.status === 'BLOCKED'
+                        ? 'BLOCKED'
+                        : 'UNVERIFIED'
+                  }
+                  label={p.lastTests?.status || 'UNVERIFIED'}
+                  pulse={false}
+                />
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {/* Interactive Nested File Tree */}
+      {selectedProject && (
+        <div className="p-2.5 space-y-2 flex-1 flex flex-col min-h-0">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7] px-1 shrink-0">
+            <span className="truncate">Source Tree ({selectedProject.currentRevision})</span>
+            <div className="flex items-center gap-1.5 font-mono text-[10px] shrink-0">
+              {allFolderPaths.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleSetAllCollapsed(false)}
+                    className="hover:text-[#00F0FF] cursor-pointer"
+                    title="Expand all folders"
+                  >
+                    Expand
+                  </button>
+                  <span aria-hidden="true">/</span>
+                  <button
+                    type="button"
+                    onClick={() => handleSetAllCollapsed(true)}
+                    className="hover:text-[#00F0FF] cursor-pointer"
+                    title="Collapse all folders"
+                  >
+                    Collapse
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Search files */}
+          <div className="relative shrink-0">
+            <Search className="w-3.5 h-3.5 text-[#64748B] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={fileFilter}
+              onChange={(e) => setFileFilter(e.target.value)}
+              placeholder="Filter project files..."
+              aria-label="Filter project files"
+              className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[11px] font-mono text-[#F4F7FF] placeholder:text-[#64748B] focus:outline-none focus:border-[#00F0FF]"
+            />
+          </div>
+
+          {onCreateFile && (
+            <form onSubmit={handleCreateSubmit} className="flex gap-1.5 shrink-0">
+              <input
+                type="text"
+                value={newFileRelPath}
+                onChange={(e) => setNewFileRelPath(e.target.value)}
+                placeholder="src/helper.mjs"
+                aria-label="New file relative path"
+                className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-[#070B19] border border-[#1E294A] text-[11px] font-mono text-white focus:outline-none focus:border-[#00F0FF]"
+              />
+              <button
+                type="submit"
+                disabled={isCreating || !newFileRelPath.trim()}
+                className="px-2.5 py-1.5 rounded-lg bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-[#00F0FF] text-[11px] font-semibold whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                + File
+              </button>
+            </form>
+          )}
+
+          <div className="space-y-0.5 flex-1 min-h-[160px] max-h-80 overflow-y-auto text-xs font-mono pr-0.5">
+            {treeNodes.length === 0 ? (
+              <div className="py-6 text-center text-[11px] text-[#9AA8C7]">
+                {fileFilter.trim()
+                  ? `No files match "${fileFilter.trim()}"`
+                  : 'No files in active revision.'}
+              </div>
+            ) : (
+              renderTreeNodes(treeNodes)
+            )}
+          </div>
+
+          {/* Collapsible 13-Stage Lifecycle Summary */}
+          <div className="pt-2 border-t border-[#1E294A] shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowPipelineDetails((v) => !v)}
+              className="w-full flex items-center justify-between text-[11px] font-semibold text-[#9AA8C7] hover:text-[#F4F7FF] py-1 cursor-pointer"
+            >
+              <span>
+                13-Stage Lifecycle (
+                {selectedProject.stages.filter((s) => s.status === 'VERIFIED').length}/13 verified)
+              </span>
+              {showPipelineDetails ? (
+                <ChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" />
+              )}
+            </button>
+            {showPipelineDetails && (
+              <div className="mt-1.5 divide-y divide-[#1E294A] max-h-56 overflow-y-auto text-[10px]">
+                {selectedProject.stages.map((st) => (
+                  <div key={st.stage} className="py-1.5 flex items-center justify-between gap-2">
+                    <span className="text-[#CBD5E1] truncate">
+                      {String(st.order).padStart(2, '0')}. {st.label}
+                    </span>
+                    <StatusDot
+                      status={toDotState ? toDotState(st.status) : 'UNVERIFIED'}
+                      label={st.status}
+                      pulse={false}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProjectExplorer;
