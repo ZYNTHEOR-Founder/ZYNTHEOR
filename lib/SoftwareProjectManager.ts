@@ -24,7 +24,7 @@ import { CognitiveContextEngine } from './CognitiveContextEngine.ts';
 import { AdaptiveReasoningEngine } from './AdaptiveReasoningEngine.ts';
 import { KnowledgeGraphEngine } from './KnowledgeGraphEngine.ts';
 import { NativeMemoryController } from './NativeMemoryController.ts';
-import { ConnectivityMonitor } from './ConnectivityMonitor.ts';
+import { ConnectivityMonitor, validateCloudUrl } from './ConnectivityMonitor.ts';
 import { validateCloudRuntimeConfig } from './CloudCheckpointStorage.ts';
 import { ToolGateway } from './ToolGateway.ts';
 import { ToolRegistry } from './ToolRegistry.ts';
@@ -122,6 +122,49 @@ export interface ProjectSecurityFinding {
   detail: string;
 }
 
+export interface ProjectDeploymentRecord {
+  deploymentId: string;
+  revisionId: string;
+  executionId: string;
+  timestamp: string;
+  status: 'NOT_CONFIGURED' | 'BLOCKED' | 'PENDING_APPROVAL' | 'DEPLOYED' | 'FAILED';
+  targetProvider: string | null;
+  targetEndpoint: string | null;
+  approvalRequestId: string | null;
+  artifactZip: string | null;
+  artifactSha256: string | null;
+  runtimeHttpStatus: number | null;
+  runtimeResponseSha256?: string | null;
+  latencyMs?: number | null;
+  reason: string;
+  evidenceHash: string;
+  linkedLogIds: string[];
+}
+
+export interface ProjectStageExecutionRecord {
+  stage: EngineeringWorkflowStageId;
+  order: number;
+  executionId: string;
+  revisionId: string;
+  timestamp: string;
+  durationMs: number;
+  status: WorkflowStageStatus;
+  summary: string;
+  artifactReference: string | null;
+  evidenceHash: string;
+}
+
+export interface ProjectRuntimeLogEntry {
+  logId: string;
+  timestamp: string;
+  level: 'INFO' | 'WARN' | 'ERROR';
+  source: string;
+  message: string;
+  deploymentId?: string;
+  executionId?: string;
+  stage?: EngineeringWorkflowStageId;
+}
+
 export interface SoftwareProjectRecord {
   projectId: string;
   tenantId: string;
@@ -145,6 +188,7 @@ export interface SoftwareProjectRecord {
     architectureSummary: string;
   };
   stages: EngineeringWorkflowStageRecord[];
+  stageExecutions: ProjectStageExecutionRecord[];
   revisions: ProjectRevisionEntry[];
   evidenceHistory: ProjectExecutionEvidenceRecord[];
   lastBuild: {
@@ -180,9 +224,14 @@ export interface SoftwareProjectRecord {
     deployedAt: string | null;
     runtimeVerifiedAt: string | null;
     runtimeHttpStatus: number | null;
+    runtimeResponseSha256?: string | null;
+    latencyMs?: number | null;
+    lastDeploymentId?: string | null;
+    lastExecutionId?: string | null;
     reason: string;
   };
-  runtimeLogs: Array<{ timestamp: string; level: 'INFO' | 'WARN' | 'ERROR'; source: string; message: string }>;
+  deploymentHistory: ProjectDeploymentRecord[];
+  runtimeLogs: ProjectRuntimeLogEntry[];
 }
 
 export interface SoftwareCapabilityStatusEntry {
@@ -271,7 +320,17 @@ export class SoftwareProjectManager {
       if (fs.existsSync(this.statePath)) {
         const parsed = JSON.parse(fs.readFileSync(this.statePath, 'utf8'));
         if (Array.isArray(parsed?.projects)) {
-          this.projects = parsed.projects;
+          this.projects = parsed.projects.map((p: any) => ({
+            ...p,
+            stageExecutions: Array.isArray(p?.stageExecutions) ? p.stageExecutions : [],
+            deploymentHistory: Array.isArray(p?.deploymentHistory) ? p.deploymentHistory : [],
+            runtimeLogs: Array.isArray(p?.runtimeLogs)
+              ? p.runtimeLogs.map((l: any, idx: number) => ({
+                  logId: l?.logId || `log_legacy_${idx}`,
+                  ...l,
+                }))
+              : [],
+          }));
         }
       }
     } catch {
@@ -322,16 +381,32 @@ export class SoftwareProjectManager {
       .slice(0, limit);
   }
 
-  private appendLog(project: SoftwareProjectRecord, level: 'INFO' | 'WARN' | 'ERROR', source: string, message: string): void {
+  private appendLog(
+    project: SoftwareProjectRecord,
+    level: 'INFO' | 'WARN' | 'ERROR',
+    source: string,
+    message: string,
+    meta?: {
+      deploymentId?: string;
+      executionId?: string;
+      stage?: EngineeringWorkflowStageId;
+    }
+  ): string {
+    const logId = `log_${Date.now().toString(36)}_${crypto.randomBytes(3).toString('hex')}`;
     project.runtimeLogs.unshift({
+      logId,
       timestamp: new Date().toISOString(),
       level,
       source,
       message: message.slice(0, 800),
+      ...(meta?.deploymentId ? { deploymentId: meta.deploymentId } : {}),
+      ...(meta?.executionId ? { executionId: meta.executionId } : {}),
+      ...(meta?.stage ? { stage: meta.stage } : {}),
     });
-    if (project.runtimeLogs.length > 100) {
-      project.runtimeLogs = project.runtimeLogs.slice(0, 100);
+    if (project.runtimeLogs.length > 150) {
+      project.runtimeLogs = project.runtimeLogs.slice(0, 150);
     }
+    return logId;
   }
 
   private setStage(
@@ -340,15 +415,52 @@ export class SoftwareProjectManager {
     status: WorkflowStageStatus,
     summary: string,
     artifactReference: string | null = null,
-    evidenceHash: string | null = null
+    evidenceHash: string | null = null,
+    meta?: { executionId?: string; durationMs?: number }
   ): void {
     const rec = project.stages.find((s) => s.stage === stage);
     if (!rec) return;
+    const now = new Date().toISOString();
     rec.status = status;
-    rec.completedAt = new Date().toISOString();
+    rec.completedAt = now;
     rec.summary = summary;
     rec.artifactReference = artifactReference;
     rec.evidenceHash = evidenceHash;
+
+    if (!Array.isArray(project.stageExecutions)) {
+      project.stageExecutions = [];
+    }
+    const stageExecId =
+      meta?.executionId || `exec_stg_${rec.order}_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`;
+    const auditDigest =
+      evidenceHash ||
+      sha256Text(
+        JSON.stringify({
+          projectId: project.projectId,
+          stage,
+          order: rec.order,
+          executionId: stageExecId,
+          revisionId: project.currentRevision,
+          status,
+          summary,
+          timestamp: now,
+        })
+      );
+    project.stageExecutions.unshift({
+      stage,
+      order: rec.order,
+      executionId: stageExecId,
+      revisionId: project.currentRevision,
+      timestamp: now,
+      durationMs: Math.max(1, meta?.durationMs ?? 1),
+      status,
+      summary,
+      artifactReference,
+      evidenceHash: auditDigest,
+    });
+    if (project.stageExecutions.length > 200) {
+      project.stageExecutions = project.stageExecutions.slice(0, 200);
+    }
   }
 
   private listProjectRelativeFiles(project: SoftwareProjectRecord): string[] {
@@ -513,6 +625,7 @@ export class SoftwareProjectManager {
         architectureSummary: `Stack=${stack}; Planner=${plan.planId}; KG nodes=${kgSummary.nodeCount}; Intent=${ctxAnalysis.intent.primary}; NeuralState=${connectivity.runtimeState}`,
       },
       stages: buildInitialStages(),
+      stageExecutions: [],
       revisions: [],
       evidenceHistory: [],
       lastBuild: null,
@@ -528,8 +641,13 @@ export class SoftwareProjectManager {
         deployedAt: null,
         runtimeVerifiedAt: null,
         runtimeHttpStatus: null,
+        runtimeResponseSha256: null,
+        latencyMs: null,
+        lastDeploymentId: null,
+        lastExecutionId: null,
         reason: 'Deployment requires security validation, admin ApprovalGate sign-off, and configured cloud target.',
       },
+      deploymentHistory: [],
       runtimeLogs: [],
     };
 
@@ -1282,19 +1400,21 @@ export class SoftwareProjectManager {
   }
 
   /**
-   * Executes Stage 10 (ApprovalGate), Stage 11 (Cloud Deployment packaging & verification),
-   * and Stage 12 (Runtime Health Probe).
+   * Executes Stage 10 (ApprovalGate), Stage 11 (Cloud Deployment packaging, HTTP webhook delivery),
+   * and Stage 12 (Live Runtime HTTP Health Probe), while persisting historical ProjectDeploymentRecord entries.
    * Strictly enforces ApprovalGate & fail-closed credential protection.
    */
   public async requestOrExecuteDeploy(
     projectId: string,
-    opts: { approvalRequestId?: string },
+    opts: { approvalRequestId?: string; targetUrl?: string },
     scope: EngineeringScope
-  ): Promise<{ project: SoftwareProjectRecord; evidence: ProjectExecutionEvidenceRecord; approvalRequestId?: string }> {
+  ): Promise<{ project: SoftwareProjectRecord; evidence: ProjectExecutionEvidenceRecord; approvalRequestId?: string; deploymentRecord?: ProjectDeploymentRecord }> {
     const project = this.getProject(projectId, scope);
     if (!project) throw new Error(`PROJECT_NOT_FOUND: '${projectId}'`);
+    if (!Array.isArray(project.deploymentHistory)) project.deploymentHistory = [];
     const t0 = Date.now();
     const startIso = new Date(t0).toISOString();
+    const deploymentId = `dep_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`;
 
     // Ensure build, tests, and security validation passed cleanly on current revision
     if (project.lastBuild?.status !== 'VERIFIED' || project.lastTests?.status !== 'VERIFIED') {
@@ -1323,23 +1443,30 @@ export class SoftwareProjectManager {
         requestedByRole: scope.role,
         tenantId: scope.tenantId,
       });
+      const execId = `exec_deploy_gate_${Date.now().toString(36)}`;
       project.deployment.status = 'PENDING_APPROVAL';
       project.deployment.approvalRequestId = reqRec.requestId;
+      project.deployment.lastDeploymentId = deploymentId;
+      project.deployment.lastExecutionId = execId;
       project.deployment.reason = `APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=${reqRec.requestId})`;
-      this.setStage(project, 'DEPLOYMENT_APPROVAL', 'BLOCKED', project.deployment.reason, reqRec.requestId, null);
+      project.updatedAt = new Date().toISOString();
 
       const finishIso = new Date().toISOString();
-      const execId = `exec_deploy_gate_${Date.now().toString(36)}`;
+      const durationMs = Math.max(1, Date.now() - t0);
       const evHash = computeExecutionEvidenceHash({
         executionId: execId,
         taskId: `deploy_${projectId}`,
         startTimestamp: startIso,
         finishTimestamp: finishIso,
-        executionDurationMs: Math.max(1, Date.now() - t0),
+        executionDurationMs: durationMs,
         executionResult: 'BLOCKED',
         artifacts: [],
         testsPassed: 0,
         testsTotal: 1,
+      });
+      this.setStage(project, 'DEPLOYMENT_APPROVAL', 'BLOCKED', project.deployment.reason, reqRec.requestId, evHash, {
+        executionId: execId,
+        durationMs,
       });
       const ev: ProjectExecutionEvidenceRecord = {
         projectId,
@@ -1349,26 +1476,58 @@ export class SoftwareProjectManager {
         operationType: 'DEPLOY_PREP',
         startTimestamp: startIso,
         completionTimestamp: finishIso,
-        actualDurationMs: Math.max(1, Date.now() - t0),
+        actualDurationMs: durationMs,
         buildOrTestResult: project.deployment.reason,
         artifactReference: reqRec.requestId,
         evidenceHash: evHash,
         verificationStatus: 'BLOCKED',
       };
       project.evidenceHistory.unshift(ev);
-      this.appendLog(project, 'WARN', 'ApprovalGate', project.deployment.reason);
+      const logId = this.appendLog(project, 'WARN', 'ApprovalGate', project.deployment.reason, {
+        deploymentId,
+        executionId: execId,
+        stage: 'DEPLOYMENT_APPROVAL',
+      });
+      const depRecord: ProjectDeploymentRecord = {
+        deploymentId,
+        revisionId: project.currentRevision,
+        executionId: execId,
+        timestamp: finishIso,
+        status: 'PENDING_APPROVAL',
+        targetProvider: project.deployment.targetProvider,
+        targetEndpoint: project.deployment.targetEndpoint,
+        approvalRequestId: reqRec.requestId,
+        artifactZip: project.deployment.artifactZip,
+        artifactSha256: project.deployment.artifactSha256,
+        runtimeHttpStatus: null,
+        runtimeResponseSha256: null,
+        latencyMs: durationMs,
+        reason: project.deployment.reason,
+        evidenceHash: evHash,
+        linkedLogIds: [logId],
+      };
+      project.deploymentHistory.unshift(depRecord);
       this.save();
-      return { project, evidence: ev, approvalRequestId: reqRec.requestId };
+      return { project, evidence: ev, approvalRequestId: reqRec.requestId, deploymentRecord: depRecord };
     }
 
+    const approvalExecId = `exec_approval_${Date.now().toString(36)}`;
+    const approvalSummary = `Approved by ${consumed.record?.reviewedByUserId || 'admin'} (${consumed.record?.requestId})`;
+    const approvalHash = sha256Text(`${consumed.record?.requestId}:${project.currentRevision}:${approvalSummary}`);
     this.setStage(
       project,
       'DEPLOYMENT_APPROVAL',
       'VERIFIED',
-      `Approved by ${consumed.record?.reviewedByUserId || 'admin'} (${consumed.record?.requestId})`,
+      approvalSummary,
       consumed.record?.requestId || null,
-      null
+      approvalHash,
+      { executionId: approvalExecId, durationMs: 1 }
     );
+    const approvalLogId = this.appendLog(project, 'INFO', 'ApprovalGate', approvalSummary, {
+      deploymentId,
+      executionId: approvalExecId,
+      stage: 'DEPLOYMENT_APPROVAL',
+    });
 
     // Stage 11: Package deliverable ZIP and check real cloud deployment target
     const relFiles = this.listProjectRelativeFiles(project).map((f) => `${project.workspaceDir}/${f}`);
@@ -1376,29 +1535,44 @@ export class SoftwareProjectManager {
     project.deployment.artifactZip = zipRes.zipFilename;
     project.deployment.artifactSha256 = zipRes.zipSha256;
 
-    const deployTargetUrl = (process.env.CLOUD_DEPLOY_WEBHOOK_URL || process.env.CLOUD_RUNTIME_URL || '').trim();
+    const envWebhookUrl = (process.env.CLOUD_DEPLOY_WEBHOOK_URL || '').trim();
+    const envRuntimeUrl = (process.env.CLOUD_RUNTIME_URL || '').trim();
+    const explicitTargetUrl = typeof opts.targetUrl === 'string' ? opts.targetUrl.trim() : '';
+    const deployTargetUrl = explicitTargetUrl || envWebhookUrl || envRuntimeUrl;
     const cloudCfg = validateCloudRuntimeConfig();
 
     if (!deployTargetUrl && cloudCfg.provider !== 's3') {
+      const execId = `exec_deploy_${Date.now().toString(36)}`;
       project.deployment.status = 'NOT_CONFIGURED';
+      project.deployment.approvalRequestId = consumed.record?.requestId || opts.approvalRequestId || null;
+      project.deployment.lastDeploymentId = deploymentId;
+      project.deployment.lastExecutionId = execId;
       project.deployment.reason =
         'BLOCKED / NOT_CONFIGURED: Release bundle packaged & integrity-checked, but no Cloud Deployment endpoint (CLOUD_DEPLOY_WEBHOOK_URL / CLOUD_RUNTIME_URL) or S3 bucket is configured.';
-      this.setStage(project, 'CLOUD_DEPLOYMENT', 'NOT_CONFIGURED', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256);
-      this.setStage(project, 'RUNTIME_VERIFICATION', 'BLOCKED', 'Cloud deployment target not configured', null, null);
+      project.updatedAt = new Date().toISOString();
 
       const finishIso = new Date().toISOString();
-      const execId = `exec_deploy_${Date.now().toString(36)}`;
+      const durationMs = Math.max(1, Date.now() - t0);
       const evHash = computeExecutionEvidenceHash({
         executionId: execId,
         taskId: `deploy_${projectId}`,
         startTimestamp: startIso,
         finishTimestamp: finishIso,
-        executionDurationMs: Math.max(1, Date.now() - t0),
+        executionDurationMs: durationMs,
         executionResult: 'BLOCKED',
         artifacts: [{ path: zipRes.zipPath, bytes: zipRes.zipBytes, verified: true }],
         testsPassed: 0,
         testsTotal: 1,
       });
+      this.setStage(project, 'CLOUD_DEPLOYMENT', 'NOT_CONFIGURED', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256, {
+        executionId: execId,
+        durationMs,
+      });
+      this.setStage(project, 'RUNTIME_VERIFICATION', 'BLOCKED', 'Cloud deployment target not configured', null, null, {
+        executionId: `${execId}_rt`,
+        durationMs: 1,
+      });
+
       const ev: ProjectExecutionEvidenceRecord = {
         projectId,
         taskId: `deploy_${projectId}`,
@@ -1407,51 +1581,267 @@ export class SoftwareProjectManager {
         operationType: 'CLOUD_DEPLOY',
         startTimestamp: startIso,
         completionTimestamp: finishIso,
-        actualDurationMs: Math.max(1, Date.now() - t0),
+        actualDurationMs: durationMs,
         buildOrTestResult: project.deployment.reason,
         artifactReference: zipRes.zipPath,
         evidenceHash: evHash,
         verificationStatus: 'BLOCKED',
       };
       project.evidenceHistory.unshift(ev);
-      this.appendLog(project, 'WARN', 'CloudDeploy', project.deployment.reason);
+      const logId = this.appendLog(project, 'WARN', 'CloudDeploy', project.deployment.reason, {
+        deploymentId,
+        executionId: execId,
+        stage: 'CLOUD_DEPLOYMENT',
+      });
+      const depRecord: ProjectDeploymentRecord = {
+        deploymentId,
+        revisionId: project.currentRevision,
+        executionId: execId,
+        timestamp: finishIso,
+        status: 'NOT_CONFIGURED',
+        targetProvider: null,
+        targetEndpoint: null,
+        approvalRequestId: project.deployment.approvalRequestId,
+        artifactZip: zipRes.zipFilename,
+        artifactSha256: zipRes.zipSha256,
+        runtimeHttpStatus: null,
+        runtimeResponseSha256: null,
+        latencyMs: durationMs,
+        reason: project.deployment.reason,
+        evidenceHash: evHash,
+        linkedLogIds: [approvalLogId, logId],
+      };
+      project.deploymentHistory.unshift(depRecord);
       this.save();
-      return { project, evidence: ev };
+      return { project, evidence: ev, deploymentRecord: depRecord };
     }
 
-    // Attempt real HTTP health/deploy verification against configured Cloud Runtime URL
+    // Attempt real HTTP deploy webhook delivery + live runtime HTTP verification
     if (deployTargetUrl) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
-      try {
-        const res = await fetch(deployTargetUrl, { method: 'HEAD', signal: controller.signal });
-        clearTimeout(timer);
-        const ok = res.status >= 200 && res.status < 400;
+      const execId = `exec_deploy_${Date.now().toString(36)}`;
+      const urlCheck = validateCloudUrl(deployTargetUrl);
+      if (!urlCheck.ok) {
         const finishIso = new Date().toISOString();
-        project.deployment.status = ok ? 'DEPLOYED' : 'FAILED';
-        project.deployment.targetProvider = 'cloud_runtime_url';
+        const durationMs = Math.max(1, Date.now() - t0);
+        const reason = `Cloud deploy target rejected by URL security policy: ${urlCheck.reason}`;
+        project.deployment.status = 'BLOCKED';
+        project.deployment.targetProvider = explicitTargetUrl || envWebhookUrl ? 'cloud_deploy_webhook' : 'cloud_runtime_url';
         project.deployment.targetEndpoint = deployTargetUrl;
-        project.deployment.deployedAt = finishIso;
-        project.deployment.runtimeVerifiedAt = ok ? finishIso : null;
-        project.deployment.runtimeHttpStatus = res.status;
-        project.deployment.reason = ok
-          ? `Verified cloud runtime endpoint reachable (HTTP ${res.status}); release ${zipRes.zipFilename} sealed`
-          : `Cloud runtime endpoint returned HTTP ${res.status}`;
-        this.setStage(project, 'CLOUD_DEPLOYMENT', ok ? 'VERIFIED' : 'BLOCKED', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256);
-        this.setStage(project, 'RUNTIME_VERIFICATION', ok ? 'VERIFIED' : 'BLOCKED', `HTTP probe ${res.status} at ${deployTargetUrl}`, deployTargetUrl, zipRes.zipSha256);
+        project.deployment.lastDeploymentId = deploymentId;
+        project.deployment.lastExecutionId = execId;
+        project.deployment.reason = reason;
+        project.updatedAt = finishIso;
 
-        const execId = `exec_deploy_${Date.now().toString(36)}`;
         const evHash = computeExecutionEvidenceHash({
           executionId: execId,
           taskId: `deploy_${projectId}`,
           startTimestamp: startIso,
           finishTimestamp: finishIso,
-          executionDurationMs: Math.max(1, Date.now() - t0),
+          executionDurationMs: durationMs,
+          executionResult: 'BLOCKED',
+          artifacts: [{ path: zipRes.zipPath, bytes: zipRes.zipBytes, verified: false }],
+          testsPassed: 0,
+          testsTotal: 1,
+        });
+        this.setStage(project, 'CLOUD_DEPLOYMENT', 'BLOCKED', reason, zipRes.zipPath, evHash, {
+          executionId: execId,
+          durationMs,
+        });
+        this.setStage(project, 'RUNTIME_VERIFICATION', 'BLOCKED', reason, null, null, {
+          executionId: `${execId}_rt`,
+          durationMs: 1,
+        });
+        const ev: ProjectExecutionEvidenceRecord = {
+          projectId,
+          taskId: `deploy_${projectId}`,
+          executionId: execId,
+          sourceRevision: project.currentRevision,
+          operationType: 'CLOUD_DEPLOY',
+          startTimestamp: startIso,
+          completionTimestamp: finishIso,
+          actualDurationMs: durationMs,
+          buildOrTestResult: reason,
+          artifactReference: zipRes.zipPath,
+          evidenceHash: evHash,
+          verificationStatus: 'BLOCKED',
+        };
+        project.evidenceHistory.unshift(ev);
+        const logId = this.appendLog(project, 'ERROR', 'CloudDeploy', reason, {
+          deploymentId,
+          executionId: execId,
+          stage: 'CLOUD_DEPLOYMENT',
+        });
+        const depRecord: ProjectDeploymentRecord = {
+          deploymentId,
+          revisionId: project.currentRevision,
+          executionId: execId,
+          timestamp: finishIso,
+          status: 'BLOCKED',
+          targetProvider: project.deployment.targetProvider,
+          targetEndpoint: deployTargetUrl,
+          approvalRequestId: consumed.record?.requestId || opts.approvalRequestId || null,
+          artifactZip: zipRes.zipFilename,
+          artifactSha256: zipRes.zipSha256,
+          runtimeHttpStatus: null,
+          runtimeResponseSha256: null,
+          latencyMs: durationMs,
+          reason,
+          evidenceHash: evHash,
+          linkedLogIds: [approvalLogId, logId],
+        };
+        project.deploymentHistory.unshift(depRecord);
+        this.save();
+        return { project, evidence: ev, deploymentRecord: depRecord };
+      }
+
+      const linkedLogIds: string[] = [approvalLogId];
+      const useWebhookPost = Boolean(explicitTargetUrl || envWebhookUrl);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        let deployPostOk = true;
+        let deployPostStatus = 0;
+        let runtimeProbeUrl = deployTargetUrl;
+
+        if (useWebhookPost) {
+          const postRes = await fetch(deployTargetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'User-Agent': 'ZYNTHEOR-CloudDeploy/1.0' },
+            body: JSON.stringify({
+              projectId: project.projectId,
+              slug: project.slug,
+              name: project.name,
+              stack: project.stack,
+              revisionId: project.currentRevision,
+              deploymentId,
+              executionId: execId,
+              artifactZip: zipRes.zipFilename,
+              artifactSha256: zipRes.zipSha256,
+              treeSha256: project.revisions[0]?.treeSha256 || null,
+              timestamp: startIso,
+            }),
+            signal: controller.signal,
+          });
+          deployPostStatus = postRes.status;
+          const postText = await postRes.text();
+          let postJson: any = null;
+          try {
+            postJson = JSON.parse(postText);
+          } catch {
+            postJson = null;
+          }
+          deployPostOk = postRes.status >= 200 && postRes.status < 400;
+          const candidateRuntime =
+            postJson?.runtimeUrl || postJson?.healthUrl || postJson?.deployedUrl || postJson?.url || '';
+          if (typeof candidateRuntime === 'string' && candidateRuntime.trim()) {
+            const rtCheck = validateCloudUrl(candidateRuntime.trim());
+            if (rtCheck.ok) {
+              runtimeProbeUrl = candidateRuntime.trim();
+            }
+          }
+          linkedLogIds.push(
+            this.appendLog(
+              project,
+              deployPostOk ? 'INFO' : 'ERROR',
+              'CloudDeploy',
+              `POST ${deployTargetUrl} -> HTTP ${deployPostStatus}; target runtime=${runtimeProbeUrl}`,
+              { deploymentId, executionId: execId, stage: 'CLOUD_DEPLOYMENT' }
+            )
+          );
+        }
+
+        // Probe live runtime HTTP health
+        const probeStarted = Date.now();
+        let probeStatus = 0;
+        let probeBody = '';
+        let probeOk = false;
+
+        if (deployPostOk) {
+          const rtUrl = new URL(runtimeProbeUrl);
+          const candidatePaths =
+            rtUrl.pathname === '/' || rtUrl.pathname === ''
+              ? [new URL('/api/health', rtUrl.origin).href, runtimeProbeUrl]
+              : [runtimeProbeUrl];
+
+          for (const candidate of candidatePaths) {
+            const getRes = await fetch(candidate, {
+              method: 'GET',
+              headers: { 'User-Agent': 'ZYNTHEOR-RuntimeProbe/1.0' },
+              signal: controller.signal,
+            });
+            probeStatus = getRes.status;
+            probeBody = await getRes.text();
+            probeOk = getRes.status >= 200 && getRes.status < 400;
+            runtimeProbeUrl = candidate;
+            if (probeOk) break;
+          }
+        }
+        clearTimeout(timer);
+
+        const probeLatencyMs = Math.max(1, Date.now() - probeStarted);
+        const totalDurationMs = Math.max(1, Date.now() - t0);
+        const finishIso = new Date().toISOString();
+        const ok = deployPostOk && probeOk;
+        const responseDigest = probeBody ? sha256Text(probeBody) : null;
+
+        project.deployment.status = ok ? 'DEPLOYED' : 'FAILED';
+        project.deployment.approvalRequestId = consumed.record?.requestId || opts.approvalRequestId || null;
+        project.deployment.targetProvider = useWebhookPost ? 'cloud_deploy_webhook' : 'cloud_runtime_url';
+        project.deployment.targetEndpoint = runtimeProbeUrl;
+        project.deployment.deployedAt = finishIso;
+        project.deployment.runtimeVerifiedAt = ok ? finishIso : null;
+        project.deployment.runtimeHttpStatus = probeStatus || deployPostStatus || null;
+        project.deployment.runtimeResponseSha256 = responseDigest;
+        project.deployment.latencyMs = probeLatencyMs;
+        project.deployment.lastDeploymentId = deploymentId;
+        project.deployment.lastExecutionId = execId;
+        project.deployment.reason = ok
+          ? `Deployed ${zipRes.zipFilename} and verified live runtime HTTP ${probeStatus} at ${runtimeProbeUrl} (${probeLatencyMs}ms)`
+          : !deployPostOk
+            ? `Deploy webhook returned HTTP ${deployPostStatus}`
+            : `Runtime probe returned HTTP ${probeStatus} at ${runtimeProbeUrl}`;
+        project.updatedAt = finishIso;
+
+        const evHash = computeExecutionEvidenceHash({
+          executionId: execId,
+          taskId: `deploy_${projectId}`,
+          startTimestamp: startIso,
+          finishTimestamp: finishIso,
+          executionDurationMs: totalDurationMs,
           executionResult: ok ? 'DELIVERED' : 'FAILED',
           artifacts: [{ path: zipRes.zipPath, bytes: zipRes.zipBytes, verified: ok }],
           testsPassed: ok ? 1 : 0,
           testsTotal: 1,
         });
+        this.setStage(
+          project,
+          'CLOUD_DEPLOYMENT',
+          deployPostOk ? 'VERIFIED' : 'BLOCKED',
+          project.deployment.reason,
+          zipRes.zipPath,
+          zipRes.zipSha256,
+          { executionId: execId, durationMs: totalDurationMs }
+        );
+        this.setStage(
+          project,
+          'RUNTIME_VERIFICATION',
+          ok ? 'VERIFIED' : 'BLOCKED',
+          `HTTP GET ${probeStatus || deployPostStatus} at ${runtimeProbeUrl} (${probeLatencyMs}ms)`,
+          runtimeProbeUrl,
+          responseDigest || evHash,
+          { executionId: `${execId}_rt`, durationMs: probeLatencyMs }
+        );
+
+        linkedLogIds.push(
+          this.appendLog(
+            project,
+            ok ? 'INFO' : 'ERROR',
+            'RuntimeProbe',
+            `GET ${runtimeProbeUrl} -> HTTP ${probeStatus} (${probeLatencyMs}ms) sha256=${responseDigest?.slice(0, 12) || 'none'}`,
+            { deploymentId, executionId: execId, stage: 'RUNTIME_VERIFICATION' }
+          )
+        );
+
         const ev: ProjectExecutionEvidenceRecord = {
           projectId,
           taskId: `deploy_${projectId}`,
@@ -1460,36 +1850,66 @@ export class SoftwareProjectManager {
           operationType: 'CLOUD_DEPLOY',
           startTimestamp: startIso,
           completionTimestamp: finishIso,
-          actualDurationMs: Math.max(1, Date.now() - t0),
+          actualDurationMs: totalDurationMs,
           buildOrTestResult: project.deployment.reason,
           artifactReference: zipRes.zipPath,
           evidenceHash: evHash,
           verificationStatus: ok ? 'VERIFIED' : 'FAILED',
+          stdoutSnippet: probeBody.slice(0, 400),
+          exitCode: ok ? 0 : 1,
         };
         project.evidenceHistory.unshift(ev);
-        this.appendLog(project, ok ? 'INFO' : 'ERROR', 'CloudDeploy', project.deployment.reason);
+        const depRecord: ProjectDeploymentRecord = {
+          deploymentId,
+          revisionId: project.currentRevision,
+          executionId: execId,
+          timestamp: finishIso,
+          status: ok ? 'DEPLOYED' : 'FAILED',
+          targetProvider: project.deployment.targetProvider,
+          targetEndpoint: runtimeProbeUrl,
+          approvalRequestId: project.deployment.approvalRequestId,
+          artifactZip: zipRes.zipFilename,
+          artifactSha256: zipRes.zipSha256,
+          runtimeHttpStatus: project.deployment.runtimeHttpStatus,
+          runtimeResponseSha256: responseDigest,
+          latencyMs: probeLatencyMs,
+          reason: project.deployment.reason,
+          evidenceHash: evHash,
+          linkedLogIds,
+        };
+        project.deploymentHistory.unshift(depRecord);
         this.save();
-        return { project, evidence: ev };
+        return { project, evidence: ev, deploymentRecord: depRecord };
       } catch (netErr: any) {
         clearTimeout(timer);
         const finishIso = new Date().toISOString();
+        const durationMs = Math.max(1, Date.now() - t0);
         project.deployment.status = 'FAILED';
-        project.deployment.targetProvider = 'cloud_runtime_url';
+        project.deployment.targetProvider = useWebhookPost ? 'cloud_deploy_webhook' : 'cloud_runtime_url';
         project.deployment.targetEndpoint = deployTargetUrl;
+        project.deployment.lastDeploymentId = deploymentId;
+        project.deployment.lastExecutionId = execId;
         project.deployment.reason = `Cloud endpoint unreachable: ${netErr?.message || netErr}`;
-        this.setStage(project, 'CLOUD_DEPLOYMENT', 'BLOCKED', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256);
-        this.setStage(project, 'RUNTIME_VERIFICATION', 'BLOCKED', project.deployment.reason, null, null);
-        const execId = `exec_deploy_${Date.now().toString(36)}`;
+        project.updatedAt = finishIso;
+
         const evHash = computeExecutionEvidenceHash({
           executionId: execId,
           taskId: `deploy_${projectId}`,
           startTimestamp: startIso,
           finishTimestamp: finishIso,
-          executionDurationMs: Math.max(1, Date.now() - t0),
+          executionDurationMs: durationMs,
           executionResult: 'FAILED',
           artifacts: [{ path: zipRes.zipPath, bytes: zipRes.zipBytes, verified: false }],
           testsPassed: 0,
           testsTotal: 1,
+        });
+        this.setStage(project, 'CLOUD_DEPLOYMENT', 'BLOCKED', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256, {
+          executionId: execId,
+          durationMs,
+        });
+        this.setStage(project, 'RUNTIME_VERIFICATION', 'BLOCKED', project.deployment.reason, null, null, {
+          executionId: `${execId}_rt`,
+          durationMs,
         });
         const ev: ProjectExecutionEvidenceRecord = {
           projectId,
@@ -1499,37 +1919,71 @@ export class SoftwareProjectManager {
           operationType: 'CLOUD_DEPLOY',
           startTimestamp: startIso,
           completionTimestamp: finishIso,
-          actualDurationMs: Math.max(1, Date.now() - t0),
+          actualDurationMs: durationMs,
           buildOrTestResult: project.deployment.reason,
           artifactReference: zipRes.zipPath,
           evidenceHash: evHash,
           verificationStatus: 'FAILED',
         };
         project.evidenceHistory.unshift(ev);
-        this.appendLog(project, 'ERROR', 'CloudDeploy', project.deployment.reason);
+        const logId = this.appendLog(project, 'ERROR', 'CloudDeploy', project.deployment.reason, {
+          deploymentId,
+          executionId: execId,
+          stage: 'CLOUD_DEPLOYMENT',
+        });
+        const depRecord: ProjectDeploymentRecord = {
+          deploymentId,
+          revisionId: project.currentRevision,
+          executionId: execId,
+          timestamp: finishIso,
+          status: 'FAILED',
+          targetProvider: project.deployment.targetProvider,
+          targetEndpoint: deployTargetUrl,
+          approvalRequestId: consumed.record?.requestId || opts.approvalRequestId || null,
+          artifactZip: zipRes.zipFilename,
+          artifactSha256: zipRes.zipSha256,
+          runtimeHttpStatus: null,
+          runtimeResponseSha256: null,
+          latencyMs: durationMs,
+          reason: project.deployment.reason,
+          evidenceHash: evHash,
+          linkedLogIds: [...linkedLogIds, logId],
+        };
+        project.deploymentHistory.unshift(depRecord);
         this.save();
-        return { project, evidence: ev };
+        return { project, evidence: ev, deploymentRecord: depRecord };
       }
     }
 
     // S3 bucket configured without HTTP deploy webhook -> report partial artifact seal
     const finishIso = new Date().toISOString();
+    const durationMs = Math.max(1, Date.now() - t0);
+    const execId = `exec_deploy_${Date.now().toString(36)}`;
     project.deployment.status = 'NOT_CONFIGURED';
     project.deployment.targetProvider = 's3';
+    project.deployment.lastDeploymentId = deploymentId;
+    project.deployment.lastExecutionId = execId;
     project.deployment.reason = 'Release artifact sealed; set CLOUD_DEPLOY_WEBHOOK_URL for live HTTP runtime verification.';
-    this.setStage(project, 'CLOUD_DEPLOYMENT', 'PARTIAL', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256);
-    this.setStage(project, 'RUNTIME_VERIFICATION', 'UNVERIFIED', 'Awaiting CLOUD_DEPLOY_WEBHOOK_URL runtime probe', null, null);
-    const execId = `exec_deploy_${Date.now().toString(36)}`;
+    project.updatedAt = finishIso;
+
     const evHash = computeExecutionEvidenceHash({
       executionId: execId,
       taskId: `deploy_${projectId}`,
       startTimestamp: startIso,
       finishTimestamp: finishIso,
-      executionDurationMs: Math.max(1, Date.now() - t0),
+      executionDurationMs: durationMs,
       executionResult: 'BLOCKED',
       artifacts: [{ path: zipRes.zipPath, bytes: zipRes.zipBytes, verified: false }],
       testsPassed: 0,
       testsTotal: 1,
+    });
+    this.setStage(project, 'CLOUD_DEPLOYMENT', 'PARTIAL', project.deployment.reason, zipRes.zipPath, zipRes.zipSha256, {
+      executionId: execId,
+      durationMs,
+    });
+    this.setStage(project, 'RUNTIME_VERIFICATION', 'UNVERIFIED', 'Awaiting CLOUD_DEPLOY_WEBHOOK_URL runtime probe', null, null, {
+      executionId: `${execId}_rt`,
+      durationMs: 1,
     });
     const ev: ProjectExecutionEvidenceRecord = {
       projectId,
@@ -1539,15 +1993,226 @@ export class SoftwareProjectManager {
       operationType: 'CLOUD_DEPLOY',
       startTimestamp: startIso,
       completionTimestamp: finishIso,
-      actualDurationMs: Math.max(1, Date.now() - t0),
+      actualDurationMs: durationMs,
       buildOrTestResult: project.deployment.reason,
       artifactReference: zipRes.zipPath,
       evidenceHash: evHash,
       verificationStatus: 'BLOCKED',
     };
     project.evidenceHistory.unshift(ev);
+    const logId = this.appendLog(project, 'WARN', 'CloudDeploy', project.deployment.reason, {
+      deploymentId,
+      executionId: execId,
+      stage: 'CLOUD_DEPLOYMENT',
+    });
+    const depRecord: ProjectDeploymentRecord = {
+      deploymentId,
+      revisionId: project.currentRevision,
+      executionId: execId,
+      timestamp: finishIso,
+      status: 'NOT_CONFIGURED',
+      targetProvider: 's3',
+      targetEndpoint: null,
+      approvalRequestId: consumed.record?.requestId || opts.approvalRequestId || null,
+      artifactZip: zipRes.zipFilename,
+      artifactSha256: zipRes.zipSha256,
+      runtimeHttpStatus: null,
+      runtimeResponseSha256: null,
+      latencyMs: durationMs,
+      reason: project.deployment.reason,
+      evidenceHash: evHash,
+      linkedLogIds: [approvalLogId, logId],
+    };
+    project.deploymentHistory.unshift(depRecord);
     this.save();
-    return { project, evidence: ev };
+    return { project, evidence: ev, deploymentRecord: depRecord };
+  }
+
+  /**
+   * Probes the live deployed HTTP runtime endpoint for health/responsiveness
+   * and appends verifiable evidence & linked runtime logs.
+   */
+  public async verifyDeployedRuntime(
+    projectId: string,
+    opts: { targetUrl?: string },
+    scope: EngineeringScope
+  ): Promise<{ project: SoftwareProjectRecord; evidence: ProjectExecutionEvidenceRecord; deploymentRecord: ProjectDeploymentRecord }> {
+    const project = this.getProject(projectId, scope);
+    if (!project) throw new Error(`PROJECT_NOT_FOUND: '${projectId}'`);
+    if (!Array.isArray(project.deploymentHistory)) project.deploymentHistory = [];
+
+    const t0 = Date.now();
+    const startIso = new Date(t0).toISOString();
+    const execId = `exec_rt_${Date.now().toString(36)}`;
+    const deploymentId = project.deployment.lastDeploymentId || `dep_rt_${Date.now().toString(36)}`;
+    const targetEndpoint = (opts.targetUrl || project.deployment.targetEndpoint || process.env.CLOUD_RUNTIME_URL || '').trim();
+
+    if (!targetEndpoint) {
+      throw new Error('RUNTIME_VERIFY_NOT_CONFIGURED: No deployed targetEndpoint or CLOUD_RUNTIME_URL configured.');
+    }
+    const urlCheck = validateCloudUrl(targetEndpoint);
+    if (!urlCheck.ok) {
+      throw new Error(urlCheck.reason || 'Blocked target endpoint URL');
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch(targetEndpoint, {
+        method: 'GET',
+        headers: { 'User-Agent': 'ZYNTHEOR-RuntimeProbe/1.0' },
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      const bodyText = await res.text();
+      const finishIso = new Date().toISOString();
+      const durationMs = Math.max(1, Date.now() - t0);
+      const ok = res.status >= 200 && res.status < 400;
+      const digest = sha256Text(bodyText);
+
+      project.deployment.runtimeVerifiedAt = ok ? finishIso : project.deployment.runtimeVerifiedAt;
+      project.deployment.runtimeHttpStatus = res.status;
+      project.deployment.runtimeResponseSha256 = digest;
+      project.deployment.latencyMs = durationMs;
+      project.deployment.targetEndpoint = targetEndpoint;
+      if (ok && project.deployment.status !== 'DEPLOYED') {
+        project.deployment.status = 'DEPLOYED';
+      }
+      project.deployment.reason = ok
+        ? `Live runtime health probe passed (HTTP ${res.status}, ${durationMs}ms) at ${targetEndpoint}`
+        : `Live runtime health probe returned HTTP ${res.status} at ${targetEndpoint}`;
+      project.updatedAt = finishIso;
+
+      const evHash = computeExecutionEvidenceHash({
+        executionId: execId,
+        taskId: `rt_${projectId}`,
+        startTimestamp: startIso,
+        finishTimestamp: finishIso,
+        executionDurationMs: durationMs,
+        executionResult: ok ? 'DELIVERED' : 'FAILED',
+        artifacts: [],
+        testsPassed: ok ? 1 : 0,
+        testsTotal: 1,
+      });
+      this.setStage(
+        project,
+        'RUNTIME_VERIFICATION',
+        ok ? 'VERIFIED' : 'BLOCKED',
+        project.deployment.reason,
+        targetEndpoint,
+        digest,
+        { executionId: execId, durationMs }
+      );
+      const ev: ProjectExecutionEvidenceRecord = {
+        projectId,
+        taskId: `rt_${projectId}`,
+        executionId: execId,
+        sourceRevision: project.currentRevision,
+        operationType: 'RUNTIME_VERIFY',
+        startTimestamp: startIso,
+        completionTimestamp: finishIso,
+        actualDurationMs: durationMs,
+        buildOrTestResult: project.deployment.reason,
+        artifactReference: targetEndpoint,
+        evidenceHash: evHash,
+        verificationStatus: ok ? 'VERIFIED' : 'FAILED',
+        stdoutSnippet: bodyText.slice(0, 400),
+        exitCode: ok ? 0 : 1,
+      };
+      project.evidenceHistory.unshift(ev);
+      const logId = this.appendLog(
+        project,
+        ok ? 'INFO' : 'ERROR',
+        'RuntimeProbe',
+        `GET ${targetEndpoint} -> HTTP ${res.status} (${durationMs}ms) sha256=${digest.slice(0, 12)}`,
+        { deploymentId, executionId: execId, stage: 'RUNTIME_VERIFICATION' }
+      );
+      const depRecord: ProjectDeploymentRecord = {
+        deploymentId: `dep_probe_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`,
+        revisionId: project.currentRevision,
+        executionId: execId,
+        timestamp: finishIso,
+        status: ok ? 'DEPLOYED' : 'FAILED',
+        targetProvider: project.deployment.targetProvider || 'cloud_runtime_url',
+        targetEndpoint,
+        approvalRequestId: project.deployment.approvalRequestId,
+        artifactZip: project.deployment.artifactZip,
+        artifactSha256: project.deployment.artifactSha256,
+        runtimeHttpStatus: res.status,
+        runtimeResponseSha256: digest,
+        latencyMs: durationMs,
+        reason: project.deployment.reason,
+        evidenceHash: evHash,
+        linkedLogIds: [logId],
+      };
+      project.deploymentHistory.unshift(depRecord);
+      this.save();
+      return { project, evidence: ev, deploymentRecord: depRecord };
+    } catch (err: any) {
+      clearTimeout(timer);
+      const finishIso = new Date().toISOString();
+      const durationMs = Math.max(1, Date.now() - t0);
+      const reason = `Live runtime probe failed at ${targetEndpoint}: ${err?.message || err}`;
+      project.deployment.status = 'FAILED';
+      project.deployment.reason = reason;
+      project.updatedAt = finishIso;
+      const evHash = computeExecutionEvidenceHash({
+        executionId: execId,
+        taskId: `rt_${projectId}`,
+        startTimestamp: startIso,
+        finishTimestamp: finishIso,
+        executionDurationMs: durationMs,
+        executionResult: 'FAILED',
+        artifacts: [],
+        testsPassed: 0,
+        testsTotal: 1,
+      });
+      this.setStage(project, 'RUNTIME_VERIFICATION', 'BLOCKED', reason, targetEndpoint, evHash, {
+        executionId: execId,
+        durationMs,
+      });
+      const ev: ProjectExecutionEvidenceRecord = {
+        projectId,
+        taskId: `rt_${projectId}`,
+        executionId: execId,
+        sourceRevision: project.currentRevision,
+        operationType: 'RUNTIME_VERIFY',
+        startTimestamp: startIso,
+        completionTimestamp: finishIso,
+        actualDurationMs: durationMs,
+        buildOrTestResult: reason,
+        artifactReference: targetEndpoint,
+        evidenceHash: evHash,
+        verificationStatus: 'FAILED',
+      };
+      project.evidenceHistory.unshift(ev);
+      const logId = this.appendLog(project, 'ERROR', 'RuntimeProbe', reason, {
+        deploymentId,
+        executionId: execId,
+        stage: 'RUNTIME_VERIFICATION',
+      });
+      const depRecord: ProjectDeploymentRecord = {
+        deploymentId: `dep_probe_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`,
+        revisionId: project.currentRevision,
+        executionId: execId,
+        timestamp: finishIso,
+        status: 'FAILED',
+        targetProvider: project.deployment.targetProvider || 'cloud_runtime_url',
+        targetEndpoint,
+        approvalRequestId: project.deployment.approvalRequestId,
+        artifactZip: project.deployment.artifactZip,
+        artifactSha256: project.deployment.artifactSha256,
+        runtimeHttpStatus: null,
+        runtimeResponseSha256: null,
+        latencyMs: durationMs,
+        reason,
+        evidenceHash: evHash,
+        linkedLogIds: [logId],
+      };
+      project.deploymentHistory.unshift(depRecord);
+      this.save();
+      return { project, evidence: ev, deploymentRecord: depRecord };
+    }
   }
 
   /**

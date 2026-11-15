@@ -2,6 +2,82 @@
   {
     "id": "session-default",
     "title": "Welcome to ZYNTHEOR Sovereign Intelligence",
+    "tenantId": "default",
+    "ownerUserId": "test-admin",
+    "createdAt": "2026-11-15T09:18:46.268Z",
+    "updatedAt": "2026-11-15T09:19:46.221Z",
+    "messages": [
+      {
+        "id": "msg-0",
+        "sender": "assistant",
+        "content": "สวัสดีครับ! ผมคือ **ZYNTHEOR Native Target 41.53M** ขับเคลื่อนด้วยโมเดล NativeLM (41,527,808 parameters · 10L · 8H · 512D · Base LM Continuation) โดยสถานะความพร้อมแสดงตามหลักฐาน Runtime\n\nพร้อมทำงานร่วมกับคุณทั้งการวิเคราะห์สถาปัตยกรรม, ตรวจโค้ด, รัน Sandbox และบันทึก Audit Ledger ครับ",
+        "timestamp": "2026-11-14T18:07:30.313Z"
+      },
+      {
+        "id": "msg-1794734326269-u",
+        "sender": "user",
+        "content": "Explain ZYNTHEOR online-only architecture",
+        "correlationId": "corr_1794734326260_5y7re",
+        "timestamp": "2026-11-15T09:18:46.269Z"
+      },
+      {
+        "id": "msg-1794734326709-a",
+        "sender": "assistant",
+        "content": "แท้จริงnOCÈ[PLAN]ฐz¸ nÇม",
+        "citations": [
+          {
+            "docTitle": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+            "collection": "Architecture",
+            "chunkIndex": 0,
+            "score": 9.092,
+            "snippet": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nTarget architecture specification: 10-layer decoder-only Transformer with 8 Multi-He..."
+          },
+          {
+            "docTitle": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+            "collection": "Architecture",
+            "chunkIndex": 1,
+            "score": 5.703,
+            "snippet": "loat32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No th..."
+          }
+        ],
+        "correlationId": "corr_1794734326260_5y7re",
+        "timestamp": "2026-11-15T09:18:46.709Z"
+      },
+      {
+        "id": "msg-1794734385759-u",
+        "sender": "user",
+        "content": "Explain ZYNTHEOR online-only architecture",
+        "correlationId": "corr_1794734385752_e8wx5",
+        "timestamp": "2026-11-15T09:19:45.759Z"
+      },
+      {
+        "id": "msg-1794734386221-a",
+        "sender": "assistant",
+        "content": "แท้จริงnOCÈ[PLAN]ฐz¸ nÇม",
+        "citations": [
+          {
+            "docTitle": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+            "collection": "Architecture",
+            "chunkIndex": 0,
+            "score": 9.092,
+            "snippet": "# ZYNTHEOR Q+ Sovereign AI Architecture Manifest\n\n## 1. Core Model Topology\nTarget architecture specification: 10-layer decoder-only Transformer with 8 Multi-He..."
+          },
+          {
+            "docTitle": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+            "collection": "Architecture",
+            "chunkIndex": 1,
+            "score": 5.703,
+            "snippet": "loat32 parameters (128 hidden dimension, 4 heads, one block, 384 FFN dimension).\n## 2. Invariants & Fail-Closed Standard\n- Absolute Zero External AI APIs: No th..."
+          }
+        ],
+        "correlationId": "corr_1794734385752_e8wx5",
+        "timestamp": "2026-11-15T09:19:46.221Z"
+      }
+    ]
+  },
+  {
+    "id": "session-default",
+    "title": "Welcome to ZYNTHEOR Sovereign Intelligence",
     "createdAt": "2026-11-14T18:07:30.313Z",
     "updatedAt": "2026-11-14T18:07:30.313Z",
     "messages": [

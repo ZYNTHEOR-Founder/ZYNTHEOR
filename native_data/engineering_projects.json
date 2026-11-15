@@ -1,6 +1,790 @@
 {
-  "updatedAt": "2026-11-15T09:08:53.494Z",
+  "updatedAt": "2026-11-15T09:18:25.832Z",
   "projects": [
+    {
+      "projectId": "proj_mwhmgdu9_9d9be2",
+      "tenantId": "dev-workspace",
+      "ownerUserId": "dev_administrator",
+      "name": "Build a service health tracker",
+      "slug": "build-a-service-health-tracker",
+      "description": "Build a service health tracker dashboard with REST API endpoints for incidents and SLA metrics",
+      "stack": "node_fullstack",
+      "attribution": "deterministic_engineering_engine",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "workspaceDir": "projects/proj_mwhmgdu9_9d9be2",
+      "currentRevision": "rev_1",
+      "createdAt": "2026-11-15T09:18:05.840Z",
+      "updatedAt": "2026-11-15T09:18:21.751Z",
+      "requirementsSpec": {
+        "rawPrompt": "Build a service health tracker dashboard with REST API endpoints for incidents and SLA metrics",
+        "objectives": [
+          "Implement primary user objective: Build a service health tracker dashboard with REST API endpoints for incidents and SLA metrics",
+          "Expose deterministic health & inspection APIs without exposed credentials",
+          "Verify syntax build, automated unit tests, and static security rules before deployment"
+        ],
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/health",
+            "purpose": "Service liveness & version check"
+          },
+          {
+            "method": "GET",
+            "path": "/api/items",
+            "purpose": "List domain records"
+          },
+          {
+            "method": "POST",
+            "path": "/api/items",
+            "purpose": "Create validated domain record"
+          },
+          {
+            "method": "GET",
+            "path": "/",
+            "purpose": "Responsive HTML application view"
+          }
+        ],
+        "dependencies": [
+          "node >= 20 (stdlib http, crypto, node:test, assert/strict)"
+        ],
+        "risks": [
+          "Missing remote cloud deploy target until configured by operator",
+          "Verify input validation on all mutation handlers"
+        ],
+        "architectureSummary": "Stack=node_fullstack; Planner=plan_eng_task_proj_mwhmgdu9_9d9be2; KG nodes=35; Intent=coding; NeuralState=NOT_CONFIGURED"
+      },
+      "stages": [
+        {
+          "stage": "USER_REQUIREMENTS",
+          "order": 1,
+          "label": "User Requirements",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.061Z",
+          "summary": "Captured 94-char specification",
+          "artifactReference": null,
+          "evidenceHash": "d6c97998ab994fe6f5625cf09cb3ef5ab52411950ecb18c2233a3b9165b487bb"
+        },
+        {
+          "stage": "REQUIREMENT_ANALYSIS",
+          "order": 2,
+          "label": "Requirement Analysis",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.061Z",
+          "summary": "Analyzed intent=coding; 3 objectives, 2 risk(s)",
+          "artifactReference": null,
+          "evidenceHash": "e78206676f0154cd01305a5ed51397e3dd9f8e7950b03ff39ef0e97f3217376b"
+        },
+        {
+          "stage": "ARCHITECTURE_DESIGN",
+          "order": 3,
+          "label": "Architecture Design",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.061Z",
+          "summary": "node_fullstack architecture designed (4 endpoint(s)); reasoning=csp_dependency_solver",
+          "artifactReference": null,
+          "evidenceHash": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        },
+        {
+          "stage": "IMPLEMENTATION_PLANNING",
+          "order": 4,
+          "label": "Implementation Planning",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.061Z",
+          "summary": "DAG Plan plan_eng_task_proj_mwhmgdu9_9d9be2 validated (7 ordered stages)",
+          "artifactReference": "plan_eng_task_proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "8d71e802a05d2fcb45bcd1f7505437ee2b3b495fb9ade26c8c40c82456ddbf72"
+        },
+        {
+          "stage": "SOURCE_CODE_CREATION",
+          "order": 5,
+          "label": "Source Code Creation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.227Z",
+          "summary": "Created 7 source & test file(s) in /projects/proj_mwhmgdu9_9d9be2",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2/README.md",
+          "evidenceHash": "c5296fd03d2b310219db4d080e4239f3febffede23d1c43800670d15c62c0832"
+        },
+        {
+          "stage": "DEPENDENCY_RESOLUTION",
+          "order": 6,
+          "label": "Dependency Resolution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.227Z",
+          "summary": "Node runtime package.json & config/runtime.template manifest resolved cleanly",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2/package.json",
+          "evidenceHash": "a9d8b5d28c50742c9bc73a2f0385ec670cd6d7edd70005dd04fc3232f2c3a3e1"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "label": "Build Execution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.554Z",
+          "summary": "Verified syntax & manifests across 4 file(s) in 302ms",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "bec0537fab5321e4d3776f526512f69a56448563a63873e54db7a6aa951af764"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "label": "Automated Testing",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:06.708Z",
+          "summary": "1/1 test file(s) passed in 133ms",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2/tests/app.test.mjs",
+          "evidenceHash": "6e213415f2f35fbc20a36986a1900304a1891f47f69886758c4c5b7ae0f3a4b6"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "label": "Security Validation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:18:21.751Z",
+          "summary": "Security scan passed across 7 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "01f81cacf697399ac2b4eeb99c07484ebe0bc6e2a6a9189dfdeec8b507b5ab0e"
+        },
+        {
+          "stage": "DEPLOYMENT_APPROVAL",
+          "order": 10,
+          "label": "Deployment Approval",
+          "status": "BLOCKED",
+          "completedAt": "2026-11-15T09:18:25.832Z",
+          "summary": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734305822_086493)",
+          "artifactReference": "apr_1794734305822_086493",
+          "evidenceHash": null
+        },
+        {
+          "stage": "CLOUD_DEPLOYMENT",
+          "order": 11,
+          "label": "Cloud Deployment",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "RUNTIME_VERIFICATION",
+          "order": 12,
+          "label": "Runtime Verification",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "label": "Maintenance & Improvement",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        }
+      ],
+      "revisions": [
+        {
+          "revisionId": "rev_1",
+          "revisionNumber": 1,
+          "createdAt": "2026-11-15T09:18:06.227Z",
+          "createdBy": "dev_administrator",
+          "message": "Initial node_fullstack scaffold",
+          "treeSha256": "c5296fd03d2b310219db4d080e4239f3febffede23d1c43800670d15c62c0832",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 267,
+              "sha256": "4e68a2b70b42dce30c4bba6f77720c6fc67c583343fe430057f9a0df70077bfe",
+              "snapshotId": "snap_1794734286144_2c034d4e"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 30,
+              "sha256": "b7db10eff3efa32c9970015b8f666d005a078c3873b57e635050340bbf42c244",
+              "snapshotId": "snap_1794734286160_46f661c0"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 873,
+              "sha256": "a802c65815846d558f538fa176dc73f1b8fd7ca9b90de753f09afe1e5d0a99a9",
+              "snapshotId": "snap_1794734286171_c5e5049d"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 897,
+              "sha256": "752107f9168628ed12edb4032a842634b4998bfc0935cdc0e0f20dcac410566e",
+              "snapshotId": "snap_1794734286179_c12b9286"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 1906,
+              "sha256": "db2440cd4678486cf3c0feed592c519970e7275b68d7e8b5c513ca2e0f80216c",
+              "snapshotId": "snap_1794734286189_18faeb70"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1480,
+              "sha256": "4234bcd33d63fe050e1d7532122075677eb5682a5c70171038e9ddb712d9e862",
+              "snapshotId": "snap_1794734286199_cbc77d8f"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 758,
+              "sha256": "a99aab47d8404c31dcd951bd52de8751d606566fc2db251e28a99a97e9504a13",
+              "snapshotId": "snap_1794734286211_88350744"
+            }
+          ]
+        }
+      ],
+      "evidenceHistory": [
+        {
+          "projectId": "proj_mwhmgdu9_9d9be2",
+          "taskId": "deploy_proj_mwhmgdu9_9d9be2",
+          "executionId": "exec_deploy_gate_mwhmgt9k",
+          "sourceRevision": "rev_1",
+          "operationType": "DEPLOY_PREP",
+          "startTimestamp": "2026-11-15T09:18:25.822Z",
+          "completionTimestamp": "2026-11-15T09:18:25.832Z",
+          "actualDurationMs": 10,
+          "buildOrTestResult": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734305822_086493)",
+          "artifactReference": "apr_1794734305822_086493",
+          "evidenceHash": "f2653607414004be5fd8f9dbfa49dafb9cdde189d7f868ff190e8fcc8219c4b1",
+          "verificationStatus": "BLOCKED"
+        },
+        {
+          "projectId": "proj_mwhmgdu9_9d9be2",
+          "taskId": "sec_proj_mwhmgdu9_9d9be2",
+          "executionId": "exec_sec_mwhmgq47",
+          "sourceRevision": "rev_1",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-15T09:18:21.740Z",
+          "completionTimestamp": "2026-11-15T09:18:21.751Z",
+          "actualDurationMs": 11,
+          "buildOrTestResult": "Security scan passed across 7 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "01f81cacf697399ac2b4eeb99c07484ebe0bc6e2a6a9189dfdeec8b507b5ab0e",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwhmgdu9_9d9be2",
+          "taskId": "sec_proj_mwhmgdu9_9d9be2",
+          "executionId": "exec_sec_mwhmgeim",
+          "sourceRevision": "rev_1",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-15T09:18:06.717Z",
+          "completionTimestamp": "2026-11-15T09:18:06.718Z",
+          "actualDurationMs": 1,
+          "buildOrTestResult": "Security scan passed across 7 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "18bf365eed9e7f40eacf35cd8fc4b070cd769888e18a893b451fc897121c44d9",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwhmgdu9_9d9be2",
+          "taskId": "test_proj_mwhmgdu9_9d9be2",
+          "executionId": "exec_test_mwhmgeic",
+          "sourceRevision": "rev_1",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-15T09:18:06.575Z",
+          "completionTimestamp": "2026-11-15T09:18:06.708Z",
+          "actualDurationMs": 133,
+          "buildOrTestResult": "1/1 test file(s) passed in 133ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "6e213415f2f35fbc20a36986a1900304a1891f47f69886758c4c5b7ae0f3a4b6",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (121ms)\nALL_TESTS_PASSED: 4/4 assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwhmgdu9_9d9be2",
+          "taskId": "build_proj_mwhmgdu9_9d9be2",
+          "executionId": "exec_build_mwhmgee2",
+          "sourceRevision": "rev_1",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-15T09:18:06.251Z",
+          "completionTimestamp": "2026-11-15T09:18:06.553Z",
+          "actualDurationMs": 302,
+          "buildOrTestResult": "Verified syntax & manifests across 4 file(s) in 302ms",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "bec0537fab5321e4d3776f526512f69a56448563a63873e54db7a6aa951af764",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwhmgdu9_9d9be2",
+          "taskId": "eng_task_proj_mwhmgdu9_9d9be2",
+          "executionId": "exec_scaffold_mwhmge4z",
+          "sourceRevision": "rev_1",
+          "operationType": "SCAFFOLD",
+          "startTimestamp": "2026-11-15T09:18:05.840Z",
+          "completionTimestamp": "2026-11-15T09:18:06.227Z",
+          "actualDurationMs": 387,
+          "buildOrTestResult": "Scaffolded 7 files (rev_1)",
+          "artifactReference": "projects/proj_mwhmgdu9_9d9be2",
+          "evidenceHash": "b6d067ba9756767e75abb8870282a8f02671405b8429d453ec749d2a56c47b30",
+          "verificationStatus": "VERIFIED"
+        }
+      ],
+      "lastBuild": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-15T09:18:06.553Z",
+        "durationMs": 302,
+        "checkedFiles": 4,
+        "summary": "Verified syntax & manifests across 4 file(s) in 302ms",
+        "output": "[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 "
+      },
+      "lastTests": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-15T09:18:06.708Z",
+        "durationMs": 133,
+        "passed": 1,
+        "total": 1,
+        "summary": "1/1 test file(s) passed in 133ms",
+        "output": "[node tests/app.test.mjs] exit=0 (121ms)\nALL_TESTS_PASSED: 4/4 assertions verified"
+      },
+      "lastSecurityScan": {
+        "status": "VERIFIED",
+        "scannedAt": "2026-11-15T09:18:21.751Z",
+        "findings": [],
+        "summary": "Security scan passed across 7 file(s) (0 low/med advisory)"
+      },
+      "deployment": {
+        "status": "PENDING_APPROVAL",
+        "approvalRequestId": "apr_1794734305822_086493",
+        "targetProvider": null,
+        "targetEndpoint": null,
+        "artifactZip": null,
+        "artifactSha256": null,
+        "deployedAt": null,
+        "runtimeVerifiedAt": null,
+        "runtimeHttpStatus": null,
+        "reason": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734305822_086493)"
+      },
+      "runtimeLogs": [
+        {
+          "timestamp": "2026-11-15T09:18:25.832Z",
+          "level": "WARN",
+          "source": "ApprovalGate",
+          "message": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734305822_086493)"
+        },
+        {
+          "timestamp": "2026-11-15T09:18:21.751Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 7 file(s) (0 low/med advisory)"
+        },
+        {
+          "timestamp": "2026-11-15T09:18:06.719Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 7 file(s) (0 low/med advisory)"
+        },
+        {
+          "timestamp": "2026-11-15T09:18:06.708Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 133ms"
+        },
+        {
+          "timestamp": "2026-11-15T09:18:06.554Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 4 file(s) in 302ms"
+        },
+        {
+          "timestamp": "2026-11-15T09:18:06.227Z",
+          "level": "INFO",
+          "source": "Planner",
+          "message": "Created project Build a service health tracker (proj_mwhmgdu9_9d9be2) at rev_1"
+        }
+      ]
+    },
+    {
+      "projectId": "proj_mwhmfs4m_dd2139",
+      "tenantId": "dev-workspace",
+      "ownerUserId": "dev_administrator",
+      "name": "Build a service health tracker",
+      "slug": "build-a-service-health-tracker",
+      "description": "Build a service health tracker dashboard with REST API endpoints for incidents and SLA metrics",
+      "stack": "node_fullstack",
+      "attribution": "deterministic_engineering_engine",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "workspaceDir": "projects/proj_mwhmfs4m_dd2139",
+      "currentRevision": "rev_1",
+      "createdAt": "2026-11-15T09:17:37.702Z",
+      "updatedAt": "2026-11-15T09:17:38.529Z",
+      "requirementsSpec": {
+        "rawPrompt": "Build a service health tracker dashboard with REST API endpoints for incidents and SLA metrics",
+        "objectives": [
+          "Implement primary user objective: Build a service health tracker dashboard with REST API endpoints for incidents and SLA metrics",
+          "Expose deterministic health & inspection APIs without exposed credentials",
+          "Verify syntax build, automated unit tests, and static security rules before deployment"
+        ],
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/health",
+            "purpose": "Service liveness & version check"
+          },
+          {
+            "method": "GET",
+            "path": "/api/items",
+            "purpose": "List domain records"
+          },
+          {
+            "method": "POST",
+            "path": "/api/items",
+            "purpose": "Create validated domain record"
+          },
+          {
+            "method": "GET",
+            "path": "/",
+            "purpose": "Responsive HTML application view"
+          }
+        ],
+        "dependencies": [
+          "node >= 20 (stdlib http, crypto, node:test, assert/strict)"
+        ],
+        "risks": [
+          "Missing remote cloud deploy target until configured by operator",
+          "Verify input validation on all mutation handlers"
+        ],
+        "architectureSummary": "Stack=node_fullstack; Planner=plan_eng_task_proj_mwhmfs4m_dd2139; KG nodes=35; Intent=coding; NeuralState=NOT_CONFIGURED"
+      },
+      "stages": [
+        {
+          "stage": "USER_REQUIREMENTS",
+          "order": 1,
+          "label": "User Requirements",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:37.877Z",
+          "summary": "Captured 94-char specification",
+          "artifactReference": null,
+          "evidenceHash": "a65661fe756fde131deea21190b636a9c0d3c373aa9be07fbb6f42f9cc513501"
+        },
+        {
+          "stage": "REQUIREMENT_ANALYSIS",
+          "order": 2,
+          "label": "Requirement Analysis",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:37.877Z",
+          "summary": "Analyzed intent=coding; 3 objectives, 2 risk(s)",
+          "artifactReference": null,
+          "evidenceHash": "e78206676f0154cd01305a5ed51397e3dd9f8e7950b03ff39ef0e97f3217376b"
+        },
+        {
+          "stage": "ARCHITECTURE_DESIGN",
+          "order": 3,
+          "label": "Architecture Design",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:37.877Z",
+          "summary": "node_fullstack architecture designed (4 endpoint(s)); reasoning=csp_dependency_solver",
+          "artifactReference": null,
+          "evidenceHash": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        },
+        {
+          "stage": "IMPLEMENTATION_PLANNING",
+          "order": 4,
+          "label": "Implementation Planning",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:37.877Z",
+          "summary": "DAG Plan plan_eng_task_proj_mwhmfs4m_dd2139 validated (7 ordered stages)",
+          "artifactReference": "plan_eng_task_proj_mwhmfs4m_dd2139",
+          "evidenceHash": "8d71e802a05d2fcb45bcd1f7505437ee2b3b495fb9ade26c8c40c82456ddbf72"
+        },
+        {
+          "stage": "SOURCE_CODE_CREATION",
+          "order": 5,
+          "label": "Source Code Creation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:38.010Z",
+          "summary": "Created 7 source & test file(s) in /projects/proj_mwhmfs4m_dd2139",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139/README.md",
+          "evidenceHash": "1d9f25ef2fc09f026106745dd9d39e1faf0ae385f4dcf38f008cca899026a05e"
+        },
+        {
+          "stage": "DEPENDENCY_RESOLUTION",
+          "order": 6,
+          "label": "Dependency Resolution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:38.010Z",
+          "summary": "Node runtime package.json & config/runtime.template manifest resolved cleanly",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139/package.json",
+          "evidenceHash": "a9d8b5d28c50742c9bc73a2f0385ec670cd6d7edd70005dd04fc3232f2c3a3e1"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "label": "Build Execution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:38.347Z",
+          "summary": "Verified syntax & manifests across 4 file(s) in 309ms",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139",
+          "evidenceHash": "5e880beab7f73294448b73520434643766e0c12baa4f1f13e8a7cdade7bcb010"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "label": "Automated Testing",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:38.511Z",
+          "summary": "1/1 test file(s) passed in 153ms",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139/tests/app.test.mjs",
+          "evidenceHash": "2f8010ea08cb421c7a2d525c46c13192c4fc3b8b31cf0e64f460d44978a1a5d0"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "label": "Security Validation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-15T09:17:38.530Z",
+          "summary": "Security scan passed across 7 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139",
+          "evidenceHash": "576559a03da2633b655905a2784ba50070fbf7f3d1c05c6b18df77070ad3d798"
+        },
+        {
+          "stage": "DEPLOYMENT_APPROVAL",
+          "order": 10,
+          "label": "Deployment Approval",
+          "status": "BLOCKED",
+          "completedAt": "2026-11-15T09:17:50.107Z",
+          "summary": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734270095_016544)",
+          "artifactReference": "apr_1794734270095_016544",
+          "evidenceHash": null
+        },
+        {
+          "stage": "CLOUD_DEPLOYMENT",
+          "order": 11,
+          "label": "Cloud Deployment",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "RUNTIME_VERIFICATION",
+          "order": 12,
+          "label": "Runtime Verification",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "label": "Maintenance & Improvement",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        }
+      ],
+      "revisions": [
+        {
+          "revisionId": "rev_1",
+          "revisionNumber": 1,
+          "createdAt": "2026-11-15T09:17:38.010Z",
+          "createdBy": "dev_administrator",
+          "message": "Initial node_fullstack scaffold",
+          "treeSha256": "1d9f25ef2fc09f026106745dd9d39e1faf0ae385f4dcf38f008cca899026a05e",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 267,
+              "sha256": "e5e49c90235b3b4d3ef322004e23bec72a727e05461a9479559daa2918d9706b",
+              "snapshotId": "snap_1794734257942_0dabc48f"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 30,
+              "sha256": "b7db10eff3efa32c9970015b8f666d005a078c3873b57e635050340bbf42c244",
+              "snapshotId": "snap_1794734257954_da9dba4b"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 873,
+              "sha256": "f9f48a05d012c7a0101615228dd8cabb67c1bb990febb6c53ec0f7871946c4b3",
+              "snapshotId": "snap_1794734257963_7d571645"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 897,
+              "sha256": "752107f9168628ed12edb4032a842634b4998bfc0935cdc0e0f20dcac410566e",
+              "snapshotId": "snap_1794734257973_9d623f00"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 1906,
+              "sha256": "db2440cd4678486cf3c0feed592c519970e7275b68d7e8b5c513ca2e0f80216c",
+              "snapshotId": "snap_1794734257981_d97eed42"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1480,
+              "sha256": "4234bcd33d63fe050e1d7532122075677eb5682a5c70171038e9ddb712d9e862",
+              "snapshotId": "snap_1794734257990_00beb804"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 758,
+              "sha256": "a99aab47d8404c31dcd951bd52de8751d606566fc2db251e28a99a97e9504a13",
+              "snapshotId": "snap_1794734258000_e71785e5"
+            }
+          ]
+        }
+      ],
+      "evidenceHistory": [
+        {
+          "projectId": "proj_mwhmfs4m_dd2139",
+          "taskId": "deploy_proj_mwhmfs4m_dd2139",
+          "executionId": "exec_deploy_gate_mwhmg1p7",
+          "sourceRevision": "rev_1",
+          "operationType": "DEPLOY_PREP",
+          "startTimestamp": "2026-11-15T09:17:50.095Z",
+          "completionTimestamp": "2026-11-15T09:17:50.107Z",
+          "actualDurationMs": 12,
+          "buildOrTestResult": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734270095_016544)",
+          "artifactReference": "apr_1794734270095_016544",
+          "evidenceHash": "f56f36a48adaf8ebc3d91b1df7db79b717c16b48cf1696f65904d31f4a5c3648",
+          "verificationStatus": "BLOCKED"
+        },
+        {
+          "projectId": "proj_mwhmfs4m_dd2139",
+          "taskId": "sec_proj_mwhmfs4m_dd2139",
+          "executionId": "exec_sec_mwhmfsrm",
+          "sourceRevision": "rev_1",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-15T09:17:38.526Z",
+          "completionTimestamp": "2026-11-15T09:17:38.529Z",
+          "actualDurationMs": 4,
+          "buildOrTestResult": "Security scan passed across 7 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139",
+          "evidenceHash": "576559a03da2633b655905a2784ba50070fbf7f3d1c05c6b18df77070ad3d798",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwhmfs4m_dd2139",
+          "taskId": "test_proj_mwhmfs4m_dd2139",
+          "executionId": "exec_test_mwhmfsr2",
+          "sourceRevision": "rev_1",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-15T09:17:38.357Z",
+          "completionTimestamp": "2026-11-15T09:17:38.510Z",
+          "actualDurationMs": 153,
+          "buildOrTestResult": "1/1 test file(s) passed in 153ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "2f8010ea08cb421c7a2d525c46c13192c4fc3b8b31cf0e64f460d44978a1a5d0",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (136ms)\nALL_TESTS_PASSED: 4/4 assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwhmfs4m_dd2139",
+          "taskId": "build_proj_mwhmfs4m_dd2139",
+          "executionId": "exec_build_mwhmfsmj",
+          "sourceRevision": "rev_1",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-15T09:17:38.038Z",
+          "completionTimestamp": "2026-11-15T09:17:38.347Z",
+          "actualDurationMs": 309,
+          "buildOrTestResult": "Verified syntax & manifests across 4 file(s) in 309ms",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139",
+          "evidenceHash": "5e880beab7f73294448b73520434643766e0c12baa4f1f13e8a7cdade7bcb010",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwhmfs4m_dd2139",
+          "taskId": "eng_task_proj_mwhmfs4m_dd2139",
+          "executionId": "exec_scaffold_mwhmfsd6",
+          "sourceRevision": "rev_1",
+          "operationType": "SCAFFOLD",
+          "startTimestamp": "2026-11-15T09:17:37.702Z",
+          "completionTimestamp": "2026-11-15T09:17:38.010Z",
+          "actualDurationMs": 308,
+          "buildOrTestResult": "Scaffolded 7 files (rev_1)",
+          "artifactReference": "projects/proj_mwhmfs4m_dd2139",
+          "evidenceHash": "6fa70aa768d7f50d38b38ea451cc5324d654e7fbd8dbb16d23ed831622210690",
+          "verificationStatus": "VERIFIED"
+        }
+      ],
+      "lastBuild": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-15T09:17:38.347Z",
+        "durationMs": 309,
+        "checkedFiles": 4,
+        "summary": "Verified syntax & manifests across 4 file(s) in 309ms",
+        "output": "[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 "
+      },
+      "lastTests": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-15T09:17:38.510Z",
+        "durationMs": 153,
+        "passed": 1,
+        "total": 1,
+        "summary": "1/1 test file(s) passed in 153ms",
+        "output": "[node tests/app.test.mjs] exit=0 (136ms)\nALL_TESTS_PASSED: 4/4 assertions verified"
+      },
+      "lastSecurityScan": {
+        "status": "VERIFIED",
+        "scannedAt": "2026-11-15T09:17:38.529Z",
+        "findings": [],
+        "summary": "Security scan passed across 7 file(s) (0 low/med advisory)"
+      },
+      "deployment": {
+        "status": "PENDING_APPROVAL",
+        "approvalRequestId": "apr_1794734270095_016544",
+        "targetProvider": null,
+        "targetEndpoint": null,
+        "artifactZip": null,
+        "artifactSha256": null,
+        "deployedAt": null,
+        "runtimeVerifiedAt": null,
+        "runtimeHttpStatus": null,
+        "reason": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734270095_016544)"
+      },
+      "runtimeLogs": [
+        {
+          "timestamp": "2026-11-15T09:17:50.107Z",
+          "level": "WARN",
+          "source": "ApprovalGate",
+          "message": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1794734270095_016544)"
+        },
+        {
+          "timestamp": "2026-11-15T09:17:38.530Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 7 file(s) (0 low/med advisory)"
+        },
+        {
+          "timestamp": "2026-11-15T09:17:38.511Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 153ms"
+        },
+        {
+          "timestamp": "2026-11-15T09:17:38.347Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 4 file(s) in 309ms"
+        },
+        {
+          "timestamp": "2026-11-15T09:17:38.011Z",
+          "level": "INFO",
+          "source": "Planner",
+          "message": "Created project Build a service health tracker (proj_mwhmfs4m_dd2139) at rev_1"
+        }
+      ]
+    },
     {
       "projectId": "proj_mwhm4ix8_b11a08",
       "tenantId": "test-tenant-sec10",

@@ -9,7 +9,9 @@ import { apiUrl } from '../../lib/apiClient';
 import { VividCard } from '../ui/VividCard';
 import { StatusDot, MinimalIndicatorState } from '../ui/StatusBadge';
 import {
+  Activity,
   CheckCircle2,
+  Clock,
   Code2,
   Eye,
   FileCode,
@@ -92,7 +94,14 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
   >([]);
   const [approvalIdInput, setApprovalIdInput] = useState<string>('');
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isVerifyingRuntime, setIsVerifyingRuntime] = useState(false);
   const [isRollingBack, setIsRollingBack] = useState<string | null>(null);
+  const [activeDeploymentFilter, setActiveDeploymentFilter] = useState<{
+    deploymentId: string;
+    executionId: string;
+    logIds: string[];
+  } | null>(null);
+  const [showAllStageExecs, setShowAllStageExecs] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const selectedProject =
@@ -213,6 +222,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
   }, [authReady, isAuthenticated]);
 
   useEffect(() => {
+    setActiveDeploymentFilter(null);
     if (selectedProject && isAuthenticated) {
       setApprovalIdInput(selectedProject.deployment.approvalRequestId || '');
       const files =
@@ -442,6 +452,60 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
     }
   };
 
+  const handleVerifyRuntime = async () => {
+    if (!selectedProject || !isAuthenticated || isVerifyingRuntime) return;
+    setIsVerifyingRuntime(true);
+    setErrorMessage(null);
+    try {
+      const res = await fetch(
+        apiUrl(
+          `/api/engineering/projects/${encodeURIComponent(selectedProject.projectId)}/verify-runtime`
+        ),
+        {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({}),
+        }
+      );
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Runtime probe failed');
+      }
+      if (json.project) {
+        setProjects((prev) =>
+          prev.map((p) => (p.projectId === selectedProject.projectId ? json.project : p))
+        );
+      }
+      await fetchCapabilities();
+      onAuditUpdated?.();
+      showToast({
+        variant: 'info',
+        title: 'Runtime Verification Executed',
+        message: json.project?.deployment?.reason || 'Runtime probe logged',
+      });
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    } finally {
+      setIsVerifyingRuntime(false);
+    }
+  };
+
+  const focusDeploymentLogs = (rec: {
+    deploymentId: string;
+    executionId: string;
+    linkedLogIds: string[];
+  }) => {
+    setActiveDeploymentFilter({
+      deploymentId: rec.deploymentId,
+      executionId: rec.executionId,
+      logIds: rec.linkedLogIds || [],
+    });
+    const targetEl = document.getElementById('project-runtime-logs');
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
   const handleRollback = async (revisionId: string) => {
     if (!selectedProject || !isAuthenticated || isRollingBack) return;
     setIsRollingBack(revisionId);
@@ -632,25 +696,67 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
           {selectedProject && (
             <VividCard
               title="13-Stage Lifecycle Pipeline"
-              subtitle={`Attribution: ${selectedProject.attribution}`}
+              subtitle={`Attribution: ${selectedProject.attribution} · ${(selectedProject.stageExecutions || []).length} execution record(s)`}
               gradientAccent="blue"
+              headerAction={
+                <button
+                  type="button"
+                  onClick={() => setShowAllStageExecs((v) => !v)}
+                  className="text-[10px] font-mono text-[#00F0FF] hover:underline whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  {showAllStageExecs ? 'Stage Summary' : 'Execution Records'}
+                </button>
+              }
             >
-              <div className="divide-y divide-[#1E294A] text-[11px]">
-                {selectedProject.stages.map((st) => (
-                  <div key={st.stage} className="py-2 first:pt-0 last:pb-0 space-y-0.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-[#F4F7FF]">
-                        {String(st.order).padStart(2, '0')}. {st.label}
-                      </span>
-                      <StatusDot
-                        status={toDotState(st.status)}
-                        label={st.status}
-                      />
-                    </div>
-                    <div className="text-[10px] text-[#9AA8C7] line-clamp-2">{st.summary}</div>
-                  </div>
-                ))}
-              </div>
+              {showAllStageExecs ? (
+                <div className="divide-y divide-[#1E294A] max-h-[420px] overflow-y-auto text-[10px] font-mono">
+                  {(selectedProject.stageExecutions || []).length === 0 ? (
+                    <div className="py-4 text-[#9AA8C7]">No stage execution records recorded yet.</div>
+                  ) : (
+                    (selectedProject.stageExecutions || []).map((se) => (
+                      <div key={se.executionId} className="py-2 first:pt-0 last:pb-0 space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-white font-bold truncate">
+                            {String(se.order).padStart(2, '0')}. {se.stage}
+                          </span>
+                          <StatusDot status={toDotState(se.status)} label={se.status} />
+                        </div>
+                        <div className="text-[#CBD5E1] line-clamp-2">{se.summary}</div>
+                        <div className="text-[#9AA8C7] tabular-nums">
+                          {se.executionId} · {se.revisionId} · {se.durationMs}ms · sha256:{se.evidenceHash.slice(0, 10)}…
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <div className="divide-y divide-[#1E294A] text-[11px]">
+                  {selectedProject.stages.map((st) => {
+                    const latestExec = (selectedProject.stageExecutions || []).find(
+                      (se) => se.stage === st.stage
+                    );
+                    return (
+                      <div key={st.stage} className="py-2 first:pt-0 last:pb-0 space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-[#F4F7FF]">
+                            {String(st.order).padStart(2, '0')}. {st.label}
+                          </span>
+                          <StatusDot
+                            status={toDotState(st.status)}
+                            label={st.status}
+                          />
+                        </div>
+                        <div className="text-[10px] text-[#9AA8C7] line-clamp-2">{st.summary}</div>
+                        {latestExec && (
+                          <div className="text-[10px] font-mono text-[#64748B] tabular-nums">
+                            {latestExec.executionId} · {latestExec.timestamp.slice(11, 19)}Z · {latestExec.evidenceHash.slice(0, 10)}…
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </VividCard>
           )}
         </div>
@@ -1032,14 +1138,170 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                                 : 'Request Deployment Approval'}
                           </span>
                         </button>
+                        {selectedProject.deployment.targetEndpoint && (
+                          <button
+                            type="button"
+                            onClick={() => void handleVerifyRuntime()}
+                            disabled={isVerifyingRuntime}
+                            className="min-h-[40px] px-3.5 py-2 rounded-lg text-xs font-bold text-[#CCFF00] bg-[#131B36] border border-[#1E294A] hover:border-[#CCFF00] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                          >
+                            <Activity className="w-3.5 h-3.5" />
+                            <span>{isVerifyingRuntime ? 'Probing...' : 'Probe Runtime'}</span>
+                          </button>
+                        )}
                       </div>
 
                       {selectedProject.deployment.artifactZip && (
-                        <div className="text-[11px] font-mono text-[#00F0FF]">
+                        <div className="text-[11px] font-mono text-[#00F0FF] tabular-nums">
                           Bundle: {selectedProject.deployment.artifactZip} · SHA-256:{' '}
                           {selectedProject.deployment.artifactSha256?.slice(0, 20)}…
+                          {selectedProject.deployment.runtimeHttpStatus !== null && (
+                            <span className="text-[#CBD5E1]">
+                              {' '}· Runtime HTTP {selectedProject.deployment.runtimeHttpStatus}
+                              {selectedProject.deployment.latencyMs ? ` (${selectedProject.deployment.latencyMs}ms)` : ''}
+                            </span>
+                          )}
                         </div>
                       )}
+                    </div>
+
+                    {/* Historical Deployment Timeline */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-[#00F0FF]" />
+                          Historical Deployment Timeline
+                        </div>
+                        <span className="text-[10px] font-mono text-[#9AA8C7] tabular-nums">
+                          {(selectedProject.deploymentHistory || []).length} recorded event(s)
+                        </span>
+                      </div>
+
+                      {(() => {
+                        const timelineItems =
+                          selectedProject.deploymentHistory && selectedProject.deploymentHistory.length > 0
+                            ? selectedProject.deploymentHistory
+                            : selectedProject.evidenceHistory
+                                .filter(
+                                  (ev) =>
+                                    ev.operationType === 'DEPLOY_PREP' ||
+                                    ev.operationType === 'CLOUD_DEPLOY' ||
+                                    ev.operationType === 'RUNTIME_VERIFY'
+                                )
+                                .map((ev) => ({
+                                  deploymentId: ev.executionId,
+                                  revisionId: ev.sourceRevision,
+                                  executionId: ev.executionId,
+                                  timestamp: ev.completionTimestamp,
+                                  status:
+                                    ev.verificationStatus === 'VERIFIED'
+                                      ? ('DEPLOYED' as const)
+                                      : ev.verificationStatus === 'FAILED'
+                                        ? ('FAILED' as const)
+                                        : ('BLOCKED' as const),
+                                  targetProvider: selectedProject.deployment.targetProvider,
+                                  targetEndpoint: selectedProject.deployment.targetEndpoint,
+                                  approvalRequestId: selectedProject.deployment.approvalRequestId,
+                                  artifactZip: selectedProject.deployment.artifactZip,
+                                  artifactSha256: selectedProject.deployment.artifactSha256,
+                                  runtimeHttpStatus: selectedProject.deployment.runtimeHttpStatus,
+                                  latencyMs: ev.actualDurationMs,
+                                  reason: ev.buildOrTestResult,
+                                  evidenceHash: ev.evidenceHash,
+                                  linkedLogIds: [] as string[],
+                                }));
+
+                        if (timelineItems.length === 0) {
+                          return (
+                            <div className="p-4 rounded-xl bg-[#0D1326] border border-[#1E294A] text-xs font-mono text-[#9AA8C7]">
+                              No deployment history recorded yet. Trigger Request Deployment Approval above to record the first timeline event.
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="rounded-xl bg-[#0D1326] border border-[#1E294A] p-4">
+                            <ol className="relative border-l border-[#1E294A] ml-2 space-y-5">
+                              {timelineItems.map((item) => {
+                                const dotState: MinimalIndicatorState =
+                                  item.status === 'DEPLOYED'
+                                    ? 'VERIFIED'
+                                    : item.status === 'PENDING_APPROVAL'
+                                      ? 'UNVERIFIED'
+                                      : item.status === 'NOT_CONFIGURED'
+                                        ? 'NOT_CONFIGURED'
+                                        : item.status === 'FAILED'
+                                          ? 'FAILED'
+                                          : 'BLOCKED';
+                                const matchingLogsCount = selectedProject.runtimeLogs.filter(
+                                  (log) =>
+                                    (log.logId && item.linkedLogIds.includes(log.logId)) ||
+                                    log.deploymentId === item.deploymentId ||
+                                    log.executionId === item.executionId
+                                ).length;
+                                const isSelectedFilter =
+                                  activeDeploymentFilter?.deploymentId === item.deploymentId &&
+                                  activeDeploymentFilter?.executionId === item.executionId;
+
+                                return (
+                                  <li key={`${item.deploymentId}_${item.executionId}`} className="pl-5 relative">
+                                    <span
+                                      className={`absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full border border-[#070B19] ${
+                                        item.status === 'DEPLOYED'
+                                          ? 'bg-[#CCFF00]'
+                                          : item.status === 'PENDING_APPROVAL'
+                                            ? 'bg-[#FF8C73]'
+                                            : item.status === 'NOT_CONFIGURED'
+                                              ? 'bg-[#9AA8C7]'
+                                              : 'bg-[#FF007F]'
+                                      }`}
+                                    />
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                      <div className="space-y-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-mono">
+                                          <StatusDot status={dotState} label={item.status} />
+                                          <span className="text-white font-bold tabular-nums">
+                                            {item.timestamp}
+                                          </span>
+                                          <span className="text-[#00F0FF]">{item.revisionId}</span>
+                                          <span className="text-[#9AA8C7]">{item.deploymentId}</span>
+                                        </div>
+                                        <div className="text-xs text-[#CBD5E1]">{item.reason}</div>
+                                        <div className="text-[10px] font-mono text-[#9AA8C7] tabular-nums flex flex-wrap gap-x-2 gap-y-0.5">
+                                          <span>exec:{item.executionId}</span>
+                                          {item.targetEndpoint && <span>· endpoint:{item.targetEndpoint}</span>}
+                                          {item.runtimeHttpStatus !== null && (
+                                            <span>· HTTP {item.runtimeHttpStatus}</span>
+                                          )}
+                                          {item.latencyMs !== null && item.latencyMs !== undefined && (
+                                            <span>· {item.latencyMs}ms</span>
+                                          )}
+                                          {item.approvalRequestId && (
+                                            <span>· gate:{item.approvalRequestId}</span>
+                                          )}
+                                          <span>· sha256:{item.evidenceHash.slice(0, 12)}…</span>
+                                        </div>
+                                      </div>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => focusDeploymentLogs(item)}
+                                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold border whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
+                                          isSelectedFilter
+                                            ? 'bg-[#00F0FF]/15 border-[#00F0FF] text-[#00F0FF]'
+                                            : 'bg-[#131B36] border-[#1E294A] hover:border-[#00F0FF] text-[#CBD5E1] hover:text-white'
+                                        }`}
+                                      >
+                                        View Linked Runtime Logs ({matchingLogsCount})
+                                      </button>
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                            </ol>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Version History & Rollback */}
@@ -1058,7 +1320,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                               <div className="text-white font-bold">
                                 {rev.revisionId} · {rev.message}
                               </div>
-                              <div className="text-[10px] text-[#9AA8C7]">
+                              <div className="text-[10px] text-[#9AA8C7] tabular-nums">
                                 {rev.createdAt} · tree {rev.treeSha256.slice(0, 14)}… ({rev.files.length} files)
                               </div>
                             </div>
@@ -1081,28 +1343,80 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
                     </div>
 
                     {/* Runtime Logs */}
-                    <div className="space-y-2">
-                      <div className="text-xs font-bold text-white">Runtime Logs &amp; Execution Evidence</div>
-                      <div className="max-h-56 overflow-y-auto rounded-xl bg-[#0D1326] border border-[#1E294A] divide-y divide-[#1E294A] font-mono text-[11px]">
-                        {[...selectedProject.runtimeLogs].reverse().map((log, i) => (
-                          <div key={i} className="px-3 py-2 flex items-start justify-between gap-3">
-                            <span className="text-[#CBD5E1]">
-                              <span
-                                className={
-                                  log.level === 'ERROR'
-                                    ? 'text-[#FF66B2] font-bold'
-                                    : log.level === 'WARN'
-                                      ? 'text-[#FF8C73] font-bold'
-                                      : 'text-[#00F0FF] font-bold'
-                                }
-                              >
-                                [{log.level}]
-                              </span>{' '}
-                              <span className="text-[#9AA8C7]">({log.source})</span> {log.message}
+                    <div id="project-runtime-logs" className="space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="text-xs font-bold text-white">
+                          Runtime Logs &amp; Execution Evidence
+                          {activeDeploymentFilter && (
+                            <span className="ml-2 text-[11px] font-mono font-normal text-[#00F0FF]">
+                              · Filtered to {activeDeploymentFilter.deploymentId} ({activeDeploymentFilter.executionId})
                             </span>
-                            <span className="text-[#64748B] shrink-0">{log.timestamp.slice(11, 19)}</span>
-                          </div>
-                        ))}
+                          )}
+                        </div>
+                        {activeDeploymentFilter && (
+                          <button
+                            type="button"
+                            onClick={() => setActiveDeploymentFilter(null)}
+                            className="px-2.5 py-1 rounded bg-[#131B36] border border-[#1E294A] hover:border-[#00F0FF] text-[11px] font-mono text-[#00F0FF] whitespace-nowrap shrink-0 cursor-pointer"
+                          >
+                            Clear Filter · Show All Logs
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-60 overflow-y-auto rounded-xl bg-[#0D1326] border border-[#1E294A] divide-y divide-[#1E294A] font-mono text-[11px]">
+                        {(() => {
+                          const orderedLogs = [...selectedProject.runtimeLogs].reverse();
+                          const displayedLogs = activeDeploymentFilter
+                            ? orderedLogs.filter(
+                                (log) =>
+                                  (log.logId && activeDeploymentFilter.logIds.includes(log.logId)) ||
+                                  log.deploymentId === activeDeploymentFilter.deploymentId ||
+                                  log.executionId === activeDeploymentFilter.executionId
+                              )
+                            : orderedLogs;
+
+                          if (displayedLogs.length === 0) {
+                            return (
+                              <div className="px-3 py-4 text-[#9AA8C7]">
+                                {activeDeploymentFilter
+                                  ? 'No runtime logs directly linked to this legacy deployment record.'
+                                  : 'No runtime logs recorded yet.'}
+                              </div>
+                            );
+                          }
+
+                          return displayedLogs.map((log, i) => (
+                            <div
+                              key={log.logId || i}
+                              className={`px-3 py-2 flex items-start justify-between gap-3 ${
+                                activeDeploymentFilter ? 'bg-[#00F0FF]/5' : ''
+                              }`}
+                            >
+                              <span className="text-[#CBD5E1] min-w-0">
+                                <span
+                                  className={
+                                    log.level === 'ERROR'
+                                      ? 'text-[#FF66B2] font-bold'
+                                      : log.level === 'WARN'
+                                        ? 'text-[#FF8C73] font-bold'
+                                        : 'text-[#00F0FF] font-bold'
+                                  }
+                                >
+                                  [{log.level}]
+                                </span>{' '}
+                                <span className="text-[#9AA8C7]">({log.source})</span> {log.message}
+                                {log.deploymentId && (
+                                  <span className="ml-2 text-[10px] text-[#64748B]">
+                                    [{log.deploymentId}]
+                                  </span>
+                                )}
+                              </span>
+                              <span className="text-[#64748B] shrink-0 tabular-nums">
+                                {log.timestamp.slice(11, 19)}
+                              </span>
+                            </div>
+                          ));
+                        })()}
                       </div>
                     </div>
                   </>

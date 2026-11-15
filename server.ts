@@ -268,15 +268,27 @@ for (let i = 5; i >= 0; i--) {
   sampleResources();
 }
 
-// 0. Lightweight Health Check
-app.get('/api/health', (_req: Request, res: Response) => {
+// 0. Lightweight Health Check (explicitly separates HTTP service liveness from Native Intelligence & Cloud Runtime)
+app.get('/api/health', async (_req: Request, res: Response) => {
+  const conn = await ConnectivityMonitor.getInstance().getStatus().catch(() => null);
+  const cloudCfg = validateCloudRuntimeConfig();
+  const nativeIntelligenceReady = Boolean(
+    conn && conn.online && conn.weightsLoaded && conn.executionVerified && conn.runtimeState === 'READY'
+  );
   res.json({
     status: 'healthy',
+    serviceLiveness: 'VERIFIED',
+    nativeIntelligenceReady,
+    cloudRuntimeStatus: conn?.runtimeState || (cloudCfg.configValid ? 'UNVERIFIED' : 'NOT_CONFIGURED'),
+    cloudConfigured: Boolean(conn ? conn.cloudStorageConfigured : cloudCfg.configValid),
+    cloudConnected: Boolean(conn?.cloudStorageReachable && conn?.pythonBridgeReachable),
+    readinessNote:
+      'HTTP API service is alive; Native Intelligence and Cloud Runtime must be verified separately via /api/connectivity/health and /api/truth/dashboard.',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     apiOnly: process.env.ZYNTHEOR_API_ONLY === '1',
     sovereign: true,
-    version: '1.0.0'
+    version: '1.0.0',
   });
 });
 
@@ -4971,9 +4983,25 @@ app.post('/api/engineering/projects/:projectId/deploy', requireAuth('developer')
   try {
     const scope = resolveEngineeringScope(req);
     const approvalRequestId = typeof req.body?.approvalRequestId === 'string' ? req.body.approvalRequestId.trim() : undefined;
+    const targetUrl = typeof req.body?.targetUrl === 'string' ? req.body.targetUrl.trim() : undefined;
     const result = await SoftwareProjectManager.getInstance().requestOrExecuteDeploy(
       String(req.params.projectId || ''),
-      { approvalRequestId },
+      { approvalRequestId, targetUrl },
+      scope
+    );
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/verify-runtime', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = resolveEngineeringScope(req);
+    const targetUrl = typeof req.body?.targetUrl === 'string' ? req.body.targetUrl.trim() : undefined;
+    const result = await SoftwareProjectManager.getInstance().verifyDeployedRuntime(
+      String(req.params.projectId || ''),
+      { targetUrl },
       scope
     );
     res.json({ success: true, ...result });

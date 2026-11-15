@@ -233,6 +233,38 @@ export interface ProjectExecutionEvidenceRecord {
   exitCode?: number | null;
 }
 
+export interface ProjectDeploymentRecord {
+  deploymentId: string;
+  revisionId: string;
+  executionId: string;
+  timestamp: string;
+  status: 'NOT_CONFIGURED' | 'BLOCKED' | 'PENDING_APPROVAL' | 'DEPLOYED' | 'FAILED';
+  targetProvider: string | null;
+  targetEndpoint: string | null;
+  approvalRequestId: string | null;
+  artifactZip: string | null;
+  artifactSha256: string | null;
+  runtimeHttpStatus: number | null;
+  runtimeResponseSha256?: string | null;
+  latencyMs?: number | null;
+  reason: string;
+  evidenceHash: string;
+  linkedLogIds: string[];
+}
+
+export interface ProjectStageExecutionRecord {
+  stage: string;
+  order: number;
+  executionId: string;
+  revisionId: string;
+  timestamp: string;
+  durationMs: number;
+  status: string;
+  summary: string;
+  artifactReference: string | null;
+  evidenceHash: string;
+}
+
 export interface SoftwareProjectRecord {
   projectId: string;
   tenantId: string;
@@ -265,6 +297,7 @@ export interface SoftwareProjectRecord {
     artifactReference: string | null;
     evidenceHash: string | null;
   }>;
+  stageExecutions?: ProjectStageExecutionRecord[];
   revisions: Array<{
     revisionId: string;
     revisionNumber: number;
@@ -308,9 +341,23 @@ export interface SoftwareProjectRecord {
     deployedAt: string | null;
     runtimeVerifiedAt: string | null;
     runtimeHttpStatus: number | null;
+    runtimeResponseSha256?: string | null;
+    latencyMs?: number | null;
+    lastDeploymentId?: string | null;
+    lastExecutionId?: string | null;
     reason: string;
   };
-  runtimeLogs: Array<{ timestamp: string; level: 'INFO' | 'WARN' | 'ERROR'; source: string; message: string }>;
+  deploymentHistory?: ProjectDeploymentRecord[];
+  runtimeLogs: Array<{
+    logId?: string;
+    timestamp: string;
+    level: 'INFO' | 'WARN' | 'ERROR';
+    source: string;
+    message: string;
+    deploymentId?: string;
+    executionId?: string;
+    stage?: string;
+  }>;
 }
 
 export interface TruthDashboardSnapshot {

@@ -1,7 +1,7 @@
 # ZYNTHEOR Multi-File Deliverable (Node.js ESM)
 
-- **Goal**: Create a sovereign cryptographic token validator with HMAC-SHA256 (Default (omitted) priority task)
-- **Priority**: Medium
+- **Goal**: Build an expense ledger CLI module with tests
+- **Priority**: High
 
 ## Files
 - `solution.js` — Primary executable entry

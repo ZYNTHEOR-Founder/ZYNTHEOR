@@ -1,5 +1,33 @@
 [
   {
+    "requestId": "apr_1794734305822_086493",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhmgdu9_9d9be2_rev_1",
+    "description": "Cloud deployment of 'Build a service health tracker' (rev_1)",
+    "requestedByUserId": "dev_administrator",
+    "requestedByRole": "admin",
+    "tenantId": "dev-workspace",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:18:25.822Z",
+    "expiresAt": "2026-11-16T09:18:25.822Z",
+    "requestDigest": "f64658d9a3ffbad0230d2be901f7c8344098b31564bec7a803954e8f1d9760c9"
+  },
+  {
+    "requestId": "apr_1794734270095_016544",
+    "actionType": "PUBLICATION",
+    "resourceId": "deploy_proj_mwhmfs4m_dd2139_rev_1",
+    "description": "Cloud deployment of 'Build a service health tracker' (rev_1)",
+    "requestedByUserId": "dev_administrator",
+    "requestedByRole": "admin",
+    "tenantId": "dev-workspace",
+    "riskLevel": "high",
+    "status": "PENDING",
+    "createdAt": "2026-11-15T09:17:50.095Z",
+    "expiresAt": "2026-11-16T09:17:50.095Z",
+    "requestDigest": "247a0a3f62e6c85ed0c3a94bcbf2dc05c90c88e8d5af675169e458127a9b1a90"
+  },
+  {
     "requestId": "apr_1794733733482_3bb2ff",
     "actionType": "PUBLICATION",
     "resourceId": "deploy_proj_mwhm4ix8_b11a08_rev_3",

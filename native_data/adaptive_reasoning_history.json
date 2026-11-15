@@ -1,5 +1,856 @@
 [
   {
+    "reasoningId": "rsn_1794734299112_0e9d05",
+    "timestamp": "2026-11-15T09:18:19.112Z",
+    "problemClass": "constraint_csp",
+    "selectedStrategy": "csp_dependency_solver",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734298994_6de314",
+      "intent": "planning",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_csp_1",
+      "strategy": "csp_dependency_solver",
+      "summary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "max_total_cost=100"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Tight budget counterexample cleanly rejected as unsatisfiable.",
+      "verifierPassed": true,
+      "score": 0.94
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.94,
+      "epistemicUncertainty": 0.06,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "deterministic_csp_scheduler",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 116.417
+    },
+    "answerSummary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_2fc6f25bab",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_csp_1' passed verifier 'deterministic_csp_scheduler' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=deterministic_csp_scheduler; counterexamplePassed=true",
+        "evidenceRefs": [
+          "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        ],
+        "evidenceHash": "2fc6f25bab22465dc6d5c1960a921e7eb47e9029a692d9760c5e1efbaa027097",
+        "timestamp": "2026-11-15T09:18:19.112Z"
+      },
+      {
+        "claimId": "claim_adapti_5c899b7257",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.94 (uncertainty=0.06)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "5c899b725759fbafe587df4282ecdde2972ec8d4d560eeb6be725a0292283eec",
+        "timestamp": "2026-11-15T09:18:19.112Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734286024_353a9f",
+    "timestamp": "2026-11-15T09:18:06.024Z",
+    "problemClass": "constraint_csp",
+    "selectedStrategy": "csp_dependency_solver",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734285843_70d963",
+      "intent": "planning",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_csp_1",
+      "strategy": "csp_dependency_solver",
+      "summary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "max_total_cost=100"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Tight budget counterexample cleanly rejected as unsatisfiable.",
+      "verifierPassed": true,
+      "score": 0.94
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.94,
+      "epistemicUncertainty": 0.06,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "deterministic_csp_scheduler",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 178.785
+    },
+    "answerSummary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_2fc6f25bab",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_csp_1' passed verifier 'deterministic_csp_scheduler' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=deterministic_csp_scheduler; counterexamplePassed=true",
+        "evidenceRefs": [
+          "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        ],
+        "evidenceHash": "2fc6f25bab22465dc6d5c1960a921e7eb47e9029a692d9760c5e1efbaa027097",
+        "timestamp": "2026-11-15T09:18:06.024Z"
+      },
+      {
+        "claimId": "claim_adapti_5c899b7257",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.94 (uncertainty=0.06)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "5c899b725759fbafe587df4282ecdde2972ec8d4d560eeb6be725a0292283eec",
+        "timestamp": "2026-11-15T09:18:06.024Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734257851_32f960",
+    "timestamp": "2026-11-15T09:17:37.851Z",
+    "problemClass": "constraint_csp",
+    "selectedStrategy": "csp_dependency_solver",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734257703_8a4a37",
+      "intent": "planning",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_csp_1",
+      "strategy": "csp_dependency_solver",
+      "summary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "max_total_cost=100"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Tight budget counterexample cleanly rejected as unsatisfiable.",
+      "verifierPassed": true,
+      "score": 0.94
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.94,
+      "epistemicUncertainty": 0.06,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "deterministic_csp_scheduler",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 145.292
+    },
+    "answerSummary": "Constraint solver found valid DAG schedule [requirements -> architecture -> source_code -> build_test] (cost=8).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_2fc6f25bab",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_csp_1' passed verifier 'deterministic_csp_scheduler' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=deterministic_csp_scheduler; counterexamplePassed=true",
+        "evidenceRefs": [
+          "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        ],
+        "evidenceHash": "2fc6f25bab22465dc6d5c1960a921e7eb47e9029a692d9760c5e1efbaa027097",
+        "timestamp": "2026-11-15T09:17:37.851Z"
+      },
+      {
+        "claimId": "claim_adapti_5c899b7257",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.94 (uncertainty=0.06)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "5c899b725759fbafe587df4282ecdde2972ec8d4d560eeb6be725a0292283eec",
+        "timestamp": "2026-11-15T09:17:37.851Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734240808_985ec4",
+    "timestamp": "2026-11-15T09:17:20.808Z",
+    "problemClass": "hybrid_execution",
+    "selectedStrategy": "multi_path_synthesis",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734240746_dd002e",
+      "intent": "general",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "No workspace document or graph path exceeded confidence threshold.",
+      "evidenceRefs": [],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": false,
+      "score": 0.18
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.05,
+      "epistemicUncertainty": 0.95,
+      "abstentionRecommended": true,
+      "reason": "Low empirical grounding, context conflict detected, or verifier rejected hypothesis."
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "e522bc422c02ef7a600d7d0ba3f237ce5568c7364402cd38a59a3101a976f618",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 60.749
+    },
+    "answerSummary": "Abstaining cleanly: no verified Knowledge Workspace or Knowledge Graph evidence matched the prompt, and cloud native weights are not resident.",
+    "verified": false,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_a65534044e",
+        "domain": "adaptive_reasoning",
+        "statement": "Hypothesis 'hyp_rag_graph_1' failed verification or triggered honest abstention",
+        "classification": "UNVERIFIED",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "e522bc422c02ef7a600d7d0ba3f237ce5568c7364402cd38a59a3101a976f618"
+        ],
+        "evidenceHash": "a65534044efc1887cd3313daa8020d1fcb4db4bbb12bfeeb105636d642c97e2b",
+        "timestamp": "2026-11-15T09:17:20.808Z"
+      },
+      {
+        "claimId": "claim_adapti_7ec0f4c2a0",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.05 (uncertainty=0.95)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "7ec0f4c2a07099f5d28af158698c52c6153f82dd39a8ebe8a23ef008a16c8995",
+        "timestamp": "2026-11-15T09:17:20.808Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 0,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 1,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 0,
+      "unverifiedCount": 1,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734240736_a44c0a",
+    "timestamp": "2026-11-15T09:17:20.736Z",
+    "problemClass": "code_verification",
+    "selectedStrategy": "ast_code_inspector",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734240605_6af9b6",
+      "intent": "coding",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_ast_1",
+      "strategy": "ast_code_inspector",
+      "summary": "AST inspection flagged issues: Unsafe builtin call 'eval()' detected.",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "syntax_valid",
+        "no_unsafe_builtins"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Malformed Python snippet rejected with SyntaxError.",
+      "verifierPassed": false,
+      "score": 0.3
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.05,
+      "epistemicUncertainty": 0.95,
+      "abstentionRecommended": true,
+      "reason": "Low empirical grounding, context conflict detected, or verifier rejected hypothesis."
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "7f299993f408123f7871dabef475224ae8aede8b9e9639de03bfccecabced46f",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "ast_code_reasoning",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 129.824
+    },
+    "answerSummary": "AST inspection flagged issues: Unsafe builtin call 'eval()' detected.",
+    "verified": false,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_50aa79911e",
+        "domain": "adaptive_reasoning",
+        "statement": "Hypothesis 'hyp_ast_1' failed verification or triggered honest abstention",
+        "classification": "UNVERIFIED",
+        "basis": "Verifier=ast_code_reasoning; counterexamplePassed=true",
+        "evidenceRefs": [
+          "7f299993f408123f7871dabef475224ae8aede8b9e9639de03bfccecabced46f"
+        ],
+        "evidenceHash": "50aa79911e1a8955dd55d4b62ed931578da7b32ca431b8b28675b92ef527166a",
+        "timestamp": "2026-11-15T09:17:20.736Z"
+      },
+      {
+        "claimId": "claim_adapti_7ec0f4c2a0",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.05 (uncertainty=0.95)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "7ec0f4c2a07099f5d28af158698c52c6153f82dd39a8ebe8a23ef008a16c8995",
+        "timestamp": "2026-11-15T09:17:20.736Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 0,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 1,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 0,
+      "unverifiedCount": 1,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734240596_3b3e1b",
+    "timestamp": "2026-11-15T09:17:20.596Z",
+    "problemClass": "code_verification",
+    "selectedStrategy": "ast_code_inspector",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734240478_9fda5d",
+      "intent": "coding",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_ast_1",
+      "strategy": "ast_code_inspector",
+      "summary": "Python AST verified safe & syntactically valid (functions: add_numbers).",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "syntax_valid",
+        "no_unsafe_builtins"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Malformed Python snippet rejected with SyntaxError.",
+      "verifierPassed": true,
+      "score": 0.93
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.93,
+      "epistemicUncertainty": 0.07,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "2e02657e948ef076d86f001d3abd34898e1fa247b43e4082dfbf6250a9c434da",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "ast_code_reasoning",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 116.791
+    },
+    "answerSummary": "Python AST verified safe & syntactically valid (functions: add_numbers).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_d8dc801e18",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_ast_1' passed verifier 'ast_code_reasoning' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=ast_code_reasoning; counterexamplePassed=true",
+        "evidenceRefs": [
+          "2e02657e948ef076d86f001d3abd34898e1fa247b43e4082dfbf6250a9c434da"
+        ],
+        "evidenceHash": "d8dc801e18ed179614cc21043ce321bcc119e8d622e6a3e2c82b423c21b6b06e",
+        "timestamp": "2026-11-15T09:17:20.596Z"
+      },
+      {
+        "claimId": "claim_adapti_92f36b35e0",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.93 (uncertainty=0.07)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "92f36b35e049fa647251477fba42f620c76b1e565d677d679e9d0eb8bf2d64a4",
+        "timestamp": "2026-11-15T09:17:20.596Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734240468_c788fd",
+    "timestamp": "2026-11-15T09:17:20.468Z",
+    "problemClass": "constraint_csp",
+    "selectedStrategy": "csp_dependency_solver",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734240346_586bad",
+      "intent": "math_reasoning",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [
+      "Plan topological order under budget limit=60"
+    ],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_csp_1",
+      "strategy": "csp_dependency_solver",
+      "summary": "Constraint solver found valid DAG schedule [ingest -> index -> verify] (cost=45).",
+      "evidenceRefs": [],
+      "constraintsChecked": [
+        "max_total_cost=60",
+        "Plan topological order under budget limit=60"
+      ],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Tight budget counterexample cleanly rejected as unsatisfiable.",
+      "verifierPassed": true,
+      "score": 0.94
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.94,
+      "epistemicUncertainty": 0.06,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "deterministic_csp_scheduler",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 121.361
+    },
+    "answerSummary": "Constraint solver found valid DAG schedule [ingest -> index -> verify] (cost=45).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_2fc6f25bab",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_csp_1' passed verifier 'deterministic_csp_scheduler' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=deterministic_csp_scheduler; counterexamplePassed=true",
+        "evidenceRefs": [
+          "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        ],
+        "evidenceHash": "2fc6f25bab22465dc6d5c1960a921e7eb47e9029a692d9760c5e1efbaa027097",
+        "timestamp": "2026-11-15T09:17:20.468Z"
+      },
+      {
+        "claimId": "claim_adapti_5c899b7257",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.94 (uncertainty=0.06)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "5c899b725759fbafe587df4282ecdde2972ec8d4d560eeb6be725a0292283eec",
+        "timestamp": "2026-11-15T09:17:20.468Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734240336_a252f0",
+    "timestamp": "2026-11-15T09:17:20.336Z",
+    "problemClass": "deterministic_symbolic",
+    "selectedStrategy": "symbolic_math_verifier",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734240222_d658ed",
+      "intent": "debugging",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_symbolic_1",
+      "strategy": "symbolic_math_verifier",
+      "summary": "Symbolic AST verification failed: Claimed 90 != computed 100.0.",
+      "evidenceRefs": [],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Injected perturbed target (+999.123); verifier rejected false claim cleanly.",
+      "verifierPassed": false,
+      "score": 0.25
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.05,
+      "epistemicUncertainty": 0.95,
+      "abstentionRecommended": true,
+      "reason": "Low empirical grounding, context conflict detected, or verifier rejected hypothesis."
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "f5b0b9e2fad63d31590477774e8ef05c18cbcc39612515494eaa473fe2105fa8",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "symbolic_math_ast_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 113.424
+    },
+    "answerSummary": "Symbolic AST verification failed: Claimed 90 != computed 100.0.",
+    "verified": false,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_16b076ce39",
+        "domain": "adaptive_reasoning",
+        "statement": "Hypothesis 'hyp_symbolic_1' failed verification or triggered honest abstention",
+        "classification": "UNVERIFIED",
+        "basis": "Verifier=symbolic_math_ast_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "f5b0b9e2fad63d31590477774e8ef05c18cbcc39612515494eaa473fe2105fa8"
+        ],
+        "evidenceHash": "16b076ce39d2a2939e8fc77a38cf08fdb99f8916f23c56dfec2c000e647ddf1e",
+        "timestamp": "2026-11-15T09:17:20.336Z"
+      },
+      {
+        "claimId": "claim_adapti_7ec0f4c2a0",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.05 (uncertainty=0.95)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "7ec0f4c2a07099f5d28af158698c52c6153f82dd39a8ebe8a23ef008a16c8995",
+        "timestamp": "2026-11-15T09:17:20.336Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 0,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 1,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 0,
+      "unverifiedCount": 1,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734240213_9acd70",
+    "timestamp": "2026-11-15T09:17:20.213Z",
+    "problemClass": "deterministic_symbolic",
+    "selectedStrategy": "symbolic_math_verifier",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734240064_d3a5d9",
+      "intent": "math_reasoning",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_symbolic_1",
+      "strategy": "symbolic_math_verifier",
+      "summary": "Symbolic AST verification passed: final_value=63 across 2 step(s).",
+      "evidenceRefs": [],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Injected perturbed target (+999.123); verifier rejected false claim cleanly.",
+      "verifierPassed": true,
+      "score": 0.96
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.96,
+      "epistemicUncertainty": 0.04,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "32446f2a5ae26c16bedbd52d86d0e3e374ce649850f8714e5cb5c6689000332b",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "symbolic_math_ast_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 147.372
+    },
+    "answerSummary": "Symbolic AST verification passed: final_value=63 across 2 step(s).",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_7ba24ce72f",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_symbolic_1' passed verifier 'symbolic_math_ast_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=symbolic_math_ast_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "32446f2a5ae26c16bedbd52d86d0e3e374ce649850f8714e5cb5c6689000332b"
+        ],
+        "evidenceHash": "7ba24ce72f84d5f0433c3f11fddee23cb5d7f514279eb25cd479961cffedd9ad",
+        "timestamp": "2026-11-15T09:17:20.212Z"
+      },
+      {
+        "claimId": "claim_adapti_e4815f3f56",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.96 (uncertainty=0.04)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "e4815f3f567be1acea4cb54d18e27d39f3f3fc05db88117354e46ea533947d4e",
+        "timestamp": "2026-11-15T09:17:20.212Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794734227892_ecf8da",
+    "timestamp": "2026-11-15T09:17:07.892Z",
+    "problemClass": "code_verification",
+    "selectedStrategy": "ast_code_inspector",
+    "contextAnalysis": {
+      "contextId": "ctx_1794734227882_3a8ec5",
+      "intent": "coding",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "Grounded in 5 workspace chunk(s) and 0 knowledge-graph path(s). Top source: Sovereign Token Verification & Constant-Time Security Specification.",
+      "evidenceRefs": [
+        {
+          "documentId": "doc_1794679634572_js1vf",
+          "title": "Sovereign Token Verification & Constant-Time Security Specification",
+          "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6"
+        },
+        {
+          "documentId": "doc_1794679634569_4tn2c",
+          "title": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+          "contentHash": "e8162067d9b3dba51f940517ab7930fd00a392e832f1738e66267dc7502c3ee5"
+        },
+        {
+          "documentId": "doc_1794679634569_4tn2c",
+          "title": "ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification",
+          "contentHash": "e8162067d9b3dba51f940517ab7930fd00a392e832f1738e66267dc7502c3ee5"
+        },
+        {
+          "documentId": "doc_1794679634571_qdvqf",
+          "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+          "contentHash": "cf040279ee6302f9c62b41809364c233cdde1283191ed31197806e1bbbb7a27a"
+        },
+        {
+          "documentId": "doc_1794679634573_utvpq",
+          "title": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+          "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7"
+        }
+      ],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": true,
+      "score": 0.92
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.92,
+      "epistemicUncertainty": 0.08,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "7eb6cb0fc2953d30216bb8fc98a3452d0d164356bde4681dd5713a104996660e",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 7.649
+    },
+    "answerSummary": "Grounded in 5 workspace chunk(s) and 0 knowledge-graph path(s). Top source: Sovereign Token Verification & Constant-Time Security Specification. Evidence: [ZYNTHEOR Target Architecture Manifest — 41.53M Parameter Roadmap Specification] - Memory Isolation: Episodic memory persisted separately from static model weights.",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_4cd1291c85",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_rag_graph_1' passed verifier 'knowledge_graph_hybrid_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "7eb6cb0fc2953d30216bb8fc98a3452d0d164356bde4681dd5713a104996660e",
+          "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+          "e8162067d9b3dba51f940517ab7930fd00a392e832f1738e66267dc7502c3ee5",
+          "e8162067d9b3dba51f940517ab7930fd00a392e832f1738e66267dc7502c3ee5",
+          "cf040279ee6302f9c62b41809364c233cdde1283191ed31197806e1bbbb7a27a",
+          "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7"
+        ],
+        "evidenceHash": "4cd1291c85f96c33d4ddaf6149a190b65b94852bc7aa7b6619e51fe07bb6cb70",
+        "timestamp": "2026-11-15T09:17:07.892Z"
+      },
+      {
+        "claimId": "claim_adapti_e10ab7ae4c",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.92 (uncertainty=0.08)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "e10ab7ae4cef94d691dba333bbf29806dc264c28f35c5f0c8aa388c54a7c19b1",
+        "timestamp": "2026-11-15T09:17:07.892Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
     "reasoningId": "rsn_1794733732802_971447",
     "timestamp": "2026-11-15T09:08:52.802Z",
     "problemClass": "constraint_csp",

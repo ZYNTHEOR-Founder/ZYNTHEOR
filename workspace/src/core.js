@@ -1,4 +1,4 @@
-// ZYNTHEOR Modular Core (ESM) — Goal: Create a sovereign cryptographic token validator with HMAC-SHA256 (Default (omitted) priority task)
+// ZYNTHEOR Modular Core (ESM) — Goal: Build an expense ledger CLI module with tests
 import crypto from 'crypto';
 
 export function computeDigestManifest(records) {

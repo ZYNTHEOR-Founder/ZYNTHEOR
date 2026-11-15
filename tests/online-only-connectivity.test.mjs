@@ -19,9 +19,48 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
+import os from 'node:os';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import readline from 'node:readline';
+
+function buildEphemeralPureSeqCheckpoint(tmpDir) {
+  const ckptPath = path.join(tmpDir, 'ephemeral_seq_pure.pt');
+  const pyScript = `
+import json, sys
+from qplus_native.tokenizer import SovereignTokenizer
+from qplus_native.seq_lm import PureSeqLM, SeqLMConfig, real_vocab_size
+
+tok = SovereignTokenizer(vocab_size=16384, profile="v2_base")
+vocab = real_vocab_size(tok)
+cfg = SeqLMConfig(vocab=vocab, d_model=16, n_layers=1, n_heads=2, d_ffn=32, ctx=12)
+lm = PureSeqLM(cfg, seed=7, tokenizer_profile="v2_base")
+ids = tok.encode("ZYNTHEOR Online Connectivity Sovereign Intelligence")[:cfg.ctx]
+inp, tgt = ids[:-1], ids[1:]
+for _ in range(3):
+    logits, cache = lm.forward_seq(inp, keep_cache=True)
+    loss_val, dlogits = lm.ce_loss_seq(logits, tgt)
+    grads = lm.backward_seq(dlogits, cache)
+    for k, g in grads.items():
+        w = lm.p[k]
+        for i in range(len(w)):
+            w[i] -= 0.05 * max(-1.0, min(1.0, g[i]))
+
+raw, meta = lm.to_bytes(tok, extra_meta={"training_steps": 3, "last_loss": float(loss_val)})
+with open(sys.argv[1], "wb") as f:
+    f.write(raw)
+print(json.dumps({"total_params": meta["total_params"], "sha256": meta["sha256"]}))
+`;
+  const out = execFileSync('python3', ['-B', '-c', pyScript, ckptPath], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+  const parsed = JSON.parse(out.trim().split('\n').pop());
+  return {
+    ckptBytes: fs.readFileSync(ckptPath),
+    expectedTotalParams: Number(parsed.total_params),
+  };
+}
 
 function getFreePort() {
   return new Promise((resolve, reject) => {
@@ -120,7 +159,8 @@ async function run() {
   // 2. Live Express Server with dead cloud endpoint -> HTTP 503 FAIL_CLOSED on all routes
   const serverPort = await getFreePort();
   const serverUrl = `http://127.0.0.1:${serverPort}`;
-  const ckptBytes = fs.readFileSync(path.resolve(process.cwd(), 'native_data/model_checkpoint_seq_pure.pt'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zyntheor-conn-test-'));
+  const { ckptBytes, expectedTotalParams } = buildEphemeralPureSeqCheckpoint(tmpDir);
 
   let cloudRequests = 0;
   const cloudServer = http.createServer((req, res) => {
@@ -160,6 +200,12 @@ async function run() {
       ...process.env,
       PORT: String(serverPort),
       ZYNTHEOR_API_ONLY: '1',
+      ZYNTHEOR_ENABLE_DEV_LOGIN: 'true',
+      ZYNTHEOR_ALLOW_LOOPBACK_CLOUD: 'true',
+      ZYNTHEOR_AUDIT_FILE: path.join(tmpDir, 'audit.jsonl'),
+      ZYNTHEOR_TASKS_FILE: path.join(tmpDir, 'tasks.json'),
+      ZYNTHEOR_PLANS_DIR: path.join(tmpDir, 'plans'),
+      ZYNTHEOR_EXEC_METRICS_FILE: path.join(tmpDir, 'exec_metrics.json'),
       CHECKPOINT_PRESIGNED_URL: deadUrl,
       S3_BUCKET: '',
       S3_ACCESS_KEY_ID: '',
@@ -288,7 +334,8 @@ async function run() {
     assert.equal(inferOnlineRes.status, 200);
     assert.equal(inferOnlineJson.success, true);
     assert.equal(inferOnlineJson.weightsSource, liveCloudUrl);
-    assert.equal(inferOnlineJson.totalParams, 51296);
+    assert.ok(expectedTotalParams > 0);
+    assert.equal(inferOnlineJson.totalParams, expectedTotalParams);
 
     const chatOnlineRes = await fetch(`${serverUrl}/api/chat`, {
       method: 'POST',
@@ -310,7 +357,7 @@ async function run() {
     assert.ok(chatDone, 'Stream must emit done event');
     assert.ok(chatChunkCount >= 1, 'Stream must emit at least one token chunk');
     assert.equal(chatDone.weightsSource, liveCloudUrl);
-    assert.equal(chatDone.totalParams, 51296);
+    assert.equal(chatDone.totalParams, expectedTotalParams);
 
     // Resume the previously Blocked task -> must recover & complete cleanly!
     const resumeOnlineRes = await fetch(`${serverUrl}/api/agent/tasks/${queuedTaskId}/resume`, {
@@ -328,6 +375,17 @@ async function run() {
     }));
     assert.equal(finalEvent?.data?.executionCycle?.lifecycleStatus, 'Delivered');
     assert.equal(finalEvent?.data?.executionCycle?.deliveryStatus, 'DELIVERED');
+
+    // Cleanup task artifact folder created in /workspace if present
+    const zipName = finalEvent?.data?.executionCycle?.packageArtifact?.zipFilename;
+    if (zipName) {
+      const zipFull = path.resolve(process.cwd(), 'native_data', 'deliverables', zipName);
+      if (fs.existsSync(zipFull)) fs.rmSync(zipFull, { force: true });
+    }
+    if (queuedTaskId) {
+      const taskWs = path.resolve(process.cwd(), 'workspace', queuedTaskId);
+      if (fs.existsSync(taskWs)) fs.rmSync(taskWs, { recursive: true, force: true });
+    }
 
     console.log('\n[PASS] Online-Only Enforcement & Cloud Reconnection E2E Verified.\n');
   } finally {
@@ -354,6 +412,7 @@ async function run() {
         resolve();
       }
     });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }
 
