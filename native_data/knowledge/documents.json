@@ -159,5 +159,30 @@
     "parsedMetadata": {
       "headingCount": 0
     }
+  },
+  {
+    "id": "doc_1794730736259_ix050",
+    "title": "TenantA Secret 1794730736248",
+    "content": "cross-tenant isolation probe content unique ed45cd95",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-15T08:18:56.259Z",
+    "updatedAt": "2026-11-15T08:18:56.259Z",
+    "contentHash": "8810ab11941542093168831cc8a44ef249191a539b3a64326afcecbe34a4acc2",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
   }
 ]

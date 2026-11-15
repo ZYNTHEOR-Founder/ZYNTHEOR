@@ -24,6 +24,14 @@ import { ConnectivityMonitor, ConnectivityRequiredError } from './ConnectivityMo
 import { KnowledgeWorkspace } from './KnowledgeWorkspace';
 import { AutonomousPlanner } from './AutonomousPlanner';
 import { ApprovalGate } from './ApprovalGate';
+import {
+  classifyTruthClaim,
+  computeExecutionEvidenceHash,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export type AgentRole = 'PLANNER' | 'CODER' | 'REVIEWER' | 'TESTER';
 
@@ -125,12 +133,18 @@ export interface CycleArtifact {
 }
 
 export interface ExecutionCycleSummary {
+  executionId: string;
   taskId: string;
   goal: string;
   priority: TaskPriority;
   runtime: 'node' | 'python3';
   lifecycleStatus?: TaskLifecycleStatus;
   deliveryStatus: 'DELIVERED' | 'BLOCKED';
+  executionResult: 'DELIVERED' | 'BLOCKED' | 'FAILED';
+  startTimestamp: string;
+  finishTimestamp: string;
+  executionDurationMs: number;
+  executionEvidenceHash: string;
   stages: ExecutionCycleStageRecord[];
   acceptanceCriteria: AcceptanceCriterion[];
   artifacts: CycleArtifact[];
@@ -141,6 +155,8 @@ export interface ExecutionCycleSummary {
   testsTotal: number;
   durationMs: number;
   completedAt: string;
+  truthClaims?: TruthClaimRecord[];
+  truthSummary?: TruthKernelSummary;
 }
 
 export interface ExecutionMetricsSummary {
@@ -1709,14 +1725,56 @@ console.log('UNIT_TESTS_PASSED: 2/2 assertions OK');
         failureReason: allCriteriaPassed ? null : limitations[0]
       });
 
-      const totalDuration = Date.now() - startTime;
+      const startTimestamp = new Date(startTime).toISOString();
+      const finishTimestamp = completedAt;
+      const totalDuration = Math.max(0, Date.parse(finishTimestamp) - startTime);
+      const executionId = `exec_${taskId}`;
+      const executionResult: 'DELIVERED' | 'BLOCKED' = deliveryStatus;
+      const executionEvidenceHash = computeExecutionEvidenceHash({
+        executionId,
+        taskId,
+        startTimestamp,
+        finishTimestamp,
+        executionDurationMs: totalDuration,
+        executionResult,
+        artifacts,
+        testsPassed: testsPassedCount,
+        testsTotal: testsTotalCount,
+      });
+      const truthClaims = enforceTruthClaims([
+        classifyTruthClaim({
+          domain: 'execution_orchestrator',
+          statement: `Execution ${executionId} (${runtime}) completed with outcome ${executionResult} (${testsPassedCount}/${testsTotalCount} acceptance gates passed in ${totalDuration}ms)`,
+          classification: deliveryStatus === 'DELIVERED' ? 'VERIFIED_FACT' : 'UNVERIFIED',
+          basis: `SHA-256 executionEvidenceHash=${executionEvidenceHash.slice(0, 16)} over measured artifacts & acceptance gates`,
+          evidenceRefs: [executionEvidenceHash, ...artifacts.map((a) => a.path)],
+        }),
+        ...(repairHistory.some((r) => r.resolved)
+          ? [
+              classifyTruthClaim({
+                domain: 'execution_orchestrator',
+                statement: `Self-repair resolved ${repairHistory.filter((r) => r.resolved).length} failure(s) before final verification`,
+                classification: 'VERIFIED_FACT',
+                basis: 'Autonomous repair loop verified subsequent test execution pass',
+              }),
+            ]
+          : []),
+      ]);
+      const truthSummary = summarizeTruthClaims(truthClaims);
+
       const executionCycle: ExecutionCycleSummary = {
+        executionId,
         taskId,
         goal,
         priority,
         runtime,
         lifecycleStatus: finalLifecycle,
         deliveryStatus,
+        executionResult,
+        startTimestamp,
+        finishTimestamp,
+        executionDurationMs: totalDuration,
+        executionEvidenceHash,
         stages,
         acceptanceCriteria,
         artifacts,
@@ -1727,6 +1785,8 @@ console.log('UNIT_TESTS_PASSED: 2/2 assertions OK');
         testsTotal: testsTotalCount,
         durationMs: totalDuration,
         completedAt,
+        truthClaims,
+        truthSummary,
       };
 
       this.recordCycleMetrics(executionCycle);

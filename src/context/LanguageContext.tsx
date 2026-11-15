@@ -15,7 +15,7 @@ export const DICTIONARY: Translations = {
   'nav.command_center': { th: 'ภาพรวมระบบ', en: 'Overview' },
   'nav.autonomous_execution': { th: 'พื้นที่สั่งงานอัตโนมัติ', en: 'Autonomous Execution' },
   'nav.cognitive_operations': { th: 'ศูนย์ปฏิบัติการพุทธิปัญญา', en: 'Cognitive Operations' },
-  'nav.conversational_intelligence': { th: 'ระบบสนทนาอัจฉริยะ', en: 'Conversational AI' },
+  'nav.conversational_intelligence': { th: 'ระบบสั่งการและสนทนาเชิงเหตุผล', en: 'Reasoning & Command Dialogue' },
   'nav.intelligence_core': { th: 'แกนสมองประสาทเทียม', en: 'Intelligence Core' },
   'nav.model_laboratory': { th: 'ห้องปฏิบัติการโมเดล', en: 'Model Laboratory' },
   'nav.dev_studio': { th: 'สตูดิโอนักพัฒนา', en: 'Dev Studio' },
@@ -63,9 +63,9 @@ export const DICTIONARY: Translations = {
   'badge.commercial_launch': { th: 'เปิดตัวเชิงพาณิชย์ (Commercial)', en: 'Commercial Launch' },
   'footer.sovereign_desc': { th: 'โมเดล Native บน Sovereign Cloud · Online-first runtime · ป้องกันสิทธิ์แบบ Fail-Closed', en: 'First-Party Cloud Runtime · Policy-Controlled Native AI · Fail-Closed Sandbox' },
 
-  // Conversational Intelligence
-  'chat.title': { th: 'ระบบสนทนาและให้เหตุผลสองภาษา', en: 'Bilingual Conversational & Reasoning Core' },
-  'chat.subtitle': { th: 'ประมวลผลด้วย Active: NativeLM v2 (2.0M) · 502,912 พารามิเตอร์ · 2L · 4H · 128D', en: 'Powered by Active: NativeLM v2 (2.0M) · 502,912 parameters · 2L · 4H · 128D' },
+  // Multi-Domain Reasoning & Command Dialogue
+  'chat.title': { th: 'คอนโซลสั่งการและให้เหตุผลสองภาษา', en: 'Bilingual Reasoning & Command Console' },
+  'chat.subtitle': { th: 'เชื่อมโยง Native Intelligence Core กับ Knowledge Workspace แบบ Execution-Gated ออนไลน์เท่านั้น', en: 'Execution-gated Bilingual Reasoning & Command Interface grounded on Native Core & Knowledge Workspace' },
   'chat.input_placeholder': { th: 'พิมพ์คำถามหรือคำสั่งภาษาไทย หรือ English... (เช่น สร้างฟังก์ชันตรวจสอบสิทธิ์, อธิบายขั้นตอน)', en: 'Type prompt in Thai or English... (e.g. Write an auth validator, explain architecture)' },
   'chat.thinking': { th: 'โมเดลกำลังวิเคราะห์และประมวลผล...', en: 'Model is analyzing and generating tokens...' },
   'chat.thought_process': { th: 'ขั้นตอนการให้เหตุผลที่ตรวจสอบได้ (Verifiable Reasoning)', en: 'Verifiable Reasoning Process' },

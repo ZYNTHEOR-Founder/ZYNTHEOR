@@ -43,6 +43,14 @@ import {
   type TaskPriority,
 } from './TaskOrchestrator.ts';
 import type { SovereignRole } from './SovereignIdentity.ts';
+import {
+  classifyTruthClaim,
+  computeExecutionEvidenceHash,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export type ActionPillarId =
   | '01_PERCEPTION'
@@ -107,6 +115,7 @@ export interface ActionMissionRequest {
 }
 
 export interface ActionMissionRecord {
+  executionId: string;
   missionId: string;
   tenantId: string;
   ownerUserId: string;
@@ -115,11 +124,16 @@ export interface ActionMissionRecord {
   priority: TaskPriority;
   runtime: 'node' | 'python3';
   status: 'DELIVERED' | 'BLOCKED' | 'FAILED';
+  executionResult: 'DELIVERED' | 'BLOCKED' | 'FAILED';
   attribution: 'deterministic_action_engine' | 'native_cloud_model';
   nativeNeuralState: string;
   createdAt: string;
+  startTimestamp: string;
+  finishTimestamp: string;
   completedAt: string;
+  executionDurationMs: number;
   durationMs: number;
+  executionEvidenceHash: string;
   pillars: ActionPillarRecord[];
   perception: PerceptionSnapshot;
   reasoningOutcome?: AdaptiveReasoningOutcome | null;
@@ -146,6 +160,8 @@ export interface ActionMissionRecord {
   approvalRequestId?: string;
   failureReason?: string | null;
   auditEntryHash: string;
+  truthClaims: TruthClaimRecord[];
+  truthSummary: TruthKernelSummary;
 }
 
 export interface ActionCapabilitiesSnapshot {
@@ -1504,13 +1520,68 @@ export class ActionDrivenEngine {
       durationMs: p.durationMs,
     }));
 
+    const startTimestamp = new Date(tStart).toISOString();
+    const finishTimestamp = completedAt;
+    const measuredDurationMs = Math.max(0, Date.parse(finishTimestamp) - tStart);
+    const executionId = `exec_${missionId}`;
+    const executionResult: 'DELIVERED' | 'BLOCKED' | 'FAILED' = status;
+    const testsPassedCount = acceptanceCriteria.filter((c) => c.passed).length;
+    const testsTotalCount = acceptanceCriteria.length;
+    const executionEvidenceHash = computeExecutionEvidenceHash({
+      executionId,
+      taskId: missionId,
+      startTimestamp,
+      finishTimestamp,
+      executionDurationMs: measuredDurationMs,
+      executionResult,
+      artifacts,
+      testsPassed: testsPassedCount,
+      testsTotal: testsTotalCount,
+    });
+
+    const rawMissionClaims: TruthClaimRecord[] = [
+      classifyTruthClaim({
+        domain: 'execution_orchestrator',
+        statement: `Action mission ${executionId} (${mode}) finished with executionResult=${executionResult} (${testsPassedCount}/${testsTotalCount} acceptance gates passed in ${measuredDurationMs}ms)`,
+        classification: status === 'DELIVERED' ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis: `SHA-256 executionEvidenceHash=${executionEvidenceHash.slice(0, 16)} over sandbox outputs and artifact sizes`,
+        evidenceRefs: [executionEvidenceHash, ...artifacts.map((a) => a.path)],
+      }),
+      classifyTruthClaim({
+        domain: 'execution_orchestrator',
+        statement: perception.connectivity.weightsLoaded
+          ? `Native Model runtime active (${perception.connectivity.runtimeState})`
+          : `Native Model runtime unavailable (${perception.connectivity.runtimeState}); deterministic action sandbox executed independently`,
+        classification: perception.connectivity.weightsLoaded ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis: `Live ConnectivityMonitor runtimeState=${perception.connectivity.runtimeState}`,
+      }),
+    ];
+    if (repairHistory.some((r) => r.resolved)) {
+      rawMissionClaims.push(
+        classifyTruthClaim({
+          domain: 'execution_orchestrator',
+          statement: `Deterministic recovery repaired ${repairHistory.filter((r) => r.resolved).length} defect(s) and re-verified execution`,
+          classification: 'VERIFIED_FACT',
+          basis: 'Post-repair sandbox execution and test verification succeeded',
+        })
+      );
+    }
+    const missionTruthClaims = enforceTruthClaims(rawMissionClaims);
+    const missionTruthSummary = summarizeTruthClaims(missionTruthClaims);
+
     const cycleSummary: ExecutionCycleSummary = {
+      executionId,
       taskId: missionId,
       goal: `[${mode}] ${goal}`,
       priority,
       runtime: effectiveRuntime,
       lifecycleStatus: allCriteriaPassed ? 'Delivered' : 'Failed',
       deliveryStatus: allCriteriaPassed ? 'DELIVERED' : 'BLOCKED',
+      executionResult,
+      startTimestamp,
+      finishTimestamp,
+      executionDurationMs: measuredDurationMs,
+      executionEvidenceHash,
       stages: cycleStages,
       acceptanceCriteria,
       artifacts,
@@ -1522,10 +1593,12 @@ export class ActionDrivenEngine {
           ? []
           : [`Native 41.53M Cloud Model inference remains BLOCKED (${perception.connectivity.runtimeState}).`]),
       ],
-      testsPassed: acceptanceCriteria.filter((c) => c.passed).length,
-      testsTotal: acceptanceCriteria.length,
-      durationMs: totalDuration,
+      testsPassed: testsPassedCount,
+      testsTotal: testsTotalCount,
+      durationMs: measuredDurationMs,
       completedAt,
+      truthClaims: missionTruthClaims,
+      truthSummary: missionTruthSummary,
     };
 
     if (process.env.ZYNTHEOR_RECORD_EXEC_METRICS !== '0') {
@@ -1536,6 +1609,7 @@ export class ActionDrivenEngine {
       'SYSTEM',
       allCriteriaPassed ? 'ACTION_MISSION_DELIVERED' : 'ACTION_MISSION_FAILED',
       {
+        executionId,
         missionId,
         tenantId: scope.tenantId,
         ownerUserId: scope.userId,
@@ -1547,7 +1621,8 @@ export class ActionDrivenEngine {
         testsTotal: cycleSummary.testsTotal,
         repairs: repairHistory.length,
         zipSha256: packageArtifact?.zipSha256 || null,
-        durationMs: totalDuration,
+        executionEvidenceHash,
+        durationMs: measuredDurationMs,
       }
     );
 
@@ -1559,6 +1634,8 @@ export class ActionDrivenEngine {
       durationMs: Math.max(1, Date.now() - p8Start),
       summary: `Mission sealed in AuditLedger (${auditRec.entry_hash.slice(0, 12)}…) & persisted`,
       evidence: {
+        executionId,
+        executionEvidenceHash,
         auditIndex: auditRec.index,
         auditEntryHash: auditRec.entry_hash,
         metricsPersisted: process.env.ZYNTHEOR_RECORD_EXEC_METRICS !== '0',
@@ -1569,13 +1646,14 @@ export class ActionDrivenEngine {
       operation: `action_mission_${mode}`,
       strategy: reasoningOutcome.selectedStrategy,
       tenantId: scope.tenantId,
-      durationMs: totalDuration,
+      durationMs: measuredDurationMs,
       heapDeltaKb: 0,
       cacheHit: false,
       succeeded: allCriteriaPassed,
     });
 
     const record: ActionMissionRecord = {
+      executionId,
       missionId,
       tenantId: scope.tenantId,
       ownerUserId: scope.userId,
@@ -1584,11 +1662,16 @@ export class ActionDrivenEngine {
       priority,
       runtime: effectiveRuntime,
       status,
+      executionResult,
       attribution: 'deterministic_action_engine',
       nativeNeuralState: perception.connectivity.runtimeState,
-      createdAt: new Date(tStart).toISOString(),
+      createdAt: startTimestamp,
+      startTimestamp,
+      finishTimestamp,
       completedAt,
-      durationMs: totalDuration,
+      executionDurationMs: measuredDurationMs,
+      durationMs: measuredDurationMs,
+      executionEvidenceHash,
       pillars,
       perception,
       reasoningOutcome,
@@ -1603,6 +1686,8 @@ export class ActionDrivenEngine {
       approvalRequestId,
       failureReason,
       auditEntryHash: auditRec.entry_hash,
+      truthClaims: missionTruthClaims,
+      truthSummary: missionTruthSummary,
     };
 
     this.missions.unshift(record);

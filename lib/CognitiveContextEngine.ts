@@ -20,6 +20,13 @@ import path from 'path';
 import crypto from 'crypto';
 import { AuditLedger } from './AuditLedger.ts';
 import { detectLang, tokenize } from './KnowledgeIntelligenceEngine.ts';
+import {
+  classifyTruthClaim,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export type ContextSegmentKind =
   | 'instruction'
@@ -94,6 +101,8 @@ export interface ContextAnalysisResult {
   temporalMarkers: string[];
   prioritizedOrder: string[];
   contentSha256: string;
+  truthClaims: TruthClaimRecord[];
+  truthSummary: TruthKernelSummary;
 }
 
 export interface ContextSessionWindow {
@@ -500,12 +509,54 @@ export class CognitiveContextEngine {
       .map((s) => s.segmentId);
 
     const contentSha256 = crypto.createHash('sha256').update(clean).digest('hex');
+    const neuralState = params.nativeNeuralState ?? 'UNINVOKED';
+
+    const rawClaims: TruthClaimRecord[] = [
+      classifyTruthClaim({
+        domain: 'cognitive_context',
+        statement: `Input segmented into ${segments.length} structural unit(s) with ${entities.length} extracted entity reference(s)`,
+        classification: 'VERIFIED_FACT',
+        basis: `Deterministic tokenizer/regex segmentation (SHA-256 ${contentSha256.slice(0, 12)})`,
+        evidenceRefs: [contentSha256],
+      }),
+      classifyTruthClaim({
+        domain: 'cognitive_context',
+        statement: `Primary intent classified as '${intent.primary}' (heuristic confidence ${intent.confidence})`,
+        classification: 'ASSUMPTION',
+        basis: 'Lexical pattern match heuristic (not calibrated neural probability)',
+        evidenceRefs: intent.matchedSignals,
+      }),
+      classifyTruthClaim({
+        domain: 'cognitive_context',
+        statement:
+          neuralState === 'READY'
+            ? 'Context paired with active Native Model runtime'
+            : `Native Model contextual embedding is not active (${neuralState})`,
+        classification: neuralState === 'READY' ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis: `Reported nativeNeuralState=${neuralState}`,
+      }),
+    ];
+
+    if (conflicts.length > 0) {
+      rawClaims.push(
+        classifyTruthClaim({
+          domain: 'cognitive_context',
+          statement: `Detected ${conflicts.length} internal context conflict(s): ${conflicts.map((c) => c.kind).join(', ')}`,
+          classification: 'CONTRADICTED',
+          basis: 'Deterministic numeric/directive negation detector across context segments',
+          evidenceRefs: conflicts.map((c) => c.conflictId),
+        })
+      );
+    }
+
+    const truthClaims = enforceTruthClaims(rawClaims);
+    const truthSummary = summarizeTruthClaims(truthClaims);
 
     return {
       contextId: `ctx_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`,
       analyzedAt: new Date().toISOString(),
       attribution: 'deterministic_preprocessor',
-      nativeNeuralState: params.nativeNeuralState ?? 'UNINVOKED',
+      nativeNeuralState: neuralState,
       language: detectLang(clean),
       intent,
       segments,
@@ -515,6 +566,8 @@ export class CognitiveContextEngine {
       temporalMarkers,
       prioritizedOrder,
       contentSha256,
+      truthClaims,
+      truthSummary,
     };
   }
 

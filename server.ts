@@ -6,6 +6,8 @@
 
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
+import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
@@ -66,7 +68,12 @@ import { AdaptiveReasoningEngine } from './lib/AdaptiveReasoningEngine.ts';
 import { KnowledgeGraphEngine } from './lib/KnowledgeGraphEngine.ts';
 import { PerformanceEngine } from './lib/PerformanceEngine.ts';
 import { getMultimodalCapabilityRegistry } from './lib/MultimodalInterfaces.ts';
-import { loadLatestBatch29EvalReport, runBatch29Evaluation } from './lib/CognitiveEvaluationLab.ts';
+import {
+  assertNoManualScoreInjection,
+  loadLatestBatch29EvalReport,
+  runBatch29Evaluation,
+} from './lib/CognitiveEvaluationLab.ts';
+import { getCapabilityGatesSnapshot } from './lib/CapabilityGates.ts';
 import {
   ActionDrivenEngine,
   type ActionMissionMode,
@@ -136,9 +143,9 @@ function requireRole(allowedRoles: Array<'User' | 'Developer' | 'Administrator'>
   return requireAuth(minSovereign);
 }
 
-// Resource history buffer using authentic OS and process telemetry
-let lastRecordedTokensPerSec = 0;
-let lastRecordedLatencyMs = 0;
+// Resource history buffer using authentic OS and process telemetry (nullable inference telemetry until measured)
+let lastRecordedTokensPerSec: number | null = null;
+let lastRecordedLatencyMs: number | null = null;
 
 interface RealResourceSample {
   timestamp: string;
@@ -153,8 +160,9 @@ interface RealResourceSample {
   systemRamUsedMb: number;
   systemRamTotalMb: number;
   systemRamFreeMb: number;
-  tokensPerSec: number;
-  lastInferenceLatencyMs: number;
+  tokensPerSec: number | null;
+  lastInferenceLatencyMs: number | null;
+  telemetryStatus: 'MEASURED' | 'UNAVAILABLE';
   // Compatibility fields
   cpuPercent: number;
   gpuPercent: number;
@@ -182,6 +190,7 @@ function sampleResources() {
 
   const now = new Date();
   const timeLabel = now.toTimeString().slice(0, 8);
+  const hasMeasuredInference = lastRecordedLatencyMs !== null || lastRecordedTokensPerSec !== null;
 
   const sample: RealResourceSample = {
     timestamp: now.toISOString(),
@@ -198,6 +207,7 @@ function sampleResources() {
     systemRamFreeMb: freeMemMb,
     tokensPerSec: lastRecordedTokensPerSec,
     lastInferenceLatencyMs: lastRecordedLatencyMs,
+    telemetryStatus: hasMeasuredInference ? 'MEASURED' : 'UNAVAILABLE',
     // Compatibility fields
     cpuPercent: Math.min(100, Math.round((load[0] / cpus) * 100)),
     gpuPercent: 0,
@@ -309,7 +319,12 @@ async function buildSystemStatusPayload() {
         memoryFootprintMb: +((measuredParams * 4) / (1024 * 1024)).toFixed(2),
         storageMode: String(pingRes.storage_mode || 'CLOUD_NATIVE'),
         weightsSource: pingRes.weights_source || connectivity.cloudSourceUri,
+        checkpointPath: pingRes.checkpoint_path || connectivity.checkpointPath,
         checkpointHash: pingRes.checkpoint_hash,
+        checkpointSha256: pingRes.checkpoint_sha256 || connectivity.checkpointSha256 || pingRes.checkpoint_hash,
+        tokenizerSha256: pingRes.tokenizer_sha256 || connectivity.tokenizerSha256,
+        activeRuntimeId: pingRes.active_runtime_id || connectivity.activeRuntimeId,
+        lastInferenceEvidence: connectivity.lastInferenceEvidence,
         expectedCheckpointHash: pingRes.checkpoint_hash,
         signatureMatchesExpected: Boolean(pingRes.checkpoint_hash),
         weightsLoaded: true,
@@ -334,7 +349,12 @@ async function buildSystemStatusPayload() {
         memoryFootprintMb: 0,
         storageMode: 'UNLOADED_FAIL_CLOSED',
         weightsSource: connectivity.cloudSourceUri,
+        checkpointPath: connectivity.checkpointPath,
         checkpointHash: '',
+        checkpointSha256: null,
+        tokenizerSha256: connectivity.tokenizerSha256 || pingRes.tokenizer_sha256 || null,
+        activeRuntimeId: connectivity.activeRuntimeId || pingRes.active_runtime_id || null,
+        lastInferenceEvidence: connectivity.lastInferenceEvidence,
         expectedCheckpointHash: null,
         signatureMatchesExpected: false,
         weightsLoaded: Boolean(pingRes.weights_loaded),
@@ -400,7 +420,11 @@ app.get('/api/model/evidence', async (_req: Request, res: Response) => {
         vocabSize: ping.vocab_size,
         storageMode: ping.storage_mode,
         weightsSource: ping.weights_source,
-        checkpointSha256: ping.checkpoint_hash,
+        checkpointPath: ping.checkpoint_path || null,
+        checkpointSha256: ping.checkpoint_sha256 || ping.checkpoint_hash || null,
+        tokenizerSha256: ping.tokenizer_sha256 || null,
+        activeRuntimeId: ping.active_runtime_id || null,
+        lastInferenceEvidence: provider.getLastInferenceEvidence(),
         weightsLoaded: ping.weights_loaded
       },
       bilingual: {
@@ -492,6 +516,13 @@ app.post('/api/native/inference', requireAuth('guest'), enforceRateLimit('infere
       provider.chat(prompt, role, { max_tokens: maxTokens, temperature }),
     ]);
 
+    if (typeof result.latency_ms === 'number' && result.latency_ms > 0) {
+      lastRecordedLatencyMs = result.latency_ms;
+    }
+    if (typeof result.tokens_per_sec === 'number' && result.tokens_per_sec > 0) {
+      lastRecordedTokensPerSec = result.tokens_per_sec;
+    }
+
     AuditLedger.append('SYSTEM', 'NATIVE_INFERENCE_EXECUTED', {
       promptLength: prompt.length,
       inputTokens: result.input_tokens_count,
@@ -500,6 +531,10 @@ app.post('/api/native/inference', requireAuth('guest'), enforceRateLimit('infere
       tokensPerSec: result.tokens_per_sec,
       totalParams: result.total_params ?? pingRes.total_params,
       weightsSource: pingRes.weights_source,
+      checkpointPath: result.checkpoint_path || pingRes.checkpoint_path || null,
+      checkpointSha256: result.checkpoint_sha256 || result.checkpoint_hash || null,
+      tokenizerSha256: result.tokenizer_sha256 || pingRes.tokenizer_sha256 || null,
+      activeRuntimeId: result.active_runtime_id || pingRes.active_runtime_id || null,
     });
 
     res.json({
@@ -510,6 +545,12 @@ app.post('/api/native/inference', requireAuth('guest'), enforceRateLimit('infere
       targetTotalParams: pingRes.target_total_params,
       weightsSource: pingRes.weights_source,
       checkpointHash: result.checkpoint_hash,
+      checkpointPath: result.checkpoint_path || pingRes.checkpoint_path || null,
+      checkpointSha256: result.checkpoint_sha256 || result.checkpoint_hash || null,
+      tokenizerSha256: result.tokenizer_sha256 || pingRes.tokenizer_sha256 || null,
+      activeRuntimeId: result.active_runtime_id || pingRes.active_runtime_id || null,
+      inferenceTimestamp: result.inference_timestamp || new Date().toISOString(),
+      executionDurationMs: result.execution_duration_ms ?? result.latency_ms,
       inferenceOrigin: result.inference_origin || 'native_model_logits',
       weightsRole: result.weights_role || pingRes.weights_role || null,
       groundingOrigin: result.grounding_origin || 'none',
@@ -549,11 +590,20 @@ app.post('/api/native/learned-generate', requireAuth('guest'), enforceRateLimit(
     const maxNewTokens = Math.min(Math.max(Number(req.body?.maxNewTokens ?? 64) || 64, 1), 256);
     const temperature = Math.min(Math.max(Number(req.body?.temperature ?? 0.8), 0), 2);
     const result = await NativeNeuralLMProvider.getInstance().learnedGenerate(prompt, { maxNewTokens, temperature });
+    if (typeof result.latency_ms === 'number' && result.latency_ms > 0) {
+      lastRecordedLatencyMs = result.latency_ms;
+    }
+    if (typeof result.tokens_per_sec === 'number' && result.tokens_per_sec > 0) {
+      lastRecordedTokensPerSec = result.tokens_per_sec;
+    }
     AuditLedger.append('SYSTEM', 'NATIVE_LEARNED_GENERATION_EXECUTED', {
       promptLength: prompt.length,
       outputTokens: result.output_tokens_count,
       latencyMs: result.latency_ms,
+      checkpointPath: result.checkpoint_path || null,
       checkpointSha256: result.checkpoint_sha256,
+      tokenizerSha256: result.tokenizer_sha256 || null,
+      activeRuntimeId: result.active_runtime_id || null,
       weightsSource: result.weights_source,
     });
     res.json({
@@ -566,7 +616,12 @@ app.post('/api/native/learned-generate', requireAuth('guest'), enforceRateLimit(
       templateUsed: result.template_used,
       totalParams: result.total_params,
       validationPerplexity: result.validation_perplexity,
+      checkpointPath: result.checkpoint_path || null,
       checkpointSha256: result.checkpoint_sha256,
+      tokenizerSha256: result.tokenizer_sha256 || null,
+      activeRuntimeId: result.active_runtime_id || null,
+      inferenceTimestamp: result.inference_timestamp || new Date().toISOString(),
+      executionDurationMs: result.execution_duration_ms ?? result.latency_ms,
       prompt,
       continuation: result.text,
       outputTokens: result.output_tokens_count,
@@ -602,11 +657,20 @@ app.post('/api/native/target-generate', requireAuth('guest'), enforceRateLimit('
     const result = await NativeNeuralLMProvider.getInstance().targetGenerate(prompt, {
       maxNewTokens, temperature, topK, repetitionPenalty, seed
     });
+    if (typeof result.latency_ms === 'number' && result.latency_ms > 0) {
+      lastRecordedLatencyMs = result.latency_ms;
+    }
+    if (typeof result.tokens_per_sec === 'number' && result.tokens_per_sec > 0) {
+      lastRecordedTokensPerSec = result.tokens_per_sec;
+    }
     AuditLedger.append('SYSTEM', 'NATIVE_TARGET_GENERATION_EXECUTED', {
       promptLength: prompt.length,
       outputTokens: result.output_tokens_count,
       latencyMs: result.latency_ms,
+      checkpointPath: result.checkpoint_path || null,
       checkpointSha256: result.checkpoint_sha256,
+      tokenizerSha256: result.tokenizer_sha256 || null,
+      activeRuntimeId: result.active_runtime_id || null,
       repetitionPenalty
     });
     res.json({
@@ -620,7 +684,12 @@ app.post('/api/native/target-generate', requireAuth('guest'), enforceRateLimit('
       totalParams: result.total_params,
       trainingSteps: result.training_steps,
       validationPerplexity: result.validation_perplexity,
+      checkpointPath: result.checkpoint_path || null,
       checkpointSha256: result.checkpoint_sha256,
+      tokenizerSha256: result.tokenizer_sha256 || null,
+      activeRuntimeId: result.active_runtime_id || null,
+      inferenceTimestamp: result.inference_timestamp || new Date().toISOString(),
+      executionDurationMs: result.execution_duration_ms ?? result.latency_ms,
       prompt,
       response: result.text,
       generatedText: result.text,
@@ -2156,7 +2225,11 @@ async function handleChatMessage(req: AuthenticatedRequest, res: Response) {
 
     const activeWeightsSource = String(streamDoneMeta?.weights_source || pingRes.weights_source || '');
     const resolvedParams = Number(streamDoneMeta?.total_params || pingRes.total_params || 0);
-    const resolvedSha = String(streamDoneMeta?.checkpoint_sha256 || pingRes.checkpoint_hash || '');
+    const resolvedCheckpointPath = streamDoneMeta?.checkpoint_path || pingRes.checkpoint_path || null;
+    const resolvedSha = String(streamDoneMeta?.checkpoint_sha256 || pingRes.checkpoint_sha256 || pingRes.checkpoint_hash || '');
+    const resolvedTokenizerSha = streamDoneMeta?.tokenizer_sha256 || pingRes.tokenizer_sha256 || null;
+    const resolvedRuntimeId = streamDoneMeta?.active_runtime_id || pingRes.active_runtime_id || null;
+    const resolvedInferenceTs = streamDoneMeta?.inference_timestamp || new Date().toISOString();
     const activeModelLabel = pingRes.model_name || `ZYNTHEOR Native (${resolvedParams.toLocaleString()} params)`;
     const activeKey =
       resolvedParams === 41527808 ? 'target_41m' : resolvedParams === 502912 ? 'v2_2m' : 'cloud_native';
@@ -2166,6 +2239,7 @@ async function handleChatMessage(req: AuthenticatedRequest, res: Response) {
     const cancelled = Boolean(streamDoneMeta?.cancelled || abortController.signal.aborted);
 
     const durationMs = Date.now() - startTime;
+    const resolvedExecutionDurationMs = Number(streamDoneMeta?.execution_duration_ms ?? durationMs);
     lastRecordedLatencyMs = durationMs;
     lastRecordedTokensPerSec = Number(
       streamDoneMeta?.tokens_per_sec ||
@@ -2199,7 +2273,10 @@ async function handleChatMessage(req: AuthenticatedRequest, res: Response) {
       activeKey,
       weightsSource: activeWeightsSource,
       totalParams: resolvedParams,
+      checkpointPath: resolvedCheckpointPath,
       checkpointSha256: resolvedSha,
+      tokenizerSha256: resolvedTokenizerSha,
+      activeRuntimeId: resolvedRuntimeId,
       inferenceOrigin,
       weightsRole,
       groundingOrigin,
@@ -2209,6 +2286,7 @@ async function handleChatMessage(req: AuthenticatedRequest, res: Response) {
       hasThought: Boolean(thoughtText),
       retrievedKnowledgeCount: retrievedChunks.length,
       durationMs,
+      executionDurationMs: resolvedExecutionDurationMs,
       tokensPerSec: lastRecordedTokensPerSec
     });
 
@@ -2220,7 +2298,12 @@ async function handleChatMessage(req: AuthenticatedRequest, res: Response) {
         activeKey,
         weightsSource: activeWeightsSource,
         totalParams: resolvedParams,
+        checkpointPath: resolvedCheckpointPath,
         checkpointSha256: resolvedSha,
+        tokenizerSha256: resolvedTokenizerSha,
+        activeRuntimeId: resolvedRuntimeId,
+        inferenceTimestamp: resolvedInferenceTs,
+        executionDurationMs: resolvedExecutionDurationMs,
         inferenceOrigin,
         weightsRole,
         groundingOrigin,
@@ -3593,12 +3676,14 @@ app.get('/api/evaluation/batch27', requireAuth('guest'), (_req: AuthenticatedReq
   }
 });
 
-app.post('/api/evaluation/batch27', requireAuth('developer'), async (_req: AuthenticatedRequest, res: Response) => {
+app.post('/api/evaluation/batch27', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
   try {
+    assertNoManualScoreInjection(req.body);
     const report = await runBatch27Evaluation();
     res.json({ success: true, report });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const status = String(err?.message || '').startsWith('INVALID_EVALUATION_INPUT') ? 400 : 500;
+    res.status(status).json({ success: false, error: err.message });
   }
 });
 
@@ -3857,12 +3942,14 @@ app.get('/api/evaluation/batch28', requireAuth('guest'), (_req: AuthenticatedReq
   }
 });
 
-app.post('/api/evaluation/batch28', requireAuth('developer'), enforceRateLimit('agent'), async (_req: AuthenticatedRequest, res: Response) => {
+app.post('/api/evaluation/batch28', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
   try {
+    assertNoManualScoreInjection(req.body);
     const report = await SelfEvaluationEngine.getInstance().runBatch28Benchmark();
     res.json({ success: true, report });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const status = String(err?.message || '').startsWith('INVALID_EVALUATION_INPUT') ? 400 : 500;
+    res.status(status).json({ success: false, error: err.message });
   }
 });
 
@@ -4460,10 +4547,22 @@ app.get('/api/cognitive/evaluation', requireAuth('guest'), (_req: AuthenticatedR
   }
 });
 
-app.post('/api/cognitive/evaluation', requireAuth('developer'), enforceRateLimit('agent'), async (_req: AuthenticatedRequest, res: Response) => {
+app.post('/api/cognitive/evaluation', requireAuth('developer'), enforceRateLimit('agent'), async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const report = await runBatch29Evaluation();
+    assertNoManualScoreInjection(req.body);
+    const report = await runBatch29Evaluation(req.body);
     res.json({ success: true, report });
+  } catch (err: any) {
+    const status = String(err?.message || '').startsWith('INVALID_EVALUATION_INPUT') ? 400 : 500;
+    res.status(status).json({ success: false, error: err.message });
+  }
+});
+
+// 29.7b Formal Zero-Simulation Capability Gates & Honest Subsystem Status Matrix
+app.get('/api/cognitive/gates', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const snapshot = await getCapabilityGatesSnapshot();
+    res.json({ success: true, ...snapshot });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -4491,6 +4590,7 @@ app.get('/api/cognitive/operations', requireAuth('guest'), async (req: Authentic
     const latestEvaluation = loadLatestBatch29EvalReport();
     const actionCapabilities = await ActionDrivenEngine.getInstance().getCapabilities(scope);
     const recentActionMissions = ActionDrivenEngine.getInstance().listMissions(scope).slice(0, 12);
+    const capabilityGates = await getCapabilityGatesSnapshot({ connectivity, multimodal });
 
     res.json({
       success: true,
@@ -4501,6 +4601,11 @@ app.get('/api/cognitive/operations', requireAuth('guest'), async (req: Authentic
         weightsLoaded: connectivity.weightsLoaded,
         executionVerified: connectivity.executionVerified,
         reason: connectivity.reason,
+        checkpointPath: connectivity.checkpointPath,
+        checkpointSha256: connectivity.checkpointSha256,
+        tokenizerSha256: connectivity.tokenizerSha256,
+        activeRuntimeId: connectivity.activeRuntimeId,
+        lastInferenceEvidence: connectivity.lastInferenceEvidence,
       },
       context: { stats: contextStats, recentSessions },
       reasoning: { recentOutcomes: reasoningHistory },
@@ -4509,6 +4614,7 @@ app.get('/api/cognitive/operations', requireAuth('guest'), async (req: Authentic
       performance,
       multimodal,
       evaluation: latestEvaluation,
+      capabilityGates,
       actionDriven: {
         capabilities: actionCapabilities,
         recentMissions: recentActionMissions,
@@ -4709,8 +4815,84 @@ async function startServer() {
     }
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[ZYNTHEOR SOVEREIGN SERVER] Running on http://0.0.0.0:${PORT} apiOnly=${apiOnly}`);
+  const httpServer = http.createServer(app);
+  const runtimeWss = new WebSocketServer({ server: httpServer, path: '/ws/runtime' });
+
+  const broadcastRuntimeState = (state: Awaited<ReturnType<ConnectivityMonitor['getStatus']>>) => {
+    const frame = JSON.stringify({
+      type: 'runtime_state',
+      data: state,
+      timestamp: new Date().toISOString(),
+    });
+    for (const client of runtimeWss.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        try {
+          client.send(frame);
+        } catch {
+          // Ignore individual broken socket sends
+        }
+      }
+    }
+  };
+
+  const unsubscribeConnectivity = ConnectivityMonitor.getInstance().subscribe((state) => {
+    broadcastRuntimeState(state);
+  });
+  ConnectivityMonitor.getInstance().startBackgroundMonitor(15000);
+
+  runtimeWss.on('connection', (ws) => {
+    void ConnectivityMonitor.getInstance()
+      .getStatus()
+      .then((state) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(
+            JSON.stringify({
+              type: 'runtime_state',
+              data: state,
+              timestamp: new Date().toISOString(),
+            })
+          );
+        }
+      })
+      .catch(() => null);
+
+    ws.on('message', (raw) => {
+      try {
+        const msg = JSON.parse(String(raw));
+        if (msg?.type === 'ping') {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+          }
+        } else if (msg?.type === 'refresh') {
+          void ConnectivityMonitor.getInstance()
+            .checkNow()
+            .then((state) => {
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(
+                  JSON.stringify({
+                    type: 'runtime_state',
+                    data: state,
+                    timestamp: new Date().toISOString(),
+                  })
+                );
+              }
+            })
+            .catch(() => null);
+        }
+      } catch {
+        // Ignore malformed WebSocket client frames
+      }
+    });
+  });
+
+  httpServer.on('close', () => {
+    unsubscribeConnectivity();
+    ConnectivityMonitor.getInstance().stopBackgroundMonitor();
+    runtimeWss.close();
+  });
+
+  httpServer.listen(PORT, '0.0.0.0', () => {
+    console.log(`[ZYNTHEOR SOVEREIGN SERVER] Running on http://0.0.0.0:${PORT} apiOnly=${apiOnly} ws=/ws/runtime`);
   });
 }
 

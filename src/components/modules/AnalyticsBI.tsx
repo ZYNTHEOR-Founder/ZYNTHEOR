@@ -412,7 +412,12 @@ export const AnalyticsBI: React.FC<AnalyticsBIProps> = ({ statusData }) => {
   const inferenceSeries = useMemo(() => {
     const hist = statusData?.resources?.history || [];
     return hist
-      .filter((s) => typeof s.lastInferenceLatencyMs === 'number' || typeof s.tokensPerSec === 'number')
+      .filter(
+        (s) =>
+          s.telemetryStatus === 'MEASURED' ||
+          (typeof s.lastInferenceLatencyMs === 'number' && s.lastInferenceLatencyMs > 0) ||
+          (typeof s.tokensPerSec === 'number' && s.tokensPerSec > 0)
+      )
       .map((s) => ({
         label: s.timeLabel || formatTimeShort(s.timestamp),
         timestampIso: s.timestamp,

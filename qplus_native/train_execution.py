@@ -16,13 +16,17 @@ import os
 import sys
 import time
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    from qplus_native import np_compat as np  # type: ignore[no-redef]
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from qplus_native.tokenizer import SovereignTokenizer
 from qplus_native.execution_corpus import build_execution_corpus
 from qplus_native.lm_v2 import NativeLM, LMConfig, AdamW, real_vocab_size, ROOT
+from qplus_native.loss_mask import IGNORE_INDEX
 
 EVIDENCE_PATH = os.path.join(ROOT, "artifacts", "execution-training-evidence.json")
 MANIFEST_PATH = os.path.join(ROOT, "artifacts", "execution-corpus-manifest.json")
@@ -44,7 +48,7 @@ def sample_batch(rng, streams, batch, T):
         s = streams[int(rng.integers(0, len(streams)))]
         if len(s) <= T:
             ctx = (s[:-1] + [0] * T)[:T]
-            tgt = (s[1:] + [0] * T)[:T]
+            tgt = (s[1:] + [IGNORE_INDEX] * T)[:T]
         else:
             i = int(rng.integers(0, len(s) - T))
             ctx = s[i : i + T]
@@ -63,9 +67,9 @@ def eval_stream_loss(model: NativeLM, streams, T: int, max_windows=48) -> float:
             continue
         if len(s) <= T:
             ctx = np.array([(s[:-1] + [0] * T)[:T]], dtype=np.int64)
-            tgt = np.array([(s[1:] + [0] * T)[:T]], dtype=np.int64)
+            tgt = np.array([(s[1:] + [IGNORE_INDEX] * T)[:T]], dtype=np.int64)
             lg, _ = model.forward(ctx, keep_cache=False)
-            loss, _ = NativeLM.ce_loss(lg, tgt)
+            loss, _ = NativeLM.ce_loss(lg, tgt, ignore_index=IGNORE_INDEX)
             losses.append(float(loss))
             n += 1
         else:
@@ -73,7 +77,7 @@ def eval_stream_loss(model: NativeLM, streams, T: int, max_windows=48) -> float:
                 ctx = np.array([s[i : i + T]], dtype=np.int64)
                 tgt = np.array([s[i + 1 : i + T + 1]], dtype=np.int64)
                 lg, _ = model.forward(ctx, keep_cache=False)
-                loss, _ = NativeLM.ce_loss(lg, tgt)
+                loss, _ = NativeLM.ce_loss(lg, tgt, ignore_index=IGNORE_INDEX)
                 losses.append(float(loss))
                 n += 1
                 if n >= max_windows:

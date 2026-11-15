@@ -27,11 +27,15 @@ import hashlib
 import shutil
 from typing import Callable, Dict, List, Optional, Tuple, Any
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    from qplus_native import np_compat as np  # type: ignore[no-redef]
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from qplus_native.tokenizer import SovereignTokenizer
 from qplus_native.architecture import TARGET_TOTAL_PARAMS
+from qplus_native.loss_mask import IGNORE_INDEX, masked_cross_entropy_loss_and_backward
 
 MAGIC_HEADER = b"ZYNTHEOR_QPLUS_PT"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -178,14 +182,23 @@ class NativeLM:
 
     # ------------------------------------------------------------------- loss
     @staticmethod
-    def ce_loss(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
+    def ce_loss(
+        logits: np.ndarray,
+        targets: np.ndarray,
+        ignore_index: int = IGNORE_INDEX,
+    ) -> Tuple[float, np.ndarray]:
+        targets_arr = np.asarray(targets, dtype=np.int64)
+        if np.any(targets_arr == ignore_index):
+            return masked_cross_entropy_loss_and_backward(
+                logits, targets_arr, ignore_index=ignore_index
+            )
         B, T, V = logits.shape
         z = logits - logits.max(-1, keepdims=True)
         lse = np.log(np.exp(z).sum(-1))
-        pick = np.take_along_axis(z, targets[..., None], -1)[..., 0]
+        pick = np.take_along_axis(z, targets_arr[..., None], -1)[..., 0]
         loss = float(np.mean(lse - pick))
         pr = np.exp(z - lse[..., None])
-        pr[np.arange(B)[:, None], np.arange(T)[None, :], targets] -= 1.0
+        pr[np.arange(B)[:, None], np.arange(T)[None, :], targets_arr] -= 1.0
         return loss, pr / (B * T)
 
     # --------------------------------------------------------------- backward

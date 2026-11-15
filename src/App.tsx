@@ -1555,20 +1555,41 @@ export default function App() {
                   <div className="flex flex-wrap items-center gap-3 shrink-0">
                     <div className="flex items-center gap-3 text-[11px] font-mono text-[#9AA8C7]">
                       <StatusDot
-                        status={connectivity.cloudStorageConfigured ? 'VERIFIED' : 'PARTIAL'}
-                        label={connectivity.cloudStorageConfigured ? 'Cloud Ready' : 'No Cloud Config'}
-                        detail="Cloud checkpoint/runtime configuration"
+                        status={connectivity.cloudStorageConfigured ? 'VERIFIED' : 'NOT_CONFIGURED'}
+                        label={connectivity.cloudStorageConfigured ? 'Cloud Configured' : 'No Cloud Config'}
+                        detail="Cloud checkpoint/runtime configuration (CHECKPOINT_PRESIGNED_URL or S3_BUCKET)"
                       />
                       <StatusDot
-                        status={connectivity.cloudStorageReachable ? 'VERIFIED' : 'BLOCKED'}
-                        label={connectivity.cloudStorageReachable ? 'Endpoint Up' : 'Unreachable'}
+                        status={
+                          !connectivity.cloudStorageConfigured
+                            ? 'NOT_CONFIGURED'
+                            : connectivity.cloudStorageReachable
+                              ? 'VERIFIED'
+                              : 'BLOCKED'
+                        }
+                        label={
+                          !connectivity.cloudStorageConfigured
+                            ? 'Endpoint Unset'
+                            : connectivity.cloudStorageReachable
+                              ? 'Endpoint Up'
+                              : 'Unreachable'
+                        }
                         detail="Cloud storage / runtime reachability"
                       />
                       <StatusDot
-                        status={connectivity.pythonBridgeReachable ? 'ONLINE' : 'CHECKING'}
-                        label={connectivity.pythonBridgeReachable ? 'Bridge Ready' : 'Bridge Offline'}
-                        detail="Native Python inference bridge process"
-                        pulse={Boolean(connectivity.pythonBridgeReachable && isCheckingConnectivity)}
+                        status={(connectivity.bridgeLifecycle?.state || (connectivity.pythonBridgeReachable ? 'Degraded' : 'Unreachable')) as any}
+                        label={`Bridge: ${connectivity.bridgeLifecycle?.state || (connectivity.pythonBridgeReachable ? 'Degraded' : 'Unreachable')}`}
+                        detail={
+                          connectivity.bridgeLifecycle?.pid
+                            ? `Native Python Bridge PID ${connectivity.bridgeLifecycle.pid}${typeof connectivity.bridgeLifecycle.lastHeartbeatLatencyMs === 'number' ? ` · ${connectivity.bridgeLifecycle.lastHeartbeatLatencyMs}ms` : ''}`
+                            : 'Native Python inference bridge lifecycle'
+                        }
+                        pulse={Boolean(
+                          isCheckingConnectivity ||
+                            connectivity.bridgeLifecycle?.state === 'Initializing' ||
+                            connectivity.bridgeLifecycle?.state === 'Connecting' ||
+                            connectivity.bridgeLifecycle?.state === 'Reconnecting'
+                        )}
                       />
                     </div>
                     {(role === 'Developer' || role === 'Administrator') && (

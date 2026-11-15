@@ -6,6 +6,7 @@
  */
 
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
+import { EventEmitter } from 'events';
 import path from 'path';
 import readline from 'readline';
 
@@ -19,6 +20,53 @@ export type RuntimeLifecycleState =
   | 'QUALITY_BLOCKED'
   | 'FAILED';
 
+export type BridgeLifecycleState =
+  | 'Initializing'
+  | 'Connecting'
+  | 'Connected'
+  | 'Degraded'
+  | 'Reconnecting'
+  | 'Unreachable'
+  | 'Service Error';
+
+export interface BridgeLifecycleTelemetry {
+  state: BridgeLifecycleState;
+  previousState: BridgeLifecycleState | null;
+  transitionAt: string;
+  pid: number | null;
+  heartbeatIntervalMs: number;
+  lastHeartbeatAt: string | null;
+  lastHeartbeatLatencyMs: number | null;
+  reconnectAttempt: number;
+  maxReconnectAttempts: number;
+  nextRetryDelayMs: number | null;
+  nextRetryAt: string | null;
+  consecutiveFailures: number;
+  totalPings: number;
+  totalFailures: number;
+  lastError: string | null;
+}
+
+export function computeExponentialBackoffMs(
+  attempt: number,
+  baseDelayMs = 1000,
+  maxDelayMs = 30000,
+  jitterMs = 0
+): number {
+  const safeAttempt = Math.max(1, Math.floor(attempt));
+  const raw = baseDelayMs * Math.pow(2, safeAttempt - 1) + Math.max(0, jitterMs);
+  return Math.min(maxDelayMs, Math.round(raw));
+}
+
+export interface InferenceEvidence {
+  checkpointPath: string | null;
+  checkpointSha256: string | null;
+  tokenizerSha256: string | null;
+  activeRuntimeId: string | null;
+  inferenceTimestamp: string;
+  executionDurationMs: number;
+}
+
 export interface InferenceResponse {
   text: string;
   input_tokens_count: number;
@@ -26,6 +74,12 @@ export interface InferenceResponse {
   latency_ms: number;
   tokens_per_sec: number;
   checkpoint_hash: string;
+  checkpoint_path?: string | null;
+  checkpoint_sha256?: string | null;
+  tokenizer_sha256?: string | null;
+  active_runtime_id?: string | null;
+  inference_timestamp?: string;
+  execution_duration_ms?: number;
   latent_norm: number;
   total_params?: number;
   inference_origin?: string;
@@ -111,8 +165,50 @@ export class NativeNeuralLMProvider {
   private activeStreamError: ((err: Error) => void) | null = null;
   private activeStreamReqId: number | null = null;
 
+  private readonly events = new EventEmitter();
+  private lifecycleState: BridgeLifecycleState = 'Initializing';
+  private previousLifecycleState: BridgeLifecycleState | null = null;
+  private transitionAt: string = new Date().toISOString();
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private heartbeatIntervalMs = 15000;
+  private heartbeatInFlight = false;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private reconnectAttempt = 0;
+  private readonly maxReconnectAttempts = 6;
+  private nextRetryDelayMs: number | null = null;
+  private nextRetryAt: string | null = null;
+  private lastHeartbeatAt: string | null = null;
+  private lastHeartbeatLatencyMs: number | null = null;
+  private consecutiveFailures = 0;
+  private totalPings = 0;
+  private totalFailures = 0;
+  private lastLifecycleError: string | null = null;
+  private isShuttingDown = false;
+  private lastInferenceEvidence: InferenceEvidence | null = null;
+
   private constructor() {
     this.startBridge();
+  }
+
+  public getLastInferenceEvidence(): InferenceEvidence | null {
+    return this.lastInferenceEvidence ? { ...this.lastInferenceEvidence } : null;
+  }
+
+  private recordInferenceEvidence(res: any): void {
+    if (!res || typeof res !== 'object') return;
+    if (res.cancelled) return;
+    const ckptSha = res.checkpoint_sha256 || res.checkpoint_hash || null;
+    const tokSha = res.tokenizer_sha256 || null;
+    const rtId = res.active_runtime_id || null;
+    if (!ckptSha || !tokSha || !rtId) return;
+    this.lastInferenceEvidence = {
+      checkpointPath: res.checkpoint_path || res.weights_source || null,
+      checkpointSha256: String(ckptSha),
+      tokenizerSha256: String(tokSha),
+      activeRuntimeId: String(rtId),
+      inferenceTimestamp: String(res.inference_timestamp || new Date().toISOString()),
+      executionDurationMs: Number(res.execution_duration_ms ?? res.latency_ms ?? 0),
+    };
   }
 
   public static getInstance(): NativeNeuralLMProvider {
@@ -124,15 +220,221 @@ export class NativeNeuralLMProvider {
 
   private lastStderr = '';
 
+  public onLifecycleChange(listener: (telemetry: BridgeLifecycleTelemetry) => void): () => void {
+    this.events.on('lifecycle', listener);
+    return () => {
+      this.events.off('lifecycle', listener);
+    };
+  }
+
+  public getLifecycleTelemetry(): BridgeLifecycleTelemetry {
+    return {
+      state: this.lifecycleState,
+      previousState: this.previousLifecycleState,
+      transitionAt: this.transitionAt,
+      pid: this.bridgeProcess?.pid ?? null,
+      heartbeatIntervalMs: this.heartbeatIntervalMs,
+      lastHeartbeatAt: this.lastHeartbeatAt,
+      lastHeartbeatLatencyMs: this.lastHeartbeatLatencyMs,
+      reconnectAttempt: this.reconnectAttempt,
+      maxReconnectAttempts: this.maxReconnectAttempts,
+      nextRetryDelayMs: this.nextRetryDelayMs,
+      nextRetryAt: this.nextRetryAt,
+      consecutiveFailures: this.consecutiveFailures,
+      totalPings: this.totalPings,
+      totalFailures: this.totalFailures,
+      lastError: this.lastLifecycleError,
+    };
+  }
+
+  public reconcileLifecycleState(nextState: BridgeLifecycleState, errorReason: string | null = null): BridgeLifecycleTelemetry {
+    this.transitionLifecycle(nextState, errorReason);
+    return this.getLifecycleTelemetry();
+  }
+
+  private transitionLifecycle(nextState: BridgeLifecycleState, errorReason: string | null = null): void {
+    const changed = this.lifecycleState !== nextState || errorReason !== this.lastLifecycleError;
+    if (this.lifecycleState !== nextState) {
+      this.previousLifecycleState = this.lifecycleState;
+      this.lifecycleState = nextState;
+      this.transitionAt = new Date().toISOString();
+    }
+    if (errorReason !== undefined) {
+      this.lastLifecycleError = errorReason;
+    }
+    if (changed) {
+      this.events.emit('lifecycle', this.getLifecycleTelemetry());
+    }
+  }
+
+  private clearReconnectTimer(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.nextRetryDelayMs = null;
+    this.nextRetryAt = null;
+  }
+
+  private scheduleReconnect(reason: string): void {
+    if (this.reconnectTimer) {
+      return;
+    }
+    if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+      this.transitionLifecycle('Unreachable', `Bridge reconnect exhausted after ${this.reconnectAttempt} attempts (${reason})`);
+      return;
+    }
+    this.reconnectAttempt += 1;
+    const jitter = Math.floor(Math.random() * 200);
+    const delayMs = computeExponentialBackoffMs(this.reconnectAttempt, 1000, 30000, jitter);
+    this.nextRetryDelayMs = delayMs;
+    this.nextRetryAt = new Date(Date.now() + delayMs).toISOString();
+    this.transitionLifecycle('Reconnecting', reason);
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.nextRetryDelayMs = null;
+      this.nextRetryAt = null;
+      this.startBridge();
+      void this.probeHeartbeat().catch(() => null);
+    }, delayMs);
+    if (typeof this.reconnectTimer.unref === 'function') {
+      this.reconnectTimer.unref();
+    }
+  }
+
+  public async probeHeartbeat(timeoutMs = 5000): Promise<BridgeLifecycleTelemetry> {
+    if (this.heartbeatInFlight) {
+      return this.getLifecycleTelemetry();
+    }
+    this.heartbeatInFlight = true;
+    const started = Date.now();
+    try {
+      const pingRes = await this.sendCommand<any>('ping', {}, timeoutMs);
+      const latency = Math.max(1, Date.now() - started);
+      this.totalPings += 1;
+      this.consecutiveFailures = 0;
+      this.reconnectAttempt = 0;
+      this.lastHeartbeatAt = new Date().toISOString();
+      this.lastHeartbeatLatencyMs = latency;
+
+      const isReady = Boolean(
+        pingRes?.weights_loaded &&
+        pingRes?.execution_verified &&
+        pingRes?.runtime_state === 'READY'
+      );
+      if (isReady) {
+        this.transitionLifecycle('Connected', null);
+      } else {
+        const reason = pingRes?.error || pingRes?.execution_error || `Runtime state=${pingRes?.runtime_state || 'NOT_CONFIGURED'}`;
+        this.transitionLifecycle('Degraded', reason);
+      }
+    } catch (err: any) {
+      this.totalFailures += 1;
+      this.consecutiveFailures += 1;
+      const msg = err?.message || String(err);
+      if (msg.includes('timed out')) {
+        this.transitionLifecycle('Unreachable', msg);
+      } else if (!this.reconnectTimer) {
+        this.transitionLifecycle('Service Error', msg);
+      }
+    } finally {
+      this.heartbeatInFlight = false;
+    }
+    return this.getLifecycleTelemetry();
+  }
+
+  public startHeartbeat(intervalMs = 15000): void {
+    const safeInterval = Math.max(2000, intervalMs);
+    if (this.heartbeatTimer && this.heartbeatIntervalMs === safeInterval) {
+      return;
+    }
+    this.stopHeartbeat();
+    this.heartbeatIntervalMs = safeInterval;
+    this.heartbeatTimer = setInterval(() => {
+      if (!this.isBridgeDead()) {
+        void this.probeHeartbeat().catch(() => null);
+      }
+    }, safeInterval);
+    if (typeof this.heartbeatTimer.unref === 'function') {
+      this.heartbeatTimer.unref();
+    }
+  }
+
+  public stopHeartbeat(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+    this.clearReconnectTimer();
+  }
+
+  public forceReconnectNow(): void {
+    this.isShuttingDown = false;
+    this.clearReconnectTimer();
+    this.reconnectAttempt = 0;
+    if (this.isBridgeDead()) {
+      this.bridgeProcess = null;
+      this.startBridge();
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    this.isShuttingDown = true;
+    this.stopHeartbeat();
+    const proc = this.bridgeProcess;
+    this.bridgeProcess = null;
+    if (proc && !proc.killed && proc.exitCode === null) {
+      await new Promise<void>((resolve) => {
+        const done = () => resolve();
+        proc.once('exit', done);
+        try {
+          proc.kill('SIGTERM');
+        } catch {
+          resolve();
+          return;
+        }
+        const t = setTimeout(() => {
+          try {
+            if (proc.exitCode === null) proc.kill('SIGKILL');
+          } catch {
+            // ignore
+          }
+          resolve();
+        }, 500);
+        if (typeof t.unref === 'function') t.unref();
+      });
+    }
+    this.transitionLifecycle('Unreachable', 'Bridge intentionally shut down');
+  }
+
   private startBridge(): void {
+    this.isShuttingDown = false;
+    this.clearReconnectTimer();
     const cwd = process.cwd();
     this.lastStderr = '';
-    this.bridgeProcess = spawn('python3', ['-m', 'qplus_native.bridge'], {
-      cwd,
-      env: {
-        ...process.env,
-        PYTHONPATH: cwd
-      }
+    this.transitionLifecycle('Connecting', this.lastLifecycleError);
+    try {
+      this.bridgeProcess = spawn('python3', ['-m', 'qplus_native.bridge'], {
+        cwd,
+        env: {
+          ...process.env,
+          PYTHONPATH: cwd
+        }
+      });
+    } catch (spawnErr: any) {
+      this.bridgeProcess = null;
+      this.totalFailures += 1;
+      this.consecutiveFailures += 1;
+      this.scheduleReconnect(`Spawn failure: ${spawnErr?.message || spawnErr}`);
+      return;
+    }
+
+    this.bridgeProcess.on('error', (procErr) => {
+      this.totalFailures += 1;
+      this.consecutiveFailures += 1;
+      this.bridgeProcess = null;
+      this.scheduleReconnect(`Bridge process error: ${procErr.message}`);
     });
 
     const rl = readline.createInterface({
@@ -217,6 +519,15 @@ export class NativeNeuralLMProvider {
         this.activeStreamReqId = null;
       }
       this.bridgeProcess = null;
+      if (this.isShuttingDown) {
+        return;
+      }
+      this.totalFailures += 1;
+      this.consecutiveFailures += 1;
+      if (code !== 0) {
+        this.transitionLifecycle('Service Error', reason);
+      }
+      this.scheduleReconnect(reason);
     });
   }
 
@@ -232,6 +543,11 @@ export class NativeNeuralLMProvider {
 
   private async sendCommand<T>(cmd: string, params: Record<string, any> = {}, timeoutMs = 10000): Promise<T> {
     if (this.isBridgeDead()) {
+      if (this.reconnectTimer) {
+        throw new Error(
+          `FAIL_CLOSED: Bridge lifecycle='${this.lifecycleState}' (retry scheduled at ${this.nextRetryAt || 'pending'})`
+        );
+      }
       this.bridgeProcess = null;
       this.startBridge();
     }
@@ -243,6 +559,9 @@ export class NativeNeuralLMProvider {
       const timeout = setTimeout(() => {
         if (this.pendingRequests.has(reqId)) {
           this.pendingRequests.delete(reqId);
+          this.totalFailures += 1;
+          this.consecutiveFailures += 1;
+          this.transitionLifecycle('Unreachable', `Native Model command '${cmd}' timed out after ${timeoutMs}ms`);
           reject(new Error(`Native Model command '${cmd}' timed out after ${timeoutMs}ms`));
         }
       }, timeoutMs);
@@ -250,6 +569,9 @@ export class NativeNeuralLMProvider {
       this.pendingRequests.set(reqId, {
         resolve: (val) => {
           clearTimeout(timeout);
+          this.totalPings += 1;
+          this.consecutiveFailures = 0;
+          this.lastHeartbeatAt = new Date().toISOString();
           resolve(val);
         },
         reject: (err) => {
@@ -276,13 +598,15 @@ export class NativeNeuralLMProvider {
 
   /** P2: text from learned logits only (v2 checkpoint). Fails closed if the checkpoint is absent. */
   public async learnedGenerate(prompt: string, opts: { maxNewTokens?: number; temperature?: number; topK?: number; seed?: number } = {}): Promise<any> {
-    return this.sendCommand('learned_generate', {
+    const out = await this.sendCommand('learned_generate', {
       prompt,
       max_new_tokens: opts.maxNewTokens ?? 64,
       temperature: opts.temperature ?? 0.8,
       top_k: opts.topK ?? 20,
       seed: opts.seed
     }, 30000);
+    this.recordInferenceEvidence(out);
+    return out;
   }
 
   /** Generate directly from the verified 41.53M NativeLM target checkpoint. */
@@ -293,7 +617,7 @@ export class NativeNeuralLMProvider {
     repetitionPenalty?: number;
     seed?: number;
   } = {}): Promise<any> {
-    return this.sendCommand('target_generate', {
+    const out = await this.sendCommand('target_generate', {
       prompt,
       max_new_tokens: opts.maxNewTokens ?? 64,
       temperature: opts.temperature ?? 0.8,
@@ -301,6 +625,8 @@ export class NativeNeuralLMProvider {
       repetition_penalty: opts.repetitionPenalty ?? 1.08,
       seed: opts.seed
     }, 300000);
+    this.recordInferenceEvidence(out);
+    return out;
   }
 
   public async connectivityCheck(presignedUrl?: string): Promise<{
@@ -311,6 +637,10 @@ export class NativeNeuralLMProvider {
     source_uri: string | null;
     weights_loaded: boolean;
     weights_source: string | null;
+    checkpoint_path?: string | null;
+    checkpoint_sha256?: string | null;
+    tokenizer_sha256?: string | null;
+    active_runtime_id?: string | null;
     boot_error?: string | null;
     runtime_state?: RuntimeLifecycleState;
     execution_verified?: boolean;
@@ -323,6 +653,7 @@ export class NativeNeuralLMProvider {
   }
 
   public async reloadCloudWeights(presignedUrl?: string, objectKey?: string): Promise<any> {
+    this.lastInferenceEvidence = null;
     return this.sendCommand('reload_cloud_weights', {
       presigned_url: presignedUrl,
       object_key: objectKey,
@@ -350,7 +681,11 @@ export class NativeNeuralLMProvider {
     vocab_size: number;
     storage_mode: string;
     weights_source: string | null;
+    checkpoint_path?: string | null;
     checkpoint_hash: string;
+    checkpoint_sha256?: string | null;
+    tokenizer_sha256?: string | null;
+    active_runtime_id?: string | null;
     weights_loaded: boolean;
   }> {
     return this.sendCommand('ping', {}, 30000);
@@ -373,13 +708,15 @@ export class NativeNeuralLMProvider {
     options: { max_tokens?: number; temperature?: number; correlation_id?: string } = {}
   ): Promise<InferenceResponse & { architecture?: string }> {
     const isChatRole = role === 'chat' || role === 'assistant';
-    return this.sendCommand<InferenceResponse & { architecture?: string }>('generate', {
+    const out = await this.sendCommand<InferenceResponse & { architecture?: string }>('generate', {
       prompt,
       role,
       max_tokens: options.max_tokens || 1024,
       temperature: options.temperature || (isChatRole ? 0.8 : 0.2),
       correlation_id: options.correlation_id || `corr_${Date.now()}`
     }, isChatRole ? 180000 : 15000);
+    this.recordInferenceEvidence(out);
+    return out;
   }
 
   public async chatStream(
@@ -443,6 +780,7 @@ export class NativeNeuralLMProvider {
       this.activeStreamDone = (doneMeta?: any) => {
         clearTimeout(timeout);
         cleanupAbort();
+        this.recordInferenceEvidence(doneMeta);
         resolve(doneMeta || {});
       };
 

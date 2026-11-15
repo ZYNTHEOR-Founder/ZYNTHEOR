@@ -56,6 +56,8 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const activeKey = statusData?.model?.activeKey;
+  const bridgeTelemetry = connectivity?.bridgeLifecycle || statusData?.connectivity?.bridgeLifecycle;
+  const bridgeState = bridgeTelemetry?.state;
   const runtimeState =
     connectivity?.runtimeState ||
     statusData?.model?.runtimeState ||
@@ -76,10 +78,16 @@ export const Header: React.FC<HeaderProps> = ({
     ? 'CHECKING'
     : !isFailClosed && executionVerified && runtimeState === 'READY'
     ? 'READY'
-    : runtimeState || 'FAIL_CLOSED';
+    : runtimeState || bridgeState || 'FAIL_CLOSED';
   const modelTitle = isFailClosed
-    ? connectivity?.reason || statusData?.model?.failClosedReason || statusData?.model?.executionError || 'FAIL_CLOSED: Online Connectivity Required'
-    : statusData?.model?.weightsSource || activeKey || 'Cloud Runtime';
+    ? `${bridgeState ? `Bridge: ${bridgeState} · ` : ''}${connectivity?.reason || statusData?.model?.failClosedReason || statusData?.model?.executionError || 'FAIL_CLOSED: Online Connectivity Required'}`
+    : `${bridgeState ? `Bridge: ${bridgeState} · ` : ''}${statusData?.model?.weightsSource || activeKey || 'Cloud Runtime'}`;
+  const headerLabel =
+    headerStatus === 'READY'
+      ? `Runtime ready${bridgeState ? ` · ${bridgeState}` : ''}`
+      : bridgeState
+        ? `${headerStatus.replaceAll('_', ' ').toLowerCase()} · ${bridgeState}`
+        : headerStatus.replaceAll('_', ' ').toLowerCase();
 
   return (
     <div className="sticky top-0 z-30">
@@ -110,10 +118,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-full workspace-runtime">
             <StatusDot
-              status={headerStatus as any}
-              label={headerStatus === 'READY' ? 'Runtime ready' : headerStatus.replaceAll('_', ' ').toLowerCase()}
+              status={(bridgeState === 'Reconnecting' || bridgeState === 'Unreachable' || bridgeState === 'Service Error' ? bridgeState : headerStatus) as any}
+              label={headerLabel}
               detail={modelTitle}
-              pulse={headerStatus === 'CHECKING' || headerStatus === 'INITIALIZING'}
+              pulse={headerStatus === 'CHECKING' || headerStatus === 'INITIALIZING' || bridgeState === 'Initializing' || bridgeState === 'Connecting' || bridgeState === 'Reconnecting'}
             />
           </div>
 

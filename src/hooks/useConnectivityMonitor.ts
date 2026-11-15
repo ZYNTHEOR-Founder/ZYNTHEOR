@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiUrl } from '../lib/apiClient';
 import type { ConnectivityHealthState } from '../types';
 
@@ -24,9 +24,67 @@ const DEFAULT_STATE: ConnectivityHealthState = {
   lastOnlineAt: null,
 };
 
-export function useConnectivityMonitor(pollIntervalMs: number = 10000) {
+function mapHealthPayload(data: any, okResponse = true): ConnectivityHealthState {
+  const executionVerified = Boolean(data?.executionVerified);
+  const runtimeState = data?.runtimeState || (data?.online ? 'READY' : 'NOT_LOADED');
+  const isOnline = Boolean(
+    okResponse &&
+      data?.online === true &&
+      !data?.onlineConnectivityRequired &&
+      executionVerified &&
+      runtimeState === 'READY'
+  );
+
+  return {
+    online: isOnline,
+    onlineConnectivityRequired: !isOnline,
+    browserOnline: typeof navigator === 'undefined' ? true : navigator.onLine,
+    status: data?.status || (isOnline ? 'ONLINE' : 'ONLINE_CONNECTIVITY_REQUIRED'),
+    runtimeState,
+    executionVerified,
+    executionError: data?.executionError || null,
+    trainedProvenance: data?.trainedProvenance || null,
+    weightsRole: data?.weightsRole || null,
+    code: data?.code || (isOnline ? null : 'FAIL_CLOSED'),
+    reason: data?.reason || (isOnline ? null : data?.message || 'Online Connectivity Required'),
+    cloudSource: data?.cloudSource || data?.cloudSourceUri || null,
+    cloudStorageConfigured: typeof data?.cloudStorageConfigured === 'boolean' ? data.cloudStorageConfigured : undefined,
+    cloudStorageReachable: typeof data?.cloudStorageReachable === 'boolean' ? data.cloudStorageReachable : undefined,
+    pythonBridgeReachable: typeof data?.pythonBridgeReachable === 'boolean' ? data.pythonBridgeReachable : undefined,
+    bridgeLifecycle: data?.bridgeLifecycle || undefined,
+    weightsLoaded: Boolean(data?.weightsLoaded),
+    weightsSource: data?.weightsSource || data?.cloudSourceUri || null,
+    checkpointSha256: data?.checkpointSha256 || null,
+    totalParams: Number(data?.totalParams || 0),
+    modelName: data?.modelName || null,
+    latencyMs: typeof data?.latencyMs === 'number' ? data.latencyMs : undefined,
+    lastCheckedAt: data?.lastCheckedAt || data?.checkedAt || new Date().toISOString(),
+    lastOnlineAt: data?.lastOnlineAt || (isOnline ? new Date().toISOString() : null),
+  };
+}
+
+function resolveRuntimeWsUrl(): string | null {
+  if (typeof window === 'undefined' || !window.location?.host) return null;
+  const apiBase = (import.meta as any)?.env?.VITE_API_URL as string | undefined;
+  try {
+    if (apiBase) {
+      const parsed = new URL(apiBase, window.location.href);
+      const wsProto = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${wsProto}//${parsed.host}/ws/runtime`;
+    }
+  } catch {
+    // Fallback to current window origin
+  }
+  const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${wsProto}//${window.location.host}/ws/runtime`;
+}
+
+export function useConnectivityMonitor(pollIntervalMs: number = 15000) {
   const [connectivity, setConnectivity] = useState<ConnectivityHealthState>(DEFAULT_STATE);
   const [isChecking, setIsChecking] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const wsReconnectTimerRef = useRef<number | null>(null);
+  const wsAttemptRef = useRef<number>(0);
 
   const checkHealth = useCallback(async () => {
     const browserOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
@@ -51,35 +109,7 @@ export function useConnectivityMonitor(pollIntervalMs: number = 10000) {
     try {
       const res = await fetch(apiUrl('/api/connectivity/health'), { cache: 'no-store' });
       const data = await res.json().catch(() => ({}));
-      const executionVerified = Boolean(data.executionVerified);
-      const runtimeState = data.runtimeState || (data.online ? 'READY' : 'NOT_LOADED');
-      const isOnline = Boolean(res.ok && data.online === true && !data.onlineConnectivityRequired && executionVerified);
-
-      setConnectivity({
-        online: isOnline,
-        onlineConnectivityRequired: !isOnline,
-        browserOnline: true,
-        status: data.status || (isOnline ? 'ONLINE' : 'FAIL_CLOSED'),
-        runtimeState,
-        executionVerified,
-        executionError: data.executionError || null,
-        trainedProvenance: data.trainedProvenance || null,
-        weightsRole: data.weightsRole || null,
-        code: data.code || (isOnline ? null : 'FAIL_CLOSED'),
-        reason: data.reason || (isOnline ? null : data.message || 'Online Connectivity Required'),
-        cloudSource: data.cloudSource || null,
-        cloudStorageConfigured: typeof data.cloudStorageConfigured === 'boolean' ? data.cloudStorageConfigured : undefined,
-        cloudStorageReachable: typeof data.cloudStorageReachable === 'boolean' ? data.cloudStorageReachable : undefined,
-        pythonBridgeReachable: typeof data.pythonBridgeReachable === 'boolean' ? data.pythonBridgeReachable : undefined,
-        weightsLoaded: Boolean(data.weightsLoaded),
-        weightsSource: data.weightsSource || null,
-        checkpointSha256: data.checkpointSha256 || null,
-        totalParams: Number(data.totalParams || 0),
-        modelName: data.modelName || null,
-        latencyMs: typeof data.latencyMs === 'number' ? data.latencyMs : undefined,
-        lastCheckedAt: data.lastCheckedAt || new Date().toISOString(),
-        lastOnlineAt: data.lastOnlineAt || (isOnline ? new Date().toISOString() : null),
-      });
+      setConnectivity(mapHealthPayload(data, res.ok));
     } catch (err: any) {
       setConnectivity((prev) => ({
         ...prev,
@@ -112,35 +142,9 @@ export function useConnectivityMonitor(pollIntervalMs: number = 10000) {
           body: JSON.stringify(presignedUrl ? { presignedUrl } : {}),
         });
         const data = await res.json().catch(() => ({}));
-        const executionVerified = Boolean(data.executionVerified);
-        const runtimeState = data.runtimeState || (data.online ? 'READY' : 'NOT_LOADED');
-        const isOnline = Boolean(res.ok && data.online === true && !data.onlineConnectivityRequired && executionVerified);
-        setConnectivity({
-          online: isOnline,
-          onlineConnectivityRequired: !isOnline,
-          browserOnline: typeof navigator === 'undefined' ? true : navigator.onLine,
-          status: data.status || (isOnline ? 'ONLINE' : 'FAIL_CLOSED'),
-          runtimeState,
-          executionVerified,
-          executionError: data.executionError || null,
-          trainedProvenance: data.trainedProvenance || null,
-          weightsRole: data.weightsRole || null,
-          code: data.code || (isOnline ? null : 'FAIL_CLOSED'),
-          reason: data.reason || (isOnline ? null : data.message || 'Online Connectivity Required'),
-          cloudSource: data.cloudSource || null,
-          cloudStorageConfigured: typeof data.cloudStorageConfigured === 'boolean' ? data.cloudStorageConfigured : undefined,
-          cloudStorageReachable: typeof data.cloudStorageReachable === 'boolean' ? data.cloudStorageReachable : undefined,
-          pythonBridgeReachable: typeof data.pythonBridgeReachable === 'boolean' ? data.pythonBridgeReachable : undefined,
-          weightsLoaded: Boolean(data.weightsLoaded),
-          weightsSource: data.weightsSource || null,
-          checkpointSha256: data.checkpointSha256 || null,
-          totalParams: Number(data.totalParams || 0),
-          modelName: data.modelName || null,
-          latencyMs: typeof data.latencyMs === 'number' ? data.latencyMs : undefined,
-          lastCheckedAt: data.lastCheckedAt || new Date().toISOString(),
-          lastOnlineAt: data.lastOnlineAt || (isOnline ? new Date().toISOString() : null),
-        });
-        return { ok: isOnline, data };
+        const mapped = mapHealthPayload(data, res.ok);
+        setConnectivity(mapped);
+        return { ok: mapped.online, data };
       } catch (err: any) {
         await checkHealth();
         return { ok: false, error: err?.message || 'Reconnect failed' };
@@ -152,13 +156,63 @@ export function useConnectivityMonitor(pollIntervalMs: number = 10000) {
   );
 
   useEffect(() => {
+    let disposed = false;
     void checkHealth();
     const timer = window.setInterval(() => {
       void checkHealth();
     }, pollIntervalMs);
 
+    const connectWebSocket = () => {
+      if (disposed || typeof WebSocket === 'undefined') return;
+      const wsUrl = resolveRuntimeWsUrl();
+      if (!wsUrl) return;
+      try {
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+          wsAttemptRef.current = 0;
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(String(event.data));
+            if (payload?.type === 'runtime_state' && payload.data) {
+              setConnectivity(mapHealthPayload(payload.data, true));
+            }
+          } catch {
+            // Ignore malformed telemetry messages
+          }
+        };
+
+        ws.onclose = () => {
+          wsRef.current = null;
+          if (disposed) return;
+          if (wsAttemptRef.current >= 6) return;
+          wsAttemptRef.current += 1;
+          const delayMs = Math.min(30000, 1000 * Math.pow(2, wsAttemptRef.current - 1));
+          wsReconnectTimerRef.current = window.setTimeout(() => {
+            wsReconnectTimerRef.current = null;
+            connectWebSocket();
+          }, delayMs);
+        };
+
+        ws.onerror = () => {
+          // Close triggers bounded exponential backoff reconnect
+        };
+      } catch {
+        // Fallback HTTP polling stays active
+      }
+    };
+
+    connectWebSocket();
+
     const handleOnline = () => {
+      wsAttemptRef.current = 0;
       void checkHealth();
+      if (!wsRef.current) {
+        connectWebSocket();
+      }
     };
     const handleOffline = () => {
       setConnectivity((prev) => ({
@@ -179,7 +233,20 @@ export function useConnectivityMonitor(pollIntervalMs: number = 10000) {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     return () => {
+      disposed = true;
       window.clearInterval(timer);
+      if (wsReconnectTimerRef.current !== null) {
+        window.clearTimeout(wsReconnectTimerRef.current);
+        wsReconnectTimerRef.current = null;
+      }
+      if (wsRef.current) {
+        try {
+          wsRef.current.close();
+        } catch {
+          // Ignore close errors during unmount
+        }
+        wsRef.current = null;
+      }
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };

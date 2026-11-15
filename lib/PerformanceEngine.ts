@@ -15,6 +15,13 @@ import path from 'path';
 import crypto from 'crypto';
 import { performance } from 'perf_hooks';
 import { AuditLedger } from './AuditLedger.ts';
+import {
+  classifyTruthClaim,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export interface PerformanceSample {
   sampleId: string;
@@ -88,7 +95,7 @@ export class PerformanceEngine {
   private samples: PerformanceSample[] = [];
   private snapshots: OptimizationSnapshot[] = [];
   private cache = new Map<string, CacheEntry>();
-  private cacheStats = { hits: 0, misses: 0, invalidations: 0, timeSavedMs: 0 };
+  private cacheStats = { hits: 0, misses: 0, invalidations: 0 };
 
   private constructor() {
     this.filePath = process.env.ZYNTHEOR_PERF_FILE
@@ -221,7 +228,6 @@ export class PerformanceEngine {
     }
     entry.hits += 1;
     this.cacheStats.hits += 1;
-    this.cacheStats.timeSavedMs += 2;
     return entry.value as T;
   }
 
@@ -410,9 +416,11 @@ export class PerformanceEngine {
     entriesCount: number;
     hits: number;
     misses: number;
-    hitRatePct: number;
+    hitRatePct: number | null;
     invalidations: number;
-    estimatedTimeSavedMs: number;
+    measuredTimeSavedMs: number | null;
+    estimatedTimeSavedMs: number | null;
+    timeSavedStatus: 'UNAVAILABLE';
   } {
     const total = this.cacheStats.hits + this.cacheStats.misses;
     return {
@@ -420,28 +428,78 @@ export class PerformanceEngine {
       entriesCount: this.cache.size,
       hits: this.cacheStats.hits,
       misses: this.cacheStats.misses,
-      hitRatePct: total > 0 ? Number(((this.cacheStats.hits / total) * 100).toFixed(1)) : 0,
+      hitRatePct: total > 0 ? Number(((this.cacheStats.hits / total) * 100).toFixed(1)) : null,
       invalidations: this.cacheStats.invalidations,
-      estimatedTimeSavedMs: this.cacheStats.timeSavedMs,
+      measuredTimeSavedMs: null,
+      estimatedTimeSavedMs: null,
+      timeSavedStatus: 'UNAVAILABLE',
     };
   }
 
-  public getTelemetry() {
+  public getTelemetry(): {
+    config: AdaptiveConfigParameters;
+    totalSamples: number;
+    recentAvgLatencyMs: number | null;
+    latencyStatus: 'MEASURED' | 'UNAVAILABLE';
+    bottlenecks: BottleneckFinding[];
+    strategies: ReturnType<PerformanceEngine['compareStrategies']>;
+    cachePolicy: ReturnType<PerformanceEngine['evaluateCachePolicy']>;
+    snapshots: OptimizationSnapshot[];
+    regressionDetected: boolean;
+    truthClaims: TruthClaimRecord[];
+    truthSummary: TruthKernelSummary;
+  } {
     const bottlenecks = this.detectBottlenecks();
     const recent = this.samples.slice(-50);
     const avgLatencyMs =
-      recent.length > 0 ? Number((recent.reduce((a, s) => a + s.durationMs, 0) / recent.length).toFixed(2)) : 0;
+      recent.length > 0 ? Number((recent.reduce((a, s) => a + s.durationMs, 0) / recent.length).toFixed(2)) : null;
     const regressionDetected = bottlenecks.some((b) => b.severity === 'bottleneck');
+    const cachePolicy = this.evaluateCachePolicy();
+
+    const truthClaims = enforceTruthClaims([
+      classifyTruthClaim({
+        domain: 'performance_engine',
+        statement:
+          recent.length > 0
+            ? `Measured average latency ${avgLatencyMs}ms across ${recent.length} recent sample(s)`
+            : 'No runtime latency samples recorded yet (recentAvgLatencyMs is UNAVAILABLE)',
+        classification: recent.length > 0 ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis:
+          recent.length > 0
+            ? 'Direct perf_hooks.performance.now() sample measurements'
+            : 'Zero recorded samples in performance store; synthetic zeroes disallowed',
+        evidenceRefs: recent.slice(-5).map((s) => s.sampleId),
+      }),
+      classifyTruthClaim({
+        domain: 'performance_engine',
+        statement: 'Cache lookup time saved is not directly measured without uncached baseline execution',
+        classification: 'UNVERIFIED',
+        basis: 'timeSavedStatus=UNAVAILABLE; hardcoded cache time savings removed under Zero-Simulation',
+      }),
+      ...(regressionDetected
+        ? [
+            classifyTruthClaim({
+              domain: 'performance_engine',
+              statement: `Performance bottleneck detected on ${bottlenecks.filter((b) => b.severity === 'bottleneck').map((b) => b.operation).join(', ')}`,
+              classification: 'VERIFIED_FACT',
+              basis: 'Observed p95 duration > 250ms in recorded samples',
+            }),
+          ]
+        : []),
+    ]);
 
     return {
       config: this.getConfig(),
       totalSamples: this.samples.length,
       recentAvgLatencyMs: avgLatencyMs,
+      latencyStatus: recent.length > 0 ? 'MEASURED' : 'UNAVAILABLE',
       bottlenecks,
       strategies: this.compareStrategies(),
-      cachePolicy: this.evaluateCachePolicy(),
+      cachePolicy,
       snapshots: this.snapshots.slice(0, 15),
       regressionDetected,
+      truthClaims,
+      truthSummary: summarizeTruthClaims(truthClaims),
     };
   }
 }

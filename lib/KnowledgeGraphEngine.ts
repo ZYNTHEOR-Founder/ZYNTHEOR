@@ -21,6 +21,13 @@ import { AuditLedger } from './AuditLedger.ts';
 import { KnowledgeWorkspace, KnowledgeDocument } from './KnowledgeWorkspace.ts';
 import { tokenize, detectContradictions } from './KnowledgeIntelligenceEngine.ts';
 import { PerformanceEngine } from './PerformanceEngine.ts';
+import {
+  classifyTruthClaim,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export interface KnowledgeGraphNode {
   nodeId: string;
@@ -91,6 +98,8 @@ export interface GraphTraversalResult {
     provenanceHashes: string[];
   }>;
   latencyMs: number;
+  truthClaims: TruthClaimRecord[];
+  truthSummary: TruthKernelSummary;
 }
 
 export interface GraphConsistencyReport {
@@ -102,6 +111,8 @@ export interface GraphConsistencyReport {
   contradictions: GraphContradictionRecord[];
   staleEdgeCount: number;
   checkedAt: string;
+  truthClaims: TruthClaimRecord[];
+  truthSummary: TruthKernelSummary;
 }
 
 export interface GraphScope {
@@ -512,12 +523,32 @@ export class KnowledgeGraphEngine {
     }
 
     paths.sort((a, b) => b.score - a.score || b.hops.length - a.hops.length);
+    const slicedPaths = paths.slice(0, limit);
+    const allHashes = Array.from(new Set(slicedPaths.flatMap((p) => p.provenanceHashes).filter(Boolean)));
+    const traversalClaims = enforceTruthClaims([
+      classifyTruthClaim({
+        domain: 'knowledge_graph',
+        statement:
+          slicedPaths.length > 0
+            ? `Traversed ${slicedPaths.length} knowledge-graph path(s) across ${seedNodes.length} seed node(s) with ${allHashes.length} SHA-256 provenance hash(es)`
+            : `No provenance-backed knowledge-graph path matched query '${query.slice(0, 64)}'`,
+        classification: slicedPaths.length > 0 && allHashes.length > 0 ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis:
+          slicedPaths.length > 0
+            ? 'Direct graph BFS traversal bounded to tenant-scoped document hashes'
+            : 'Zero matching entity edges in scoped workspace graph',
+        evidenceRefs: allHashes.slice(0, 8),
+      }),
+    ]);
+
     const result: GraphTraversalResult = {
       query,
       seedNodes: seedNodes.map((n) => n.label),
       maxHops,
-      paths: paths.slice(0, limit),
+      paths: slicedPaths,
       latencyMs: Date.now() - t0,
+      truthClaims: traversalClaims,
+      truthSummary: summarizeTruthClaims(traversalClaims),
     };
 
     perf.setCached('kg_traverse', tenantKey, cacheKey, result);
@@ -613,9 +644,41 @@ export class KnowledgeGraphEngine {
 
     const staleEdgeCount = edges.filter((e) => e.freshnessScore < 0.25).length;
     const contradictions = this.detectGraphContradictions(scope);
+    const valid = danglingEdgeIds.length === 0 && missingProvenanceEdgeIds.length === 0;
+
+    const rawClaims: TruthClaimRecord[] = [
+      classifyTruthClaim({
+        domain: 'knowledge_graph',
+        statement: `Graph consistency check across ${nodes.length} node(s) and ${edges.length} edge(s): valid=${valid}`,
+        classification: valid ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis: `dangling=${danglingEdgeIds.length}, missingProvenance=${missingProvenanceEdgeIds.length}`,
+      }),
+    ];
+    if (contradictions.length > 0) {
+      rawClaims.push(
+        classifyTruthClaim({
+          domain: 'knowledge_graph',
+          statement: `${contradictions.length} cross-document contradiction(s) detected in knowledge graph`,
+          classification: 'CONTRADICTED',
+          basis: 'Triple/assertion polarity and numeric conflict check',
+          evidenceRefs: contradictions.slice(0, 5).map((c) => c.contradictionId),
+        })
+      );
+    }
+    if (staleEdgeCount > 0) {
+      rawClaims.push(
+        classifyTruthClaim({
+          domain: 'knowledge_graph',
+          statement: `${staleEdgeCount} edge(s) have low temporal freshness (<0.25) and may require re-verification`,
+          classification: 'ASSUMPTION',
+          basis: 'Exponential freshness decay heuristic',
+        })
+      );
+    }
+    const truthClaims = enforceTruthClaims(rawClaims);
 
     return {
-      valid: danglingEdgeIds.length === 0 && missingProvenanceEdgeIds.length === 0,
+      valid,
       nodeCount: nodes.length,
       edgeCount: edges.length,
       danglingEdgeIds,
@@ -623,6 +686,8 @@ export class KnowledgeGraphEngine {
       contradictions,
       staleEdgeCount,
       checkedAt: new Date().toISOString(),
+      truthClaims,
+      truthSummary: summarizeTruthClaims(truthClaims),
     };
   }
 
@@ -640,6 +705,8 @@ export class KnowledgeGraphEngine {
       consistencyValid: consistency.valid,
       topNodes: nodes.slice(0, 12),
       recentEdges: edges.slice(0, 15),
+      truthClaims: consistency.truthClaims,
+      truthSummary: consistency.truthSummary,
     };
   }
 }

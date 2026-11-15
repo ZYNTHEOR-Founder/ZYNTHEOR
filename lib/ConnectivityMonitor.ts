@@ -10,10 +10,16 @@ import {
   isCloudCheckpointStorageConfigured,
   statCheckpointInCloudStorage,
 } from './CloudCheckpointStorage.ts';
-import { NativeNeuralLMProvider, type RuntimeLifecycleState } from './providers.ts';
+import {
+  NativeNeuralLMProvider,
+  type InferenceEvidence,
+  type RuntimeLifecycleState,
+  type BridgeLifecycleState,
+  type BridgeLifecycleTelemetry,
+} from './providers.ts';
 import net from 'net';
 
-export type { RuntimeLifecycleState };
+export type { InferenceEvidence, RuntimeLifecycleState, BridgeLifecycleState, BridgeLifecycleTelemetry };
 
 export interface BackendConnectivityState {
   online: boolean;
@@ -32,7 +38,12 @@ export interface BackendConnectivityState {
   cloudStorageReachable: boolean;
   cloudSourceUri: string | null;
   pythonBridgeReachable: boolean;
+  bridgeLifecycle: BridgeLifecycleTelemetry;
+  checkpointPath: string | null;
   checkpointSha256: string | null;
+  tokenizerSha256: string | null;
+  activeRuntimeId: string | null;
+  lastInferenceEvidence: InferenceEvidence | null;
   latencyMs: number;
   checkedAt: string;
   lastTransitionAt: string | null;
@@ -194,14 +205,67 @@ export class ConnectivityMonitor {
   private lastCheckAtMs = 0;
   private lastTransitionAt: string | null = null;
   private overridePresignedUrl: string | undefined;
+  private listeners = new Set<(state: BackendConnectivityState) => void>();
+  private monitorTimer: ReturnType<typeof setInterval> | null = null;
+  private bridgeUnsubscribe: (() => void) | null = null;
 
-  private constructor() {}
+  private constructor() {
+    const provider = NativeNeuralLMProvider.getInstance();
+    this.bridgeUnsubscribe = provider.onLifecycleChange((telemetry) => {
+      if (this.lastState) {
+        const updated: BackendConnectivityState = {
+          ...this.lastState,
+          bridgeLifecycle: telemetry,
+          checkedAt: new Date().toISOString(),
+        };
+        this.lastState = updated;
+        this.emitState(updated);
+      }
+    });
+  }
 
   public static getInstance(): ConnectivityMonitor {
     if (!ConnectivityMonitor.instance) {
       ConnectivityMonitor.instance = new ConnectivityMonitor();
     }
     return ConnectivityMonitor.instance;
+  }
+
+  public subscribe(listener: (state: BackendConnectivityState) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private emitState(state: BackendConnectivityState): void {
+    for (const listener of this.listeners) {
+      try {
+        listener(state);
+      } catch {
+        // Never allow subscriber exception to disrupt health check
+      }
+    }
+  }
+
+  public startBackgroundMonitor(intervalMs = 15000): void {
+    const safeMs = Math.max(3000, intervalMs);
+    NativeNeuralLMProvider.getInstance().startHeartbeat(safeMs);
+    if (this.monitorTimer) return;
+    this.monitorTimer = setInterval(() => {
+      void this.checkNow().catch(() => null);
+    }, safeMs);
+    if (typeof this.monitorTimer.unref === 'function') {
+      this.monitorTimer.unref();
+    }
+  }
+
+  public stopBackgroundMonitor(): void {
+    NativeNeuralLMProvider.getInstance().stopHeartbeat();
+    if (this.monitorTimer) {
+      clearInterval(this.monitorTimer);
+      this.monitorTimer = null;
+    }
   }
 
   public setPresignedUrlOverride(url?: string): void {
@@ -329,12 +393,36 @@ export class ConnectivityMonitor {
       ? `Online connectivity verified (${cloudSourceUri || 'cloud runtime'})`
       : cloudErrorReason || bridgeReason || 'Online Connectivity Required';
 
+    const bridgeTelemetryBefore = provider.getLifecycleTelemetry();
+    const targetBridgeState: BridgeLifecycleState = online
+      ? 'Connected'
+      : pythonBridgeReachable
+        ? 'Degraded'
+        : bridgeTelemetryBefore.state === 'Reconnecting'
+          ? 'Reconnecting'
+          : (bridgeReason.includes('timed out') || bridgeTelemetryBefore.reconnectAttempt >= bridgeTelemetryBefore.maxReconnectAttempts)
+            ? 'Unreachable'
+            : 'Service Error';
+    const bridgeLifecycle = provider.reconcileLifecycleState(
+      targetBridgeState,
+      online ? null : reason
+    );
+
     const nowIso = new Date().toISOString();
+    const prevBridgeState = this.lastState?.bridgeLifecycle?.state;
+    const stateTransitioned = Boolean(
+      this.lastState && (
+        this.lastState.online !== online ||
+        this.lastState.runtimeState !== runtimeState ||
+        prevBridgeState !== bridgeLifecycle.state
+      )
+    );
     if (this.lastState && this.lastState.online !== online) {
       this.lastTransitionAt = nowIso;
       AuditLedger.append('SYSTEM', online ? 'CONNECTIVITY_RESTORED' : 'CONNECTIVITY_LOST_FAIL_CLOSED', {
         online,
         runtimeState,
+        bridgeLifecycleState: bridgeLifecycle.state,
         executionVerified,
         cloudSourceUri,
         reason,
@@ -360,7 +448,21 @@ export class ConnectivityMonitor {
       cloudStorageReachable,
       cloudSourceUri,
       pythonBridgeReachable,
-      checkpointSha256: (weightsLoaded && this.lastPingResult?.checkpoint_hash) ? String(this.lastPingResult.checkpoint_hash) : null,
+      bridgeLifecycle: {
+        ...bridgeLifecycle,
+        lastHeartbeatLatencyMs: pythonBridgeReachable ? (Date.now() - started) : bridgeLifecycle.lastHeartbeatLatencyMs,
+      },
+      checkpointPath:
+        (weightsLoaded && (this.lastPingResult?.checkpoint_path || this.lastPingResult?.weights_source))
+          ? String(this.lastPingResult.checkpoint_path || this.lastPingResult.weights_source)
+          : null,
+      checkpointSha256:
+        (weightsLoaded && (this.lastPingResult?.checkpoint_sha256 || this.lastPingResult?.checkpoint_hash))
+          ? String(this.lastPingResult.checkpoint_sha256 || this.lastPingResult.checkpoint_hash)
+          : null,
+      tokenizerSha256: this.lastPingResult?.tokenizer_sha256 ? String(this.lastPingResult.tokenizer_sha256) : null,
+      activeRuntimeId: this.lastPingResult?.active_runtime_id ? String(this.lastPingResult.active_runtime_id) : null,
+      lastInferenceEvidence: weightsLoaded ? provider.getLastInferenceEvidence() : null,
       latencyMs: Date.now() - started,
       checkedAt: nowIso,
       lastTransitionAt: this.lastTransitionAt,
@@ -368,6 +470,9 @@ export class ConnectivityMonitor {
 
     this.lastState = nextState;
     this.lastCheckAtMs = Date.now();
+    if (stateTransitioned || this.listeners.size > 0) {
+      this.emitState(nextState);
+    }
     return nextState;
   }
 
@@ -403,6 +508,7 @@ export class ConnectivityMonitor {
       this.setPresignedUrlOverride(presignedUrl);
     }
     const provider = NativeNeuralLMProvider.getInstance();
+    provider.forceReconnectNow();
     try {
       await provider.reloadCloudWeights(
         presignedUrl || this.overridePresignedUrl,

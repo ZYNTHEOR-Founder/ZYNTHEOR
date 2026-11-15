@@ -9,11 +9,14 @@ import sys
 import os
 import json
 import time
+import uuid
 import socket
 import queue
 import tempfile
 import threading
 from typing import Dict, Any, Optional
+
+BRIDGE_RUNTIME_ID = f"zyn-bridge-{os.getpid()}-{uuid.uuid4().hex[:8]}"
 
 # Ensure project root is in sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -1049,6 +1052,10 @@ def main():
                 elif probe.get("runtime_state_hint") in ("NOT_CONFIGURED", "NOT_FOUND"):
                     probe["runtime_state"] = probe["runtime_state_hint"]
                 probe["weights_source"] = model.weights_source if model else None
+                probe["checkpoint_path"] = (model.checkpoint_path or model.weights_source or None) if model else None
+                probe["checkpoint_sha256"] = (model.checkpoint_hash or None) if model else None
+                probe["tokenizer_sha256"] = model.tokenizer_sha256 if model else None
+                probe["active_runtime_id"] = model.active_runtime_id if model else BRIDGE_RUNTIME_ID
                 probe["boot_error"] = boot_error
                 sys.stdout.write(json.dumps(probe) + "\n")
                 sys.stdout.flush()
@@ -1073,10 +1080,14 @@ def main():
                         "fail_closed": not is_ready,
                         "weights_loaded": model.weights_loaded,
                         "weights_source": model.weights_source,
+                        "checkpoint_path": model.checkpoint_path or model.weights_source or None,
                         "model_name": model.metadata.get("model_name"),
                         "architecture": model.metadata.get("architecture"),
                         "total_params": model.config.total_params,
                         "checkpoint_hash": model.checkpoint_hash,
+                        "checkpoint_sha256": model.checkpoint_hash or None,
+                        "tokenizer_sha256": model.tokenizer_sha256,
+                        "active_runtime_id": model.active_runtime_id,
                         "storage_mode": model.metadata.get("storage_mode"),
                     }) + "\n")
                     sys.stdout.flush()
@@ -1086,6 +1097,10 @@ def main():
                     sys.stdout.write(json.dumps({
                         "id": req_id,
                         "runtime_state": _classify_runtime_state(None, boot_error),
+                        "checkpoint_path": None,
+                        "checkpoint_sha256": None,
+                        "tokenizer_sha256": None,
+                        "active_runtime_id": BRIDGE_RUNTIME_ID,
                         "error": boot_error,
                     }) + "\n")
                     sys.stdout.flush()
@@ -1129,7 +1144,11 @@ def main():
                         "tokenizer_profile": getattr(model.tokenizer, "profile", None) if model else None,
                         "storage_mode": model.metadata.get("storage_mode", "UNLOADED_FAIL_CLOSED") if model else "UNLOADED_FAIL_CLOSED",
                         "weights_source": model.weights_source if model else None,
+                        "checkpoint_path": (model.checkpoint_path or model.weights_source or None) if model else None,
                         "checkpoint_hash": model.checkpoint_hash if model else "",
+                        "checkpoint_sha256": (model.checkpoint_hash or None) if model else None,
+                        "tokenizer_sha256": model.tokenizer_sha256 if model else None,
+                        "active_runtime_id": model.active_runtime_id if model else BRIDGE_RUNTIME_ID,
                         "weights_loaded": bool(model is not None and model.weights_loaded),
                     }
                 else:
@@ -1153,7 +1172,11 @@ def main():
                         "tokenizer_profile": getattr(model.tokenizer, "profile", "v2_base"),
                         "storage_mode": model.metadata.get("storage_mode", "UNKNOWN"),
                         "weights_source": model.weights_source,
+                        "checkpoint_path": model.checkpoint_path or model.weights_source or None,
                         "checkpoint_hash": model.checkpoint_hash,
+                        "checkpoint_sha256": model.checkpoint_hash or None,
+                        "tokenizer_sha256": model.tokenizer_sha256,
+                        "active_runtime_id": model.active_runtime_id,
                         "weights_loaded": model.weights_loaded,
                     }
                 sys.stdout.write(json.dumps(resp) + "\n")
@@ -1264,7 +1287,12 @@ def main():
                         "output_tokens_count": gen_res.get("output_tokens_count", 0),
                         "latency_ms": gen_res.get("latency_ms", 0.0),
                         "tokens_per_sec": gen_res.get("tokens_per_sec", 0.0),
-                        "checkpoint_sha256": gen_res.get("checkpoint_hash", active_model.checkpoint_hash),
+                        "checkpoint_path": gen_res.get("checkpoint_path", active_model.checkpoint_path or active_model.weights_source),
+                        "checkpoint_sha256": gen_res.get("checkpoint_sha256", gen_res.get("checkpoint_hash", active_model.checkpoint_hash)),
+                        "tokenizer_sha256": gen_res.get("tokenizer_sha256", active_model.tokenizer_sha256),
+                        "active_runtime_id": gen_res.get("active_runtime_id", active_model.active_runtime_id),
+                        "inference_timestamp": gen_res.get("inference_timestamp", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())),
+                        "execution_duration_ms": gen_res.get("execution_duration_ms", gen_res.get("latency_ms", 0.0)),
                         "total_params": int(gen_res.get("total_params", active_model.config.total_params)),
                         "weights_source": gen_res.get("weights_source", active_model.weights_source),
                         "inference_origin": gen_res.get("inference_origin", "orchestrator_structured"),
@@ -1347,8 +1375,13 @@ def main():
                     "output_tokens_count": output_count,
                     "first_token_latency_ms": ttft_ms,
                     "latency_ms": elapsed_ms,
+                    "execution_duration_ms": elapsed_ms,
                     "tokens_per_sec": tok_per_sec,
+                    "checkpoint_path": active_model.checkpoint_path or weights_source,
                     "checkpoint_sha256": lm_meta.get("sha256", active_model.checkpoint_hash),
+                    "tokenizer_sha256": active_model.tokenizer_sha256,
+                    "active_runtime_id": active_model.active_runtime_id,
+                    "inference_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                     "total_params": int(lm_meta.get("total_params", active_model.config.total_params)),
                     "weights_source": weights_source,
                     "inference_origin": "native_model_logits",
@@ -1459,9 +1492,13 @@ def main():
                     "id": req_id,
                     "valid": True,
                     "weights_source": active_model.weights_source,
+                    "checkpoint_path": active_model.checkpoint_path or active_model.weights_source,
                     "cloud_only": True,
                     "file_size": len(active_model._raw_checkpoint_bytes),
                     "payload_sha256": actual_sha,
+                    "checkpoint_sha256": actual_sha,
+                    "tokenizer_sha256": active_model.tokenizer_sha256,
+                    "active_runtime_id": active_model.active_runtime_id,
                     "sha256_match": (meta.get("sha256") == actual_sha),
                     "total_params": meta.get("total_params"),
                     "parameter_count_match": (len(payload) // 4 == meta.get("total_params")),

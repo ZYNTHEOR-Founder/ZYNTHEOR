@@ -1607,7 +1607,10 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span className="font-semibold text-[#F4F7FF]">Telemetry & Cache Policy</span>
                 <span className="font-mono tabular-nums text-[#9AA8C7]">
-                  Samples {perfTelemetry?.totalSamples ?? 0} · Avg {perfTelemetry?.recentAvgLatencyMs ?? 0} ms · Cache Hit {perfTelemetry?.cachePolicy?.hitRatePct ?? 0}%
+                  Samples {perfTelemetry?.totalSamples ?? 0} · Avg{' '}
+                  {perfTelemetry?.recentAvgLatencyMs != null ? `${perfTelemetry.recentAvgLatencyMs} ms` : 'UNAVAILABLE'} · Cache Hit{' '}
+                  {perfTelemetry?.cachePolicy?.hitRatePct != null ? `${perfTelemetry.cachePolicy.hitRatePct}%` : 'UNAVAILABLE'} · Time Saved{' '}
+                  {perfTelemetry?.cachePolicy?.timeSavedStatus || 'UNAVAILABLE'}
                 </span>
               </div>
 
@@ -1750,6 +1753,42 @@ export const CognitiveOperations: React.FC<CognitiveOperationsProps> = ({ status
                   </Button>
                 }
               />
+            )}
+          </VividCard>
+
+          <VividCard
+            title="Zero-Simulation Capability Gates"
+            subtitle="Formal completion gates enforced from live runtime provenance, SHA-256 execution hashes, and multimodal probes"
+            gradientAccent="cyan"
+            variant="midnight"
+          >
+            {opsData?.capabilityGates?.gates ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Object.values(opsData.capabilityGates.gates).map((gate: any) => (
+                    <div key={gate.gateId} className="p-3.5 rounded-xl bg-[#070B19] border border-[#1E294A] space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-xs font-semibold text-[#F4F7FF]">{gate.gateId}</span>
+                        <StatusDot
+                          status={gate.status === 'IMPLEMENTED' ? 'VERIFIED' : (gate.status as any)}
+                          label={gate.status}
+                        />
+                      </div>
+                      <p className="text-xs text-[#9AA8C7]">{gate.reason}</p>
+                    </div>
+                  ))}
+                </div>
+                {opsData.capabilityGates.truthSummary && (
+                  <div className="text-xs font-mono text-[#9AA8C7] flex flex-wrap gap-4 pt-2 border-t border-[#1E294A]">
+                    <span>Truth Kernel Claims: {opsData.capabilityGates.truthSummary.total}</span>
+                    <span>VERIFIED_FACT: {opsData.capabilityGates.truthSummary.counts?.VERIFIED_FACT ?? 0}</span>
+                    <span>UNVERIFIED: {opsData.capabilityGates.truthSummary.counts?.UNVERIFIED ?? 0}</span>
+                    <span>Verified Execution Cycles: {opsData.capabilityGates.verifiedExecutionSummary?.verifiedCyclesCount ?? 0}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Text size="xs">Capability gates loading…</Text>
             )}
           </VividCard>
 

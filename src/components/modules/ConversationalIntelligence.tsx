@@ -94,7 +94,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || {
     id: 'session-default',
-    title: lang === 'th' ? 'การสนทนาใหม่' : 'New Conversation',
+    title: lang === 'th' ? 'เซสชันสั่งการและเหตุผลใหม่' : 'New Reasoning Session',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     messages: []
@@ -277,7 +277,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
     const newId = `session-${Date.now()}`;
     const newSession: ChatSession = {
       id: newId,
-      title: lang === 'th' ? 'การสนทนาใหม่' : 'New Conversation',
+      title: lang === 'th' ? 'เซสชันสั่งการและเหตุผลใหม่' : 'New Reasoning Session',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: [
@@ -286,11 +286,11 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
           sender: 'assistant',
           content: !isModelReady
             ? (lang === 'th'
-                ? `สร้างห้องสนทนาใหม่แล้ว · สถานะ Runtime ปัจจุบัน: **${runtimeState}** (ยังไม่ได้ยืนยัน Model Weights ในหน่วยความจำ; ระบบจะไม่จำลองคำตอบหากไม่มี Checkpoint ออนไลน์)`
-                : `New session initialized · Current runtime state: **${runtimeState}** (no resident model weights verified; inference stays fail-closed until online checkpoint is READY).`)
+                ? `เริ่มต้นเซสชันสั่งการและให้เหตุผลแล้ว · สถานะ Runtime ปัจจุบัน: **${runtimeState}** (ยังไม่ได้ยืนยัน Model Weights ในหน่วยความจำ; ระบบจะไม่จำลองคำตอบหากไม่มี Checkpoint ออนไลน์)`
+                : `Reasoning session initialized · Current runtime state: **${runtimeState}** (no resident model weights verified; inference stays fail-closed until online checkpoint is READY).`)
             : (lang === 'th'
-                ? `สวัสดีครับ! ผมคือ **ZYNTHEOR ${activeModelBadge}** ขับเคลื่อนด้วยโมเดล ${statusData?.model?.architecture || 'NativeLM'} ผ่าน Sovereign Cloud runtime`
-                : `Greetings! I am **ZYNTHEOR ${activeModelBadge}**, powered by ${statusData?.model?.architecture || 'NativeLM'} on the Sovereign Cloud runtime.`),
+                ? `ZYNTHEOR Native Core พร้อมรับคำสั่งเชิงเหตุผลและการอ้างอิงความรู้ (${activeModelBadge} · ${statusData?.model?.architecture || 'NativeLM'} ผ่าน Sovereign Cloud runtime)`
+                : `ZYNTHEOR Native Core ready for grounded reasoning & command execution (${activeModelBadge} · ${statusData?.model?.architecture || 'NativeLM'} on Sovereign Cloud runtime).`),
           thought:
             `Runtime gate: ${runtimeState} · executionVerified=${String(executionVerified)} · Active source: ${statusData?.model?.weightsSource || 'unconfigured'}`,
           timestamp: new Date().toISOString()
@@ -371,11 +371,11 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
             className="min-h-[44px] w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>{lang === 'th' ? '+ บทสนทนาใหม่' : '+ Start New Chat'}</span>
+            <span>{lang === 'th' ? '+ เซสชันเหตุผลใหม่' : '+ New Reasoning Session'}</span>
           </button>
 
           <VividCard
-            title={lang === 'th' ? 'ประวัติการสนทนา' : 'Chat History'}
+            title={lang === 'th' ? 'ประวัติเซสชันคำสั่งและเหตุผล' : 'Reasoning Session History'}
             subtitle={lang === 'th' ? 'บันทึกผ่าน Sovereign Runtime API' : 'Persisted through the Sovereign Runtime API'}
             className="!p-3"
           >

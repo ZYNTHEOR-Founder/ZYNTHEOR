@@ -14,6 +14,13 @@ import crypto from 'crypto';
 import { AuditLedger } from './AuditLedger';
 import { isCloudSqlConfigured } from '../src/db/index.ts';
 import { deleteCloudMemory, upsertCloudMemory } from '../src/db/repositories.ts';
+import {
+  classifyTruthClaim,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export interface MemoryVersionRecord {
   version: number;
@@ -85,6 +92,8 @@ export interface MemoryStoreIntegrityReport {
   expiredPurgedCount: number;
   storeSha256: string;
   checkedAt: string;
+  truthClaims: TruthClaimRecord[];
+  truthSummary: TruthKernelSummary;
 }
 
 export class NativeMemoryController {
@@ -494,6 +503,20 @@ export class NativeMemoryController {
       ? crypto.createHash('sha256').update(fs.readFileSync(this.filePath)).digest('hex')
       : crypto.createHash('sha256').update(JSON.stringify(this.store)).digest('hex');
 
+    const rawClaims: TruthClaimRecord[] = [
+      classifyTruthClaim({
+        domain: 'memory_controller',
+        statement:
+          tamperedKeys.length === 0
+            ? `All ${verifiedItems} memory item(s) match SHA-256 contentDigest (store SHA-256 ${storeSha256.slice(0, 12)})`
+            : `Integrity mismatch detected on ${tamperedKeys.length} memory key(s): ${tamperedKeys.join(', ')}`,
+        classification: tamperedKeys.length === 0 ? 'VERIFIED_FACT' : 'CONTRADICTED',
+        basis: 'SHA-256 contentDigest recomputation over persisted episodic store',
+        evidenceRefs: [storeSha256, ...tamperedKeys],
+      }),
+    ];
+    const truthClaims = enforceTruthClaims(rawClaims);
+
     const report: MemoryStoreIntegrityReport = {
       valid: tamperedKeys.length === 0,
       totalItems: items.length,
@@ -502,6 +525,8 @@ export class NativeMemoryController {
       expiredPurgedCount,
       storeSha256,
       checkedAt: new Date().toISOString(),
+      truthClaims,
+      truthSummary: summarizeTruthClaims(truthClaims),
     };
 
     AuditLedger.append('SYSTEM', 'MEMORY_INTEGRITY_VERIFIED', {
@@ -1117,13 +1142,48 @@ export class NativeMemoryController {
       }
     }
 
+    const integrity = this.verifyStoreIntegrity();
+    const conflictCount = items.reduce((acc, it) => acc + (Array.isArray(it.conflicts) ? it.conflicts.length : 0), 0);
+    const lifecycleClaims = enforceTruthClaims([
+      ...integrity.truthClaims,
+      classifyTruthClaim({
+        domain: 'memory_controller',
+        statement: `Analyzed ${items.length} scoped memory item(s) across ${archives.length} consolidation archive(s)`,
+        classification: 'VERIFIED_FACT',
+        basis: 'Direct scoped inspection of memory_store.json and archive snapshots',
+        evidenceRefs: [integrity.storeSha256],
+      }),
+      ...(duplicates.length > 0
+        ? [
+            classifyTruthClaim({
+              domain: 'memory_controller',
+              statement: `Flagged ${duplicates.length} near-duplicate memory pair(s) by Jaccard threshold`,
+              classification: 'ASSUMPTION',
+              basis: 'Lexical token-Jaccard >= 0.8 similarity heuristic',
+            }),
+          ]
+        : []),
+      ...(conflictCount > 0
+        ? [
+            classifyTruthClaim({
+              domain: 'memory_controller',
+              statement: `${conflictCount} conflicting write record(s) logged across memory history`,
+              classification: 'CONTRADICTED',
+              basis: 'Digest mismatch recorded by storeWithConflictResolution',
+            }),
+          ]
+        : []),
+    ]);
+
     return {
       stats: this.getStats(scope),
       tierCounts,
       classifiedItems: classified.sort((a, b) => b.importanceScore - a.importanceScore).slice(0, 30),
       duplicates,
       archives: archives.reverse(),
-      integrity: this.verifyStoreIntegrity(),
+      integrity,
+      truthClaims: lifecycleClaims,
+      truthSummary: summarizeTruthClaims(lifecycleClaims),
     };
   }
 }

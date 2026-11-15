@@ -24,6 +24,18 @@ import { PerformanceEngine } from './PerformanceEngine.ts';
 import { SelfEvaluationEngine } from './SelfEvaluationEngine.ts';
 import { getMultimodalCapabilityRegistry } from './MultimodalInterfaces.ts';
 import { SovereignIdentity } from './SovereignIdentity.ts';
+import {
+  getCapabilityGatesSnapshot,
+  inspectVerifiedExecutionMetrics,
+  type CapabilityGatesSnapshot,
+} from './CapabilityGates.ts';
+import {
+  classifyTruthClaim,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export type EvalMetricStatus = 'PASS' | 'FAIL' | 'BLOCKED' | 'NOT IMPLEMENTED';
 
@@ -46,6 +58,8 @@ export interface Batch29EvaluationReport {
     runtimeVersion: string;
     datasetVersion: string;
     checkpointSha256: string | null;
+    tokenizerSha256: string | null;
+    activeRuntimeId: string | null;
     runtimeState: string;
     executionVerified: boolean;
     hardware: {
@@ -70,6 +84,11 @@ export interface Batch29EvaluationReport {
   metrics: CognitiveMetricResult[];
   modelCapabilityProbe: any;
   multimodalCapabilities: Awaited<ReturnType<typeof getMultimodalCapabilityRegistry>>;
+  capabilityGates?: CapabilityGatesSnapshot;
+  truthKernel?: {
+    claims: TruthClaimRecord[];
+    summary: TruthKernelSummary;
+  };
   securityValidation: {
     auditChainValid: boolean;
     auditRecords: number;
@@ -128,7 +147,50 @@ async function runPythonModelCapabilityProbe(): Promise<any> {
   });
 }
 
-export async function runBatch29Evaluation(): Promise<Batch29EvaluationReport> {
+const FORBIDDEN_EVAL_INJECTION_KEYS = new Set([
+  'score',
+  'scores',
+  'metrics',
+  'cog08',
+  'cog-08',
+  'taskcompletionscore',
+  'taskcompletionrate',
+  'override',
+  'overrides',
+  'manualscore',
+  'status',
+  'summary',
+  'passed',
+  'failed',
+  'blocked',
+  'totalcycles',
+  'succeededcycles',
+  'executionevidencehash',
+]);
+
+export function assertNoManualScoreInjection(input: unknown): void {
+  if (input === undefined || input === null) return;
+  if (typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('INVALID_EVALUATION_INPUT: Request payload must be an object or empty');
+  }
+  const scan = (obj: Record<string, unknown>, prefix = '') => {
+    for (const [key, val] of Object.entries(obj)) {
+      const normalized = key.toLowerCase();
+      if (FORBIDDEN_EVAL_INJECTION_KEYS.has(normalized)) {
+        throw new Error(
+          `INVALID_EVALUATION_INPUT: Manual score/metric injection ('${prefix}${key}') is forbidden; evaluation scores must come exclusively from verified execution evidence.`
+        );
+      }
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        scan(val as Record<string, unknown>, `${prefix}${key}.`);
+      }
+    }
+  };
+  scan(input as Record<string, unknown>);
+}
+
+export async function runBatch29Evaluation(rawInput?: unknown): Promise<Batch29EvaluationReport> {
+  assertNoManualScoreInjection(rawInput);
   const tStart = Date.now();
   const runId = `b29_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
   const timestamp = new Date().toISOString();
@@ -407,19 +469,10 @@ export async function runBatch29Evaluation(): Promise<Batch29EvaluationReport> {
     evidence: { consolidationId, consolidationSafe },
   });
 
-  // 8. Task Completion Rate (measured from persisted autonomous task execution artifacts if any)
-  let taskCyclesTotal = 0;
-  let taskCyclesSucceeded = 0;
-  try {
-    const execMetricsFile = path.resolve(process.cwd(), 'native_data', 'execution_metrics.json');
-    if (fs.existsSync(execMetricsFile)) {
-      const m = JSON.parse(fs.readFileSync(execMetricsFile, 'utf8'));
-      taskCyclesTotal = Number(m.totalCycles || 0);
-      taskCyclesSucceeded = Number(m.succeededCycles || 0);
-    }
-  } catch {
-    taskCyclesTotal = 0;
-  }
+  // 8. Task Completion Rate (strictly measured from cryptographically verified execution records only)
+  const execInspection = inspectVerifiedExecutionMetrics();
+  const taskCyclesTotal = execInspection.verifiedCycles.length;
+  const taskCyclesSucceeded = execInspection.verifiedSucceededCount;
   const taskCompletionScore =
     taskCyclesTotal > 0 ? Number((taskCyclesSucceeded / taskCyclesTotal).toFixed(3)) : null;
   metrics.push({
@@ -430,9 +483,17 @@ export async function runBatch29Evaluation(): Promise<Batch29EvaluationReport> {
     unit: 'ratio',
     details:
       taskCyclesTotal > 0
-        ? `${taskCyclesSucceeded}/${taskCyclesTotal} persisted autonomous execution cycles completed.`
-        : 'No persisted autonomous task execution cycles recorded yet.',
-    evidence: { totalCycles: taskCyclesTotal, succeededCycles: taskCyclesSucceeded },
+        ? `${taskCyclesSucceeded}/${taskCyclesTotal} cryptographically verified autonomous execution cycle(s) completed (rejected/unverified=${execInspection.rejectedCycles.length}).`
+        : execInspection.rejectedCycles.length > 0
+        ? `BLOCKED: ${execInspection.rejectedCycles.length} unverified/tampered cycle(s) rejected (zero valid executionEvidenceHash records).`
+        : 'BLOCKED: Zero verified autonomous task execution cycles recorded yet.',
+    evidence: {
+      totalCycles: taskCyclesTotal,
+      succeededCycles: taskCyclesSucceeded,
+      rejectedCyclesCount: execInspection.rejectedCycles.length,
+      rejectedReasons: execInspection.rejectedCycles.slice(0, 5),
+      verifiedExecutionIds: execInspection.verifiedCycles.slice(0, 5).map((c: any) => c.executionId || c.taskId),
+    },
   });
 
   // 9. Bilingual Capability & Native Model Capability Probe
@@ -486,23 +547,39 @@ export async function runBatch29Evaluation(): Promise<Batch29EvaluationReport> {
   const rolledBack = perf.rollbackOptimization(snap.snapshotId, 'Batch29Evaluator');
   const perfTel = perf.getTelemetry();
   const memMb = Number((process.memoryUsage().rss / (1024 * 1024)).toFixed(2));
+  const avgLatencyLabel = perfTel.recentAvgLatencyMs !== null ? `${perfTel.recentAvgLatencyMs}ms` : 'UNAVAILABLE';
   metrics.push({
     id: 'COG-12',
     name: 'Runtime Latency, RSS Memory & Reversible Optimization',
     status: rolledBack.rolledBack ? 'PASS' : 'FAIL',
     score: perfTel.recentAvgLatencyMs,
     unit: 'ms',
-    details: `avgLatency=${perfTel.recentAvgLatencyMs}ms; Node RSS=${memMb}MiB; Optimization rollback verified=${rolledBack.rolledBack}.`,
+    details: `avgLatency=${avgLatencyLabel}; Node RSS=${memMb}MiB; Optimization rollback verified=${rolledBack.rolledBack}.`,
     evidence: {
       recentAvgLatencyMs: perfTel.recentAvgLatencyMs,
+      latencyStatus: perfTel.latencyStatus,
       nodeRssMb: memMb,
       bottlenecksCount: perfTel.bottlenecks.length,
       rollbackVerified: rolledBack.rolledBack,
     },
   });
 
-  // Security & Multimodal Probes
+  // Security, Multimodal & Capability Gates
   const multimodalCapabilities = await getMultimodalCapabilityRegistry();
+  const capabilityGates = await getCapabilityGatesSnapshot({
+    connectivity: conn,
+    multimodal: multimodalCapabilities,
+  });
+  const evalTruthClaims = enforceTruthClaims([
+    ...capabilityGates.truthClaims,
+    ...perfTel.truthClaims,
+    classifyTruthClaim({
+      domain: 'capability_gate',
+      statement: `COG-08 autonomous completion=${taskCompletionScore ?? 'BLOCKED'} over ${taskCyclesTotal} verified execution record(s)`,
+      classification: taskCyclesTotal > 0 ? 'VERIFIED_FACT' : 'UNVERIFIED',
+      basis: `SHA-256 executionEvidenceHash inspection (rejected=${execInspection.rejectedCycles.length})`,
+    }),
+  ]);
   const auditCheck = AuditLedger.verifyIntegrity();
   const idSim = SovereignIdentity.getInstance().runSecuritySimulation();
   const idPassed = idSim.filter((r) => r.status === 'PASS').length;
@@ -528,9 +605,11 @@ export async function runBatch29Evaluation(): Promise<Batch29EvaluationReport> {
     timestamp,
     status: overallStatus,
     provenance: {
-      runtimeVersion: 'ZYNTHEOR-Batch29',
+      runtimeVersion: 'ZYNTHEOR-Core0.3-Batch30',
       datasetVersion: `KnowledgeCorpus+B29Bench@${timestamp.slice(0, 10)}`,
       checkpointSha256: conn.weightsLoaded ? conn.checkpointSha256 || null : null,
+      tokenizerSha256: conn.tokenizerSha256 || null,
+      activeRuntimeId: conn.activeRuntimeId || null,
       runtimeState: conn.runtimeState,
       executionVerified: conn.executionVerified,
       hardware: {
@@ -555,6 +634,11 @@ export async function runBatch29Evaluation(): Promise<Batch29EvaluationReport> {
     metrics,
     modelCapabilityProbe,
     multimodalCapabilities,
+    capabilityGates,
+    truthKernel: {
+      claims: evalTruthClaims,
+      summary: summarizeTruthClaims(evalTruthClaims),
+    },
     securityValidation: {
       auditChainValid: auditCheck.valid,
       auditRecords: auditCheck.totalRecords,

@@ -20,6 +20,13 @@ import { KnowledgeIntelligenceEngine } from './KnowledgeIntelligenceEngine.ts';
 import { KnowledgeGraphEngine } from './KnowledgeGraphEngine.ts';
 import { PerformanceEngine } from './PerformanceEngine.ts';
 import { ConnectivityMonitor } from './ConnectivityMonitor.ts';
+import {
+  classifyTruthClaim,
+  enforceTruthClaims,
+  summarizeTruthClaims,
+  type TruthClaimRecord,
+  type TruthKernelSummary,
+} from './TruthKernel.ts';
 
 export type ProblemClass =
   | 'deterministic_symbolic'
@@ -83,6 +90,8 @@ export interface AdaptiveReasoningOutcome {
   };
   answerSummary: string;
   verified: boolean;
+  truthClaims: TruthClaimRecord[];
+  truthSummary: TruthKernelSummary;
 }
 
 export interface IndependentBenchmarkCase {
@@ -418,13 +427,14 @@ export class AdaptiveReasoningEngine {
 
         // Hypothesis 2 (Multi-Path): Objective candidate comparison via Python verifier
         if (problemClass === 'hybrid_execution' && params.prompt.length > 0) {
+          const measuredLatencyMs = Math.max(1, Date.now() - Date.parse(ctx.analyzedAt));
           const candidates = hypotheses.map((h) => ({
             id: h.hypothesisId,
             tests_passed: h.verifierPassed ? 1 : 0,
             tests_total: 1,
             constraints_satisfied: ctx.conflicts.length === 0,
             safety_passed: true,
-            latency_ms: 12,
+            latency_ms: measuredLatencyMs,
           }));
           const altRank = await this.runPythonVerifier({ op: 'evaluate_alternatives', candidates });
           internalTraceSteps.push(`alt_rank_selected=${altRank.selected}`);
@@ -462,6 +472,48 @@ export class AdaptiveReasoningEngine {
       .update(internalTraceSteps.join('|'))
       .digest('hex');
 
+    const rawClaims: TruthClaimRecord[] = [
+      classifyTruthClaim({
+        domain: 'adaptive_reasoning',
+        statement: profiled.result.verified
+          ? `Winning hypothesis '${profiled.result.winner.hypothesisId}' passed verifier '${profiled.result.verifierAttribution}' and counterexample probe`
+          : `Hypothesis '${profiled.result.winner.hypothesisId}' failed verification or triggered honest abstention`,
+        classification: profiled.result.verified ? 'VERIFIED_FACT' : 'UNVERIFIED',
+        basis: `Verifier=${profiled.result.verifierAttribution}; counterexamplePassed=${profiled.result.winner.counterexamplePassed}`,
+        evidenceRefs: [traceDigestSha256, ...profiled.result.winner.evidenceRefs.map((e) => e.contentHash)],
+      }),
+      classifyTruthClaim({
+        domain: 'adaptive_reasoning',
+        statement: `Epistemic confidence=${profiled.result.calibratedConfidence} (uncertainty=${profiled.result.epistemicUncertainty})`,
+        classification: 'ASSUMPTION',
+        basis: 'Heuristic scoring formula combining verifier pass/fail and context conflict penalty',
+      }),
+    ];
+    if (ctx.conflicts.length > 0) {
+      rawClaims.push(
+        classifyTruthClaim({
+          domain: 'adaptive_reasoning',
+          statement: `${ctx.conflicts.length} unresolved context conflict(s) lowered confidence`,
+          classification: 'CONTRADICTED',
+          basis: 'Context conflict detector flagged opposing assertions or numeric mismatch',
+          evidenceRefs: ctx.conflicts.map((c) => c.conflictId),
+        })
+      );
+    }
+    if (profiled.result.revisedToStrategy) {
+      rawClaims.push(
+        classifyTruthClaim({
+          domain: 'adaptive_reasoning',
+          statement: `Strategy fallback proposed from '${selectedStrategy}' to '${profiled.result.revisedToStrategy}'`,
+          classification: 'PROPOSED',
+          basis: profiled.result.revisionReason || 'Guardrail triggered when Native Model runtime is not verified',
+        })
+      );
+    }
+
+    const truthClaims = enforceTruthClaims(rawClaims);
+    const truthSummary = summarizeTruthClaims(truthClaims);
+
     const outcome: AdaptiveReasoningOutcome = {
       reasoningId: `rsn_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`,
       timestamp: new Date().toISOString(),
@@ -496,6 +548,8 @@ export class AdaptiveReasoningEngine {
       },
       answerSummary: profiled.result.answerSummary,
       verified: profiled.result.verified,
+      truthClaims,
+      truthSummary,
     };
 
     this.history.unshift(outcome);

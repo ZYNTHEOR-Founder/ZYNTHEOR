@@ -1,10 +1,11 @@
 import React from 'react';
-import { RuntimeLifecycleState, StatusLevel } from '../../types';
+import { BridgeLifecycleState, RuntimeLifecycleState, StatusLevel } from '../../types';
 import { ZYNTHEOR_STATUS_TOKENS } from './tokens';
 
 export type MinimalIndicatorState =
   | StatusLevel
   | RuntimeLifecycleState
+  | BridgeLifecycleState
   | 'CHECKING'
   | 'FAIL_CLOSED';
 
@@ -23,6 +24,11 @@ const INDICATOR_STYLES: Record<
     textHex: '#CCFF00',
   },
   READY: {
+    hex: ZYNTHEOR_STATUS_TOKENS.ONLINE.hex,
+    glow: ZYNTHEOR_STATUS_TOKENS.ONLINE.glow,
+    textHex: '#CCFF00',
+  },
+  Connected: {
     hex: ZYNTHEOR_STATUS_TOKENS.ONLINE.hex,
     glow: ZYNTHEOR_STATUS_TOKENS.ONLINE.glow,
     textHex: '#CCFF00',
@@ -49,6 +55,43 @@ const INDICATOR_STYLES: Record<
     glow: '0 0 9px rgba(0, 240, 255, 0.65)',
     textHex: '#00F0FF',
     isActiveDefault: true,
+  },
+  Initializing: {
+    hex: '#00F0FF',
+    glow: '0 0 9px rgba(0, 240, 255, 0.65)',
+    textHex: '#00F0FF',
+    isActiveDefault: true,
+  },
+  Connecting: {
+    hex: '#00F0FF',
+    glow: '0 0 9px rgba(0, 240, 255, 0.65)',
+    textHex: '#00F0FF',
+    isActiveDefault: true,
+  },
+  Reconnecting: {
+    hex: '#FF5E3A',
+    glow: '0 0 9px rgba(255, 94, 58, 0.65)',
+    textHex: '#FF8C73',
+    isActiveDefault: true,
+    isError: true,
+  },
+  Degraded: {
+    hex: ZYNTHEOR_STATUS_TOKENS.PARTIAL.hex,
+    glow: ZYNTHEOR_STATUS_TOKENS.PARTIAL.glow,
+    textHex: '#FF8C73',
+    isError: true,
+  },
+  Unreachable: {
+    hex: '#FF007F',
+    glow: '0 0 9px rgba(255, 0, 127, 0.60)',
+    textHex: '#FF66B2',
+    isError: true,
+  },
+  'Service Error': {
+    hex: ZYNTHEOR_STATUS_TOKENS.FAILED.hex,
+    glow: ZYNTHEOR_STATUS_TOKENS.FAILED.glow,
+    textHex: '#FF66B2',
+    isError: true,
   },
   PARTIAL: {
     hex: ZYNTHEOR_STATUS_TOKENS.PARTIAL.hex,

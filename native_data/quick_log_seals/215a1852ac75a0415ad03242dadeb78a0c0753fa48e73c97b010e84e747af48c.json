@@ -1,1 +1,1 @@
-{"sealId":"dd93299d-455d-4a5d-ba38-147138b4058e","contentHash":"215a1852ac75a0415ad03242dadeb78a0c0753fa48e73c97b010e84e747af48c","userId":"user_rbac","tenantId":"tenant_a","sealedAt":"2026-11-15T08:01:24.887Z","logs":["[INIT] seal test","[OK] line2"]}
+{"sealId":"65eac42f-2b6c-43a8-b7fe-bc5108124b8b","contentHash":"215a1852ac75a0415ad03242dadeb78a0c0753fa48e73c97b010e84e747af48c","userId":"user_rbac","tenantId":"tenant_a","sealedAt":"2026-11-15T08:18:56.285Z","logs":["[INIT] seal test","[OK] line2"]}

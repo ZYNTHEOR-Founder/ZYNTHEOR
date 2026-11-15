@@ -457,24 +457,50 @@ class PureSeqLM:
         return logits, None
 
     @staticmethod
-    def ce_loss_seq(logits: List[List[float]], targets: List[int]) -> Tuple[float, List[List[float]]]:
+    def apply_prompt_loss_mask(
+        targets: List[int],
+        prompt_len: int = 0,
+        pad_id: Optional[int] = 0,
+        ignore_index: int = -100,
+    ) -> List[int]:
+        """Mask prompt prefix tokens and trailing pad tokens with ignore_index (-100)."""
+        masked: List[int] = []
+        for idx, tgt in enumerate(targets):
+            if idx < prompt_len or (pad_id is not None and tgt == pad_id):
+                masked.append(ignore_index)
+            else:
+                masked.append(tgt)
+        return masked
+
+    @staticmethod
+    def ce_loss_seq(
+        logits: List[List[float]],
+        targets: List[int],
+        ignore_index: int = -100,
+    ) -> Tuple[float, List[List[float]]]:
         T = len(targets)
         V = len(logits[0])
+        valid_count = sum(1 for tgt in targets if tgt != ignore_index)
+        if valid_count == 0:
+            return 0.0, [[0.0] * V for _ in range(T)]
         total_loss = 0.0
         dlogits: List[List[float]] = []
-        inv_T = 1.0 / T
+        inv_valid = 1.0 / valid_count
         for t in range(T):
+            tgt = targets[t]
+            if tgt == ignore_index:
+                dlogits.append([0.0] * V)
+                continue
             row = logits[t]
             m = max(row)
             exps = [math.exp(val - m) for val in row]
             s_exp = sum(exps)
             inv_s = 1.0 / s_exp
             probs = [e * inv_s for e in exps]
-            tgt = targets[t]
             total_loss += -math.log(max(probs[tgt], 1e-12))
             probs[tgt] -= 1.0
-            dlogits.append([pr * inv_T for pr in probs])
-        return total_loss * inv_T, dlogits
+            dlogits.append([pr * inv_valid for pr in probs])
+        return total_loss * inv_valid, dlogits
 
     def backward_seq(self, dlogits: List[List[float]], cache: Dict[str, Any]) -> Dict[str, List[float]]:
         c, p = self.cfg, self.p

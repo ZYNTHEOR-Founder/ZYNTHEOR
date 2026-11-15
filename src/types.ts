@@ -91,13 +91,41 @@ export interface ResourceSample {
   systemRamUsedMb: number;
   systemRamTotalMb: number;
   systemRamFreeMb: number;
-  tokensPerSec?: number;
-  lastInferenceLatencyMs?: number;
+  tokensPerSec?: number | null;
+  lastInferenceLatencyMs?: number | null;
+  telemetryStatus?: 'MEASURED' | 'UNAVAILABLE';
   // Compatibility fields
   cpuPercent?: number;
   vramMb?: number;
   ramUsedMb?: number;
   ramTotalMb?: number;
+}
+
+export type BridgeLifecycleState =
+  | 'Initializing'
+  | 'Connecting'
+  | 'Connected'
+  | 'Degraded'
+  | 'Reconnecting'
+  | 'Unreachable'
+  | 'Service Error';
+
+export interface BridgeLifecycleTelemetry {
+  state: BridgeLifecycleState;
+  previousState: BridgeLifecycleState | null;
+  transitionAt: string;
+  pid: number | null;
+  heartbeatIntervalMs: number;
+  lastHeartbeatAt: string | null;
+  lastHeartbeatLatencyMs: number | null;
+  reconnectAttempt: number;
+  maxReconnectAttempts: number;
+  nextRetryDelayMs: number | null;
+  nextRetryAt: string | null;
+  consecutiveFailures: number;
+  totalPings: number;
+  totalFailures: number;
+  lastError: string | null;
 }
 
 export interface ConnectivityHealthState {
@@ -116,9 +144,21 @@ export interface ConnectivityHealthState {
   cloudStorageConfigured?: boolean;
   cloudStorageReachable?: boolean;
   pythonBridgeReachable?: boolean;
+  bridgeLifecycle?: BridgeLifecycleTelemetry;
   weightsLoaded: boolean;
   weightsSource?: string | null;
+  checkpointPath?: string | null;
   checkpointSha256?: string | null;
+  tokenizerSha256?: string | null;
+  activeRuntimeId?: string | null;
+  lastInferenceEvidence?: {
+    checkpointPath: string | null;
+    checkpointSha256: string | null;
+    tokenizerSha256: string | null;
+    activeRuntimeId: string | null;
+    inferenceTimestamp: string;
+    executionDurationMs: number;
+  } | null;
   totalParams?: number;
   modelName?: string | null;
   latencyMs?: number;
@@ -139,7 +179,12 @@ export interface SystemStatusData {
     memoryFootprintMb?: number;
     storageMode?: string;
     weightsSource?: string;
+    checkpointPath?: string | null;
     checkpointHash: string;
+    checkpointSha256?: string | null;
+    tokenizerSha256?: string | null;
+    activeRuntimeId?: string | null;
+    lastInferenceEvidence?: ConnectivityHealthState['lastInferenceEvidence'];
     expectedCheckpointHash?: string | null;
     signatureMatchesExpected?: boolean;
     weightsLoaded: boolean;
@@ -328,6 +373,12 @@ export interface ExecutionCycleSummary {
   testsTotal: number;
   durationMs: number;
   completedAt: string;
+  executionId?: string;
+  startTimestamp?: string;
+  finishTimestamp?: string;
+  executionDurationMs?: number;
+  executionResult?: 'DELIVERED' | 'BLOCKED';
+  executionEvidenceHash?: string;
 }
 
 export interface ExecutionMetricsSummary {

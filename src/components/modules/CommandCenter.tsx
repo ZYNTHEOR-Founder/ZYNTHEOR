@@ -78,18 +78,24 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
       <section className="command-hero relative overflow-hidden rounded-3xl border p-6 md:p-9">
         <div className="command-hero-orb" aria-hidden="true" />
         <div className="relative z-10 max-w-3xl">
-          <Eyebrow color="cyan" className="mb-3">
-            ZYNTHEOR · Autonomous Intelligence Platform
+          <Eyebrow color={modelReady ? 'cyan' : 'coral'} className="mb-3">
+            {modelReady
+              ? 'ZYNTHEOR · NATIVE MULTI-DOMAIN INTELLIGENCE (VERIFIED)'
+              : `ZYNTHEOR · SOVEREIGN NATIVE ARCHITECTURE (GATE: ${runtimeState || 'NOT_CONFIGURED'})`}
           </Eyebrow>
           <Heading as="h2" scale="display" className="max-w-3xl text-white">
             {lang === 'th'
-              ? 'ปัญญาประดิษฐ์อเนกประสงค์ ที่คิด เข้าใจ สร้าง และเรียนรู้'
-              : 'A general-purpose intelligence that understands, reasons, creates and learns.'}
+              ? 'แกนปัญญา Native Multi-Domain บน Sovereign Cloud Runtime'
+              : 'Native Multi-Domain Intelligence on Sovereign Cloud Runtime.'}
           </Heading>
           <Text size="base" className="mt-3 max-w-2xl text-[#9AA8C7]">
-            {lang === 'th'
-              ? 'ZYNTHEOR เชื่อมความสามารถหลายด้านไว้บน Native Intelligence Core เดียว ตั้งแต่การรับรู้และให้เหตุผล ไปจนถึงการสร้าง วิจัย ลงมือทำ และปรับปรุงจากผลการทดสอบ'
-              : 'ZYNTHEOR brings multiple capabilities together around one Native Intelligence Core—from perception and reasoning to creation, research, execution and evidence-based improvement.'}
+            {modelReady
+              ? (lang === 'th'
+                  ? 'Native Intelligence Core ออนไลน์และผ่านการยืนยัน Forward Execution แล้ว เชื่อมต่อ Reasoner, Knowledge, Research, Creation และ Evaluation ร่วมกัน'
+                  : 'Native Intelligence Core is online and execution-verified, connecting reasoning, knowledge, research, creation, and evidence-based evaluation.')
+              : (lang === 'th'
+                  ? 'โครงสร้างระบบออนไลน์พร้อมกลไก Fail-Closed: Deterministic Sandbox, Audit Ledger และ Workspace ทำงานปกติ ส่วน Neural Inference ถูกระงับจนกว่าจะตั้งค่าและยืนยัน Cloud Checkpoint'
+                  : 'Fail-closed Sovereign Cloud runtime: deterministic sandbox, Audit Ledger, and Knowledge Workspace are active, while neural inference remains gated until a signed Cloud Checkpoint is configured and verified.')}
           </Text>
           <div className="mt-7 flex flex-wrap gap-3">
             <button
@@ -113,17 +119,21 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           <div>
             <Eyebrow color="violet">{lang === 'th' ? 'ขอบเขตความสามารถ' : 'INTELLIGENCE DOMAINS'}</Eyebrow>
             <Heading as="h3" scale="h2" id="command-capabilities-title">
-              {lang === 'th' ? 'โครงสร้างเป้าหมาย: หกแขนง บน Native Core' : 'Six capability domains. One native core.'}
+              {lang === 'th' ? 'โครงสร้าง 6 แขนง เชื่อมต่อบน Native Core เดียว' : 'Six capability domains unified by one Native Core.'}
             </Heading>
             <Text size="sm" className="mt-1" tone="secondary">
               {lang === 'th'
-                ? 'เลือกพื้นที่พัฒนาแต่ละด้าน การเชื่อมต่อและความสามารถจริงต้องยืนยันจาก Runtime และผลทดสอบ'
-                : 'Open a development domain. Integration and real capability must be confirmed by runtime and test evidence.'}
+                ? 'ความสามารถเชิงประสาทเทียมแต่ละด้านถูกควบคุมด้วยหลักฐานจริงจาก Runtime และผลทดสอบ (Zero Simulation)'
+                : 'Each intelligence domain is execution-gated by live runtime verification and real evaluation evidence (Zero Simulation).'}
             </Text>
           </div>
           <div className="command-core-chip">
             <BrainCircuit className="h-4 w-4" />
-            <span>TARGET ARCHITECTURE · NATIVE CORE</span>
+            <span>
+              {modelReady
+                ? 'NATIVE CORE · EXECUTION VERIFIED'
+                : `NATIVE CORE GATE · ${runtimeState || 'NOT_CONFIGURED'}`}
+            </span>
           </div>
         </div>
         <div className="command-capability-grid">
@@ -250,6 +260,49 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                     {runtimeState || (modelReady ? 'READY' : 'NOT_LOADED')}
                   </span>
                 </div>
+                {statusData?.connectivity?.bridgeLifecycle && (
+                  <div className="flex items-start gap-3 py-3">
+                    <span
+                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                        statusData.connectivity.bridgeLifecycle.state === 'Connected'
+                          ? 'bg-[#CCFF00]'
+                          : statusData.connectivity.bridgeLifecycle.state === 'Degraded'
+                            ? 'bg-[#FF5E3A]'
+                            : statusData.connectivity.bridgeLifecycle.state === 'Initializing' ||
+                                statusData.connectivity.bridgeLifecycle.state === 'Connecting'
+                              ? 'bg-[#00F0FF]'
+                              : 'bg-[#FF007F]'
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold">{lang === 'th' ? 'Native Python Bridge' : 'Native Python bridge'}</div>
+                      <div className="mt-1 break-words text-xs font-mono" style={{ color: 'var(--app-text-secondary)' }}>
+                        {statusData.connectivity.bridgeLifecycle.pid
+                          ? `PID ${statusData.connectivity.bridgeLifecycle.pid}`
+                          : 'No active PID'}
+                        {typeof statusData.connectivity.bridgeLifecycle.lastHeartbeatLatencyMs === 'number'
+                          ? ` · ${statusData.connectivity.bridgeLifecycle.lastHeartbeatLatencyMs}ms`
+                          : ''}
+                        {statusData.connectivity.bridgeLifecycle.reconnectAttempt > 0
+                          ? ` · retry ${statusData.connectivity.bridgeLifecycle.reconnectAttempt}/${statusData.connectivity.bridgeLifecycle.maxReconnectAttempts}`
+                          : ''}
+                      </div>
+                    </div>
+                    <span
+                      className="text-xs font-mono shrink-0"
+                      style={{
+                        color:
+                          statusData.connectivity.bridgeLifecycle.state === 'Connected'
+                            ? '#CCFF00'
+                            : statusData.connectivity.bridgeLifecycle.state === 'Degraded'
+                              ? '#FF8C73'
+                              : '#FF66B2',
+                      }}
+                    >
+                      {statusData.connectivity.bridgeLifecycle.state}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-start gap-3 py-3">
                   <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${audit?.chainValid ? 'bg-[#CCFF00]' : 'bg-[#FF007F]'}`} />
                   <div className="min-w-0 flex-1">

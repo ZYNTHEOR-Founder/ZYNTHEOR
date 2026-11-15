@@ -11,6 +11,7 @@ import sys
 import math
 import json
 import time
+import uuid
 import struct
 import hashlib
 import threading
@@ -91,7 +92,9 @@ class NativeNeuralModel:
 
         self.weights_source = ""
         self.checkpoint_path = ""
+        self.active_runtime_id = f"zyn-rt-{os.getpid()}-{uuid.uuid4().hex[:8]}"
         self.tokenizer = SovereignTokenizer(self.config.vocab_size)
+        self.tokenizer_sha256 = self.compute_tokenizer_sha256()
         self.weights_loaded = False
         self.learned_weights_loaded = False
         self.checkpoint_hash = ""
@@ -126,6 +129,24 @@ class NativeNeuralModel:
         # Load and verify checkpoint strictly from Cloud Object Storage (Fail-Closed)
         self.load_checkpoint(cloud_bytes=cloud_bytes)
         self.load_memory()
+
+    def compute_tokenizer_sha256(self) -> str:
+        """Deterministic SHA-256 over ordered active tokenizer vocabulary."""
+        limit = min(int(self.config.vocab_size), len(self.tokenizer.id_to_token))
+        vocab_items = [self.tokenizer.id_to_token.get(i, f"<tok_{i}>") for i in range(limit)]
+        return hashlib.sha256(json.dumps(vocab_items, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+    def _build_inference_evidence(self, elapsed_ms: float) -> Dict[str, Any]:
+        ckpt_path = self.checkpoint_path or self.weights_source or None
+        ckpt_sha = self.checkpoint_hash or None
+        return {
+            "checkpoint_path": ckpt_path,
+            "checkpoint_sha256": ckpt_sha,
+            "tokenizer_sha256": self.tokenizer_sha256,
+            "active_runtime_id": self.active_runtime_id,
+            "inference_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "execution_duration_ms": round(float(elapsed_ms), 2),
+        }
 
     def cancel_inference(self, correlation_id: Optional[str] = None) -> None:
         with self._cancel_lock:
@@ -219,12 +240,20 @@ class NativeNeuralModel:
                 "NOT_TRAINED"
             )
             if isinstance(self.load_diagnostics, dict):
+                verify_ms = round((time.perf_counter() - t0) * 1000.0, 2)
                 self.load_diagnostics["execution_verified"] = True
-                self.load_diagnostics["execution_verify_ms"] = round((time.perf_counter() - t0) * 1000.0, 2)
+                self.load_diagnostics["execution_verify_ms"] = verify_ms
                 self.load_diagnostics["runtime_state"] = self.runtime_state
                 self.load_diagnostics["trained_provenance"] = self.trained_provenance
                 self.load_diagnostics["quality_gate_passed"] = self.quality_gate_passed
                 self.load_diagnostics["quality_gate_reason"] = self.quality_gate_reason
+                self.load_diagnostics["tokenizer_sha256"] = self.tokenizer_sha256
+                self.load_diagnostics["active_runtime_id"] = self.active_runtime_id
+                stages = self.load_diagnostics.get("stages")
+                if isinstance(stages, list):
+                    for st in stages:
+                        if isinstance(st, dict) and st.get("id") == "execution_verify":
+                            st["duration_ms"] = verify_ms
             return True, None
         except Exception as exc:
             self.execution_verified = False
@@ -302,6 +331,7 @@ class NativeNeuralModel:
                 self.config.d_head = self.config.d_model // max(1, self.config.n_heads)
                 self.config.max_seq_len = int(cfg.get("ctx", seq_lm.cfg.ctx))
                 self.config.total_params = int(seq_meta.get("total_params", seq_lm.num_params()))
+                self.tokenizer_sha256 = self.compute_tokenizer_sha256()
                 self.checkpoint_hash = actual_sha256
                 self.weights_loaded = True
                 self.learned_weights_loaded = True
@@ -323,6 +353,8 @@ class NativeNeuralModel:
                     "trained_provenance": self.trained_provenance,
                     "trained_provenance_reason": self.trained_provenance_reason,
                     "checkpoint_sha256": self.checkpoint_hash,
+                    "tokenizer_sha256": self.tokenizer_sha256,
+                    "active_runtime_id": self.active_runtime_id,
                     "file_size_bytes": file_size_bytes,
                     "header_bytes": header_bytes,
                     "payload_bytes": len(payload),
@@ -349,10 +381,10 @@ class NativeNeuralModel:
 
             if storage_mode == "LEARNED_WEIGHTS_TRAINED_V2":
                 try:
-                    from qplus_native.lm_v2 import NativeLM
+                    from qplus_native.lm_v2 import NativeLM, np as _lm_np
                 except ImportError as imp_err:
                     raise RuntimeError(
-                        f"FAIL_CLOSED: Online Cloud Runtime (NumPy) required for LEARNED_WEIGHTS_TRAINED_V2 ({imp_err}). Local fallback is disabled."
+                        f"FAIL_CLOSED: Online Cloud Runtime array backend required for LEARNED_WEIGHTS_TRAINED_V2 ({imp_err}). Local fallback is disabled."
                     ) from imp_err
                 t_unpack_start = time.perf_counter()
                 lm, lm_meta = NativeLM.load_bytes(raw_container, None)
@@ -370,11 +402,12 @@ class NativeNeuralModel:
                 self.config.d_head = self.config.d_model // max(1, self.config.n_heads)
                 self.config.max_seq_len = int(cfg.get("ctx", 64))
                 self.config.total_params = int(lm_meta.get("total_params", lm.num_params()))
+                self.tokenizer_sha256 = self.compute_tokenizer_sha256()
                 self.checkpoint_hash = lm_meta["sha256"]
                 self.weights_loaded = True
                 self.learned_weights_loaded = True
                 for tname, tarr in lm.p.items():
-                    if not __import__("numpy").all(__import__("numpy").isfinite(tarr)):
+                    if not _lm_np.all(_lm_np.isfinite(tarr)):
                         raise RuntimeError(f"FAIL_CLOSED: non-finite (NaN/Inf) weight detected in NativeLM tensor '{tname}'")
                 self.tensor_validation_ok = True
                 self.weights_role = "learned_sequence_lm"
@@ -417,6 +450,8 @@ class NativeNeuralModel:
                     "trained_provenance": self.trained_provenance,
                     "trained_provenance_reason": self.trained_provenance_reason,
                     "checkpoint_sha256": self.checkpoint_hash,
+                    "tokenizer_sha256": self.tokenizer_sha256,
+                    "active_runtime_id": self.active_runtime_id,
                     "file_size_bytes": file_size_bytes,
                     "header_bytes": header_bytes,
                     "payload_bytes": payload_bytes,
@@ -459,6 +494,7 @@ class NativeNeuralModel:
                     f"metadata total={stored_params}, trained_subgraph={trained_params}"
                 )
             self.config.total_params = 231168
+            self.tokenizer_sha256 = self.compute_tokenizer_sha256()
             self.checkpoint_hash = actual_sha256
             self.weights_loaded = True
             self.metadata = metadata
@@ -493,6 +529,8 @@ class NativeNeuralModel:
                 "trained_provenance": self.trained_provenance,
                 "trained_provenance_reason": self.trained_provenance_reason,
                 "checkpoint_sha256": self.checkpoint_hash,
+                "tokenizer_sha256": self.tokenizer_sha256,
+                "active_runtime_id": self.active_runtime_id,
                 "file_size_bytes": file_size_bytes,
                 "header_bytes": header_bytes,
                 "payload_bytes": payload_bytes,
@@ -582,6 +620,10 @@ class NativeNeuralModel:
         diag["trained_provenance"] = self.trained_provenance
         diag["trained_provenance_reason"] = self.trained_provenance_reason
         diag["weights_role"] = self.weights_role
+        diag["checkpoint_path"] = self.checkpoint_path or self.weights_source or None
+        diag["checkpoint_sha256"] = self.checkpoint_hash or None
+        diag["tokenizer_sha256"] = self.tokenizer_sha256
+        diag["active_runtime_id"] = self.active_runtime_id
         diag["python_process_rss_bytes"] = rss_bytes
         diag["python_process_rss_mb"] = round(rss_bytes / (1024 * 1024), 2)
         diag["reloaded"] = bool(reload_weights)
@@ -721,6 +763,7 @@ class NativeNeuralModel:
                 "prompt_truncated": prompt_truncated,
                 "max_context_len": max_ctx,
                 "effective_context_len": len(bounded_tokens),
+                **self._build_inference_evidence(target_res["latency_ms"]),
             }
 
         if role in ("chat", "assistant") and self._seq_lm is not None:
@@ -762,6 +805,7 @@ class NativeNeuralModel:
                 "prompt_truncated": prompt_truncated,
                 "max_context_len": max_ctx,
                 "effective_context_len": len(ids),
+                **self._build_inference_evidence(elapsed_ms),
             }
 
         # Autoregressive forward pass step verifying token logits (legacy subgraph / structured agent roles)
@@ -772,6 +816,7 @@ class NativeNeuralModel:
         output_tokens = self.tokenizer.encode(output_text)
 
         duration = time.time() - start_time
+        elapsed_ms = round(duration * 1000, 2)
         tokens_per_sec = len(output_tokens) / max(duration, 0.001)
 
         return {
@@ -780,7 +825,7 @@ class NativeNeuralModel:
             "input_tokens_count": len(input_tokens),
             "output_tokens_count": len(output_tokens),
             "autoregressive_tokens_count": len(auto_tokens),
-            "latency_ms": round(duration * 1000, 2),
+            "latency_ms": elapsed_ms,
             "tokens_per_sec": round(tokens_per_sec, 2),
             "checkpoint_hash": self.checkpoint_hash,
             "total_params": self.config.total_params,
@@ -797,6 +842,7 @@ class NativeNeuralModel:
             "prompt_truncated": prompt_truncated,
             "max_context_len": max_ctx,
             "effective_context_len": len(bounded_tokens),
+            **self._build_inference_evidence(elapsed_ms),
         }
 
     def generate_learned(
@@ -829,6 +875,9 @@ class NativeNeuralModel:
             )
         )
         text = self.tokenizer.decode(out)
+        elapsed_ms = round((time.time() - t0) * 1000, 2)
+        ev = self._build_inference_evidence(elapsed_ms)
+        ev["checkpoint_sha256"] = meta.get("sha256", self.checkpoint_hash)
         return {
             "text": text,
             "source": "learned_logits_cloud",
@@ -836,10 +885,10 @@ class NativeNeuralModel:
             "template_used": False,
             "input_tokens_count": len(ids),
             "output_tokens_count": len(out),
-            "latency_ms": round((time.time() - t0) * 1000, 2),
-            "checkpoint_sha256": meta.get("sha256", self.checkpoint_hash),
+            "latency_ms": elapsed_ms,
             "total_params": int(meta.get("total_params", self.config.total_params)),
             "validation_perplexity": meta.get("validation_perplexity"),
+            **ev,
         }
 
     def generate_target(
@@ -878,20 +927,23 @@ class NativeNeuralModel:
         )
         text = self.tokenizer.decode(out)
         meta = self._target_lm_meta
+        elapsed_ms = round((time.time() - t0) * 1000, 2)
+        ev = self._build_inference_evidence(elapsed_ms)
+        ev["checkpoint_sha256"] = meta["sha256"]
         return {
             "text": text,
             "source": "native_cloud_runtime",
             "weights_source": self.weights_source,
             "input_tokens_count": len(ids),
             "output_tokens_count": len(out),
-            "latency_ms": round((time.time() - t0) * 1000, 2),
-            "checkpoint_sha256": meta["sha256"],
+            "latency_ms": elapsed_ms,
             "total_params": meta["total_params"],
             "training_steps": meta.get("training_steps"),
             "validation_perplexity": meta.get("validation_perplexity"),
             "repetition_penalty": repetition_penalty,
             "temperature": temperature,
             "top_k": top_k,
+            **ev,
         }
 
     def _resolve_active_lm(self) -> Tuple[Optional[Any], Dict[str, Any], str]:
@@ -1035,6 +1087,8 @@ class NativeNeuralModel:
 
         elapsed_ms = round((time.perf_counter() - t0) * 1000.0, 2)
         tok_per_sec = round(out_count / max(elapsed_ms / 1000.0, 0.001), 2)
+        ev = self._build_inference_evidence(elapsed_ms)
+        ev["checkpoint_sha256"] = meta.get("sha256", self.checkpoint_hash)
         yield {
             "type": "done",
             "cancelled": was_cancelled,
@@ -1045,13 +1099,13 @@ class NativeNeuralModel:
             "output_tokens_count": out_count,
             "latency_ms": elapsed_ms,
             "tokens_per_sec": tok_per_sec,
-            "checkpoint_sha256": meta.get("sha256", self.checkpoint_hash),
             "total_params": int(meta.get("total_params", self.config.total_params)),
             "weights_source": weights_source,
             "inference_origin": "native_model_logits",
             "weights_role": self.weights_role,
             "runtime_state": self.runtime_state,
             "execution_verified": self.execution_verified,
+            **ev,
         }
 
     def stream_generate(

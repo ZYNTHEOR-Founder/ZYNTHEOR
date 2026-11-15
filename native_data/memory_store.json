@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-SOVEREIGN",
-  "lastPersisted": "2026-11-14T20:29:10.420Z",
+  "lastPersisted": "2026-11-15T08:19:16.112Z",
   "verified_knowledge": {
     "architecture": "ZYNTHEOR Q+ Native Target 41.53M (41,527,808 parameters; 10L · 8H · 512D)",
     "sovereignty_rule": "Online-first Native neural inference on the Sovereign Cloud runtime",
@@ -8,5 +8,384 @@
     "multilingual_engine": "Thai-English Dual Native Vocabulary & Code-Switching"
   },
   "sessions": [],
-  "episodic": {}
+  "episodic": {
+    "action_mission_act-1794729921964-7f52e9": {
+      "key": "action_mission_act-1794729921964-7f52e9",
+      "value": "[VERIFIED ACTION MISSION] Mode=engineering_blueprint_execute | Runtime=node | Goal=Build an in-memory LRU cache with TTL eviction and verify tests | Strategy=ast_code_inspector | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:22.371Z",
+      "updatedAt": "2026-11-15T08:05:22.371Z",
+      "readCount": 1,
+      "metadata": {
+        "missionId": "ACT-1794729921964-7f52e9",
+        "mode": "engineering_blueprint_execute",
+        "runtime": "node",
+        "zipSha256": "49be743f71c5c795712570978b4ea293d6045b2e4a99795a68d35f859f8953de",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "c803e5f96645d6dbedd1fa9eaf6bf1e8e91cc9a4f3b7054fdb1b208453fd3d76",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:22.371Z",
+          "digest": "c803e5f96645d6dbedd1fa9eaf6bf1e8e91cc9a4f3b7054fdb1b208453fd3d76"
+        }
+      ]
+    },
+    "action_mission_act-1794729922376-83c36a": {
+      "key": "action_mission_act-1794729922376-83c36a",
+      "value": "[VERIFIED ACTION MISSION] Mode=engineering_blueprint_execute | Runtime=python3 | Goal=Build a topological DAG dependency scheduler in Python with cycle detection | Strategy=csp_dependency_solver | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:22.784Z",
+      "updatedAt": "2026-11-15T08:05:22.784Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794729922376-83c36a",
+        "mode": "engineering_blueprint_execute",
+        "runtime": "python3",
+        "zipSha256": "8947ed3a8c8fdaba6b363f9c4fd84857879c52631cc4044a72d96e4a98f4fc8a",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "29f77b8ac48669335724bc5a1b39a36bfd2aee25f0aad194cc5a25916712f937",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:22.784Z",
+          "digest": "29f77b8ac48669335724bc5a1b39a36bfd2aee25f0aad194cc5a25916712f937"
+        }
+      ]
+    },
+    "action_mission_act-1794729922788-f57a29": {
+      "key": "action_mission_act-1794729922788-f57a29",
+      "value": "[VERIFIED ACTION MISSION] Mode=workspace_verify_repair | Runtime=node | Goal=Verify and self-repair broken JS config parser | Strategy=ast_code_inspector | Repairs=1",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:23.147Z",
+      "updatedAt": "2026-11-15T08:05:23.147Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794729922788-f57a29",
+        "mode": "workspace_verify_repair",
+        "runtime": "node",
+        "zipSha256": "24317118b5f0c94ce32224879b2d5094f33b76750b9765e777b37ccbe80343fe",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "b503f74fe815e9bad231ff90f251f29dbbc43a77b6c2f78f7683662e276ee666",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:23.147Z",
+          "digest": "b503f74fe815e9bad231ff90f251f29dbbc43a77b6c2f78f7683662e276ee666"
+        }
+      ]
+    },
+    "action_mission_act-1794729923333-e6041a": {
+      "key": "action_mission_act-1794729923333-e6041a",
+      "value": "[VERIFIED ACTION MISSION] Mode=system_integrity_audit | Runtime=node | Goal=Audit system integrity and SSRF hardening | Strategy=multi_hop_graph_rag | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:23.444Z",
+      "updatedAt": "2026-11-15T08:05:23.444Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794729923333-e6041a",
+        "mode": "system_integrity_audit",
+        "runtime": "node",
+        "zipSha256": "fc3014397130310262e4d32d225ab9e117f51b2c2fbee6863eb3cd121c669c57",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "650a93da47282a27b7a5eb4519f07e4f50aa509f4a477561afc5bbae9e4be5f6",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:23.444Z",
+          "digest": "650a93da47282a27b7a5eb4519f07e4f50aa509f4a477561afc5bbae9e4be5f6"
+        }
+      ]
+    },
+    "action_mission_act-1794729923449-cfbba5": {
+      "key": "action_mission_act-1794729923449-cfbba5",
+      "value": "[VERIFIED ACTION MISSION] Mode=reasoning_verification | Runtime=node | Goal=Verify multi-step arithmetic proof for capacity planning | Strategy=symbolic_math_verifier | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:23.665Z",
+      "updatedAt": "2026-11-15T08:05:23.665Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794729923449-cfbba5",
+        "mode": "reasoning_verification",
+        "runtime": "node",
+        "zipSha256": "3b58f7acb7e43ea4a302aaafc29bf9a88af9b0cf53bdc3de4f0939ef18ab2e32",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "49623ed1cac7ed8db7fa6807cb25e7e2c16242ed519752c18f06568b66b17335",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:23.665Z",
+          "digest": "49623ed1cac7ed8db7fa6807cb25e7e2c16242ed519752c18f06568b66b17335"
+        }
+      ]
+    },
+    "action_mission_act-1794729923746-59a785": {
+      "key": "action_mission_act-1794729923746-59a785",
+      "value": "[VERIFIED ACTION MISSION] Mode=system_integrity_audit | Runtime=node | Goal=Purge all legacy production records after auditing table schema | Strategy=multi_path_synthesis | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:23.920Z",
+      "updatedAt": "2026-11-15T08:05:23.920Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794729923746-59a785",
+        "mode": "system_integrity_audit",
+        "runtime": "node",
+        "zipSha256": "3a7a3e0f6357b2f2f9f168b7ffa9291d3a7218b70535f972bbc9ddb6002f9586",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "7a52280af25403dcc52a782ffa0e6412822bde328c14168d005ffbe2c17722e4",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:23.920Z",
+          "digest": "7a52280af25403dcc52a782ffa0e6412822bde328c14168d005ffbe2c17722e4"
+        }
+      ]
+    },
+    "action_mission_act-1794729928050-acc3b4": {
+      "key": "action_mission_act-1794729928050-acc3b4",
+      "value": "[VERIFIED ACTION MISSION] Mode=engineering_blueprint_execute | Runtime=node | Goal=Build a token bucket rate limiter module with unit tests | Strategy=multi_hop_graph_rag | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:05:28.491Z",
+      "updatedAt": "2026-11-15T08:05:28.491Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794729928050-acc3b4",
+        "mode": "engineering_blueprint_execute",
+        "runtime": "node",
+        "zipSha256": "6123056e16c50c2daf9b26376b3ad54036c70eec18efbb84dd0e3903f4433d0a",
+        "tenantId": "b30_http_alpha",
+        "ownerUserId": "dev_a"
+      },
+      "contentDigest": "2f0ecbb1b659adb54a91f791cb924f3b8f99c836d6bbf194897f0b7e2987b539",
+      "tenantId": "b30_http_alpha",
+      "ownerUserId": "dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:05:28.491Z",
+          "digest": "2f0ecbb1b659adb54a91f791cb924f3b8f99c836d6bbf194897f0b7e2987b539"
+        }
+      ]
+    },
+    "action_mission_act-1794730750471-2bfe37": {
+      "key": "action_mission_act-1794730750471-2bfe37",
+      "value": "[VERIFIED ACTION MISSION] Mode=engineering_blueprint_execute | Runtime=node | Goal=Build an in-memory LRU cache with TTL eviction and verify tests | Strategy=ast_code_inspector | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:10.838Z",
+      "updatedAt": "2026-11-15T08:19:10.838Z",
+      "readCount": 1,
+      "metadata": {
+        "missionId": "ACT-1794730750471-2bfe37",
+        "mode": "engineering_blueprint_execute",
+        "runtime": "node",
+        "zipSha256": "402797f4ac61574cad1289f09ef2ef5fd987dc794dc2120a281b692740503f97",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "c803e5f96645d6dbedd1fa9eaf6bf1e8e91cc9a4f3b7054fdb1b208453fd3d76",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:10.838Z",
+          "digest": "c803e5f96645d6dbedd1fa9eaf6bf1e8e91cc9a4f3b7054fdb1b208453fd3d76"
+        }
+      ]
+    },
+    "action_mission_act-1794730750843-e5d2c3": {
+      "key": "action_mission_act-1794730750843-e5d2c3",
+      "value": "[VERIFIED ACTION MISSION] Mode=engineering_blueprint_execute | Runtime=python3 | Goal=Build a topological DAG dependency scheduler in Python with cycle detection | Strategy=csp_dependency_solver | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:11.173Z",
+      "updatedAt": "2026-11-15T08:19:11.173Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794730750843-e5d2c3",
+        "mode": "engineering_blueprint_execute",
+        "runtime": "python3",
+        "zipSha256": "0c3a31f2c14815f2fb4026705b115ad6ca8ff23a1a96ef9079983e27d95d0fa7",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "29f77b8ac48669335724bc5a1b39a36bfd2aee25f0aad194cc5a25916712f937",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:11.173Z",
+          "digest": "29f77b8ac48669335724bc5a1b39a36bfd2aee25f0aad194cc5a25916712f937"
+        }
+      ]
+    },
+    "action_mission_act-1794730751178-a6e524": {
+      "key": "action_mission_act-1794730751178-a6e524",
+      "value": "[VERIFIED ACTION MISSION] Mode=workspace_verify_repair | Runtime=node | Goal=Verify and self-repair broken JS config parser | Strategy=ast_code_inspector | Repairs=1",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:11.481Z",
+      "updatedAt": "2026-11-15T08:19:11.481Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794730751178-a6e524",
+        "mode": "workspace_verify_repair",
+        "runtime": "node",
+        "zipSha256": "2336cc3a1077d858196eafcdde8fbb53405e7ae8053782d566d2c92194eb6929",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "b503f74fe815e9bad231ff90f251f29dbbc43a77b6c2f78f7683662e276ee666",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:11.481Z",
+          "digest": "b503f74fe815e9bad231ff90f251f29dbbc43a77b6c2f78f7683662e276ee666"
+        }
+      ]
+    },
+    "action_mission_act-1794730751653-37c434": {
+      "key": "action_mission_act-1794730751653-37c434",
+      "value": "[VERIFIED ACTION MISSION] Mode=system_integrity_audit | Runtime=node | Goal=Audit system integrity and SSRF hardening | Strategy=multi_hop_graph_rag | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:11.740Z",
+      "updatedAt": "2026-11-15T08:19:11.740Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794730751653-37c434",
+        "mode": "system_integrity_audit",
+        "runtime": "node",
+        "zipSha256": "606e00cf03e3f91859fba91d0989e98c3766b68b41fbb26216a6b1fdb3398b75",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "650a93da47282a27b7a5eb4519f07e4f50aa509f4a477561afc5bbae9e4be5f6",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:11.740Z",
+          "digest": "650a93da47282a27b7a5eb4519f07e4f50aa509f4a477561afc5bbae9e4be5f6"
+        }
+      ]
+    },
+    "action_mission_act-1794730751744-9407e7": {
+      "key": "action_mission_act-1794730751744-9407e7",
+      "value": "[VERIFIED ACTION MISSION] Mode=reasoning_verification | Runtime=node | Goal=Verify multi-step arithmetic proof for capacity planning | Strategy=symbolic_math_verifier | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:11.923Z",
+      "updatedAt": "2026-11-15T08:19:11.923Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794730751744-9407e7",
+        "mode": "reasoning_verification",
+        "runtime": "node",
+        "zipSha256": "6e62fe58aee1a36c082af210914f6d6a8f3f09a382586b8fdbb5fe265bc643f4",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "49623ed1cac7ed8db7fa6807cb25e7e2c16242ed519752c18f06568b66b17335",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:11.923Z",
+          "digest": "49623ed1cac7ed8db7fa6807cb25e7e2c16242ed519752c18f06568b66b17335"
+        }
+      ]
+    },
+    "action_mission_act-1794730751993-c6ed97": {
+      "key": "action_mission_act-1794730751993-c6ed97",
+      "value": "[VERIFIED ACTION MISSION] Mode=system_integrity_audit | Runtime=node | Goal=Purge all legacy production records after auditing table schema | Strategy=multi_path_synthesis | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:12.134Z",
+      "updatedAt": "2026-11-15T08:19:12.134Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794730751993-c6ed97",
+        "mode": "system_integrity_audit",
+        "runtime": "node",
+        "zipSha256": "fef465363173619021b0faa4254fb081a6f6044c61e90ba46b9b7a6359a8068a",
+        "tenantId": "b30_tenant_alpha",
+        "ownerUserId": "b30_dev_a"
+      },
+      "contentDigest": "7a52280af25403dcc52a782ffa0e6412822bde328c14168d005ffbe2c17722e4",
+      "tenantId": "b30_tenant_alpha",
+      "ownerUserId": "b30_dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:12.134Z",
+          "digest": "7a52280af25403dcc52a782ffa0e6412822bde328c14168d005ffbe2c17722e4"
+        }
+      ]
+    },
+    "action_mission_act-1794730755735-245053": {
+      "key": "action_mission_act-1794730755735-245053",
+      "value": "[VERIFIED ACTION MISSION] Mode=engineering_blueprint_execute | Runtime=node | Goal=Build a token bucket rate limiter module with unit tests | Strategy=multi_hop_graph_rag | Repairs=0",
+      "category": "task_memory",
+      "createdAt": "2026-11-15T08:19:16.112Z",
+      "updatedAt": "2026-11-15T08:19:16.112Z",
+      "readCount": 0,
+      "metadata": {
+        "missionId": "ACT-1794730755735-245053",
+        "mode": "engineering_blueprint_execute",
+        "runtime": "node",
+        "zipSha256": "38d4203223d9f77cff74becad9be3eab17aa954195d9cef1796d783c8def3ff8",
+        "tenantId": "b30_http_alpha",
+        "ownerUserId": "dev_a"
+      },
+      "contentDigest": "2f0ecbb1b659adb54a91f791cb924f3b8f99c836d6bbf194897f0b7e2987b539",
+      "tenantId": "b30_http_alpha",
+      "ownerUserId": "dev_a",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-15T08:19:16.112Z",
+          "digest": "2f0ecbb1b659adb54a91f791cb924f3b8f99c836d6bbf194897f0b7e2987b539"
+        }
+      ]
+    }
+  }
 }
