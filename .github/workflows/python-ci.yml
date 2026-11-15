@@ -34,19 +34,26 @@ jobs:
           python -m compileall -q qplus_native
           echo "Python sources compiled successfully."
 
-      - name: Check for Python dependency manifests
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: pip-${{ runner.os }}-
+
+      - name: Install Python dependencies
         run: |
-          if [ -f requirements.txt ] || [ -f pyproject.toml ] || [ -f setup.py ]; then
-            echo "Manifest found."
-          else
-            echo "PARTIAL: No requirements.txt / pyproject.toml present. Skipping pip install and pytest."
-            echo "Python CI limited to syntax compile of qplus_native/."
+          python -m pip install --upgrade pip pytest
+          if [ -f requirements-native.txt ]; then
+            python -m pip install -r requirements-native.txt
+          fi
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
           fi
 
       - name: Run Python Tests (if any)
         run: |
-          if find . -type f \( -name "test_*.py" -o -name "*_test.py" \) -not -path "./.git/*" | grep -q .; then
-            python -m pip install --upgrade pip pytest
+          if find . -type f \( -name "test_*.py" -o -name "*_test.py" \) -not -path "./.git/*" -not -path "./node_modules/*" -not -path "./extracted/*" | grep -q .; then
             python -m pytest -q
           else
             echo "No Python test files found. Status: PARTIAL (compile-only)."
