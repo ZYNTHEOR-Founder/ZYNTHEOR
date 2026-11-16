@@ -1,4 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#10b981"/><stop offset=".55" stop-color="#28d6b5"/><stop offset="1" stop-color="#f59e0b"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <rect width="128" height="128" rx="34" fill="#071b18"/><path d="M64 15 103 38v52L64 113 25 90V38Z" fill="none" stroke="#24483d" stroke-width="2"/><g fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" filter="url(#glow)"><path d="M37 64h54M64 37v54M45 45l38 38M83 45 45 83"/><circle cx="64" cy="64" r="19" stroke-width="4"/></g><circle cx="64" cy="64" r="6" fill="#f5b85f"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">ZYNTHEOR Vivid Intelligence</title>
+  <desc id="desc">A luminous multicolor neural core wrapped in flowing rainbow orbital paths.</desc>
+  <defs>
+    <linearGradient id="spectrum" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#00F0FF"/><stop offset=".2" stop-color="#397BFF"/>
+      <stop offset=".4" stop-color="#7B2CBF"/><stop offset=".6" stop-color="#FF007F"/>
+      <stop offset=".8" stop-color="#FF5E3A"/><stop offset="1" stop-color="#CCFF00"/>
+    </linearGradient>
+    <radialGradient id="core"><stop stop-color="#fff"/><stop offset=".2" stop-color="#bdfcff"/><stop offset=".48" stop-color="#7B2CBF" stop-opacity=".92"/><stop offset="1" stop-color="#00F0FF" stop-opacity="0"/></radialGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <style>
+    .orbit{transform-origin:64px 64px;animation:orbit 17s linear infinite}
+    .orbit.reverse{animation-direction:reverse;animation-duration:23s}
+    .pulse{transform-origin:64px 64px;animation:pulse 3.4s ease-in-out infinite}
+    .spark{animation:spark 2.5s ease-in-out infinite alternate}
+    @keyframes orbit{to{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.08);opacity:1}}
+    @keyframes spark{from{opacity:.32}to{opacity:1}}
+    @media(prefers-reduced-motion:reduce){.orbit,.pulse,.spark{animation:none!important}}
+  </style>
+  <circle cx="64" cy="64" r="58" fill="#080D20" stroke="#ffffff" stroke-opacity=".12" stroke-width="1.2"/>
+  <circle cx="64" cy="64" r="46" fill="none" stroke="url(#spectrum)" stroke-width="1" opacity=".28"/>
+  <g class="orbit" fill="none" filter="url(#glow)">
+    <ellipse cx="64" cy="64" rx="49" ry="19" stroke="url(#spectrum)" stroke-width="3.5"/>
+    <path d="M17 63C35 13 93 10 111 63S35 115 17 63Z" stroke="#00F0FF" stroke-width="1.5" opacity=".75"/>
+  </g>
+  <g class="orbit reverse" fill="none" opacity=".9">
+    <ellipse cx="64" cy="64" rx="35" ry="52" stroke="#FF007F" stroke-width="1.5" stroke-dasharray="4 7"/>
+    <ellipse cx="64" cy="64" rx="52" ry="35" stroke="#CCFF00" stroke-width="1.2" stroke-dasharray="2 8"/>
+  </g>
+  <circle cx="64" cy="64" r="31" fill="#7B2CBF" opacity=".15" filter="url(#glow)" class="pulse"/>
+  <circle cx="64" cy="64" r="22" fill="url(#core)" class="pulse"/>
+  <path d="M47 65h10l6-13 7 25 6-12h7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="17" cy="63" r="3.2" fill="#00F0FF" class="spark" filter="url(#glow)"/>
+  <circle cx="111" cy="63" r="3.2" fill="#FF5E3A" class="spark" filter="url(#glow)"/>
+  <circle cx="64" cy="12" r="2.8" fill="#CCFF00" class="spark" filter="url(#glow)"/>
 </svg>
