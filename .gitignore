@@ -23,6 +23,3 @@ native_data/**/*.pth
 *.pth
 node_modules/
 .workspace/.zyntheor/snapshots/
-*.bin
-*.pt
-*.zip

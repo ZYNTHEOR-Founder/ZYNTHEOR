@@ -1,6 +1,6 @@
 import React from 'react';
 import { ModuleId, SystemStatusData } from '../types';
-import { Menu, ShieldCheck, Terminal, RefreshCw, Languages, Clock, Keyboard } from 'lucide-react';
+import { Menu, ShieldCheck, Terminal, RefreshCw, Languages, Clock, Keyboard, Sparkles } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -14,6 +14,7 @@ interface HeaderProps {
   isRefreshing: boolean;
   onOpenShortcuts?: () => void;
   onOpenSettings?: () => void;
+  onOpenAssistant?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -24,7 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
   onRefreshStatus,
   isRefreshing,
   onOpenShortcuts,
-  onOpenSettings
+  onOpenSettings,
+  onOpenAssistant
 }) => {
   const { t, lang } = useLanguage();
   const { session, role, isAuthenticated } = useAuth();
@@ -165,6 +167,24 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} style={isRefreshing ? { color: 'var(--app-accent)' } : undefined} />
         </button>
+
+        {/* AI Assistant Trigger */}
+        {onOpenAssistant && (
+          <button
+            type="button"
+            onClick={onOpenAssistant}
+            title={lang === 'th' ? 'เปิดผู้ช่วย AI ในระบบ (Alt+A)' : 'Open System AI Assistant (Alt+A)'}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-semibold rounded-xl transition-colors cursor-pointer whitespace-nowrap border hover:border-[var(--app-accent)]"
+            style={{
+              color: 'var(--app-text-primary)',
+              backgroundColor: 'var(--app-card)',
+              borderColor: 'var(--app-card-border)'
+            }}
+          >
+            <Sparkles className="w-4 h-4 text-[var(--app-accent)] shrink-0" />
+            <span className="hidden sm:inline">{lang === 'th' ? 'ผู้ช่วย AI' : 'AI Assistant'}</span>
+          </button>
+        )}
 
         {/* Primary Action Button with Shortcut Badge */}
         <button

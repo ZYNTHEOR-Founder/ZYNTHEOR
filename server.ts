@@ -21,6 +21,7 @@ import { ActionDrivenEngine } from './lib/ActionDrivenEngine';
 import { AutonomousPlanner } from './lib/AutonomousPlanner';
 import { ApprovalGate } from './lib/ApprovalGate';
 import { CognitiveContextEngine } from './lib/CognitiveContextEngine';
+import { CognitiveCore } from './lib/CognitiveCore';
 import { AdaptiveReasoningEngine } from './lib/AdaptiveReasoningEngine';
 import { KnowledgeGraphEngine } from './lib/KnowledgeGraphEngine';
 import { PerformanceEngine } from './lib/PerformanceEngine';
@@ -62,6 +63,16 @@ import { SovereignIdentity, SovereignRole } from './lib/SovereignIdentity';
 import { TokenRevocation } from './lib/TokenRevocation';
 import { requireFirebaseAuth, type AuthRequest } from './src/middleware/auth';
 import { BenchmarkRunner } from './server/benchmarks/runner';
+import {
+  runUpgradedAssistant,
+  isAssistantConfigured,
+  getAssistantModelName,
+  getAssistantBrainStatus,
+  syncAssistantSessionContext,
+  getAssistantSessionMemoryInfo,
+  clearAssistantSessionMemory,
+  type AssistantThinkingMode,
+} from './server/assistant';
 
 const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.PORT) || 3000;
@@ -2727,6 +2738,152 @@ app.get('/api/cognitive/gates', requireAuth('guest'), async (_req: Authenticated
   }
 });
 
+// CognitiveCore Module API Routes (extends IntelligenceCore with persistent state, memory buffers, recursive planning)
+app.get('/api/cognitive-core/snapshot', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const query = typeof req.query.query === 'string' ? req.query.query : undefined;
+    const category = typeof req.query.category === 'string' ? (req.query.category as any) : undefined;
+    const snapshot = await CognitiveCore.getInstance().getSnapshot(scope, { query, category });
+    res.json({ success: true, snapshot });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/cognitive-core/state', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const tenantId = req.sovereignTenantId || 'default-tenant';
+    const state = CognitiveCore.getInstance().updateState(tenantId, req.body || {});
+    res.json({ success: true, state });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive-core/state/checkpoint', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const { checkpoint, state } = CognitiveCore.getInstance().saveCheckpoint(scope, req.body?.label);
+    res.status(201).json({ success: true, checkpoint, state });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.get('/api/cognitive-core/memory', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const query = typeof req.query.query === 'string' ? req.query.query : undefined;
+    const category = typeof req.query.category === 'string' ? (req.query.category as any) : undefined;
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const memory = CognitiveCore.getInstance().listMemoryBuffers(scope, { query, category, limit });
+    res.json({ success: true, memory });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive-core/memory', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const result = CognitiveCore.getInstance().commitMemoryBuffer(scope, req.body || {});
+    res.status(201).json({ success: true, ...result });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.delete('/api/cognitive-core/memory/:key', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const deleted = CognitiveCore.getInstance().deleteMemoryBuffer(scope, req.params.key);
+    res.json({ success: true, deleted });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/cognitive-core/memory/consolidate', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const result = CognitiveCore.getInstance().consolidateMemoryBuffer(scope, req.body || {});
+    res.json({ success: true, result });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.get('/api/cognitive-core/plans', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const plans = CognitiveCore.getInstance().listRecursivePlans(scope);
+    res.json({ success: true, plans });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive-core/plans', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const plan = CognitiveCore.getInstance().createRecursivePlan(scope, req.body || {});
+    res.status(201).json({ success: true, plan });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/cognitive-core/plans/:planId/expand', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const plan = CognitiveCore.getInstance().expandRecursiveNode(scope, {
+      planId: req.params.planId,
+      nodeId: String(req.body?.nodeId || ''),
+      focusHint: req.body?.focusHint,
+      branchFactor: req.body?.branchFactor ? Number(req.body.branchFactor) : undefined,
+    });
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('NOT_FOUND') ? 404 : msg.includes('FORBIDDEN') ? 403 : 400;
+    res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.patch('/api/cognitive-core/plans/:planId/nodes/:nodeId', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const plan = CognitiveCore.getInstance().updateRecursiveNodeStatus(scope, {
+      planId: req.params.planId,
+      nodeId: req.params.nodeId,
+      status: req.body?.status,
+      note: req.body?.note,
+    });
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('NOT_FOUND') ? 404 : msg.includes('FORBIDDEN') ? 403 : 400;
+    res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.delete('/api/cognitive-core/plans/:planId', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const deleted = CognitiveCore.getInstance().deleteRecursivePlan(scope, req.params.planId);
+    res.json({ success: true, deleted });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
 // Batch 30 Action-Driven Routes
 app.get('/api/action/capabilities', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -2967,6 +3124,149 @@ app.post('/api/automation/run', requireAuth('developer'), async (req: Authentica
     res.json({ success: true, mission });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/assistant/status', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    available: isAssistantConfigured(),
+    model: getAssistantModelName(),
+    brainCore: getAssistantBrainStatus(),
+    capabilities: [
+      'function_calling',
+      'system_telemetry',
+      'knowledge_hub_search',
+      'workspace_inspection',
+      'audit_ledger',
+      'web_grounding',
+      'url_context',
+      'multimodal_attachments',
+      'thinking_levels',
+      'short_term_session_memory',
+      'live_workspace_context',
+      'assistant_brain_core',
+      'adaptive_reasoning',
+      'persistent_episodic_memory',
+      'dag_goal_planning',
+    ],
+  });
+});
+
+app.get('/api/assistant/brain', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    brain: getAssistantBrainStatus(),
+  });
+});
+
+app.post('/api/assistant/context', (req: Request, res: Response) => {
+  const sessionId = typeof req.body?.sessionId === 'string' ? req.body.sessionId : 'default-session';
+  const moduleState =
+    req.body?.moduleState && typeof req.body.moduleState === 'object' ? req.body.moduleState : undefined;
+  const workspaceMetadata =
+    req.body?.workspaceMetadata && typeof req.body.workspaceMetadata === 'object'
+      ? req.body.workspaceMetadata
+      : undefined;
+  const rawContext = req.body?.context && typeof req.body.context === 'object' ? req.body.context : {};
+  const context = {
+    sessionId,
+    activeModule: typeof rawContext.activeModule === 'string' ? rawContext.activeModule : moduleState?.moduleId,
+    lang: rawContext.lang === 'th' ? ('th' as const) : ('en' as const),
+    role: typeof rawContext.role === 'string' ? rawContext.role : undefined,
+    runtimeReady: typeof rawContext.runtimeReady === 'boolean' ? rawContext.runtimeReady : undefined,
+    recentLogs: Array.isArray(rawContext.recentLogs)
+      ? rawContext.recentLogs.filter((l: unknown): l is string => typeof l === 'string').slice(-12)
+      : undefined,
+  };
+
+  const session = syncAssistantSessionContext(sessionId, {
+    moduleState,
+    workspaceMetadata,
+    context,
+  });
+
+  res.json({ success: true, session });
+});
+
+app.get('/api/assistant/session/:sessionId', (req: Request, res: Response) => {
+  const session = getAssistantSessionMemoryInfo(req.params.sessionId);
+  res.json({ success: true, session });
+});
+
+app.delete('/api/assistant/session/:sessionId', (req: Request, res: Response) => {
+  const cleared = clearAssistantSessionMemory(req.params.sessionId);
+  res.json({ success: true, cleared });
+});
+
+app.post('/api/assistant/chat', async (req: Request, res: Response) => {
+  const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+  const attachments = Array.isArray(req.body?.attachments) ? req.body.attachments : [];
+  if (!message && attachments.length === 0) {
+    return res.status(400).json({ success: false, error: 'Message or attachment is required.' });
+  }
+
+  const sessionId =
+    typeof req.body?.sessionId === 'string'
+      ? req.body.sessionId
+      : typeof req.body?.context?.sessionId === 'string'
+      ? req.body.context.sessionId
+      : 'default-session';
+  const history = Array.isArray(req.body?.history) ? req.body.history : [];
+  const rawThinking = req.body?.thinkingMode;
+  const thinkingMode: AssistantThinkingMode =
+    rawThinking === 'fast' || rawThinking === 'deep' ? rawThinking : 'balanced';
+  const webGrounding = req.body?.webGrounding === true;
+  const moduleState =
+    req.body?.moduleState && typeof req.body.moduleState === 'object' ? req.body.moduleState : undefined;
+  const workspaceMetadata =
+    req.body?.workspaceMetadata && typeof req.body.workspaceMetadata === 'object'
+      ? req.body.workspaceMetadata
+      : undefined;
+  const rawContext = req.body?.context && typeof req.body.context === 'object' ? req.body.context : {};
+  const context = {
+    sessionId,
+    activeModule: typeof rawContext.activeModule === 'string' ? rawContext.activeModule : moduleState?.moduleId,
+    lang: rawContext.lang === 'th' ? ('th' as const) : ('en' as const),
+    role: typeof rawContext.role === 'string' ? rawContext.role : undefined,
+    runtimeReady: typeof rawContext.runtimeReady === 'boolean' ? rawContext.runtimeReady : undefined,
+    recentLogs: Array.isArray(rawContext.recentLogs)
+      ? rawContext.recentLogs.filter((l: unknown): l is string => typeof l === 'string').slice(-12)
+      : undefined,
+    moduleState,
+    workspaceMetadata,
+  };
+
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders?.();
+
+  try {
+    await runUpgradedAssistant({
+      sessionId,
+      message: message || 'Please analyze the attached file(s).',
+      history,
+      attachments,
+      context,
+      moduleState,
+      workspaceMetadata,
+      thinkingMode,
+      webGrounding,
+      onEvent: (event) => {
+        res.write(JSON.stringify(event) + '\n');
+      },
+    });
+    res.end();
+  } catch (err: any) {
+    const errMsg = err?.message || 'AI Assistant request failed.';
+    if (res.headersSent) {
+      res.write(JSON.stringify({ type: 'error', error: errMsg }) + '\n');
+      res.end();
+    } else {
+      const status = typeof err?.status === 'number' ? err.status : 500;
+      res.status(status).json({ success: false, error: errMsg });
+    }
   }
 });
 

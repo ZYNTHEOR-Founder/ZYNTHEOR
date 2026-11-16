@@ -18,7 +18,8 @@
     "test:knowledge-e2e": "node --experimental-strip-types tests/knowledge_e2e.test.ts",
     "test:security": "node tests/security-rbac-integrity.run.mjs",
     "test:live-training": "node tests/live-training-e2e.mjs",
-    "train:continue": "node tests/continue-training-e2e.mjs"
+    "train:continue": "node tests/continue-training-e2e.mjs",
+    "verify:types": "node scripts/verify-type-packages.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1169.0",
@@ -26,6 +27,7 @@
     "@babel/parser": "^8.1.2",
     "@babel/traverse": "^8.1.2",
     "@babel/types": "^8.1.2",
+    "@google/genai": "^3.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",

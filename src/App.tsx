@@ -3,14 +3,19 @@
  * 100% First-Party Sovereign AI Operating Platform
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ModuleId, SystemStatusData, OrchestrationEvent } from './types';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { MobileNav } from './components/MobileNav';
+import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { useAuditIntegrity } from './hooks/useAuditIntegrity';
+import {
+  rankLogsBySemanticIntent,
+  getSemanticIntentPresets,
+} from './utils/semanticLogSearch';
 
 // 15 Ecosystem Modules
 import { CommandCenter } from './components/modules/CommandCenter';
@@ -30,11 +35,15 @@ import { GovernanceSecurity } from './components/modules/GovernanceSecurity';
 import { UserSettings } from './components/modules/UserSettings';
 import { AdminConsole } from './components/modules/AdminConsole';
 
-import { Terminal, X, Play, ShieldCheck, ShieldAlert, CheckCircle2, Copy, Check, Download, Search, Volume2, VolumeX, RotateCcw, Trash2, WrapText, FileJson, FileText, FileSpreadsheet, ChevronDown, Printer, Camera, History, CheckSquare, Keyboard, PanelRightClose, PanelRightOpen, Activity, Database, LockKeyhole, Network, Sparkles, Layers, LogIn, Settings, Regex, AlertCircle } from 'lucide-react';
+import { Terminal, X, Play, Pause, ShieldCheck, ShieldAlert, CheckCircle2, Copy, Check, Download, Search, Volume2, VolumeX, RotateCcw, Trash2, WrapText, FileJson, FileText, FileSpreadsheet, ChevronDown, Printer, Camera, History, CheckSquare, Keyboard, PanelRightClose, PanelRightOpen, Activity, Database, LockKeyhole, Network, Sparkles, Layers, LogIn, Settings, Regex, AlertCircle, ListOrdered } from 'lucide-react';
 
 type LogSemanticCategory = 'I/O' | 'Computation' | 'Authentication' | 'System';
 
 const SEMANTIC_CATEGORY_ORDER: LogSemanticCategory[] = ['Authentication', 'I/O', 'Computation', 'System'];
+
+function isResolvedLogLine(entry: string): boolean {
+  return /\[(DONE|VERIFIED)\]/i.test(entry);
+}
 
 function classifyLogSemanticFunction(entry: string): LogSemanticCategory {
   if (/\b(auth|oauth|login|logout|token|jwt|session|rbac|role|permission|credential|firebase|tenant|secret|unauthorized|forbidden|401|403|verify_id_token|identity)\b/i.test(entry)) {
@@ -288,6 +297,8 @@ export default function App() {
   });
   const [isQuickTaskOpen, setIsQuickTaskOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [assistantOpenedAt, setAssistantOpenedAt] = useState<string | null>(null);
   const quickGoalInputRef = useRef<HTMLInputElement | null>(null);
 
   // Quick Modal Execution State
@@ -321,7 +332,7 @@ export default function App() {
   const [copiedLogs, setCopiedLogs] = useState(false);
   const [logTagFilter, setLogTagFilter] = useState<'ALL' | 'INIT' | 'TESTER' | 'DONE' | 'ERROR'>('ALL');
   const [logSearchQuery, setLogSearchQuery] = useState('');
-  const [logSearchMode, setLogSearchMode] = useState<'text' | 'regex'>('text');
+  const [logSearchMode, setLogSearchMode] = useState<'text' | 'regex' | 'semantic'>('text');
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [ttsRate, setTtsRate] = useState<number>(() => {
     if (typeof window !== 'undefined') {
@@ -343,11 +354,35 @@ export default function App() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('zyntheor_tts_volume');
       const parsed = saved ? parseFloat(saved) : 1.0;
-      return Number.isFinite(parsed) && parsed >= 0.1 && parsed <= 2.0 ? parsed : 1.0;
+      return Number.isFinite(parsed) && parsed >= 0 && parsed <= 2.0 ? parsed : 1.0;
     }
     return 1.0;
   });
-  const [logTextWrap, setLogTextWrap] = useState(true);
+  const [logTextWrap, setLogTextWrap] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('zyntheor_log_text_wrap');
+      return saved === null ? true : saved !== 'false';
+    }
+    return true;
+  });
+  const [showLineNumbers, setShowLineNumbers] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('zyntheor_log_line_numbers');
+      return saved === null ? true : saved !== 'false';
+    }
+    return true;
+  });
+  const [activeTtsLineIndex, setActiveTtsLineIndex] = useState<number | null>(null);
+  const [ttsPaused, setTtsPaused] = useState(false);
+  const [ttsQueueLength, setTtsQueueLength] = useState(0);
+  const activeTtsRowRef = useRef<HTMLDivElement | null>(null);
+  const ttsQueueRef = useRef<Array<{ lineText: string; lineIdx: number }>>([]);
+  const isTtsSpeakingRef = useRef(false);
+  const ttsPausedRef = useRef(false);
+  const ttsEnabledRef = useRef(ttsEnabled);
+  const ttsSessionTokenRef = useRef(0);
+  const ttsSpectrumCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const ttsSpeechEnergyRef = useRef(0);
   const [logTimeMode, setLogTimeMode] = useState<'absolute' | 'relative'>('absolute');
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedLogIndices, setSelectedLogIndices] = useState<number[]>([]);
@@ -366,11 +401,145 @@ export default function App() {
     }
     return '';
   });
+  const ttsConfigRef = useRef({ ttsRate, ttsPitch, ttsVolume, ttsVoiceUri, ttsVoices });
+  ttsEnabledRef.current = ttsEnabled;
+  ttsConfigRef.current = { ttsRate, ttsPitch, ttsVolume, ttsVoiceUri, ttsVoices };
   const [logLatencyMs, setLogLatencyMs] = useState<number | null>(null);
   const lastLogTimeRef = useRef<number | null>(null);
   const lastSpokenIndexRef = useRef<number>(-1);
+  const prevTtsEnabledRef = useRef<boolean>(ttsEnabled);
   const logsContainerRef = useRef<HTMLDivElement | null>(null);
   const logsEndRef = useRef<HTMLDivElement | null>(null);
+
+  const resetTtsQueue = (cancelBrowserSpeech = true) => {
+    ttsSessionTokenRef.current += 1;
+    ttsQueueRef.current = [];
+    setTtsQueueLength(0);
+    isTtsSpeakingRef.current = false;
+    setActiveTtsLineIndex(null);
+    if (cancelBrowserSpeech && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  const processTtsQueue = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (!ttsEnabledRef.current || ttsPausedRef.current || isTtsSpeakingRef.current) return;
+
+    const nextItem = ttsQueueRef.current.shift();
+    setTtsQueueLength(ttsQueueRef.current.length);
+    if (!nextItem) return;
+
+    const sessionToken = ttsSessionTokenRef.current;
+    const { lineText, lineIdx } = nextItem;
+    const {
+      ttsRate: rate,
+      ttsPitch: pitch,
+      ttsVolume: volume,
+      ttsVoiceUri: voiceUri,
+      ttsVoices: voices,
+    } = ttsConfigRef.current;
+
+    const cleaned = lineText.replace(/^\[[A-Z0-9_]+\]\s*/, '').trim() || lineText;
+    const utterance = new SpeechSynthesisUtterance(cleaned);
+    utterance.rate = rate;
+    utterance.pitch = pitch;
+    utterance.volume = Math.min(1, Math.max(0, volume));
+    if (voiceUri) {
+      const availableVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
+      const matched = availableVoices.find((v) => v.voiceURI === voiceUri || v.name === voiceUri);
+      if (matched) utterance.voice = matched;
+    }
+
+    isTtsSpeakingRef.current = true;
+    ttsSpeechEnergyRef.current = 1.0;
+    setActiveTtsLineIndex(lineIdx);
+
+    utterance.onstart = () => {
+      if (sessionToken !== ttsSessionTokenRef.current) return;
+      ttsSpeechEnergyRef.current = 1.0;
+      setActiveTtsLineIndex(lineIdx);
+    };
+
+    utterance.onboundary = () => {
+      if (sessionToken !== ttsSessionTokenRef.current) return;
+      ttsSpeechEnergyRef.current = 1.0;
+    };
+
+    const advanceQueue = () => {
+      if (sessionToken !== ttsSessionTokenRef.current) return;
+      isTtsSpeakingRef.current = false;
+      if (ttsQueueRef.current.length === 0) {
+        ttsSpeechEnergyRef.current = 0;
+        setActiveTtsLineIndex(null);
+      }
+      processTtsQueue();
+    };
+
+    utterance.onend = advanceQueue;
+    utterance.onerror = advanceQueue;
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const speakLogLine = (lineText: string, lineIdx: number, cancelExisting = false) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (cancelExisting) {
+      resetTtsQueue(true);
+      ttsPausedRef.current = false;
+      setTtsPaused(false);
+    }
+    ttsQueueRef.current.push({ lineText, lineIdx });
+    setTtsQueueLength(ttsQueueRef.current.length);
+    processTtsQueue();
+  };
+
+  const handleToggleTtsPause = () => {
+    if (!ttsEnabled) return;
+    const nextPaused = !ttsPausedRef.current;
+    ttsPausedRef.current = nextPaused;
+    setTtsPaused(nextPaused);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      if (nextPaused) {
+        window.speechSynthesis.pause();
+      } else {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        processTtsQueue();
+      }
+    }
+  };
+
+  const resolvedLogCount = useMemo(
+    () => quickLogs.filter(isResolvedLogLine).length,
+    [quickLogs]
+  );
+
+  const handleClearResolvedLogs = () => {
+    if (resolvedLogCount === 0) return;
+    const nextLogs: string[] = [];
+    const nextCategories: Record<number, LogSemanticCategory> = {};
+    quickLogs.forEach((line, oldIdx) => {
+      if (!isResolvedLogLine(line)) {
+        const newIdx = nextLogs.length;
+        nextLogs.push(line);
+        if (logCategories[oldIdx]) {
+          nextCategories[newIdx] = logCategories[oldIdx];
+        }
+      }
+    });
+    setQuickLogs(nextLogs);
+    setLogCategories(nextCategories);
+    setSelectedLogIndices([]);
+    if (Object.keys(nextCategories).length === 0) {
+      setGroupByCategory(false);
+    }
+    if (ttsEnabled) {
+      resetTtsQueue(true);
+      lastSpokenIndexRef.current = nextLogs.length - 1;
+    }
+  };
 
   // Real-time Audit Hash reconciler (rolling SHA-256 of quickLogs vs sealed baseline)
   const {
@@ -388,9 +557,36 @@ export default function App() {
     [logSearchMode, logSearchQuery]
   );
 
+  const semanticLogSuggestions = useMemo(
+    () => rankLogsBySemanticIntent(quickLogs, logSearchQuery),
+    [quickLogs, logSearchQuery]
+  );
+
+  const semanticScoreMap = useMemo(() => {
+    const map = new Map<number, { scorePct: number; matchedConcepts: string[] }>();
+    for (const item of semanticLogSuggestions) {
+      map.set(item.originalIdx, { scorePct: item.scorePct, matchedConcepts: item.matchedConcepts });
+    }
+    return map;
+  }, [semanticLogSuggestions]);
+
   const activeHighlightRegex = useMemo(() => {
     if (!logSearchQuery.trim()) return null;
     if (logSearchMode === 'regex') return compiledLogSearch.regex;
+    if (logSearchMode === 'semantic') {
+      const tokens = logSearchQuery
+        .trim()
+        .split(/\s+/)
+        .filter((w) => w.length >= 2)
+        .slice(0, 8)
+        .map((w) => escapeRegExpLiteral(w));
+      if (tokens.length === 0) return null;
+      try {
+        return new RegExp(`(${tokens.join('|')})`, 'i');
+      } catch {
+        return null;
+      }
+    }
     try {
       return new RegExp(escapeRegExpLiteral(logSearchQuery.trim()), 'i');
     } catch {
@@ -399,6 +595,11 @@ export default function App() {
   }, [logSearchMode, logSearchQuery, compiledLogSearch.regex]);
 
   const filteredLogEntries = useMemo(() => {
+    if (logSearchMode === 'semantic' && logSearchQuery.trim()) {
+      return semanticLogSuggestions
+        .filter(({ log }) => logTagFilter === 'ALL' || log.startsWith(`[${logTagFilter}]`))
+        .map(({ log, originalIdx }) => ({ log, originalIdx }));
+    }
     return quickLogs
       .map((log, originalIdx) => ({ log, originalIdx }))
       .filter(({ log }) => {
@@ -411,16 +612,35 @@ export default function App() {
         }
         return log.toLowerCase().includes(logSearchQuery.toLowerCase());
       });
-  }, [quickLogs, logTagFilter, logSearchQuery, logSearchMode, compiledLogSearch]);
+  }, [quickLogs, logTagFilter, logSearchQuery, logSearchMode, compiledLogSearch, semanticLogSuggestions]);
 
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) setTtsVoices(voices);
+      if (voices.length === 0) return;
+      setTtsVoices(voices);
+      ttsConfigRef.current.ttsVoices = voices;
+      const savedVoiceId = localStorage.getItem('zyntheor_tts_voice') || ttsConfigRef.current.ttsVoiceUri;
+      if (savedVoiceId) {
+        const matched = voices.find((v) => v.voiceURI === savedVoiceId || v.name === savedVoiceId);
+        if (matched) {
+          setTtsVoiceUri(matched.voiceURI);
+          ttsConfigRef.current.ttsVoiceUri = matched.voiceURI;
+          if (matched.voiceURI !== savedVoiceId) {
+            localStorage.setItem('zyntheor_tts_voice', matched.voiceURI);
+          }
+        }
+      }
     };
     loadVoices();
+    if (typeof window.speechSynthesis.addEventListener === 'function') {
+      window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+      return () => {
+        window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+      };
+    }
     window.speechSynthesis.onvoiceschanged = loadVoices;
     return () => {
       window.speechSynthesis.onvoiceschanged = null;
@@ -428,7 +648,104 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!ttsEnabled) {
+      resetTtsQueue(true);
+      ttsPausedRef.current = false;
+      setTtsPaused(false);
+    }
+  }, [ttsEnabled]);
+
+  useEffect(() => {
+    if (ttsEnabled && activeTtsLineIndex !== null) {
+      activeTtsRowRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [ttsEnabled, activeTtsLineIndex]);
+
+  useEffect(() => {
+    const canvas = ttsSpectrumCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const isPlaying = ttsEnabled && !ttsPaused && activeTtsLineIndex !== null;
+    const styles = getComputedStyle(document.documentElement);
+    const accentColor = styles.getPropertyValue('--app-accent').trim() || '#22d3ee';
+    const amberColor = styles.getPropertyValue('--app-amber').trim() || '#f59e0b';
+    const reducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const barCount = 16;
+    const heights = new Array<number>(barCount).fill(0);
+
+    const drawFrame = (now: number) => {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!isPlaying) {
+        return;
+      }
+
+      const volScale = Math.min(1, Math.max(0.15, ttsVolume));
+      const pitchShift = (ttsPitch - 1.0) * 0.35;
+      const cadence = 0.008 * Math.max(0.5, ttsRate);
+
+      // Decay live boundary energy gradually between word syllables
+      ttsSpeechEnergyRef.current = Math.max(0.32, ttsSpeechEnergyRef.current * 0.94);
+      const energy = ttsSpeechEnergyRef.current;
+
+      const gap = 2;
+      const barWidth = Math.max(2, (w - gap * (barCount - 1)) / barCount);
+
+      for (let i = 0; i < barCount; i += 1) {
+        const normIdx = i / (barCount - 1);
+        const formantCenter = Math.min(0.85, Math.max(0.15, 0.42 + pitchShift));
+        const spectralShape = Math.exp(-Math.pow((normIdx - formantCenter) * 2.1, 2));
+        const wave = reducedMotion
+          ? 0.68
+          : 0.48 +
+            0.35 * Math.sin(now * cadence + i * 0.85) +
+            0.17 * Math.cos(now * cadence * 1.65 - i * 1.3);
+
+        const target = Math.min(1, Math.max(0.08, wave * (0.45 + 0.55 * spectralShape) * volScale * energy));
+        heights[i] = reducedMotion ? target : heights[i] * 0.6 + target * 0.4;
+
+        const barH = Math.max(2, Math.round(heights[i] * (h - 4)));
+        const x = Math.round(i * (barWidth + gap));
+        const y = h - barH;
+
+        ctx.globalAlpha = i % 3 === 0 ? 0.52 : 0.38;
+        ctx.fillStyle = normIdx > 0.65 ? amberColor : accentColor;
+        ctx.fillRect(x, y, barWidth, barH);
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    if (!isPlaying || reducedMotion) {
+      drawFrame(performance.now());
+      return;
+    }
+
+    let rafId = 0;
+    const loop = (now: number) => {
+      drawFrame(now);
+      rafId = window.requestAnimationFrame(loop);
+    };
+    rafId = window.requestAnimationFrame(loop);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+  }, [ttsEnabled, ttsPaused, activeTtsLineIndex, ttsVolume, ttsRate, ttsPitch]);
+
+  useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const justEnabledTts = ttsEnabled && !prevTtsEnabledRef.current;
+    prevTtsEnabledRef.current = ttsEnabled;
+
     if (quickLogs.length > 0) {
       const now = performance.now();
       if (lastLogTimeRef.current !== null) {
@@ -437,25 +754,29 @@ export default function App() {
       lastLogTimeRef.current = now;
 
       const latestIdx = quickLogs.length - 1;
-      if (ttsEnabled && latestIdx > lastSpokenIndexRef.current && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        const latest = quickLogs[latestIdx];
-        const utterance = new SpeechSynthesisUtterance(latest.replace(/^\[[A-Z0-9_]+\]\s*/, ''));
-        utterance.rate = ttsRate;
-        utterance.pitch = ttsPitch;
-        utterance.volume = Math.min(1, Math.max(0, ttsVolume));
-        if (ttsVoiceUri) {
-          const matched = ttsVoices.find((v) => v.voiceURI === ttsVoiceUri);
-          if (matched) utterance.voice = matched;
+      if (ttsEnabled && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        if (justEnabledTts) {
+          ttsQueueRef.current.push({ lineText: quickLogs[latestIdx], lineIdx: latestIdx });
+          lastSpokenIndexRef.current = latestIdx;
+          setTtsQueueLength(ttsQueueRef.current.length);
+          processTtsQueue();
+        } else if (latestIdx > lastSpokenIndexRef.current) {
+          const startIdx = Math.max(0, lastSpokenIndexRef.current + 1);
+          for (let idx = startIdx; idx <= latestIdx; idx += 1) {
+            ttsQueueRef.current.push({ lineText: quickLogs[idx], lineIdx: idx });
+          }
+          lastSpokenIndexRef.current = latestIdx;
+          setTtsQueueLength(ttsQueueRef.current.length);
+          processTtsQueue();
         }
-        window.speechSynthesis.speak(utterance);
-        lastSpokenIndexRef.current = latestIdx;
       }
     } else {
       lastLogTimeRef.current = null;
       lastSpokenIndexRef.current = -1;
+      resetTtsQueue(true);
       setLogLatencyMs(null);
     }
-  }, [quickLogs, ttsEnabled, ttsRate, ttsPitch, ttsVolume]);
+  }, [quickLogs, ttsEnabled]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -688,7 +1009,7 @@ export default function App() {
     }
   };
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     setIsRefreshing(true);
     try {
       const res = await fetch('/api/system/status');
@@ -701,13 +1022,148 @@ export default function App() {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchStatus]);
+
+  useEffect(() => {
+    if (isAssistantOpen) {
+      setAssistantOpenedAt(new Date().toISOString());
+    }
+  }, [isAssistantOpen]);
+
+  const assistantModuleState = useMemo(() => {
+    const moduleDetails: Record<string, unknown> = {};
+    if (statusData) {
+      if (
+        activeModule === 'command_center' ||
+        activeModule === 'intelligence_core' ||
+        activeModule === 'model_laboratory' ||
+        activeModule === 'experiment_center'
+      ) {
+        moduleDetails.model = {
+          name: statusData.model.name,
+          architecture: statusData.model.architecture,
+          runtimeState: statusData.model.runtimeState,
+          weightsLoaded: statusData.model.weightsLoaded,
+          inferenceReady: statusData.model.inferenceReady,
+          totalParams: statusData.model.totalParams,
+          activeParams: statusData.model.activeParams,
+          readinessReason: statusData.model.readinessReason,
+        };
+      }
+      if (activeModule === 'subscription_billing' || activeModule === 'analytics_bi') {
+        moduleDetails.commercial = {
+          phase: statusData.commercial.currentPhase,
+          tenantId: statusData.commercial.activeTenantId,
+          planId: statusData.commercial.activePlanId,
+          tasksCompleted: statusData.commercial.tasksCompleted,
+          tasksFailed: statusData.commercial.tasksFailed,
+          taskCompletionRate: statusData.commercial.taskCompletionRate,
+        };
+      }
+      if (activeModule === 'governance_security' || activeModule === 'admin_console') {
+        moduleDetails.audit = statusData.audit;
+      }
+      if (activeModule === 'knowledge_hub' || activeModule === 'dev_studio') {
+        moduleDetails.sandboxFileCount = statusData.sandbox.fileCount;
+      }
+    }
+
+    return {
+      moduleId: activeModule,
+      moduleLabel: t(`nav.${activeModule}`),
+      openedAt: assistantOpenedAt || undefined,
+      isContextRailOpen: isContextOpen,
+      quickTask: {
+        isOpen: isQuickTaskOpen,
+        goal: quickGoal,
+        isRunning: isQuickRunning,
+        done: quickDone,
+        logCount: quickLogs.length,
+      },
+      logTerminal: {
+        totalLogs: quickLogs.length,
+        searchMode: logSearchMode,
+        searchQuery: logSearchQuery,
+        tagFilter: logTagFilter,
+        integrityStatus,
+        ttsEnabled,
+      },
+      ...(Object.keys(moduleDetails).length > 0 ? { moduleDetails } : {}),
+    };
+  }, [
+    activeModule,
+    t,
+    assistantOpenedAt,
+    isContextOpen,
+    isQuickTaskOpen,
+    quickGoal,
+    isQuickRunning,
+    quickDone,
+    quickLogs.length,
+    logSearchMode,
+    logSearchQuery,
+    logTagFilter,
+    integrityStatus,
+    ttsEnabled,
+    statusData,
+  ]);
+
+  const assistantWorkspaceMetadata = useMemo(() => {
+    if (!statusData) return undefined;
+    const rawFiles = Array.isArray(statusData.sandbox?.files) ? statusData.sandbox.files : [];
+    const userFacingFiles = rawFiles.filter((f) => !f.startsWith('.zyntheor/snapshots/'));
+    const sampleFiles = (userFacingFiles.length > 0 ? userFacingFiles : rawFiles).slice(0, 25);
+    const currentRes = statusData.resources?.current;
+    const bridgeVal = statusData.connectivity?.bridgeLifecycle as any;
+
+    return {
+      tenantId: statusData.commercial?.activeTenantId,
+      planId: statusData.commercial?.activePlanId,
+      commercialPhase: statusData.commercial?.currentPhase,
+      sandboxPath: statusData.sandbox?.path,
+      sandboxFileCount: statusData.sandbox?.fileCount,
+      sandboxFilesSample: sampleFiles,
+      model: {
+        name: statusData.model?.name,
+        architecture: statusData.model?.architecture,
+        runtimeState: statusData.model?.runtimeState,
+        weightsLoaded: statusData.model?.weightsLoaded,
+        inferenceReady: statusData.model?.inferenceReady,
+        executionVerified: statusData.model?.executionVerified,
+        checkpointHash: statusData.model?.checkpointHash,
+      },
+      audit: statusData.audit,
+      connectivity: statusData.connectivity
+        ? {
+            online: statusData.connectivity.online,
+            status: statusData.connectivity.status,
+            runtimeState: statusData.connectivity.runtimeState,
+            bridgeLifecycle: typeof bridgeVal === 'object' && bridgeVal !== null ? bridgeVal.state : bridgeVal,
+            cloudStorageConfigured: statusData.connectivity.cloudStorageConfigured,
+            pythonBridgeReachable: statusData.connectivity.pythonBridgeReachable,
+          }
+        : undefined,
+      resources: currentRes
+        ? {
+            loadAvg1m: currentRes.loadAvg1m,
+            cpuCores: currentRes.cpuCores,
+            processRssMb: currentRes.processRssMb,
+            systemRamUsedMb: currentRes.systemRamUsedMb,
+            systemRamTotalMb: currentRes.systemRamTotalMb,
+            tokensPerSec: currentRes.tokensPerSec,
+            lastInferenceLatencyMs: currentRes.lastInferenceLatencyMs,
+          }
+        : undefined,
+      serverTime: statusData.serverTime,
+      uptimeSeconds: statusData.uptimeSeconds,
+    };
+  }, [statusData]);
 
   const handleIntegrityAutoRecovery = async () => {
     const result = await restoreFromLedger();
@@ -731,6 +1187,10 @@ export default function App() {
     setLogCategories({});
     setGroupByCategory(false);
     setSelectedLogIndices([]);
+    lastSpokenIndexRef.current = -1;
+    resetTtsQueue(true);
+    setTtsPaused(false);
+    ttsPausedRef.current = false;
     setQuickLogs([`[INIT] Initiating Sovereign Multi-Agent for: "${quickGoal}"`]);
 
     try {
@@ -852,6 +1312,11 @@ export default function App() {
           setIsSnapshotDrawerOpen(false);
           return;
         }
+        if (isAssistantOpen) {
+          e.preventDefault();
+          setIsAssistantOpen(false);
+          return;
+        }
         if (isQuickTaskOpen) {
           e.preventDefault();
           setIsQuickTaskOpen(false);
@@ -868,6 +1333,13 @@ export default function App() {
       if ((isCtrlOrCmd && (e.key === '/' || e.key === '?')) || (!isInput && e.key === '?')) {
         e.preventDefault();
         setIsShortcutsModalOpen((prev) => !prev);
+        return;
+      }
+
+      // 4b. Alt+A: Toggle System AI Assistant Drawer
+      if (e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        setIsAssistantOpen((prev) => !prev);
         return;
       }
 
@@ -939,6 +1411,7 @@ export default function App() {
     isExportMenuOpen,
     isShortcutsModalOpen,
     isSnapshotDrawerOpen,
+    isAssistantOpen,
     isMobileOpen,
     quickLogs,
     snapshots
@@ -1154,6 +1627,7 @@ export default function App() {
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           onRefreshStatus={fetchStatus}
           onOpenSettings={() => setActiveModule('user_settings')}
+          onOpenAssistant={() => setIsAssistantOpen(true)}
           isRefreshing={isRefreshing}
         />
 
@@ -1342,9 +1816,50 @@ export default function App() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setLogTextWrap((prev) => !prev)}
-                      title={logTextWrap ? 'Switch to no-wrap' : 'Switch to text wrap'}
-                      className={`p-1.5 rounded-md transition-colors cursor-pointer border ${
+                      data-testid="toggle-line-numbers"
+                      onClick={() => {
+                        setShowLineNumbers((prev) => {
+                          const next = !prev;
+                          try {
+                            localStorage.setItem('zyntheor_log_line_numbers', String(next));
+                          } catch {
+                            // ignore
+                          }
+                          return next;
+                        });
+                      }}
+                      aria-pressed={showLineNumbers}
+                      aria-label="Toggle Line Numbers"
+                      title={showLineNumbers ? 'Toggle Line Numbers (Hide)' : 'Toggle Line Numbers (Show)'}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer border text-[10px] font-mono font-bold ${
+                        showLineNumbers
+                          ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
+                          : logTheme === 'high_contrast'
+                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
+                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
+                      }`}
+                    >
+                      <ListOrdered className="w-3.5 h-3.5" />
+                      <span className="hidden xl:inline">Lines</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="toggle-log-wrap"
+                      aria-pressed={logTextWrap}
+                      aria-label={logTextWrap ? 'Wrap Text' : 'No-Wrap'}
+                      onClick={() => {
+                        setLogTextWrap((prev) => {
+                          const next = !prev;
+                          try {
+                            localStorage.setItem('zyntheor_log_text_wrap', String(next));
+                          } catch {
+                            // ignore storage quota errors
+                          }
+                          return next;
+                        });
+                      }}
+                      title={logTextWrap ? 'Wrap Text (click to switch to No-Wrap)' : 'No-Wrap (click to switch to Wrap Text)'}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer border text-[10px] font-mono font-bold ${
                         logTextWrap
                           ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
                           : logTheme === 'high_contrast'
@@ -1353,6 +1868,7 @@ export default function App() {
                       }`}
                     >
                       <WrapText className="w-3.5 h-3.5" />
+                      <span>{logTextWrap ? 'Wrap Text' : 'No-Wrap'}</span>
                     </button>
                     <button
                       type="button"
@@ -1367,6 +1883,84 @@ export default function App() {
                       }`}
                     >
                       {ttsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleToggleTtsPause}
+                      disabled={!ttsEnabled}
+                      aria-pressed={ttsPaused}
+                      aria-label={ttsPaused ? 'Resume TTS' : 'Pause TTS'}
+                      title={
+                        !ttsEnabled
+                          ? 'Enable TTS to pause or resume speech'
+                          : ttsPaused
+                          ? 'Resume queued speech synthesis'
+                          : 'Pause ongoing speech synthesis'
+                      }
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
+                        ttsEnabled && ttsPaused
+                          ? 'bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_50%,transparent)]'
+                          : ttsEnabled
+                          ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
+                          : logTheme === 'high_contrast'
+                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
+                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)]'
+                      }`}
+                    >
+                      {ttsPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+                      <span className="hidden sm:inline">{ttsPaused ? 'Resume' : 'Pause'}</span>
+                    </button>
+                    <div
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono ${
+                        logTheme === 'high_contrast'
+                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
+                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]'
+                      }`}
+                      title="TTS Pitch (0.5x – 2.0x)"
+                    >
+                      <label htmlFor="tts-pitch-header-slider" className="shrink-0 font-semibold">
+                        TTS Pitch
+                      </label>
+                      <input
+                        id="tts-pitch-header-slider"
+                        type="range"
+                        min="0.5"
+                        max="2.0"
+                        step="0.1"
+                        value={ttsPitch}
+                        aria-label="TTS Pitch"
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setTtsPitch(val);
+                          localStorage.setItem('zyntheor_tts_pitch', String(val));
+                        }}
+                        className="w-16 accent-[var(--app-amber)] cursor-pointer"
+                      />
+                      <span className="tabular-nums font-bold text-[var(--app-amber)] min-w-[2.1rem] text-right">
+                        {ttsPitch.toFixed(1)}x
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      data-testid="clear-resolved-logs"
+                      aria-label="Clear Resolved Logs"
+                      onClick={handleClearResolvedLogs}
+                      disabled={resolvedLogCount === 0}
+                      title={
+                        lang === 'th'
+                          ? 'ล้างบันทึกที่เสร็จสิ้นแล้ว ([DONE] / [VERIFIED])'
+                          : 'Remove all log lines tagged [DONE] or [VERIFIED]'
+                      }
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer border text-[10px] font-mono font-bold disabled:opacity-40 disabled:cursor-not-allowed ${
+                        logTheme === 'high_contrast'
+                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
+                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--z-ok)] hover:text-[var(--z-ok)]'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>
+                        Clear Resolved Logs{resolvedLogCount > 0 ? ` (${resolvedLogCount})` : ''}
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -1578,13 +2172,23 @@ export default function App() {
                           type="text"
                           value={logSearchQuery}
                           onChange={(e) => setLogSearchQuery(e.target.value)}
-                          aria-label={logSearchMode === 'regex' ? 'Regex log search pattern' : 'Text log search query'}
+                          aria-label={
+                            logSearchMode === 'regex'
+                              ? 'Regex log search pattern'
+                              : logSearchMode === 'semantic'
+                              ? 'Semantic intent log search query'
+                              : 'Text log search query'
+                          }
                           aria-invalid={logSearchMode === 'regex' && Boolean(compiledLogSearch.error)}
                           placeholder={
                             logSearchMode === 'regex'
                               ? lang === 'th'
                                 ? 'Regex (เช่น \\[ERROR\\]\\s*\\[auth\\] หรือ at\\s+.*:\\d+)...'
                                 : 'Regex (e.g. \\[ERROR\\]\\s*\\[auth\\] or at\\s+.*:\\d+)...'
+                              : logSearchMode === 'semantic'
+                              ? lang === 'th'
+                                ? 'ค้นหาตามความหมาย/เจตนา (เช่น ปัญหาสิทธิ์, พัง, ช้า, test ผ่าน)...'
+                                : 'Search by intent (e.g. auth problem, crash, slow, tests passed)...'
                               : lang === 'th'
                               ? 'ค้นหาในบันทึก...'
                               : 'Filter logs by text...'
@@ -1611,7 +2215,7 @@ export default function App() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => setLogSearchMode((prev) => (prev === 'text' ? 'regex' : 'text'))}
+                        onClick={() => setLogSearchMode((prev) => (prev === 'regex' ? 'text' : 'regex'))}
                         aria-pressed={logSearchMode === 'regex'}
                         title={
                           logSearchMode === 'regex'
@@ -1630,6 +2234,28 @@ export default function App() {
                       >
                         <Regex className="w-3.5 h-3.5" />
                         <span>Regex</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLogSearchMode((prev) => (prev === 'semantic' ? 'text' : 'semantic'))}
+                        aria-pressed={logSearchMode === 'semantic'}
+                        title={
+                          logSearchMode === 'semantic'
+                            ? 'Semantic Vector Search Active (click to switch to plain text search)'
+                            : 'Switch to Semantic Intent Search (TF-IDF + cosine relevance ranking)'
+                        }
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono font-bold border transition-colors cursor-pointer shrink-0 ${
+                          logSearchMode === 'semantic'
+                            ? logTheme === 'high_contrast'
+                              ? 'bg-[var(--app-text-primary)] text-[var(--app-bg)] border-[var(--app-text-primary)]'
+                              : 'bg-[color-mix(in_srgb,var(--app-amber)_22%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_55%,transparent)]'
+                            : logTheme === 'high_contrast'
+                            ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
+                            : 'bg-[var(--app-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-amber)]'
+                        }`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Semantic</span>
                       </button>
                     </div>
                     {(logSearchQuery.trim() || logTagFilter !== 'ALL') && quickLogs.length > 0 && (
@@ -1660,75 +2286,106 @@ export default function App() {
                       <option value="DONE">[DONE]</option>
                       <option value="ERROR">[ERROR]</option>
                     </select>
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--app-text-secondary)]">
-                    <span>Rate {ttsRate.toFixed(1)}x</span>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2.0"
-                      step="0.1"
-                      value={ttsRate}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        setTtsRate(val);
-                        localStorage.setItem('zyntheor_tts_rate', String(val));
-                      }}
-                      className="w-14 accent-[var(--app-accent)] cursor-pointer"
-                      title="TTS Speech Rate"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--app-text-secondary)]">
-                    <span>Pitch {ttsPitch.toFixed(1)}x</span>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2.0"
-                      step="0.1"
-                      value={ttsPitch}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        setTtsPitch(val);
-                        localStorage.setItem('zyntheor_tts_pitch', String(val));
-                      }}
-                      className="w-14 accent-[var(--app-amber)] cursor-pointer"
-                      title="TTS Pitch"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--app-text-secondary)]">
-                    <span>Vol {ttsVolume.toFixed(1)}x</span>
-                    <input
-                      type="range"
-                      min="0.1"
-                      max="2.0"
-                      step="0.1"
-                      value={ttsVolume}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        setTtsVolume(val);
-                        localStorage.setItem('zyntheor_tts_volume', String(val));
-                      }}
-                      className="w-14 accent-[var(--app-accent)] cursor-pointer"
-                      title="TTS Volume Gain"
-                    />
-                  </div>
-                  {ttsVoices.length > 0 && (
-                    <select
-                      value={ttsVoiceUri}
-                      onChange={(e) => {
-                        setTtsVoiceUri(e.target.value);
-                        localStorage.setItem('zyntheor_tts_voice', e.target.value);
-                      }}
-                      className="max-w-[140px] px-2 py-1 rounded-md text-[10px] font-mono bg-[var(--app-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] cursor-pointer"
-                      title="Select TTS Voice"
+                    <div
+                      role="region"
+                      aria-label="TTS"
+                      data-section="tts"
+                      className="flex flex-wrap items-center gap-2 pl-2 border-l border-[var(--app-card-border)]"
                     >
-                      <option value="">Default Voice</option>
-                      {ttsVoices.map((v) => (
-                        <option key={v.voiceURI} value={v.voiceURI}>
-                          {v.name} ({v.lang})
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--app-accent)]">
+                        TTS
+                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--app-text-secondary)]">
+                        <span>Rate {ttsRate.toFixed(1)}x</span>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.0"
+                          step="0.1"
+                          value={ttsRate}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            setTtsRate(val);
+                            localStorage.setItem('zyntheor_tts_rate', String(val));
+                          }}
+                          className="w-14 accent-[var(--app-accent)] cursor-pointer"
+                          title="TTS Speech Rate"
+                        />
+                      </div>
+                      <div
+                        className={`relative overflow-hidden flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono text-[var(--app-text-secondary)] ${
+                          logTheme === 'high_contrast'
+                            ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
+                            : 'bg-[var(--app-bg)] border-[var(--app-card-border)]'
+                        }`}
+                      >
+                        <label htmlFor="tts-volume-slider" className="relative z-10 font-semibold shrink-0">
+                          Volume {ttsVolume.toFixed(2)}x
+                        </label>
+                        <input
+                          id="tts-volume-slider"
+                          data-testid="tts-volume-slider"
+                          type="range"
+                          min="0"
+                          max="2"
+                          step="0.01"
+                          value={ttsVolume}
+                          aria-label="TTS Volume"
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            setTtsVolume(val);
+                            ttsConfigRef.current.ttsVolume = val;
+                            try {
+                              localStorage.setItem('zyntheor_tts_volume', String(val));
+                            } catch {
+                              // ignore storage errors
+                            }
+                          }}
+                          className="relative z-10 w-24 accent-[var(--app-accent)] cursor-pointer"
+                          title="TTS Volume (0.00x – 2.00x)"
+                        />
+                        <canvas
+                          ref={ttsSpectrumCanvasRef}
+                          width={160}
+                          height={28}
+                          data-testid="tts-spectrum-analyzer"
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 w-full h-full z-20 opacity-80"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--app-text-secondary)]">
+                        <label htmlFor="tts-voice-select" className="shrink-0">
+                          Voice
+                        </label>
+                        <select
+                          id="tts-voice-select"
+                          aria-label="Select TTS Voice"
+                          value={ttsVoiceUri}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setTtsVoiceUri(val);
+                            ttsConfigRef.current.ttsVoiceUri = val;
+                            localStorage.setItem('zyntheor_tts_voice', val);
+                          }}
+                          className={`max-w-[160px] px-2 py-1 rounded-md text-[10px] font-mono cursor-pointer border focus:outline-none ${
+                            logTheme === 'high_contrast'
+                              ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
+                              : 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-card-border)]'
+                          }`}
+                          title="Select TTS Voice"
+                        >
+                          <option value="">Default Voice</option>
+                          {ttsVoiceUri && !ttsVoices.some((v) => v.voiceURI === ttsVoiceUri) && (
+                            <option value={ttsVoiceUri}>{ttsVoiceUri} (Saved)</option>
+                          )}
+                          {ttsVoices.map((v) => (
+                            <option key={v.voiceURI} value={v.voiceURI}>
+                              {v.name} ({v.lang})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
                   {logSearchMode === 'regex' && (
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
@@ -1772,6 +2429,52 @@ export default function App() {
                       )}
                     </div>
                   )}
+                  {logSearchMode === 'semantic' && (
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
+                      <span className={logTheme === 'high_contrast' ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-amber)]'}>
+                        {logSearchQuery.trim()
+                          ? `Intent Vector Match (${semanticLogSuggestions.length} ranked)`
+                          : 'Intents:'}
+                      </span>
+                      {!logSearchQuery.trim() &&
+                        getSemanticIntentPresets().map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => setLogSearchQuery(preset.query)}
+                            className="px-1.5 py-0.5 rounded-md border border-[var(--app-card-border)] bg-[var(--app-bg)] text-[var(--app-text-secondary)] hover:text-[var(--app-amber)] hover:border-[var(--app-amber)] transition-colors cursor-pointer"
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                  {logSearchMode !== 'semantic' &&
+                    logSearchQuery.trim().length >= 2 &&
+                    semanticLogSuggestions.length > 0 && (
+                      <div
+                        data-testid="semantic-intent-suggestions"
+                        className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono"
+                      >
+                        <span className="text-[var(--app-amber)] font-semibold shrink-0">
+                          {lang === 'th' ? 'แนะนำตามเจตนา:' : 'Intent suggestions:'}
+                        </span>
+                        {semanticLogSuggestions.slice(0, 3).map((sug) => (
+                          <button
+                            key={`sug-${sug.originalIdx}`}
+                            type="button"
+                            onClick={() => setLogSearchMode('semantic')}
+                            title={`L${sug.originalIdx + 1} (${sug.scorePct}% intent match): ${sug.log}`}
+                            className="max-w-[230px] truncate px-2 py-0.5 rounded-md border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)] bg-[color-mix(in_srgb,var(--app-amber)_10%,var(--app-bg))] text-[var(--app-text-primary)] hover:border-[var(--app-amber)] cursor-pointer transition-colors"
+                          >
+                            <span className="text-[var(--app-amber)] font-bold mr-1">
+                              L{sug.originalIdx + 1} · {sug.scorePct}%
+                            </span>
+                            <span className="opacity-85">{sug.log.replace(/^\[[A-Z0-9_]+\]\s*/, '')}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                 </div>
                 {bulkMode && (
                   <div
@@ -1955,6 +2658,27 @@ export default function App() {
                       </div>
                     );
                   })()}
+                  {ttsEnabled && (activeTtsLineIndex !== null || ttsPaused || ttsQueueLength > 0) && (
+                    <span
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${
+                        ttsPaused
+                          ? 'bg-[color-mix(in_srgb,var(--app-amber)_16%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
+                          : 'bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]'
+                      }`}
+                    >
+                      {ttsPaused ? <Pause className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                      <span>
+                        {ttsPaused
+                          ? activeTtsLineIndex !== null
+                            ? `Paused L${activeTtsLineIndex + 1}`
+                            : 'TTS Paused'
+                          : activeTtsLineIndex !== null
+                          ? `Reading L${activeTtsLineIndex + 1}`
+                          : 'TTS Ready'}
+                        {ttsQueueLength > 0 ? ` (+${ttsQueueLength} queued)` : ''}
+                      </span>
+                    </span>
+                  )}
                   <span className="ml-auto opacity-60 hidden sm:inline">
                     Ctrl+Home/End · Ctrl+C
                   </span>
@@ -1982,7 +2706,9 @@ export default function App() {
                       }
                     }
                   }}
-                  className="p-4 max-h-56 overflow-y-auto space-y-1.5 focus:outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]"
+                  className={`p-4 max-h-56 overflow-y-auto ${
+                    logTextWrap ? 'overflow-x-hidden' : 'overflow-x-auto'
+                  } space-y-1.5 focus:outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]`}
                 >
                   {quickLogs.length === 0 ? (
                     <span className={logTheme === 'high_contrast' ? 'text-[var(--app-text-secondary)] italic' : 'text-[color-mix(in_srgb,var(--app-text-secondary)_70%,transparent)] italic'}>
@@ -2072,10 +2798,21 @@ export default function App() {
                         ? 'bg-[var(--z-ok)]'
                         : 'bg-[var(--app-amber)]';
 
+                      const isActiveTtsLine = ttsEnabled && activeTtsLineIndex === originalIdx;
+
                       return (
                         <div
                           key={originalIdx}
-                          className="text-[11px] leading-relaxed flex items-start gap-2 text-[var(--app-text-primary)]"
+                          ref={isActiveTtsLine ? activeTtsRowRef : undefined}
+                          data-tts-active={isActiveTtsLine ? 'true' : undefined}
+                          aria-current={isActiveTtsLine ? 'step' : undefined}
+                          className={`text-[11px] leading-relaxed flex items-start gap-2 text-[var(--app-text-primary)] transition-colors ${
+                            isActiveTtsLine
+                              ? logTheme === 'high_contrast'
+                                ? 'rounded-md px-1.5 py-0.5 -mx-1.5 bg-[color-mix(in_srgb,var(--app-accent)_22%,transparent)] border-l-2 border-[var(--app-text-primary)]'
+                                : 'rounded-md px-1.5 py-0.5 -mx-1.5 bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border-l-2 border-[var(--app-accent)]'
+                              : ''
+                          }`}
                         >
                           {bulkMode && (
                             <input
@@ -2095,15 +2832,35 @@ export default function App() {
                             className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${sentimentDotClass}`}
                             title={isNegative ? 'Alert' : isPositive ? 'Positive' : 'Neutral'}
                           />
-                          <span
-                            className={`text-[10px] shrink-0 select-none w-5 text-right ${
-                              logTheme === 'high_contrast'
-                                ? 'text-[var(--app-text-secondary)]'
-                                : 'text-[color-mix(in_srgb,var(--app-text-secondary)_50%,transparent)]'
-                            }`}
-                          >
-                            {originalIdx + 1}
-                          </span>
+                          {showLineNumbers && (
+                            <span
+                              data-line-number={originalIdx + 1}
+                              data-tts-highlighted={isActiveTtsLine ? 'true' : 'false'}
+                              onClick={() => {
+                                if (ttsEnabled) {
+                                  speakLogLine(log, originalIdx, true);
+                                }
+                              }}
+                              title={
+                                isActiveTtsLine
+                                  ? `Line ${originalIdx + 1} — Reading via TTS`
+                                  : ttsEnabled
+                                  ? `Line ${originalIdx + 1} (click to read with TTS)`
+                                  : `Line ${originalIdx + 1}`
+                              }
+                              className={`text-[10px] font-mono tabular-nums shrink-0 select-none min-w-[1.75rem] pr-1.5 text-right border-r transition-colors ${
+                                ttsEnabled ? 'cursor-pointer' : ''
+                              } ${
+                                isActiveTtsLine
+                                  ? 'bg-[var(--app-accent)] text-black font-bold rounded px-1 border-r-transparent ring-1 ring-[var(--app-accent)] shadow-sm'
+                                  : logTheme === 'high_contrast'
+                                  ? 'text-[var(--app-text-secondary)] border-[color-mix(in_srgb,var(--app-text-primary)_25%,transparent)]'
+                                  : 'text-[color-mix(in_srgb,var(--app-text-secondary)_60%,transparent)] border-[color-mix(in_srgb,var(--app-card-border)_60%,transparent)]'
+                              }`}
+                            >
+                              {originalIdx + 1}
+                            </span>
+                          )}
                           <span
                             className={`text-[10px] shrink-0 select-none ${
                               logTheme === 'high_contrast'
@@ -2134,6 +2891,14 @@ export default function App() {
                               }`}
                             >
                               {tag}
+                            </span>
+                          )}
+                          {logSearchMode === 'semantic' && logSearchQuery.trim() && semanticScoreMap.has(originalIdx) && (
+                            <span
+                              className="text-[10px] font-mono tabular-nums text-[var(--app-amber)] shrink-0"
+                              title={`Semantic relevance: ${semanticScoreMap.get(originalIdx)!.matchedConcepts.join(', ') || 'intent match'}`}
+                            >
+                              {semanticScoreMap.get(originalIdx)!.scorePct}%
                             </span>
                           )}
                           <span className={logTextWrap ? 'break-words whitespace-pre-wrap' : 'whitespace-nowrap'}>
@@ -2365,6 +3130,12 @@ export default function App() {
                       Ctrl + / or ?
                     </kbd>
                   </div>
+                  <div className="p-2.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] flex items-center justify-between">
+                    <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'เปิด/ปิด ผู้ช่วย AI' : 'Toggle AI Assistant'}</span>
+                    <kbd className="px-2 py-0.5 rounded bg-black/40 text-[var(--app-accent)] font-mono font-bold text-[11px] border border-[var(--app-card-border)]">
+                      Alt + A
+                    </kbd>
+                  </div>
                 </div>
               </div>
 
@@ -2481,6 +3252,41 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Floating AI Assistant Quick Launcher */}
+      {!isAssistantOpen && (
+        <button
+          type="button"
+          onClick={() => setIsAssistantOpen(true)}
+          aria-label={lang === 'th' ? 'เปิดผู้ช่วย AI ในระบบ' : 'Open System AI Assistant'}
+          title={lang === 'th' ? 'ผู้ช่วย AI ในระบบ (Alt+A)' : 'System AI Assistant (Alt+A)'}
+          className="fixed bottom-20 lg:bottom-6 right-5 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl vivid-gradient-brand text-white text-xs font-bold shadow-xl hover:opacity-95 transition-all cursor-pointer border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]"
+        >
+          <Sparkles className="w-4 h-4 shrink-0" />
+          <span>{lang === 'th' ? 'ผู้ช่วย AI' : 'AI Assistant'}</span>
+        </button>
+      )}
+
+      {/* System AI Assistant Drawer */}
+      <AIAssistantDrawer
+        isOpen={isAssistantOpen}
+        onClose={() => setIsAssistantOpen(false)}
+        activeModule={activeModule}
+        runtimeReady={Boolean(statusData?.model?.weightsLoaded && statusData?.model?.inferenceReady)}
+        recentLogs={quickLogs}
+        moduleState={assistantModuleState}
+        workspaceMetadata={assistantWorkspaceMetadata}
+        onRefreshContext={fetchStatus}
+        onApplyToQuickTask={(goalText) => {
+          setQuickGoal(goalText);
+          setIsAssistantOpen(false);
+          setIsQuickTaskOpen(true);
+        }}
+        onNavigateModule={(mod) => {
+          setActiveModule(mod);
+          setIsAssistantOpen(false);
+        }}
+      />
     </div>
   );
 }

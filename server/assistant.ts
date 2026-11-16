@@ -1,0 +1,1292 @@
+import {
+  GoogleGenAI,
+  ThinkingLevel,
+  Type,
+  type Content,
+  type FunctionDeclaration,
+  type GenerateContentResponse,
+  type Part,
+} from '@google/genai';
+import { buildTruthDashboardSnapshot } from '../lib/DashboardTruth';
+import { ConnectivityMonitor } from '../lib/ConnectivityMonitor';
+import { KnowledgeWorkspace } from '../lib/KnowledgeWorkspace';
+import { AuditLedger } from '../lib/AuditLedger';
+import { ToolGateway } from '../lib/ToolGateway';
+import {
+  AssistantBrainCore,
+  type AssistantBrainStatus,
+  type BrainCorePacket,
+  type BrainCycleTrace,
+} from './assistantBrainCore';
+
+const ASSISTANT_MODEL = 'gemini-4-hydrogen';
+
+export type AssistantThinkingMode = 'fast' | 'balanced' | 'deep';
+
+export interface AssistantHistoryTurn {
+  role: 'user' | 'model';
+  text: string;
+}
+
+export interface AssistantAttachment {
+  name: string;
+  mimeType: string;
+  dataBase64?: string;
+  textContent?: string;
+}
+
+export interface AssistantModuleState {
+  moduleId: string;
+  moduleLabel?: string;
+  openedAt?: string;
+  quickTask?: {
+    isOpen?: boolean;
+    goal?: string;
+    isRunning?: boolean;
+    done?: boolean;
+    logCount?: number;
+  };
+  logTerminal?: {
+    totalLogs?: number;
+    searchMode?: string;
+    searchQuery?: string;
+    tagFilter?: string;
+    integrityStatus?: string;
+    ttsEnabled?: boolean;
+  };
+  isContextRailOpen?: boolean;
+  moduleDetails?: Record<string, unknown>;
+}
+
+export interface AssistantWorkspaceMetadata {
+  tenantId?: string;
+  planId?: string;
+  commercialPhase?: string;
+  sandboxPath?: string;
+  sandboxFileCount?: number;
+  sandboxFilesSample?: string[];
+  model?: {
+    name?: string;
+    architecture?: string;
+    runtimeState?: string;
+    weightsLoaded?: boolean;
+    inferenceReady?: boolean;
+    executionVerified?: boolean;
+    checkpointHash?: string;
+  };
+  audit?: {
+    totalRecords?: number;
+    chainValid?: boolean;
+    headHash?: string;
+  };
+  connectivity?: {
+    online?: boolean;
+    status?: string;
+    runtimeState?: string;
+    bridgeLifecycle?: string;
+    cloudStorageConfigured?: boolean;
+    pythonBridgeReachable?: boolean;
+  };
+  resources?: {
+    loadAvg1m?: number;
+    cpuCores?: number;
+    processRssMb?: number;
+    systemRamUsedMb?: number;
+    systemRamTotalMb?: number;
+    tokensPerSec?: number;
+    lastInferenceLatencyMs?: number;
+  };
+  serverTime?: string;
+  uptimeSeconds?: number;
+}
+
+export interface AssistantContextInfo {
+  sessionId?: string;
+  activeModule?: string;
+  lang?: 'th' | 'en';
+  role?: string;
+  runtimeReady?: boolean;
+  recentLogs?: string[];
+  moduleState?: AssistantModuleState;
+  workspaceMetadata?: AssistantWorkspaceMetadata;
+}
+
+export interface AssistantShortTermTurn {
+  role: 'user' | 'model';
+  text: string;
+  timestamp: string;
+  toolsUsed?: string[];
+  activeModule?: string;
+}
+
+export interface SessionMemoryBuffer {
+  sessionId: string;
+  turns: AssistantShortTermTurn[];
+  recentTools: string[];
+  referencedEntities: string[];
+  lastSummary: string;
+  moduleState?: AssistantModuleState;
+  workspaceMetadata?: AssistantWorkspaceMetadata;
+  lastContext?: AssistantContextInfo;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SessionMemoryInfo {
+  sessionId: string;
+  turnCount: number;
+  exchangeCount: number;
+  maxExchanges: number;
+  recentTools: string[];
+  referencedEntities: string[];
+  lastSummary: string;
+  activeModule?: string;
+  workspaceTenantId?: string;
+  sandboxFileCount?: number;
+  updatedAt: string;
+}
+
+export interface AssistantGroundingSource {
+  title: string;
+  url: string;
+}
+
+export interface AssistantProposedAction {
+  actionType: 'navigate_module' | 'prepare_quick_task';
+  label: string;
+  moduleId?: string;
+  taskGoal?: string;
+}
+
+export type AssistantStreamEvent =
+  | { type: 'status'; phase: string; label: string }
+  | { type: 'brain_core'; packet: BrainCorePacket }
+  | { type: 'tool_call'; name: string; args: Record<string, unknown> }
+  | { type: 'tool_result'; name: string; ok: boolean; summary: string }
+  | { type: 'chunk'; text: string }
+  | { type: 'grounding'; sources: AssistantGroundingSource[] }
+  | { type: 'actions'; actions: AssistantProposedAction[] }
+  | {
+      type: 'done';
+      text: string;
+      sources?: AssistantGroundingSource[];
+      actions?: AssistantProposedAction[];
+      toolsUsed?: string[];
+      sessionId?: string;
+      memoryTurns?: number;
+      memoryExchanges?: number;
+      maxMemoryExchanges?: number;
+      brainTrace?: BrainCycleTrace;
+    }
+  | { type: 'error'; error: string };
+
+const VALID_MODULE_IDS = new Set([
+  'command_center',
+  'conversational_intelligence',
+  'intelligence_core',
+  'dev_studio',
+  'research_lab',
+  'automation_center',
+  'knowledge_hub',
+  'model_laboratory',
+  'experiment_center',
+  'api_platform',
+  'marketplace',
+  'subscription_billing',
+  'analytics_bi',
+  'governance_security',
+  'user_settings',
+  'admin_console',
+]);
+
+let cachedClient: GoogleGenAI | null = null;
+let cachedKey: string | undefined;
+
+function getAssistantClient(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+  if (!cachedClient || cachedKey !== apiKey) {
+    cachedKey = apiKey;
+    cachedClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+  }
+  return cachedClient;
+}
+
+export function isAssistantConfigured(): boolean {
+  return Boolean(process.env.GEMINI_API_KEY?.trim());
+}
+
+export function getAssistantModelName(): string {
+  return ASSISTANT_MODEL;
+}
+
+export function getAssistantBrainStatus(): AssistantBrainStatus {
+  return AssistantBrainCore.getInstance().getBrainStatus();
+}
+
+function resolveThinkingLevel(mode?: AssistantThinkingMode): ThinkingLevel {
+  switch (mode) {
+    case 'fast':
+      return ThinkingLevel.LOW;
+    case 'deep':
+      return ThinkingLevel.XHIGH;
+    case 'balanced':
+    default:
+      return ThinkingLevel.HIGH;
+  }
+}
+
+const getSystemTelemetryDeclaration: FunctionDeclaration = {
+  name: 'get_system_telemetry',
+  description:
+    'Inspect live ZYNTHEOR verified system status, runtime metrics, native intelligence gates, active blockers, and SHA-256 audit chain health.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      includeMetrics: {
+        type: Type.BOOLEAN,
+        description: 'Include detailed runtime resource metrics and blockers.',
+      },
+    },
+  },
+};
+
+const searchKnowledgeHubDeclaration: FunctionDeclaration = {
+  name: 'search_knowledge_hub',
+  description:
+    'Search indexed documents and knowledge chunks in the ZYNTHEOR Knowledge Hub.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      query: {
+        type: Type.STRING,
+        description: 'Search keywords or question to match against indexed documents.',
+      },
+      limit: {
+        type: Type.INTEGER,
+        description: 'Maximum number of matching chunks to return (1 to 8).',
+      },
+      collection: {
+        type: Type.STRING,
+        description: 'Optional collection name filter.',
+      },
+    },
+    required: ['query'],
+  },
+};
+
+const inspectWorkspaceFilesDeclaration: FunctionDeclaration = {
+  name: 'inspect_workspace_files',
+  description:
+    'List files inside the ZYNTHEOR /workspace sandbox or read a specific file inside /workspace.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      action: {
+        type: Type.STRING,
+        description: 'Use "list" to list all workspace files, or "read" to read a file.',
+      },
+      path: {
+        type: Type.STRING,
+        description: 'Relative file path inside /workspace when action is "read".',
+      },
+    },
+    required: ['action'],
+  },
+};
+
+const inspectAuditLedgerDeclaration: FunctionDeclaration = {
+  name: 'inspect_audit_ledger',
+  description:
+    'Verify the immutable SHA-256 audit ledger integrity and retrieve recent audit log entries.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      limit: {
+        type: Type.INTEGER,
+        description: 'Number of recent audit entries to retrieve (default 8, max 20).',
+      },
+    },
+  },
+};
+
+const proposeUiActionDeclaration: FunctionDeclaration = {
+  name: 'propose_ui_action',
+  description:
+    'Attach an interactive action button for the user in the ZYNTHEOR UI: either navigate to a specific module or pre-fill a task goal in the Quick Task Engine.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      actionType: {
+        type: Type.STRING,
+        description: 'Either "navigate_module" or "prepare_quick_task".',
+      },
+      moduleId: {
+        type: Type.STRING,
+        description:
+          'Target module ID when actionType is "navigate_module" (e.g., command_center, conversational_intelligence, intelligence_core, dev_studio, research_lab, automation_center, knowledge_hub, model_laboratory, experiment_center, api_platform, marketplace, subscription_billing, analytics_bi, governance_security, user_settings, admin_console).',
+      },
+      taskGoal: {
+        type: Type.STRING,
+        description: 'Task specification to prefill in Quick Task when actionType is "prepare_quick_task".',
+      },
+      label: {
+        type: Type.STRING,
+        description: 'Short button label in Thai or English for the user.',
+      },
+    },
+    required: ['actionType', 'label'],
+  },
+};
+
+const recallOrStoreMemoryDeclaration: FunctionDeclaration = {
+  name: 'recall_or_store_assistant_memory',
+  description:
+    'Access ZYNTHEOR NativeMemoryController persistent cross-session memory: recall ranked episodic/semantic/task memories or store a verified fact, preference, or lesson.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      action: {
+        type: Type.STRING,
+        description: 'Either "recall" to query persistent memory or "store" to save a memory entry.',
+      },
+      query: {
+        type: Type.STRING,
+        description: 'Search query when action is "recall".',
+      },
+      key: {
+        type: Type.STRING,
+        description: 'Unique memory key when action is "store".',
+      },
+      value: {
+        type: Type.STRING,
+        description: 'Memory content or JSON string when action is "store".',
+      },
+      category: {
+        type: Type.STRING,
+        description: 'Memory category: episodic, semantic, user_preference, reasoning_trace, or task_memory.',
+      },
+      limit: {
+        type: Type.INTEGER,
+        description: 'Maximum results when action is "recall" (1 to 10).',
+      },
+    },
+    required: ['action'],
+  },
+};
+
+const runAdaptiveReasoningDeclaration: FunctionDeclaration = {
+  name: 'run_adaptive_reasoning',
+  description:
+    'Invoke ZYNTHEOR AdaptiveReasoningEngine to run multi-step verification (symbolic math verification, CSP constraints, AST code inspection, or multi-hop graph reasoning).',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      prompt: {
+        type: Type.STRING,
+        description: 'Problem statement or reasoning objective to evaluate.',
+      },
+      pythonSource: {
+        type: Type.STRING,
+        description: 'Optional Python code snippet to inspect via AST verifier.',
+      },
+    },
+    required: ['prompt'],
+  },
+};
+
+const decomposeExecutionPlanDeclaration: FunctionDeclaration = {
+  name: 'decompose_execution_plan',
+  description:
+    'Invoke ZYNTHEOR AutonomousPlanner to decompose a software, research, or automation goal into a structured multi-stage DAG execution plan.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      goal: {
+        type: Type.STRING,
+        description: 'Target engineering or research goal to decompose into stages.',
+      },
+      priority: {
+        type: Type.STRING,
+        description: 'Optional priority: Low, Medium, or High.',
+      },
+      runtime: {
+        type: Type.STRING,
+        description: 'Target runtime: "node" or "python3".',
+      },
+    },
+    required: ['goal'],
+  },
+};
+
+const ASSISTANT_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
+  getSystemTelemetryDeclaration,
+  searchKnowledgeHubDeclaration,
+  inspectWorkspaceFilesDeclaration,
+  inspectAuditLedgerDeclaration,
+  proposeUiActionDeclaration,
+  recallOrStoreMemoryDeclaration,
+  runAdaptiveReasoningDeclaration,
+  decomposeExecutionPlanDeclaration,
+];
+
+export const MAX_SHORT_TERM_EXCHANGES = 12;
+const MAX_SHORT_TERM_MESSAGES = MAX_SHORT_TERM_EXCHANGES * 2;
+const SESSION_MEMORY_TTL_MS = 2 * 60 * 60 * 1000;
+const MAX_SESSIONS = 100;
+
+const sessionMemoryStore = new Map<string, SessionMemoryBuffer>();
+
+export function sanitizeSessionId(raw?: string): string {
+  const cleaned = typeof raw === 'string' ? raw.trim().replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80) : '';
+  return cleaned || 'default-session';
+}
+
+function pruneSessionMemoryStore(): void {
+  const now = Date.now();
+  for (const [id, entry] of sessionMemoryStore.entries()) {
+    const updatedMs = Date.parse(entry.updatedAt);
+    if (!Number.isFinite(updatedMs) || now - updatedMs > SESSION_MEMORY_TTL_MS) {
+      sessionMemoryStore.delete(id);
+    }
+  }
+  if (sessionMemoryStore.size <= MAX_SESSIONS) return;
+  const sorted = Array.from(sessionMemoryStore.entries()).sort(
+    (a, b) => Date.parse(a[1].updatedAt) - Date.parse(b[1].updatedAt)
+  );
+  while (sorted.length > MAX_SESSIONS) {
+    const oldest = sorted.shift();
+    if (oldest) sessionMemoryStore.delete(oldest[0]);
+  }
+}
+
+function getOrCreateSessionBuffer(sessionId: string): SessionMemoryBuffer {
+  pruneSessionMemoryStore();
+  const safeId = sanitizeSessionId(sessionId);
+  const existing = sessionMemoryStore.get(safeId);
+  if (existing) return existing;
+  const now = new Date().toISOString();
+  const created: SessionMemoryBuffer = {
+    sessionId: safeId,
+    turns: [],
+    recentTools: [],
+    referencedEntities: [],
+    lastSummary: '',
+    createdAt: now,
+    updatedAt: now,
+  };
+  sessionMemoryStore.set(safeId, created);
+  return created;
+}
+
+function extractReferencedEntities(text: string): string[] {
+  const found = new Set<string>();
+  const fileMatches = text.match(/[a-zA-Z0-9_./-]+\.(?:ts|tsx|js|jsx|py|json|md|yml|yaml|sql|log|sh)/g) || [];
+  for (const m of fileMatches.slice(0, 8)) found.add(m);
+  for (const mod of VALID_MODULE_IDS) {
+    if (text.includes(mod)) found.add(mod);
+  }
+  return Array.from(found).slice(0, 12);
+}
+
+function toSessionMemoryInfo(buffer: SessionMemoryBuffer): SessionMemoryInfo {
+  return {
+    sessionId: buffer.sessionId,
+    turnCount: buffer.turns.length,
+    exchangeCount: Math.ceil(buffer.turns.length / 2),
+    maxExchanges: MAX_SHORT_TERM_EXCHANGES,
+    recentTools: buffer.recentTools.slice(-8),
+    referencedEntities: buffer.referencedEntities.slice(-12),
+    lastSummary: buffer.lastSummary,
+    activeModule: buffer.moduleState?.moduleId || buffer.lastContext?.activeModule,
+    workspaceTenantId: buffer.workspaceMetadata?.tenantId,
+    sandboxFileCount: buffer.workspaceMetadata?.sandboxFileCount,
+    updatedAt: buffer.updatedAt,
+  };
+}
+
+export function syncAssistantSessionContext(
+  rawSessionId: string,
+  payload: {
+    moduleState?: AssistantModuleState;
+    workspaceMetadata?: AssistantWorkspaceMetadata;
+    context?: AssistantContextInfo;
+  }
+): SessionMemoryInfo {
+  const buffer = getOrCreateSessionBuffer(rawSessionId);
+  if (payload.moduleState && typeof payload.moduleState === 'object') {
+    buffer.moduleState = payload.moduleState;
+  }
+  if (payload.workspaceMetadata && typeof payload.workspaceMetadata === 'object') {
+    buffer.workspaceMetadata = payload.workspaceMetadata;
+  }
+  if (payload.context && typeof payload.context === 'object') {
+    buffer.lastContext = {
+      ...buffer.lastContext,
+      ...payload.context,
+      sessionId: buffer.sessionId,
+    };
+  }
+  buffer.updatedAt = new Date().toISOString();
+  return toSessionMemoryInfo(buffer);
+}
+
+export function getAssistantSessionMemoryInfo(rawSessionId: string): SessionMemoryInfo {
+  const safeId = sanitizeSessionId(rawSessionId);
+  const existing = sessionMemoryStore.get(safeId);
+  if (!existing) {
+    return {
+      sessionId: safeId,
+      turnCount: 0,
+      exchangeCount: 0,
+      maxExchanges: MAX_SHORT_TERM_EXCHANGES,
+      recentTools: [],
+      referencedEntities: [],
+      lastSummary: '',
+      updatedAt: new Date().toISOString(),
+    };
+  }
+  return toSessionMemoryInfo(existing);
+}
+
+export function clearAssistantSessionMemory(rawSessionId: string): boolean {
+  const safeId = sanitizeSessionId(rawSessionId);
+  return sessionMemoryStore.delete(safeId);
+}
+
+function buildSystemInstruction(
+  ctx: AssistantContextInfo,
+  sessionBuffer?: SessionMemoryBuffer,
+  brainPacket?: BrainCorePacket
+): string {
+  const langNote =
+    ctx.lang === 'th'
+      ? 'Respond primarily in clear, structured Thai (keep technical identifiers/code in English as appropriate) unless the user writes in another language.'
+      : 'Respond in the same language as the user (Thai or English).';
+
+  const moduleState = ctx.moduleState || sessionBuffer?.moduleState;
+  const workspaceMetadata = ctx.workspaceMetadata || sessionBuffer?.workspaceMetadata;
+  const activeModule = moduleState?.moduleId || ctx.activeModule;
+
+  const moduleNote = activeModule ? `Current active workspace module: ${activeModule}.` : '';
+  const roleNote = ctx.role ? `Current user role: ${ctx.role}.` : '';
+  const runtimeNote =
+    typeof ctx.runtimeReady === 'boolean'
+      ? `Native runtime status from UI: ${ctx.runtimeReady ? 'READY' : 'NOT_READY / CHECKING'}.`
+      : '';
+
+  const brainPacketNote = brainPacket
+    ? [
+        `[Assistant Brain Core Cognitive State (${brainPacket.architecture})]`,
+        `Cycle: ${brainPacket.cycleId} | Intent: ${brainPacket.intent} (conf ${brainPacket.intentConfidence}) | ProblemClass: ${brainPacket.problemClass} | Strategy: ${brainPacket.strategy}`,
+        `Native Core Runtime: ${brainPacket.nativeRuntimeState} (weightsLoaded=${brainPacket.nativeWeightsLoaded})`,
+        brainPacket.entities.length > 0 ? `Extracted Entities: ${brainPacket.entities.join(', ')}` : '',
+        brainPacket.conflictCount > 0 ? `Context Conflicts Detected: ${brainPacket.conflicts.join('; ')}` : '',
+        brainPacket.recalledMemories.length > 0
+          ? `Persistent Long-Term Memories Recalled (${brainPacket.recalledMemories.length}):\n${brainPacket.recalledMemories
+              .map((m) => `- [${m.category}] ${m.key} (score ${m.score}): ${m.preview}`)
+              .join('\n')}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join('\n')
+    : '';
+
+  const moduleStateNote = moduleState
+    ? `[Selected Module State (Captured on Assistant Open / Sync)]\n${JSON.stringify(moduleState, null, 2).slice(0, 3500)}`
+    : '';
+
+  const workspaceMetaNote = workspaceMetadata
+    ? `[Active Workspace Metadata]\n${JSON.stringify(workspaceMetadata, null, 2).slice(0, 3500)}`
+    : '';
+
+  const memoryBufferNote =
+    sessionBuffer && sessionBuffer.turns.length > 0
+      ? [
+          `[Short-Term Session Memory Buffer]`,
+          `Session ID: ${sessionBuffer.sessionId} (${Math.ceil(sessionBuffer.turns.length / 2)}/${MAX_SHORT_TERM_EXCHANGES} retained exchanges)`,
+          sessionBuffer.recentTools.length > 0
+            ? `Tools invoked earlier in this session: ${sessionBuffer.recentTools.join(', ')}`
+            : '',
+          sessionBuffer.referencedEntities.length > 0
+            ? `Previously referenced modules/files: ${sessionBuffer.referencedEntities.join(', ')}`
+            : '',
+          sessionBuffer.lastSummary
+            ? `Latest assistant response summary: ${sessionBuffer.lastSummary}`
+            : '',
+          'Use this single-session conversational buffer to answer follow-up questions referencing earlier responses seamlessly.',
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : '';
+
+  const logsNote =
+    Array.isArray(ctx.recentLogs) && ctx.recentLogs.length > 0
+      ? `Recent execution terminal logs (latest ${Math.min(12, ctx.recentLogs.length)} lines):\n${ctx.recentLogs
+          .slice(-12)
+          .join('\n')}`
+      : '';
+
+  return [
+    'You are the upgraded built-in AI Assistant (ผู้ช่วย AI อัจฉริยะ) powered by ZYNTHEOR AssistantBrainCore (แกนสมองผู้ช่วย: CognitiveContextEngine + AdaptiveReasoningEngine + NativeMemoryController + AutonomousPlanner + Gemini Neural Slot).',
+    'You have real server-side tools to inspect live system telemetry (get_system_telemetry), search indexed knowledge (search_knowledge_hub), inspect /workspace sandbox files (inspect_workspace_files), audit SHA-256 logs (inspect_audit_ledger), recall/store persistent memory (recall_or_store_assistant_memory), run adaptive reasoning/verification (run_adaptive_reasoning), decompose DAG plans (decompose_execution_plan), and suggest interactive UI actions (propose_ui_action).',
+    'When the user asks about current system health, blockers, metrics, audit records, knowledge documents, or workspace files, proactively call the relevant tool instead of guessing.',
+    'When a user asks to remember preferences/facts across sessions, or asks complex multi-step engineering/planning/verification questions, use recall_or_store_assistant_memory, run_adaptive_reasoning, or decompose_execution_plan.',
+    'When a user wants to open a module or run an agent task, call propose_ui_action so they get a one-click button right inside the assistant response.',
+    'When the user asks about the currently selected module or active workspace, cite the live [Selected Module State] and [Active Workspace Metadata] provided below (and call tools if deeper inspection is needed).',
+    'Available ZYNTHEOR modules: command_center, conversational_intelligence, intelligence_core, dev_studio, research_lab, automation_center, knowledge_hub, model_laboratory, experiment_center, api_platform, marketplace, subscription_billing, analytics_bi, governance_security, user_settings, admin_console.',
+    'Be accurate, grounded in tool evidence, and concise. Never fabricate metrics or claim unverified operations.',
+    langNote,
+    moduleNote,
+    roleNote,
+    runtimeNote,
+    brainPacketNote,
+    moduleStateNote,
+    workspaceMetaNote,
+    memoryBufferNote,
+    logsNote,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+async function executeLocalTool(
+  name: string,
+  args: Record<string, unknown>,
+  proposedActions: AssistantProposedAction[],
+  scopeCtx?: { tenantId?: string; role?: string }
+): Promise<{ ok: boolean; summary: string; data: Record<string, unknown> }> {
+  try {
+    switch (name) {
+      case 'get_system_telemetry': {
+        const connectivityState = await ConnectivityMonitor.getInstance().checkNow();
+        const snapshot = await buildTruthDashboardSnapshot(connectivityState, {
+          wsClientCount: 0,
+          wsLastFrameAt: null,
+          apiAvgLatencyMs: null,
+          apiSampleCount: 0,
+          lastRecordedTokensPerSec: null,
+          lastInferenceLatencyMs: null,
+        });
+        const integrity = AuditLedger.verifyIntegrity();
+        const includeMetrics = args.includeMetrics !== false;
+        const payload = {
+          generatedAt: snapshot.generatedAt,
+          policy: snapshot.policy,
+          systemStatusOverview: snapshot.systemStatusOverview,
+          nativeIntelligenceGates: snapshot.nativeIntelligenceGates,
+          activeBlockers: snapshot.activeBlockers,
+          auditIntegrity: {
+            valid: integrity.valid,
+            totalRecords: integrity.totalRecords,
+            headHash: integrity.headHash,
+          },
+          ...(includeMetrics
+            ? {
+                realRuntimeMetrics: snapshot.realRuntimeMetrics,
+                executionAndAutonomy: snapshot.executionAndAutonomy,
+              }
+            : {}),
+        };
+        return {
+          ok: true,
+          summary: `${snapshot.systemStatusOverview.length} status items · ${snapshot.activeBlockers.length} blockers`,
+          data: payload,
+        };
+      }
+
+      case 'search_knowledge_hub': {
+        const query = String(args.query || '').trim();
+        const limit = Math.min(8, Math.max(1, Number(args.limit) || 5));
+        const collection = typeof args.collection === 'string' && args.collection.trim() ? args.collection.trim() : undefined;
+        const kw = KnowledgeWorkspace.getInstance();
+        const stats = kw.getStats();
+        const results = query ? kw.retrieve(query, { limit, collection }) : [];
+        return {
+          ok: true,
+          summary: `${results.length} matches across ${stats.totalDocuments} docs`,
+          data: {
+            stats,
+            query,
+            results: results.map((r) => ({
+              documentTitle: r.documentTitle,
+              collection: r.collection,
+              score: r.score,
+              text: r.text.slice(0, 900),
+            })),
+          },
+        };
+      }
+
+      case 'inspect_workspace_files': {
+        const action = String(args.action || 'list');
+        if (action === 'read') {
+          const relPath = String(args.path || '').trim();
+          const content = ToolGateway.readFile(relPath);
+          const truncated = content.length > 8000 ? `${content.slice(0, 8000)}\n...[truncated]` : content;
+          return {
+            ok: true,
+            summary: `Read ${relPath} (${content.length} chars)`,
+            data: { path: relPath, length: content.length, content: truncated },
+          };
+        }
+        const files = ToolGateway.listFiles();
+        return {
+          ok: true,
+          summary: `${files.length} files in /workspace`,
+          data: { count: files.length, files: files.slice(0, 100) },
+        };
+      }
+
+      case 'inspect_audit_ledger': {
+        const limit = Math.min(20, Math.max(1, Number(args.limit) || 8));
+        const integrity = AuditLedger.verifyIntegrity();
+        const recent = AuditLedger.getRecent(limit).map((r) => ({
+          index: r.index,
+          timestamp: r.timestamp,
+          role: r.role,
+          action: r.action,
+          entryHash: r.entry_hash.slice(0, 16),
+          payloadSummary: JSON.stringify(r.payload).slice(0, 220),
+        }));
+        return {
+          ok: true,
+          summary: `Chain ${integrity.valid ? 'VALID' : 'INVALID'} · ${recent.length} entries`,
+          data: { integrity, recent },
+        };
+      }
+
+      case 'propose_ui_action': {
+        const actionType =
+          args.actionType === 'prepare_quick_task' ? 'prepare_quick_task' : 'navigate_module';
+        const label = String(args.label || '').trim() || (actionType === 'prepare_quick_task' ? 'Open Quick Task' : 'Open Module');
+        if (actionType === 'navigate_module') {
+          const moduleId = String(args.moduleId || '').trim();
+          if (!VALID_MODULE_IDS.has(moduleId)) {
+            return {
+              ok: false,
+              summary: `Invalid moduleId: ${moduleId}`,
+              data: { error: `Unknown moduleId '${moduleId}'.` },
+            };
+          }
+          const action: AssistantProposedAction = { actionType: 'navigate_module', label, moduleId };
+          proposedActions.push(action);
+          return {
+            ok: true,
+            summary: `Navigation action ready: ${moduleId}`,
+            data: { registered: true, action },
+          };
+        }
+
+        const taskGoal = String(args.taskGoal || '').trim();
+        if (!taskGoal) {
+          return {
+            ok: false,
+            summary: 'Missing taskGoal',
+            data: { error: 'taskGoal is required for prepare_quick_task.' },
+          };
+        }
+        const action: AssistantProposedAction = { actionType: 'prepare_quick_task', label, taskGoal };
+        proposedActions.push(action);
+        return {
+          ok: true,
+          summary: `Quick Task action ready`,
+          data: { registered: true, action },
+        };
+      }
+
+      case 'recall_or_store_assistant_memory': {
+        const action = args.action === 'store' ? 'store' : 'recall';
+        const validCats = new Set(['episodic', 'semantic', 'user_preference', 'reasoning_trace', 'task_memory', 'working_context']);
+        const rawCat = typeof args.category === 'string' ? args.category.trim() : '';
+        const category = validCats.has(rawCat) ? (rawCat as any) : undefined;
+        return AssistantBrainCore.getInstance().recallOrStoreMemory({
+          action,
+          query: typeof args.query === 'string' ? args.query : undefined,
+          key: typeof args.key === 'string' ? args.key : undefined,
+          value: args.value,
+          category,
+          limit: typeof args.limit === 'number' ? args.limit : undefined,
+          tenantId: scopeCtx?.tenantId,
+          role: scopeCtx?.role,
+        });
+      }
+
+      case 'run_adaptive_reasoning': {
+        const prompt = String(args.prompt || '').trim();
+        if (!prompt) {
+          return {
+            ok: false,
+            summary: 'Missing prompt',
+            data: { error: 'prompt is required for run_adaptive_reasoning.' },
+          };
+        }
+        return await AssistantBrainCore.getInstance().executeAdaptiveReasoning({
+          prompt,
+          tenantId: scopeCtx?.tenantId,
+          role: scopeCtx?.role,
+          pythonSource: typeof args.pythonSource === 'string' ? args.pythonSource : undefined,
+        });
+      }
+
+      case 'decompose_execution_plan': {
+        const goal = String(args.goal || '').trim();
+        if (!goal) {
+          return {
+            ok: false,
+            summary: 'Missing goal',
+            data: { error: 'goal is required for decompose_execution_plan.' },
+          };
+        }
+        return AssistantBrainCore.getInstance().decomposeExecutionPlan({
+          goal,
+          priority: args.priority === 'High' || args.priority === 'Low' ? args.priority : 'Medium',
+          runtime: args.runtime === 'python3' ? 'python3' : 'node',
+          tenantId: scopeCtx?.tenantId,
+          userId: scopeCtx?.role,
+        });
+      }
+
+      default:
+        return {
+          ok: false,
+          summary: `Unknown tool ${name}`,
+          data: { error: `Tool '${name}' is not supported.` },
+        };
+    }
+  } catch (err: any) {
+    return {
+      ok: false,
+      summary: err?.message || 'Tool execution error',
+      data: { error: err?.message || 'Tool execution error' },
+    };
+  }
+}
+
+function formatGeminiAssistantError(err: any, lang: 'th' | 'en'): Error {
+  const raw = String(err?.message || err || 'AI Assistant request failed.');
+  const status = typeof err?.status === 'number' ? err.status : 0;
+
+  if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(raw)) {
+    return new Error(
+      lang === 'th'
+        ? 'โควตาการใช้งาน Gemini API เต็มหรือเกินขีดจำกัด (429 RESOURCE_EXHAUSTED) โดยเฉพาะฟีเจอร์ค้นเว็บ (Web + URL) อาจต้องใช้คีย์แบบชำระเงิน กรุณาปิดโหมด Web + URL ชั่วคราว หรือตรวจสอบคีย์ที่ Settings > Secrets'
+        : 'Gemini API quota exceeded (429 RESOURCE_EXHAUSTED). Search grounding may require a billing-enabled key—disable Web + URL or select a billing-enabled API key in Settings > Secrets.'
+    );
+  }
+  if (status === 403 || status === 400 || /PERMISSION_DENIED|API_KEY_INVALID/i.test(raw)) {
+    return new Error(
+      lang === 'th'
+        ? 'คีย์ Gemini API ไม่ถูกต้องหรือไม่มีสิทธิ์ใช้งาน กรุณาตรวจสอบหรือเลือกคีย์ใหม่ในแผง Settings > Secrets'
+        : 'Gemini API key invalid or permission denied. Please check your API key in Settings > Secrets.'
+    );
+  }
+  if (status === 404 || /NOT_FOUND/i.test(raw)) {
+    return new Error(
+      lang === 'th'
+        ? 'ไม่พบโมเดลที่เรียกใช้งาน (404 NOT_FOUND) กรุณาตรวจสอบชื่อโมเดลบนเซิร์ฟเวอร์'
+        : 'Requested Gemini model was not found (404 NOT_FOUND).'
+    );
+  }
+  return new Error(raw);
+}
+
+async function generateWithRetry(
+  ai: GoogleGenAI,
+  params: Parameters<GoogleGenAI['models']['generateContent']>[0],
+  lang: 'th' | 'en',
+  maxAttempts = 2
+): Promise<GenerateContentResponse> {
+  let lastError: any;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (err: any) {
+      lastError = err;
+      const status = typeof err?.status === 'number' ? err.status : 0;
+      const isTransient = status === 503 || status === 500 || /timeout|ECONNRESET|ETIMEDOUT/i.test(String(err?.message || ''));
+      if (!isTransient || attempt === maxAttempts) {
+        throw formatGeminiAssistantError(err, lang);
+      }
+      await new Promise((r) => setTimeout(r, 400 * attempt));
+    }
+  }
+  throw formatGeminiAssistantError(lastError, lang);
+}
+
+function extractGroundingSources(response: GenerateContentResponse): AssistantGroundingSource[] {
+  const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+  if (!Array.isArray(chunks)) return [];
+  const seen = new Set<string>();
+  const sources: AssistantGroundingSource[] = [];
+  for (const chunk of chunks) {
+    const uri = chunk?.web?.uri;
+    const title = chunk?.web?.title;
+    if (typeof uri === 'string' && /^https?:\/\//i.test(uri) && !seen.has(uri)) {
+      seen.add(uri);
+      sources.push({
+        title: typeof title === 'string' && title.trim() ? title.trim() : uri,
+        url: uri,
+      });
+    }
+  }
+  return sources.slice(0, 8);
+}
+
+export async function runUpgradedAssistant(params: {
+  sessionId?: string;
+  message: string;
+  history?: AssistantHistoryTurn[];
+  attachments?: AssistantAttachment[];
+  context?: AssistantContextInfo;
+  moduleState?: AssistantModuleState;
+  workspaceMetadata?: AssistantWorkspaceMetadata;
+  thinkingMode?: AssistantThinkingMode;
+  webGrounding?: boolean;
+  onEvent: (event: AssistantStreamEvent) => void;
+}): Promise<string> {
+  const ai = getAssistantClient();
+  if (!ai) {
+    throw new Error(
+      'GEMINI_API_KEY is not configured on the server. Please attach a Gemini API key in Settings > Secrets.'
+    );
+  }
+
+  const resolvedSessionId = sanitizeSessionId(params.sessionId || params.context?.sessionId);
+  const sessionBuffer = getOrCreateSessionBuffer(resolvedSessionId);
+
+  const mergedModuleState = params.moduleState || params.context?.moduleState || sessionBuffer.moduleState;
+  const mergedWorkspaceMeta =
+    params.workspaceMetadata || params.context?.workspaceMetadata || sessionBuffer.workspaceMetadata;
+
+  syncAssistantSessionContext(resolvedSessionId, {
+    moduleState: mergedModuleState,
+    workspaceMetadata: mergedWorkspaceMeta,
+    context: params.context,
+  });
+
+  const mergedContext: AssistantContextInfo = {
+    ...sessionBuffer.lastContext,
+    ...params.context,
+    sessionId: resolvedSessionId,
+    moduleState: mergedModuleState,
+    workspaceMetadata: mergedWorkspaceMeta,
+  };
+
+  const clientHistory = (params.history || [])
+    .filter((h) => h && (h.role === 'user' || h.role === 'model') && typeof h.text === 'string' && h.text.trim())
+    .slice(-MAX_SHORT_TERM_MESSAGES);
+
+  // Reconcile server short-term memory buffer with client history (supports server-only follow-ups & restart recovery)
+  if (sessionBuffer.turns.length === 0 && clientHistory.length > 0) {
+    const nowIso = new Date().toISOString();
+    sessionBuffer.turns = clientHistory.map((h) => ({
+      role: h.role,
+      text: h.text,
+      timestamp: nowIso,
+      activeModule: mergedModuleState?.moduleId || mergedContext.activeModule,
+    }));
+  } else if (clientHistory.length > sessionBuffer.turns.length) {
+    const nowIso = new Date().toISOString();
+    sessionBuffer.turns = clientHistory.map((h) => ({
+      role: h.role,
+      text: h.text,
+      timestamp: nowIso,
+      activeModule: mergedModuleState?.moduleId || mergedContext.activeModule,
+    }));
+  }
+
+  const effectiveHistory = sessionBuffer.turns.slice(-MAX_SHORT_TERM_MESSAGES);
+
+  const lang = mergedContext.lang === 'th' ? 'th' : 'en';
+  const startedAtMs = Date.now();
+  const tenantId = mergedWorkspaceMeta?.tenantId || 'zyntheor-default';
+
+  params.onEvent({
+    type: 'status',
+    phase: 'perceiving',
+    label:
+      lang === 'th'
+        ? 'แกนสมองผู้ช่วยกำลังวิเคราะห์บริบทและความจำ...'
+        : 'Assistant Brain Core perceiving context & memory...',
+  });
+
+  const brainPacket = await AssistantBrainCore.getInstance().perceiveAndPrepare({
+    sessionId: resolvedSessionId,
+    message: params.message,
+    activeModule: mergedModuleState?.moduleId || mergedContext.activeModule,
+    tenantId,
+    role: mergedContext.role,
+    shortTermSummary: sessionBuffer.lastSummary,
+  });
+
+  params.onEvent({
+    type: 'brain_core',
+    packet: brainPacket,
+  });
+
+  const systemInstruction = buildSystemInstruction(mergedContext, sessionBuffer, brainPacket);
+  const thinkingLevel = resolveThinkingLevel(params.thinkingMode);
+
+  const contents: Content[] = effectiveHistory.map((h) => ({
+    role: h.role,
+    parts: [{ text: h.text }],
+  }));
+
+  const userParts: Part[] = [];
+  if (Array.isArray(params.attachments)) {
+    for (const att of params.attachments.slice(0, 4)) {
+      if (!att || typeof att.name !== 'string') continue;
+      if (typeof att.textContent === 'string' && att.textContent.trim()) {
+        userParts.push({
+          text: `[Attached file: ${att.name}]\n\`\`\`\n${att.textContent.slice(0, 12000)}\n\`\`\``,
+        });
+      } else if (
+        typeof att.dataBase64 === 'string' &&
+        att.dataBase64 &&
+        typeof att.mimeType === 'string' &&
+        att.mimeType
+      ) {
+        userParts.push({
+          inlineData: {
+            mimeType: att.mimeType,
+            data: att.dataBase64,
+          },
+        });
+      }
+    }
+  }
+  userParts.push({ text: params.message });
+  contents.push({ role: 'user', parts: userParts });
+
+  const hasUrlInMessage = /https?:\/\/\S+/i.test(params.message);
+  const useHybridBuiltIns = Boolean(params.webGrounding);
+
+  const tools: Array<Record<string, unknown>> = [
+    ...(useHybridBuiltIns ? [{ googleSearch: {} }] : []),
+    ...(useHybridBuiltIns && hasUrlInMessage ? [{ urlContext: {} }] : []),
+    { functionDeclarations: ASSISTANT_FUNCTION_DECLARATIONS },
+  ];
+
+  const config: Record<string, unknown> = {
+    systemInstruction,
+    thinkingConfig: { thinkingLevel },
+    tools,
+    ...(useHybridBuiltIns ? { toolConfig: { includeServerSideToolInvocations: true } } : {}),
+  };
+
+  params.onEvent({
+    type: 'status',
+    phase: 'thinking',
+    label:
+      lang === 'th'
+        ? thinkingLevel === ThinkingLevel.XHIGH
+          ? 'กำลังวิเคราะห์เชิงลึก (XHIGH)...'
+          : 'กำลังประมวลผล...'
+        : thinkingLevel === ThinkingLevel.XHIGH
+        ? 'Deep reasoning (XHIGH)...'
+        : 'Thinking...',
+  });
+
+  const proposedActions: AssistantProposedAction[] = [];
+  const collectedSources: AssistantGroundingSource[] = [];
+  const toolsUsed = new Set<string>();
+
+  const maxToolHops = 5;
+  let finalText = '';
+
+  let activeHybridBuiltIns = useHybridBuiltIns;
+  let activeConfig: Record<string, unknown> = { ...config };
+
+  for (let hop = 0; hop < maxToolHops; hop += 1) {
+    let response: GenerateContentResponse;
+    try {
+      response = await generateWithRetry(
+        ai,
+        {
+          model: ASSISTANT_MODEL,
+          contents,
+          config: activeConfig as any,
+        },
+        lang
+      );
+    } catch (err: any) {
+      const msg = String(err?.message || '');
+      if (activeHybridBuiltIns && /429|RESOURCE_EXHAUSTED|quota/i.test(msg)) {
+        activeHybridBuiltIns = false;
+        activeConfig = {
+          systemInstruction,
+          thinkingConfig: { thinkingLevel },
+          tools: [{ functionDeclarations: ASSISTANT_FUNCTION_DECLARATIONS }],
+        };
+        params.onEvent({
+          type: 'status',
+          phase: 'fallback',
+          label:
+            lang === 'th'
+              ? 'โควตาค้นเว็บเต็ม — ใช้เครื่องมือสดในระบบต่ออัตโนมัติ...'
+              : 'Web grounding quota reached — continuing with live system tools...',
+        });
+        response = await generateWithRetry(
+          ai,
+          {
+            model: ASSISTANT_MODEL,
+            contents,
+            config: activeConfig as any,
+          },
+          lang
+        );
+      } else {
+        throw err;
+      }
+    }
+
+    for (const src of extractGroundingSources(response)) {
+      if (!collectedSources.some((s) => s.url === src.url)) {
+        collectedSources.push(src);
+      }
+    }
+
+    const modelContent = response.candidates?.[0]?.content;
+    const functionCalls = response.functionCalls;
+
+    if (functionCalls && functionCalls.length > 0 && modelContent) {
+      contents.push(modelContent);
+      const responseParts: Part[] = [];
+
+      for (const fc of functionCalls) {
+        const fnName = fc.name || 'unknown_tool';
+        const fnArgs = (fc.args && typeof fc.args === 'object' ? fc.args : {}) as Record<string, unknown>;
+        toolsUsed.add(fnName);
+
+        params.onEvent({
+          type: 'tool_call',
+          name: fnName,
+          args: fnArgs,
+        });
+
+        const toolOutcome = await executeLocalTool(fnName, fnArgs, proposedActions, {
+          tenantId,
+          role: mergedContext.role,
+        });
+
+        params.onEvent({
+          type: 'tool_result',
+          name: fnName,
+          ok: toolOutcome.ok,
+          summary: toolOutcome.summary,
+        });
+
+        responseParts.push({
+          functionResponse: {
+            id: fc.id,
+            name: fnName,
+            response: toolOutcome.data,
+          },
+        });
+      }
+
+      contents.push({
+        role: 'user',
+        parts: responseParts,
+      });
+
+      params.onEvent({
+        type: 'status',
+        phase: 'synthesizing',
+        label: lang === 'th' ? 'กำลังสรุปคำตอบจากข้อมูลจริง...' : 'Synthesizing grounded response...',
+      });
+      continue;
+    }
+
+    finalText = (response.text || '').trim();
+    break;
+  }
+
+  if (!finalText) {
+    finalText =
+      lang === 'th'
+        ? 'ดำเนินการตรวจสอบข้อมูลเรียบร้อยแล้ว แต่ไม่พบข้อความตอบกลับเพิ่มเติม'
+        : 'Completed tool checks, no additional text returned.';
+  }
+
+  if (collectedSources.length > 0) {
+    params.onEvent({ type: 'grounding', sources: collectedSources });
+  }
+  if (proposedActions.length > 0) {
+    params.onEvent({ type: 'actions', actions: proposedActions });
+  }
+
+  // Stream text cleanly in small bursts for smooth progressive display
+  const chunkSize = 48;
+  for (let i = 0; i < finalText.length; i += chunkSize) {
+    params.onEvent({ type: 'chunk', text: finalText.slice(i, i + chunkSize) });
+  }
+
+  const turnTimestamp = new Date().toISOString();
+  const usedToolsList = Array.from(toolsUsed);
+  const userSummaryText = params.attachments && params.attachments.length > 0
+    ? `${params.message} [Attachments: ${params.attachments.map((a) => a.name).join(', ')}]`
+    : params.message;
+
+  sessionBuffer.turns.push(
+    {
+      role: 'user',
+      text: userSummaryText,
+      timestamp: turnTimestamp,
+      activeModule: mergedModuleState?.moduleId || mergedContext.activeModule,
+    },
+    {
+      role: 'model',
+      text: finalText,
+      timestamp: new Date().toISOString(),
+      toolsUsed: usedToolsList.length > 0 ? usedToolsList : undefined,
+      activeModule: mergedModuleState?.moduleId || mergedContext.activeModule,
+    }
+  );
+  if (sessionBuffer.turns.length > MAX_SHORT_TERM_MESSAGES) {
+    sessionBuffer.turns = sessionBuffer.turns.slice(-MAX_SHORT_TERM_MESSAGES);
+  }
+  if (usedToolsList.length > 0) {
+    sessionBuffer.recentTools = Array.from(new Set([...sessionBuffer.recentTools, ...usedToolsList])).slice(-12);
+  }
+  const entities = extractReferencedEntities(`${userSummaryText}\n${finalText}`);
+  if (entities.length > 0) {
+    sessionBuffer.referencedEntities = Array.from(
+      new Set([...sessionBuffer.referencedEntities, ...entities])
+    ).slice(-16);
+  }
+  sessionBuffer.lastSummary = finalText.replace(/\s+/g, ' ').trim().slice(0, 220);
+  sessionBuffer.updatedAt = new Date().toISOString();
+
+  const brainTrace = AssistantBrainCore.getInstance().recordEpisode({
+    packet: brainPacket,
+    sessionId: sessionBuffer.sessionId,
+    userMessage: userSummaryText,
+    assistantResponse: finalText,
+    toolsUsed: usedToolsList,
+    startedAtMs,
+  });
+
+  params.onEvent({
+    type: 'done',
+    text: finalText,
+    sources: collectedSources.length > 0 ? collectedSources : undefined,
+    actions: proposedActions.length > 0 ? proposedActions : undefined,
+    toolsUsed: usedToolsList.length > 0 ? usedToolsList : undefined,
+    sessionId: sessionBuffer.sessionId,
+    memoryTurns: sessionBuffer.turns.length,
+    memoryExchanges: Math.ceil(sessionBuffer.turns.length / 2),
+    maxMemoryExchanges: MAX_SHORT_TERM_EXCHANGES,
+    brainTrace,
+  });
+
+  return finalText;
+}
