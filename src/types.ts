@@ -73,9 +73,15 @@ export interface ResourceSample {
 export interface ConnectivityHealthState {
   online: boolean;
   onlineConnectivityRequired: boolean;
+  failClosed?: boolean;
   browserOnline: boolean;
   status: string;
   runtimeState: string;
+  internetReachable?: boolean;
+  internetStatus?: 'ONLINE' | 'OFFLINE';
+  internetProbeDetail?: string;
+  modelConnectivityReady?: boolean;
+  remediationSteps?: string[];
   executionVerified: boolean;
   executionError?: string | null;
   trainedProvenance?: string | null;
@@ -83,6 +89,7 @@ export interface ConnectivityHealthState {
   code?: string | null;
   reason?: string | null;
   cloudSource?: string | null;
+  cloudSourceUri?: string | null;
   cloudStorageConfigured?: boolean;
   cloudStorageReachable?: boolean;
   cloudConfigValid?: boolean;
@@ -104,15 +111,60 @@ export interface ConnectivityHealthState {
   lastOnlineAt?: string | null;
 }
 
+export interface EndToEndVerificationStage {
+  id:
+    | 'dns_lookup'
+    | 'https_probe'
+    | 'cloud_storage'
+    | 'cloud_runtime_health'
+    | 'checkpoint_load_verify'
+    | 'native_inference';
+  order: number;
+  label: string;
+  status: 'PASS' | 'BLOCKED' | 'FAIL';
+  latencyMs: number;
+  evidence: Record<string, any>;
+  error: string | null;
+}
+
+export interface SubsystemOnlinePolicyEntry {
+  id: string;
+  name: string;
+  status: 'VERIFIED' | 'IMPLEMENTED' | 'BLOCKED' | 'NOT_CONFIGURED';
+  onlineRequired: boolean;
+  sovereignControlled: boolean;
+  failClosedOnNetworkLoss: boolean;
+  evidence: string;
+  blocker: string | null;
+}
+
+export interface EndToEndVerificationReport {
+  overallStatus: 'VERIFIED' | 'BLOCKED' | 'FAILED';
+  onlineReady: boolean;
+  internetConnected: boolean;
+  cloudConnected: boolean;
+  checkpointVerified: boolean;
+  inferenceVerified: boolean;
+  executedAt: string;
+  totalLatencyMs: number;
+  stages: EndToEndVerificationStage[];
+  subsystemPolicyMatrix: SubsystemOnlinePolicyEntry[];
+  remediationSteps: string[];
+}
+
 export interface SystemStatusData {
   success: boolean;
   model: {
     name: string;
     architecture: string;
     totalParams: number;
-    activeParams: number;
+    activeParams: number | null;
     targetParams?: number | null;
     checkpointHash: string;
+    checkpointPath?: string | null;
+    checkpointSha256?: string | null;
+    tokenizerSha256?: string | null;
+    activeRuntimeId?: string | null;
     weightsLoaded: boolean;
     inferenceReady: boolean;
     runtimeState: string;

@@ -39,6 +39,7 @@ export interface ParsedCloudCheckpoint {
   metadata: Record<string, any>;
   weightsFloat32: Float32Array;
   payloadSha256: string;
+  containerSha256: string;
   byteSize: number;
   sourceUri: string;
 }
@@ -362,6 +363,7 @@ export function parseCheckpointBuffer(buffer: Buffer, sourceUri: string): Parsed
     );
   }
 
+  const containerSha256 = crypto.createHash('sha256').update(buffer).digest('hex');
   const payloadSha256 = crypto.createHash('sha256').update(weightBytes).digest('hex');
   const expectedSha = metadata.sha256 || metadata.payload_sha256;
   if (expectedSha && expectedSha !== payloadSha256) {
@@ -374,21 +376,31 @@ export function parseCheckpointBuffer(buffer: Buffer, sourceUri: string): Parsed
   const aligned = new Uint8Array(weightBytes.length);
   aligned.set(weightBytes);
   const weightsFloat32 = new Float32Array(aligned.buffer);
+  for (let i = 0; i < weightsFloat32.length; i++) {
+    if (!Number.isFinite(weightsFloat32[i])) {
+      throw new Error(`CORRUPTED_CHECKPOINT: Non-finite (NaN/Inf) Float32 weight detected at index ${i}`);
+    }
+  }
 
   return {
     magic,
     metadata,
     weightsFloat32,
     payloadSha256,
+    containerSha256,
     byteSize: buffer.length,
     sourceUri,
   };
 }
 
 /**
- * Loads and verifies a `.pt` checkpoint directly from Cloud Object Storage (S3/R2/GCS/Supabase).
+ * Downloads raw container bytes + parsed verification directly from S3-compatible Cloud Storage.
  */
-export async function loadCheckpointFromCloudStorage(objectKey?: string): Promise<ParsedCloudCheckpoint> {
+export async function downloadRawCheckpointFromCloudStorage(objectKey?: string): Promise<{
+  buffer: Buffer;
+  sourceUri: string;
+  parsed: ParsedCloudCheckpoint;
+}> {
   const cfg = getCloudStorageConfig();
   const key = objectKey || cfg.defaultKey;
   const client = createS3Client(cfg);
@@ -403,6 +415,14 @@ export async function loadCheckpointFromCloudStorage(objectKey?: string): Promis
 
   const buffer = await streamToBuffer(response.Body);
   const parsed = parseCheckpointBuffer(buffer, sourceUri);
+  return { buffer, sourceUri, parsed };
+}
+
+/**
+ * Loads and verifies a `.pt` checkpoint directly from Cloud Object Storage (S3/R2/GCS/Supabase).
+ */
+export async function loadCheckpointFromCloudStorage(objectKey?: string): Promise<ParsedCloudCheckpoint> {
+  const { parsed, sourceUri } = await downloadRawCheckpointFromCloudStorage(objectKey);
 
   AuditLedger.append('SYSTEM', 'CLOUD_CHECKPOINT_LOADED', {
     sourceUri,
@@ -495,3 +515,102 @@ export async function uploadCheckpointToCloudStorage(
     byteSize: parsed.byteSize,
   };
 }
+
+/**
+ * Publishes an integrity-verified `.pt` buffer either to configured S3/R2 storage
+ * or via HTTP PUT to a presigned `CHECKPOINT_UPLOAD_URL`. Fails closed when unconfigured.
+ */
+export async function publishCheckpointBufferToCloud(
+  buffer: Buffer,
+  opts?: {
+    objectKey?: string;
+    presignedUploadUrl?: string;
+    modelKey?: string;
+  }
+): Promise<{
+  provider: 's3' | 'presigned_upload_url';
+  sourceUri: string;
+  payloadSha256: string;
+  totalParams: number;
+  byteSize: number;
+  httpStatus?: number;
+}> {
+  const norm = hydrateCloudRuntimeEnv();
+  const putUrl = cleanEnvValue(opts?.presignedUploadUrl) || norm.CHECKPOINT_UPLOAD_URL || '';
+
+  if (isCloudCheckpointStorageConfigured()) {
+    const out = await uploadCheckpointToCloudStorage(buffer, opts?.objectKey, opts?.modelKey || 'active_native');
+    return { provider: 's3', ...out };
+  }
+
+  if (putUrl) {
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(putUrl);
+    } catch {
+      throw new Error('FAIL_CLOSED: Malformed CHECKPOINT_UPLOAD_URL');
+    }
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      throw new Error(`FAIL_CLOSED: Unsupported upload URL scheme '${parsedUrl.protocol}'`);
+    }
+    if (parsedUrl.username || parsedUrl.password) {
+      throw new Error('SSRF_BLOCKED: Embedded credentials disallowed in upload URL');
+    }
+    const uploadHost = parsedUrl.hostname.toLowerCase();
+    const allowLoopback = process.env.ZYNTHEOR_ALLOW_LOOPBACK_CLOUD !== 'false';
+    const isLoopback = uploadHost === 'localhost' || uploadHost === '127.0.0.1' || uploadHost === '::1';
+    if (
+      uploadHost === 'metadata.google.internal' ||
+      uploadHost === 'metadata.goog' ||
+      uploadHost.endsWith('.internal') ||
+      uploadHost.startsWith('169.254.') ||
+      uploadHost.startsWith('10.') ||
+      uploadHost.startsWith('192.168.') ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(uploadHost) ||
+      (isLoopback && !allowLoopback)
+    ) {
+      throw new Error(`SSRF_BLOCKED: Restricted upload host '${uploadHost}'`);
+    }
+    const parsed = parseCheckpointBuffer(buffer, putUrl);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const res = await fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'User-Agent': 'ZYNTHEOR-Cloud-Runtime/1.0',
+        },
+        body: new Uint8Array(buffer),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        throw new Error(`Cloud upload HTTP ${res.status} ${res.statusText}`);
+      }
+      AuditLedger.append('SYSTEM', 'CLOUD_CHECKPOINT_UPLOADED', {
+        sourceUri: putUrl,
+        modelKey: opts?.modelKey || 'active_native',
+        payloadSha256: parsed.payloadSha256,
+        byteSize: parsed.byteSize,
+        httpStatus: res.status,
+      });
+      return {
+        provider: 'presigned_upload_url',
+        sourceUri: putUrl,
+        payloadSha256: parsed.payloadSha256,
+        totalParams: parsed.weightsFloat32.length,
+        byteSize: parsed.byteSize,
+        httpStatus: res.status,
+      };
+    } catch (err: any) {
+      clearTimeout(timer);
+      throw new Error(`FAIL_CLOSED: Online Connectivity Required — cloud upload failed (${err?.message || err})`);
+    }
+  }
+
+  throw new Error(
+    'FAIL_CLOSED: Online Connectivity Required — no Cloud Object Storage upload target configured (missing S3_BUCKET + S3_ACCESS_KEY_ID + S3_SECRET_ACCESS_KEY or CHECKPOINT_UPLOAD_URL).'
+  );
+}
+

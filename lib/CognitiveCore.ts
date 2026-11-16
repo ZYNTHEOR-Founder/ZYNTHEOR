@@ -691,7 +691,7 @@ export class CognitiveCore {
     intent: string
   ): string[] {
     const clean = goal.replace(/\s+/g, ' ').trim().slice(0, 90);
-    const templatesByDepth: string[][] =
+    const templatesByDepth: string[] =
       depth === 0
         ? [
             `Recall context & verify constraints for: ${clean}`,

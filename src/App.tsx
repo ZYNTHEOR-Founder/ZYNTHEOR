@@ -72,6 +72,70 @@ function getSemanticCategoryBadgeClass(category: LogSemanticCategory): string {
   }
 }
 
+type SentimentEventKind = 'error' | 'completion' | 'neutral';
+
+interface SentimentEventSchemaEntry {
+  readonly kind: SentimentEventKind;
+  readonly label: 'Error' | 'Completion' | 'Neutral';
+  readonly delta: -1 | 0 | 1;
+  readonly deltaLabel: '-1 ↓' | '0 →' | '+1 ↑';
+  readonly description: string;
+  readonly color: string;
+  readonly badgeClass: string;
+  readonly Icon: typeof AlertCircle;
+  readonly match?: RegExp;
+}
+
+const SENTIMENT_EVENT_SCHEMA: Record<SentimentEventKind, SentimentEventSchemaEntry> = {
+  error: {
+    kind: 'error',
+    label: 'Error',
+    delta: -1,
+    deltaLabel: '-1 ↓',
+    description: 'Negative shift — error, failure, or blocked step.',
+    color: 'var(--z-danger)',
+    badgeClass:
+      'bg-[color-mix(in_srgb,var(--z-danger)_18%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)]',
+    Icon: AlertCircle,
+    match: /\[ERROR\]|fail|error|blocked/i,
+  },
+  completion: {
+    kind: 'completion',
+    label: 'Completion',
+    delta: 1,
+    deltaLabel: '+1 ↑',
+    description: 'Positive shift — step verified or completed.',
+    color: 'var(--z-ok)',
+    badgeClass:
+      'bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]',
+    Icon: CheckCircle2,
+    match: /\[DONE\]|success|verified|exitCode:\s*0|passed/i,
+  },
+  neutral: {
+    kind: 'neutral',
+    label: 'Neutral',
+    delta: 0,
+    deltaLabel: '0 →',
+    description: 'Neutral shift — trace or informational event.',
+    color: 'var(--app-accent)',
+    badgeClass:
+      'bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]',
+    Icon: Activity,
+  },
+};
+
+const SENTIMENT_EVENT_LOOKUP_ORDER: readonly SentimentEventKind[] = ['error', 'completion', 'neutral'];
+
+function resolveSentimentEventSchema(logEntry: string): SentimentEventSchemaEntry {
+  for (const kind of SENTIMENT_EVENT_LOOKUP_ORDER) {
+    const entry = SENTIMENT_EVENT_SCHEMA[kind];
+    if (entry.match && entry.match.test(logEntry)) {
+      return entry;
+    }
+  }
+  return SENTIMENT_EVENT_SCHEMA.neutral;
+}
+
 function compileLogSearchRegex(query: string): { regex: RegExp | null; error: string | null } {
   if (!query.trim()) return { regex: null, error: null };
   try {
@@ -358,6 +422,7 @@ export default function App() {
     }
     return 1.0;
   });
+  const [hoveredTrendIndex, setHoveredTrendIndex] = useState<number | null>(null);
   const [logTextWrap, setLogTextWrap] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('zyntheor_log_text_wrap');
@@ -404,6 +469,16 @@ export default function App() {
   const ttsConfigRef = useRef({ ttsRate, ttsPitch, ttsVolume, ttsVoiceUri, ttsVoices });
   ttsEnabledRef.current = ttsEnabled;
   ttsConfigRef.current = { ttsRate, ttsPitch, ttsVolume, ttsVoiceUri, ttsVoices };
+  const updateTtsVolume = useCallback((val: number) => {
+    const clamped = Math.min(2, Math.max(0, Number(val.toFixed(2))));
+    setTtsVolume(clamped);
+    ttsConfigRef.current.ttsVolume = clamped;
+    try {
+      localStorage.setItem('zyntheor_tts_volume', String(clamped));
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
   const [logLatencyMs, setLogLatencyMs] = useState<number | null>(null);
   const lastLogTimeRef = useRef<number | null>(null);
   const lastSpokenIndexRef = useRef<number>(-1);
@@ -1501,7 +1576,7 @@ export default function App() {
       case 'conversational_intelligence':
         return <ConversationalIntelligence />;
       case 'intelligence_core':
-        return <IntelligenceCore statusData={statusData} />;
+        return <IntelligenceCore statusData={statusData} onRefreshStatus={fetchStatus} />;
       case 'dev_studio':
         return role === 'Developer' || role === 'Administrator' ? (
           <DevStudio />
@@ -1719,14 +1794,14 @@ export default function App() {
 
               {/* Progress Log Area */}
               <div
-                className={`rounded-xl font-mono text-xs border transition-colors overflow-hidden ${
+                className={`rounded-xl font-mono text-xs border transition-colors ${
                   logTheme === 'high_contrast'
                     ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_60%,transparent)]'
                     : 'bg-[var(--app-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]'
                 }`}
               >
                 <div
-                  className={`px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 border-b ${
+                  className={`px-3.5 py-2 rounded-t-xl flex flex-wrap items-center justify-between gap-2 border-b ${
                     logTheme === 'high_contrast'
                       ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_30%,transparent)]'
                       : 'bg-[var(--app-surface)] border-[var(--app-card-border)]'
@@ -2313,7 +2388,7 @@ export default function App() {
                         />
                       </div>
                       <div
-                        className={`relative overflow-hidden flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono text-[var(--app-text-secondary)] ${
+                        className={`relative overflow-hidden flex flex-wrap items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono text-[var(--app-text-secondary)] ${
                           logTheme === 'high_contrast'
                             ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
                             : 'bg-[var(--app-bg)] border-[var(--app-card-border)]'
@@ -2331,19 +2406,41 @@ export default function App() {
                           step="0.01"
                           value={ttsVolume}
                           aria-label="TTS Volume"
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            setTtsVolume(val);
-                            ttsConfigRef.current.ttsVolume = val;
-                            try {
-                              localStorage.setItem('zyntheor_tts_volume', String(val));
-                            } catch {
-                              // ignore storage errors
-                            }
-                          }}
+                          onChange={(e) => updateTtsVolume(parseFloat(e.target.value))}
                           className="relative z-10 w-24 accent-[var(--app-accent)] cursor-pointer"
                           title="TTS Volume (0.00x – 2.00x)"
                         />
+                        <div
+                          role="group"
+                          aria-label="TTS Volume Presets"
+                          className="relative z-10 flex items-center gap-1"
+                        >
+                          {[0.25, 0.5, 1.0, 2.0].map((preset) => {
+                            const isActive = Math.abs(ttsVolume - preset) < 0.005;
+                            const label = `${preset === 0.25 ? '0.25' : preset.toFixed(1)}x`;
+                            return (
+                              <button
+                                key={preset}
+                                type="button"
+                                data-testid={`tts-volume-preset-${preset}`}
+                                aria-pressed={isActive}
+                                onClick={() => updateTtsVolume(preset)}
+                                title={`Set TTS volume to ${label}`}
+                                className={`px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold border transition-colors cursor-pointer ${
+                                  isActive
+                                    ? logTheme === 'high_contrast'
+                                      ? 'bg-[var(--app-text-primary)] text-[var(--app-bg)] border-[var(--app-text-primary)]'
+                                      : 'bg-[color-mix(in_srgb,var(--app-accent)_22%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_55%,transparent)]'
+                                    : logTheme === 'high_contrast'
+                                    ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_35%,transparent)] hover:bg-[var(--app-surface)]'
+                                    : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)]'
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
                         <canvas
                           ref={ttsSpectrumCanvasRef}
                           width={160}
@@ -2618,7 +2715,7 @@ export default function App() {
                 )}
                 {/* Summary Dashboard Header */}
                 <div
-                  className={`px-3.5 py-1.5 flex items-center gap-3 text-[10px] font-mono border-b ${
+                  className={`px-3.5 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono border-b ${
                     logTheme === 'high_contrast'
                       ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_20%,transparent)] text-[var(--app-text-primary)]'
                       : 'bg-[var(--app-bg)] border-[var(--app-card-border)] text-[var(--app-text-secondary)]'
@@ -2635,26 +2732,187 @@ export default function App() {
                   </span>
                   {quickLogs.length > 0 && (() => {
                     let score = 0;
-                    const points = quickLogs.map((l, i) => {
-                      if (/\[ERROR\]|fail|error|blocked/i.test(l)) score -= 1;
-                      else if (/\[DONE\]|success|verified|exitCode:\s*0|passed/i.test(l)) score += 1;
+                    const trendPoints = quickLogs.map((l, i) => {
+                      const schema = resolveSentimentEventSchema(l);
+                      score += schema.delta;
                       const x = quickLogs.length === 1 ? 50 : (i / (quickLogs.length - 1)) * 100;
                       const y = Math.max(2, Math.min(18, 10 - score * 2));
-                      return `${x.toFixed(1)},${y.toFixed(1)}`;
+                      const tagMatch = l.match(/^\[([A-Z0-9_]+)\]\s*(.*)$/);
+                      const tag = tagMatch ? tagMatch[1] : null;
+                      const message = tagMatch ? tagMatch[2] : l;
+                      return {
+                        index: i,
+                        x,
+                        y,
+                        delta: schema.delta,
+                        score,
+                        eventType: schema.kind,
+                        tag,
+                        message,
+                        raw: l,
+                      };
                     });
+                    const activePoint =
+                      hoveredTrendIndex !== null && hoveredTrendIndex < trendPoints.length
+                        ? trendPoints[hoveredTrendIndex]
+                        : null;
+                    const polylinePoints = trendPoints.map((pt) => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' ');
+
                     return (
-                      <div className="flex items-center gap-1.5 ml-2" title="Session Sentiment Trend">
-                        <span className="opacity-70">Trend</span>
-                        <svg width="64" height="20" viewBox="0 0 100 20" className="overflow-visible">
+                      <div
+                        className="relative flex flex-wrap items-center gap-2 ml-2"
+                        data-testid="session-sentiment-trend"
+                      >
+                        <span className="opacity-70" title="Session Sentiment Trend">
+                          Trend
+                        </span>
+                        <svg
+                          width="84"
+                          height="22"
+                          viewBox="0 0 100 20"
+                          className="overflow-visible cursor-crosshair"
+                          role="img"
+                          aria-label="Session Sentiment Trend"
+                          onMouseLeave={() => setHoveredTrendIndex(null)}
+                          onMouseMove={(e) => {
+                            if (trendPoints.length === 0) return;
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            if (rect.width <= 0) return;
+                            const relX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+                            let nearestIdx = 0;
+                            let minDist = Math.abs(trendPoints[0].x - relX);
+                            for (let idx = 1; idx < trendPoints.length; idx += 1) {
+                              const d = Math.abs(trendPoints[idx].x - relX);
+                              if (d < minDist) {
+                                minDist = d;
+                                nearestIdx = idx;
+                              }
+                            }
+                            setHoveredTrendIndex(nearestIdx);
+                          }}
+                        >
                           <polyline
                             fill="none"
                             stroke="var(--app-accent)"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            points={points.join(' ')}
+                            points={polylinePoints}
                           />
+                          {trendPoints.map((pt) => {
+                            const ptSchema = SENTIMENT_EVENT_SCHEMA[pt.eventType];
+                            const isHovered = activePoint?.index === pt.index;
+                            const baseRadius = pt.eventType === 'neutral' ? 1.1 : 2.1;
+                            return (
+                              <g
+                                key={pt.index}
+                                tabIndex={0}
+                                role="button"
+                                aria-label={`Line ${pt.index + 1} (${ptSchema.label} ${ptSchema.deltaLabel}): ${pt.raw}`}
+                                data-testid={`sentiment-point-${pt.index}`}
+                                onMouseEnter={() => setHoveredTrendIndex(pt.index)}
+                                onFocus={() => setHoveredTrendIndex(pt.index)}
+                                onBlur={() =>
+                                  setHoveredTrendIndex((prev) => (prev === pt.index ? null : prev))
+                                }
+                                className="focus:outline-none cursor-pointer"
+                              >
+                                <title>
+                                  {`L${pt.index + 1}/${trendPoints.length} · ${ptSchema.label} (${ptSchema.deltaLabel}) · Score ${
+                                    pt.score > 0 ? `+${pt.score}` : pt.score
+                                  }: ${pt.raw}`}
+                                </title>
+                                <circle cx={pt.x} cy={pt.y} r={5} fill="transparent" />
+                                <circle
+                                  cx={pt.x}
+                                  cy={pt.y}
+                                  r={isHovered ? 3.4 : baseRadius}
+                                  fill={ptSchema.color}
+                                  stroke={isHovered ? 'var(--app-text-primary)' : 'var(--app-bg)'}
+                                  strokeWidth={isHovered ? 1.2 : 0.75}
+                                />
+                              </g>
+                            );
+                          })}
                         </svg>
+                        <div
+                          data-testid="sentiment-trend-legend"
+                          aria-label="Session Sentiment Trend Legend"
+                          className="inline-flex flex-wrap items-center gap-2 text-[9px] opacity-90 border-l border-[var(--app-card-border)] pl-2"
+                        >
+                          {(['completion', 'neutral', 'error'] as const).map((kind) => {
+                            const item = SENTIMENT_EVENT_SCHEMA[kind];
+                            return (
+                              <span
+                                key={kind}
+                                className="inline-flex items-center gap-1"
+                                title={`${item.label} (${item.deltaLabel}): ${item.description}`}
+                              >
+                                <span
+                                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: item.color }}
+                                />
+                                <span>
+                                  {item.label} ({item.deltaLabel})
+                                </span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                        {activePoint && (() => {
+                          const schema = SENTIMENT_EVENT_SCHEMA[activePoint.eventType] ?? SENTIMENT_EVENT_SCHEMA.neutral;
+                          const EventIcon = schema.Icon;
+                          const formattedScore = activePoint.score > 0 ? `+${activePoint.score}` : String(activePoint.score);
+                          return (
+                            <div
+                              role="tooltip"
+                              data-testid="sentiment-trend-tooltip"
+                              style={{
+                                left: `${Math.min(88, Math.max(12, activePoint.x))}%`,
+                              }}
+                              className={`pointer-events-none absolute bottom-full mb-2 -translate-x-1/2 z-50 w-72 max-w-[19rem] rounded-lg border px-2.5 py-2 shadow-xl text-[10px] font-mono leading-snug ${
+                                logTheme === 'high_contrast'
+                                  ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-text-primary)]'
+                                  : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)]'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2 mb-1.5">
+                                <div className="inline-flex items-center gap-1 min-w-0">
+                                  <span
+                                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-bold border text-[9px] uppercase ${schema.badgeClass}`}
+                                  >
+                                    <EventIcon className="w-3 h-3 shrink-0" aria-hidden="true" />
+                                    <span>{schema.label}</span>
+                                  </span>
+                                  {activePoint.tag && (
+                                    <span className="text-[9px] text-[var(--app-text-secondary)] truncate">
+                                      [{activePoint.tag}]
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[9px] text-[var(--app-text-secondary)] tabular-nums shrink-0">
+                                  Line {activePoint.index + 1}/{trendPoints.length}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 px-2 py-1 mb-1.5 rounded border border-[var(--app-card-border)] bg-[var(--app-bg)] text-[9px] tabular-nums">
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="text-[var(--app-text-secondary)] uppercase">Delta</span>
+                                  <strong style={{ color: schema.color }}>{schema.deltaLabel}</strong>
+                                </div>
+                                <div className="flex items-center justify-between gap-1 border-l border-[var(--app-card-border)] pl-2">
+                                  <span className="text-[var(--app-text-secondary)] uppercase">Score</span>
+                                  <strong className="text-[var(--app-text-primary)]">{formattedScore}</strong>
+                                </div>
+                              </div>
+                              <div className="text-[9px] text-[var(--app-text-secondary)] mb-1">
+                                {schema.description}
+                              </div>
+                              <div className="text-[var(--app-text-primary)] break-words line-clamp-3 border-t border-[var(--app-card-border)] pt-1">
+                                {activePoint.message || activePoint.raw}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })()}
@@ -2706,7 +2964,7 @@ export default function App() {
                       }
                     }
                   }}
-                  className={`p-4 max-h-56 overflow-y-auto ${
+                  className={`p-4 max-h-56 rounded-b-xl overflow-y-auto ${
                     logTextWrap ? 'overflow-x-hidden' : 'overflow-x-auto'
                   } space-y-1.5 focus:outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]`}
                 >

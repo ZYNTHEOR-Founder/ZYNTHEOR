@@ -15,7 +15,8 @@ import crypto from 'crypto';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { NativeNeuralLMProvider, ExternalBrainProvider } from './lib/providers';
-import { ConnectivityMonitor } from './lib/ConnectivityMonitor';
+import { ConnectivityMonitor, ConnectivityRequiredError, validateCloudUrl } from './lib/ConnectivityMonitor';
+import { publishCheckpointBufferToCloud } from './lib/CloudCheckpointStorage';
 import { TaskOrchestrator, normalizeTaskPriority } from './lib/TaskOrchestrator';
 import { ActionDrivenEngine } from './lib/ActionDrivenEngine';
 import { AutonomousPlanner } from './lib/AutonomousPlanner';
@@ -337,6 +338,45 @@ app.post('/api/connectivity/reconnect', async (req: Request, res: Response) => {
   }
 });
 
+// 0b. Real End-to-End 6-Stage Online Verification & 8-Subsystem Compliance Matrix
+app.post('/api/connectivity/verify-e2e', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const presignedUrl = typeof req.body?.presignedUrl === 'string' ? req.body.presignedUrl.trim() : undefined;
+    const objectKey = typeof req.body?.objectKey === 'string' ? req.body.objectKey.trim() : undefined;
+    const testPrompt = typeof req.body?.testPrompt === 'string' ? req.body.testPrompt.trim() : undefined;
+    if (presignedUrl && presignedUrl.length > 4096) {
+      return res.status(400).json({ success: false, code: 'INVALID_URL', error: 'presignedUrl is too long.' });
+    }
+    const report = await ConnectivityMonitor.getInstance().runEndToEndVerification({
+      presignedUrl,
+      objectKey,
+      testPrompt,
+    });
+    AuditLedger.append('SYSTEM', 'CONNECTIVITY_E2E_VERIFICATION', {
+      userId: req.sovereignUserId,
+      overallStatus: report.overallStatus,
+      onlineReady: report.onlineReady,
+      internetConnected: report.internetConnected,
+      cloudConnected: report.cloudConnected,
+      checkpointVerified: report.checkpointVerified,
+      inferenceVerified: report.inferenceVerified,
+      totalLatencyMs: report.totalLatencyMs,
+    });
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || String(err) });
+  }
+});
+
+app.get('/api/connectivity/diagnostics', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const state = await ConnectivityMonitor.getInstance().checkNow();
+    res.json({ success: true, connectivity: state });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || String(err) });
+  }
+});
+
 // 1. System Status API
 app.get('/api/system/status', async (_req: Request, res: Response) => {
   try {
@@ -364,7 +404,10 @@ app.get('/api/system/status', async (_req: Request, res: Response) => {
         activeRuntimeId: connectivity.activeRuntimeId,
         lastInferenceEvidence: lastEvidence,
         weightsLoaded: connectivity.weightsLoaded,
-        activeParams: pingRes.active_params,
+        activeParams:
+          connectivity.weightsLoaded && connectivity.executionVerified && connectivity.runtimeState === 'READY'
+            ? pingRes.active_params
+            : null,
         targetParams: pingRes.target_params ?? null,
         inferenceReady: connectivity.online && connectivity.executionVerified,
         runtimeState: connectivity.runtimeState,
@@ -1694,6 +1737,72 @@ app.post('/api/knowledge/documents', requireRole(['Developer', 'Administrator'])
   }
 });
 
+// 6b. Online Knowledge URL Ingestion (Requires live internet connectivity + SSRF guard)
+app.post('/api/knowledge/ingest-url', requireRole(['Developer', 'Administrator']), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const targetUrl = typeof req.body?.url === 'string' ? req.body.url.trim() : '';
+    if (!targetUrl) {
+      return res.status(400).json({ success: false, error: 'url is required' });
+    }
+    const netCheck = await ConnectivityMonitor.getInstance().requireInternetConnectivity('knowledge-ingest-url');
+    const fetched = await InternetIntegrationEngine.getInstance().fetchExternalUrl(
+      { url: targetUrl, method: 'GET', timeoutMs: 8000 },
+      { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId! }
+    );
+    if (fetched.blockedByPolicy) {
+      return res.status(400).json({ success: false, code: 'SSRF_BLOCKED', error: fetched.error || 'URL blocked by SSRF policy' });
+    }
+    if (!fetched.ok) {
+      return res.status(503).json({
+        success: false,
+        code: 'FAIL_CLOSED',
+        error: fetched.error || `Failed to fetch online source HTTP ${fetched.status}`,
+      });
+    }
+    const isHtml = fetched.contentType.toLowerCase().includes('html');
+    const titleMatch = fetched.bodyPreview.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const extractedText = isHtml
+      ? fetched.bodyPreview
+          .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+          .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+      : fetched.bodyPreview.trim();
+    if (!extractedText) {
+      return res.status(400).json({ success: false, error: 'Fetched online URL contained no readable text content.' });
+    }
+    const doc = KnowledgeWorkspace.getInstance().createDocument({
+      title: (typeof req.body?.title === 'string' && req.body.title.trim()) || titleMatch?.[1]?.trim() || fetched.finalUrl,
+      content: extractedText,
+      collection: typeof req.body?.collection === 'string' && req.body.collection.trim() ? req.body.collection.trim() : 'online_research',
+      tags: Array.isArray(req.body?.tags) ? req.body.tags.map(String) : ['online-ingested'],
+      format: fetched.contentType.includes('json') ? 'json' : 'markdown',
+      source: fetched.finalUrl,
+      provenance: `online_url_sha256:${fetched.contentSha256}`,
+      curatedForTraining: Boolean(req.body?.curatedForTraining),
+      tenantId: req.sovereignTenantId!,
+    });
+    res.json({
+      success: true,
+      document: doc,
+      fetchEvidence: {
+        finalUrl: fetched.finalUrl,
+        httpStatus: fetched.status,
+        latencyMs: fetched.latencyMs,
+        internetCheckLatencyMs: netCheck.latencyMs,
+        contentSha256: fetched.contentSha256,
+        byteLength: fetched.byteLength,
+      },
+    });
+  } catch (err: any) {
+    if (err instanceof ConnectivityRequiredError) {
+      return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: err.message });
+    }
+    res.status(500).json({ success: false, error: err?.message || String(err) });
+  }
+});
+
 app.get('/api/knowledge/documents/:id', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
   try {
     const kw = KnowledgeWorkspace.getInstance();
@@ -2383,6 +2492,111 @@ app.post('/api/training/pipeline/rollback', requireAuth('admin'), (req: Authenti
   } catch (err: any) {
     const msg = String(err?.message || err);
     res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/training/pipeline/publish-cloud', requireAuth('admin'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const runId = String(req.body?.runId || '').trim();
+    const objectKey = typeof req.body?.objectKey === 'string' && req.body.objectKey.trim()
+      ? req.body.objectKey.trim()
+      : undefined;
+    const presignedUploadUrl = typeof req.body?.presignedUploadUrl === 'string' && req.body.presignedUploadUrl.trim()
+      ? req.body.presignedUploadUrl.trim()
+      : undefined;
+    const loadAfterUpload = req.body?.loadAfterUpload === true;
+
+    if (!runId) {
+      return res.status(400).json({ success: false, error: 'runId is required to publish a verified checkpoint to Cloud Storage.' });
+    }
+    const effectiveUploadUrl = presignedUploadUrl || process.env.CHECKPOINT_UPLOAD_URL?.trim() || '';
+    if (effectiveUploadUrl) {
+      const check = validateCloudUrl(effectiveUploadUrl);
+      if (!check.ok) {
+        return res.status(400).json({ success: false, code: 'SSRF_BLOCKED', error: check.reason });
+      }
+    }
+
+    const pipe = ContinuousLearningPipeline.getInstance();
+    const run = pipe.listRuns({ tenantId: req.sovereignTenantId! }).find((r) => r.runId === runId);
+    if (!run) {
+      return res.status(404).json({ success: false, error: `RUN_NOT_FOUND: Run '${runId}' not found.` });
+    }
+    if (!run.candidateCheckpointPath || !fs.existsSync(run.candidateCheckpointPath)) {
+      return res.status(404).json({ success: false, error: 'CHECKPOINT_NOT_FOUND: Candidate checkpoint file does not exist.' });
+    }
+    if (!run.regressionPassed) {
+      return res.status(409).json({ success: false, code: 'REGRESSION_GATE_BLOCKED', error: 'Cannot publish a candidate checkpoint that failed regression gates.' });
+    }
+
+    const approvedAlready = run.status === 'PROMOTED' || ApprovalGate.getInstance().verifyAndConsume({
+      actionType: 'MODEL_RELEASE',
+      resourceId: run.runId,
+      tenantId: run.tenantId,
+      approvalRequestId: run.approvalRequestId || undefined,
+      consume: false,
+    }).approved;
+
+    if (!approvedAlready) {
+      return res.status(403).json({
+        success: false,
+        code: 'APPROVAL_REQUIRED',
+        error: 'Human ApprovalGate sign-off (MODEL_RELEASE) is mandatory before publishing a trained checkpoint to Cloud Object Storage.',
+      });
+    }
+
+    const inspection = await pipe.inspectCheckpointFile(run.candidateCheckpointPath);
+    if (!inspection?.valid) {
+      return res.status(409).json({
+        success: false,
+        code: 'CORRUPTED_CHECKPOINT',
+        error: inspection?.error || 'Candidate checkpoint failed integrity verification before cloud upload.',
+      });
+    }
+
+    const buffer = fs.readFileSync(run.candidateCheckpointPath);
+    const actualFileSha = crypto.createHash('sha256').update(buffer).digest('hex');
+    if (run.candidateCheckpointFileSha256 && actualFileSha !== run.candidateCheckpointFileSha256) {
+      return res.status(409).json({
+        success: false,
+        code: 'CHECKPOINT_TAMPERED',
+        error: 'Candidate checkpoint SHA-256 mismatch against recorded training run.',
+      });
+    }
+
+    const uploaded = await publishCheckpointBufferToCloud(buffer, {
+      objectKey,
+      presignedUploadUrl,
+      modelKey: run.phaseId || 'active_native',
+    });
+
+    AuditLedger.append('GOVERNANCE', 'TRAINING_CHECKPOINT_PUBLISHED_CLOUD', {
+      runId: run.runId,
+      actorUserId: req.sovereignUserId,
+      provider: uploaded.provider,
+      sourceUri: uploaded.sourceUri,
+      payloadSha256: uploaded.payloadSha256,
+      totalParams: uploaded.totalParams,
+    });
+
+    let connectivity = null;
+    if (loadAfterUpload) {
+      connectivity = await ConnectivityMonitor.getInstance().reconnect(undefined, objectKey);
+    }
+
+    return res.json({
+      success: true,
+      uploaded,
+      connectivity,
+    });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const isFailClosed = msg.includes('FAIL_CLOSED');
+    return res.status(isFailClosed ? 503 : 400).json({
+      success: false,
+      code: isFailClosed ? 'FAIL_CLOSED' : 'CLOUD_PUBLISH_ERROR',
+      error: msg,
+    });
   }
 });
 
@@ -3078,7 +3292,9 @@ app.post('/api/research/investigate', requireAuth('developer'), async (req: Auth
     });
     const graphPaths = KnowledgeGraphEngine.getInstance().traverseMultiHop(query, { maxHops: 2, limit: 5, scope });
     let webResearch: any = { ok: false, note: 'Online topic lookup not requested' };
+    let internetCheck: any = null;
     if (req.body?.includeWeb === true) {
+      internetCheck = await ConnectivityMonitor.getInstance().requireInternetConnectivity('research-web-investigate');
       webResearch = await InternetIntegrationEngine.getInstance().researchWebTopic(query, {
         tenantId: scope.tenantId,
         userId: scope.userId,
@@ -3090,11 +3306,15 @@ app.post('/api/research/investigate', requireAuth('developer'), async (req: Auth
       query,
       knowledgeHits,
       graphPaths,
+      internetCheck,
       webResearch,
       reasoning,
       externalBrain: ExternalBrainProvider.getStatus(),
     });
   } catch (err: any) {
+    if (err instanceof ConnectivityRequiredError) {
+      return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: err.message });
+    }
     res.status(400).json({ success: false, error: err.message });
   }
 });
@@ -3199,12 +3419,37 @@ app.delete('/api/assistant/session/:sessionId', (req: Request, res: Response) =>
   res.json({ success: true, cleared });
 });
 
+function resolveVerifiedAssistantCallerRole(req: Request): SovereignRole {
+  let token: string | null = null;
+  const authHeader = req.headers['authorization'];
+  if (typeof authHeader === 'string' && authHeader.toLowerCase().startsWith('bearer ')) {
+    const trimmed = authHeader.slice(7).trim();
+    if (trimmed) token = trimmed;
+  }
+  if (!token) {
+    const dedicated = req.headers['x-zyntheor-token'];
+    if (typeof dedicated === 'string' && dedicated.trim()) {
+      token = dedicated.trim();
+    }
+  }
+  if (!token) return 'guest';
+
+  const verification = SovereignIdentity.getInstance().verifyToken(token);
+  if (!verification.valid || !verification.payload) return 'guest';
+  if (verification.payload.jti && TokenRevocation.isRevoked(verification.payload.jti)) {
+    return 'guest';
+  }
+  return verification.payload.role;
+}
+
 app.post('/api/assistant/chat', async (req: Request, res: Response) => {
   const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
   const attachments = Array.isArray(req.body?.attachments) ? req.body.attachments : [];
   if (!message && attachments.length === 0) {
     return res.status(400).json({ success: false, error: 'Message or attachment is required.' });
   }
+
+  const verifiedCallerRole = resolveVerifiedAssistantCallerRole(req);
 
   const sessionId =
     typeof req.body?.sessionId === 'string'
@@ -3249,6 +3494,7 @@ app.post('/api/assistant/chat', async (req: Request, res: Response) => {
       history,
       attachments,
       context,
+      verifiedCallerRole,
       moduleState,
       workspaceMetadata,
       thinkingMode,

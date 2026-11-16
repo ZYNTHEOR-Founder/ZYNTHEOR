@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
+import { ConnectivityE2EVerifier } from '../ui/ConnectivityE2EVerifier';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -58,6 +59,7 @@ export const ModelLaboratory: React.FC = () => {
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
   const [runs, setRuns] = useState<any[]>([]);
   const [backups, setBackups] = useState<any[]>([]);
+  const [approvals, setApprovals] = useState<any[]>([]);
   const [harvestReport, setHarvestReport] = useState<any>(null);
 
   const [selectedPhaseId, setSelectedPhaseId] = useState<string>('phase_1_continuation');
@@ -76,6 +78,10 @@ export const ModelLaboratory: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [lastError, setLastError] = useState('');
   const [actionMessage, setActionMessage] = useState('');
+  const [cloudUrlInput, setCloudUrlInput] = useState('');
+  const [cloudUploadUrlInput, setCloudUploadUrlInput] = useState('');
+  const [cloudKeyInput, setCloudKeyInput] = useState('');
+  const [reconnectBusy, setReconnectBusy] = useState(false);
 
   const isDevOrAdmin = role === 'Developer' || role === 'Administrator';
 
@@ -100,15 +106,25 @@ export const ModelLaboratory: React.FC = () => {
         datasetsResponse.json(),
       ]);
 
-      setModelStatus({ runtime: runtime?.model || null, inspect, inspectHttpOk: inspectResponse.ok });
+      setModelStatus({
+        runtime: runtime?.model || null,
+        connectivity: runtime?.connectivity || null,
+        inspect,
+        inspectHttpOk: inspectResponse.ok,
+      });
       if (datasetData?.success) setDatasets(Array.isArray(datasetData.datasets) ? datasetData.datasets : []);
 
       if (isAuthenticated && isDevOrAdmin) {
-        const [phasesRes, runsRes] = await Promise.all([
+        const [phasesRes, runsRes, approvalsRes] = await Promise.all([
           fetch('/api/training/pipeline/phases', { headers }),
           fetch('/api/training/pipeline/runs', { headers }),
+          fetch('/api/governance/approvals', { headers }),
         ]);
-        const [phasesJson, runsJson] = await Promise.all([phasesRes.json(), runsRes.json()]);
+        const [phasesJson, runsJson, approvalsJson] = await Promise.all([
+          phasesRes.json(),
+          runsRes.json(),
+          approvalsRes.json(),
+        ]);
         if (phasesJson?.success) {
           setPhases(Array.isArray(phasesJson.phases) ? phasesJson.phases : []);
           setPhaseSummary(phasesJson.summary || null);
@@ -128,6 +144,9 @@ export const ModelLaboratory: React.FC = () => {
             setSelectedResumeRunId(resumable.runId);
           }
         }
+        if (approvalsJson?.success) {
+          setApprovals(Array.isArray(approvalsJson.requests) ? approvalsJson.requests : []);
+        }
       }
 
       if (!runtimeResponse.ok) {
@@ -146,6 +165,47 @@ export const ModelLaboratory: React.FC = () => {
   useEffect(() => {
     if (authReady) void refresh();
   }, [authReady, isAuthenticated, role]);
+
+  const handleReconnectCloud = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (reconnectBusy) return;
+    setReconnectBusy(true);
+    setActionMessage('');
+    setLastError('');
+    try {
+      const body: Record<string, string> = {};
+      if (cloudUrlInput.trim()) body.presignedUrl = cloudUrlInput.trim();
+      if (cloudKeyInput.trim()) body.objectKey = cloudKeyInput.trim();
+      const res = await fetch('/api/connectivity/reconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        const errMsg = json.error || json.reason || `Reconnect HTTP ${res.status}`;
+        setLastError(errMsg);
+        setActionMessage(
+          lang === 'th'
+            ? `เชื่อมต่อ Cloud Runtime ไม่สำเร็จ: ${errMsg}`
+            : `Cloud Runtime connection failed: ${errMsg}`
+        );
+      } else {
+        setActionMessage(
+          lang === 'th'
+            ? `โหลดและตรวจสอบ Checkpoint สำเร็จ (${count(json.activeParams)} active params · SHA-256: ${String(json.checkpointSha256 || '').slice(0, 12)}…)`
+            : `Cloud Checkpoint loaded & verified (${count(json.activeParams)} active params · SHA-256: ${String(json.checkpointSha256 || '').slice(0, 12)}…)`
+        );
+      }
+      await refresh();
+    } catch (err: any) {
+      const msg = err?.message || String(err);
+      setLastError(msg);
+      setActionMessage(`Reconnect error: ${msg}`);
+    } finally {
+      setReconnectBusy(false);
+    }
+  };
 
   const activePhase = phases.find((p) => p.phase.id === selectedPhaseId) || phases[0] || null;
 
@@ -315,6 +375,81 @@ export const ModelLaboratory: React.FC = () => {
     }
   };
 
+  const handleApprovalDecision = async (requestId: string, decision: 'approve' | 'reject', runId: string) => {
+    setActionBusyRunId(runId);
+    setActionMessage('');
+    try {
+      const res = await fetch(`/api/governance/approvals/${encodeURIComponent(requestId)}/${decision}`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ note: `${decision}d via ModelLaboratory` }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
+      setActionMessage(`Approval request ${requestId} ${decision}d.`);
+      await refresh();
+    } catch (err: any) {
+      setActionMessage(`Approval decision error: ${err?.message || String(err)}`);
+    } finally {
+      setActionBusyRunId(null);
+    }
+  };
+
+  const handlePromoteRun = async (runId: string) => {
+    setActionBusyRunId(runId);
+    setActionMessage('');
+    try {
+      const res = await fetch('/api/training/pipeline/promote', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ runId }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
+      setActionMessage(`Promoted run ${runId} to active local release target.`);
+      await refresh();
+    } catch (err: any) {
+      setActionMessage(`Promote blocked: ${err?.message || String(err)}`);
+    } finally {
+      setActionBusyRunId(null);
+    }
+  };
+
+  const handlePublishCloud = async (runId: string) => {
+    setActionBusyRunId(runId);
+    setActionMessage('');
+    try {
+      const res = await fetch('/api/training/pipeline/publish-cloud', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          runId,
+          objectKey: cloudKeyInput.trim() || undefined,
+          presignedUploadUrl: cloudUploadUrlInput.trim() || undefined,
+          loadAfterUpload: !cloudUploadUrlInput.trim() || Boolean(cloudUrlInput.trim()),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
+      setActionMessage(
+        `Published checkpoint to Cloud Storage (${json.uploaded?.sourceUri} · SHA-256: ${String(
+          json.uploaded?.payloadSha256 || ''
+        ).slice(0, 12)}…)`
+      );
+      await refresh();
+    } catch (err: any) {
+      setActionMessage(`Cloud publish blocked: ${err?.message || String(err)}`);
+    } finally {
+      setActionBusyRunId(null);
+    }
+  };
+
   const handleRollback = async (backupId: string) => {
     setActionBusyRunId(backupId);
     setActionMessage('');
@@ -338,12 +473,25 @@ export const ModelLaboratory: React.FC = () => {
   };
 
   const runtime = modelStatus?.runtime;
+  const connectivity = modelStatus?.connectivity;
   const inspect = modelStatus?.inspect;
-  const ready = Boolean(runtime?.weightsLoaded && runtime?.inferenceReady);
-  const activeParams = ready ? (runtime?.activeParams ?? runtime?.totalParams) : null;
+  const ready = Boolean(
+    runtime?.weightsLoaded &&
+      runtime?.inferenceReady &&
+      connectivity?.executionVerified !== false &&
+      runtime?.runtimeState === 'READY'
+  );
+  const activeParams = ready ? (runtime?.activeParams ?? runtime?.totalParams ?? null) : null;
   const payloadBytes = inspect?.payload_bytes;
-  const hash = ready ? (runtime?.checkpointHash || inspect?.payload_sha256 || '') : '';
+  const hash = ready ? (runtime?.checkpointSha256 || runtime?.checkpointHash || inspect?.payload_sha256 || '') : '';
   const digestVerified = ready && Boolean(hash) && inspect?.status !== 'PAYLOAD_INTEGRITY_FAILED';
+  const internetReachable = Boolean(connectivity?.internetReachable);
+  const cloudConfigured = Boolean(connectivity?.cloudStorageConfigured);
+  const cloudReachable = Boolean(connectivity?.cloudStorageReachable);
+  const bridgeReachable = Boolean(connectivity?.pythonBridgeReachable);
+  const remediationSteps: string[] = Array.isArray(connectivity?.remediationSteps)
+    ? connectivity.remediationSteps
+    : [];
 
   return (
     <div className="space-y-6">
@@ -373,8 +521,14 @@ export const ModelLaboratory: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard
           title="Active parameters"
-          value={count(activeParams)}
-          subtitle={ready ? 'Cloud Runtime loaded' : 'No verified active cloud weights'}
+          value={ready ? count(activeParams) : '—'}
+          subtitle={
+            ready
+              ? typeof activeParams === 'number' && activeParams < TARGET_PARAMS
+                ? 'Partial Trained Subgraph · not full 41.5M Core'
+                : 'Cloud Runtime verified & loaded'
+              : 'Hidden until checkpoint verified & loaded'
+          }
           icon={<BrainCircuit className="w-5 h-5" />}
           accentColor="cyan"
         />
@@ -409,23 +563,149 @@ export const ModelLaboratory: React.FC = () => {
         />
       </div>
 
-      {/* Runtime & Checkpoint Evidence */}
+      {/* Runtime & Checkpoint Evidence + Internet vs Model Connectivity */}
       <VividCard
-        title="Runtime & checkpoint evidence"
-        subtitle="Active Cloud Runtime readiness is tracked separately from local candidate PureSeqLM training runs."
+        title="Runtime, Connectivity & Checkpoint Evidence"
+        subtitle="Separates public Internet reachability from Cloud Storage & Native Runtime checkpoint verification."
         gradientAccent="cyan"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <span className={`vivid-status-dot ${ready ? 'is-ready' : 'is-blocked'}`} />
-            <span className="text-sm font-semibold text-[var(--app-text-primary)]">{runtime?.runtimeState || 'BLOCKED'}</span>
+            <span className="text-sm font-semibold text-[var(--app-text-primary)]">
+              {ready ? 'READY' : runtime?.runtimeState || connectivity?.runtimeState || 'NOT_CONFIGURED'}
+            </span>
           </div>
-          <StatusBadge status={ready ? 'VERIFIED' : runtime ? 'BLOCKED' : 'UNVERIFIED'} />
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border ${
+                internetReachable
+                  ? 'text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_12%,transparent)]'
+                  : 'text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)]'
+              }`}
+            >
+              INTERNET: {internetReachable ? 'ONLINE' : 'OFFLINE'}
+            </span>
+            <StatusBadge
+              status={
+                ready
+                  ? 'VERIFIED'
+                  : connectivity?.cloudStorageConfigured
+                  ? 'BLOCKED'
+                  : 'UNVERIFIED'
+              }
+            />
+          </div>
         </div>
+
+        {/* Two-Track Connectivity Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
+          <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
+            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">1. Internet Connectivity</div>
+            <div className={`mt-1 font-bold ${internetReachable ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'}`}>
+              {internetReachable ? 'ONLINE' : 'OFFLINE'}
+            </div>
+            <div className="mt-1 text-[11px] text-[var(--app-text-secondary)] break-words">
+              {connectivity?.internetProbeDetail || 'Checking public network reachability…'}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
+            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">2. Cloud Storage</div>
+            <div
+              className={`mt-1 font-bold ${
+                cloudConfigured && cloudReachable
+                  ? 'text-[var(--z-ok)]'
+                  : cloudConfigured
+                  ? 'text-[var(--z-warn)]'
+                  : 'text-[var(--z-danger)]'
+              }`}
+            >
+              {cloudConfigured ? (cloudReachable ? 'REACHABLE' : 'UNREACHABLE') : 'NOT CONFIGURED'}
+            </div>
+            <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)] break-all">
+              {connectivity?.cloudSourceUri ||
+                (connectivity?.cloudConfigMissingKeys?.length
+                  ? `Missing: ${connectivity.cloudConfigMissingKeys.join(', ')}`
+                  : 'Set CHECKPOINT_PRESIGNED_URL or S3_BUCKET')}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
+            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">3. Native Bridge & Weights</div>
+            <div
+              className={`mt-1 font-bold ${
+                ready ? 'text-[var(--z-ok)]' : bridgeReachable ? 'text-[var(--z-warn)]' : 'text-[var(--z-danger)]'
+              }`}
+            >
+              {ready ? 'VERIFIED & READY' : bridgeReachable ? 'BRIDGE UP · NO WEIGHTS' : 'BRIDGE UNREACHABLE'}
+            </div>
+            <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)]">
+              {ready
+                ? `Active Params: ${count(activeParams)}`
+                : 'Active Params withheld until SHA-256 & forward-pass verified'}
+            </div>
+          </div>
+        </div>
+
         <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
-          {lastError || (ready ? 'Cloud checkpoint is loaded; inference readiness is reported by the active bridge.' : 'No verified cloud checkpoint is loaded. Target architecture values are not active weights.')}
+          {lastError ||
+            (ready
+              ? 'Cloud checkpoint is loaded, SHA-256 verified, and forward-pass execution passed on the active bridge.'
+              : connectivity?.reason || 'Cloud checkpoint is not yet connected or loaded.')}
         </p>
-        {hash && <p className="mt-3 text-[11px] break-all font-mono text-[var(--app-text-secondary)]">SHA-256: {hash}</p>}
+
+        {!ready && remediationSteps.length > 0 && (
+          <div
+            data-testid="model-connectivity-remediation"
+            className="mt-3 p-3 rounded-xl border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)] bg-[color-mix(in_srgb,var(--app-amber)_8%,var(--app-surface-elevated))] text-xs"
+          >
+            <div className="font-bold text-[var(--app-amber)] mb-1.5 flex items-center gap-1.5">
+              <Wrench className="w-3.5 h-3.5" />
+              <span>{lang === 'th' ? 'สาเหตุและขั้นตอนการเชื่อมต่อ' : 'Diagnostics & Remediation Steps'}</span>
+            </div>
+            <ol className="list-decimal list-inside space-y-1 text-[var(--app-text-primary)]">
+              {remediationSteps.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Live Cloud Checkpoint Connect / Reload Form */}
+        <form onSubmit={handleReconnectCloud} className="mt-4 space-y-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="url"
+              value={cloudUrlInput}
+              onChange={(e) => setCloudUrlInput(e.target.value)}
+              placeholder="Download Presigned URL — CHECKPOINT_PRESIGNED_URL (https://.../model_checkpoint.pt)"
+              className="flex-1 px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+            />
+            <input
+              type="text"
+              value={cloudKeyInput}
+              onChange={(e) => setCloudKeyInput(e.target.value)}
+              placeholder="Optional S3 Key"
+              className="sm:w-44 px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+            />
+            <button
+              type="submit"
+              disabled={reconnectBusy}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 disabled:opacity-50 inline-flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span>{reconnectBusy ? 'Connecting…' : 'Connect & Load Checkpoint'}</span>
+            </button>
+          </div>
+          <input
+            type="url"
+            value={cloudUploadUrlInput}
+            onChange={(e) => setCloudUploadUrlInput(e.target.value)}
+            placeholder="Optional Upload Presigned URL — CHECKPOINT_UPLOAD_URL for Publish to Cloud Storage (https://...)"
+            className="w-full px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+          />
+        </form>
+
+        {hash && <p className="mt-3 text-[11px] break-all font-mono text-[var(--app-text-secondary)]">Verified SHA-256: {hash}</p>}
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="rounded-xl bg-[var(--app-surface-elevated)] p-3">
             <div className="text-[var(--app-text-secondary)]">Target width</div>
@@ -444,6 +724,13 @@ export const ModelLaboratory: React.FC = () => {
             <div className="mt-1 font-semibold text-[var(--app-text-primary)]">{datasets.length}</div>
           </div>
         </div>
+
+        <ConnectivityE2EVerifier
+          presignedUrl={cloudUrlInput}
+          objectKey={cloudKeyInput}
+          authHeaders={authHeaders}
+          onAfterVerify={refresh}
+        />
       </VividCard>
 
       {/* Authentication Notice if not Dev/Admin */}
@@ -867,47 +1154,100 @@ export const ModelLaboratory: React.FC = () => {
                         </div>
                       )}
 
-                      {run.candidateCheckpointPath && (
-                        <div className="flex flex-wrap items-center gap-2 pt-1">
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => void handleInspectCheckpoint(run.candidateCheckpointPath)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
-                          >
-                            Inspect Checkpoint
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => void handleEvaluateRun(run.runId, 'phase')}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50 flex items-center gap-1"
-                          >
-                            <Sparkles className="w-3 h-3 text-[var(--app-accent)]" />
-                            Run Phase Verification
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => void handleEvaluateRun(run.runId, 'domain')}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50 flex items-center gap-1"
-                          >
-                            <Activity className="w-3 h-3" />
-                            Domain Benchmark ({run.benchmarkStatus})
-                          </button>
-                          {run.status === 'TRAINED' && (
+                      {run.candidateCheckpointPath && (() => {
+                        const matchingReq = approvals.find(
+                          (req) =>
+                            req.actionType === 'MODEL_RELEASE' &&
+                            req.resourceId === run.runId
+                        );
+                        return (
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
                             <button
                               type="button"
                               disabled={busy}
-                              onClick={() => void handleRequestApproval(run.runId)}
+                              onClick={() => void handleInspectCheckpoint(run.candidateCheckpointPath)}
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
+                            >
+                              Inspect Checkpoint
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => void handleEvaluateRun(run.runId, 'phase')}
                               className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50 flex items-center gap-1"
                             >
-                              <ShieldCheck className="w-3 h-3 text-[var(--z-ok)]" />
-                              Request Release Approval
+                              <Sparkles className="w-3 h-3 text-[var(--app-accent)]" />
+                              Run Phase Verification
                             </button>
-                          )}
-                        </div>
-                      )}
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => void handleEvaluateRun(run.runId, 'domain')}
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                            >
+                              <Activity className="w-3 h-3" />
+                              Domain Benchmark ({run.benchmarkStatus})
+                            </button>
+                            {run.status === 'TRAINED' && !matchingReq && (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => void handleRequestApproval(run.runId)}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                              >
+                                <ShieldCheck className="w-3 h-3 text-[var(--z-ok)]" />
+                                Request Release Approval
+                              </button>
+                            )}
+                            {matchingReq && (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono border border-[var(--app-card-border)] text-[var(--app-text-secondary)]">
+                                Approval: {matchingReq.status}
+                              </span>
+                            )}
+                            {role === 'Administrator' && matchingReq?.status === 'PENDING' && (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={() => void handleApprovalDecision(matchingReq.requestId, 'approve', run.runId)}
+                                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-[var(--z-ok)] border border-[var(--z-ok)] cursor-pointer disabled:opacity-50"
+                                >
+                                  Approve Release
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={() => void handleApprovalDecision(matchingReq.requestId, 'reject', run.runId)}
+                                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-[var(--z-danger)] border border-[var(--z-danger)] cursor-pointer disabled:opacity-50"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                            {role === 'Administrator' && matchingReq?.status === 'APPROVED' && run.status !== 'PROMOTED' && (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => void handlePromoteRun(run.runId)}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-[var(--app-accent)] border border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
+                              >
+                                Promote Release
+                              </button>
+                            )}
+                            {role === 'Administrator' && (matchingReq?.status === 'APPROVED' || run.status === 'PROMOTED') && (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => void handlePublishCloud(run.runId)}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1"
+                              >
+                                <Cloud className="w-3 h-3" />
+                                Publish to Cloud Storage
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}

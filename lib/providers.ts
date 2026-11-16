@@ -6,7 +6,11 @@
 
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import readline from 'readline';
-import { validateCloudRuntimeConfig } from './CloudCheckpointStorage';
+import {
+  downloadRawCheckpointFromCloudStorage,
+  isCloudCheckpointStorageConfigured,
+  validateCloudRuntimeConfig,
+} from './CloudCheckpointStorage';
 
 export type RuntimeLifecycleState =
   | 'NOT_CONFIGURED'
@@ -523,6 +527,12 @@ export class NativeNeuralLMProvider {
       this.setCloudOverrides({ presignedUrl });
     }
     if (objectKey) params.objectKey = objectKey;
+
+    if (!presignedUrl && isCloudCheckpointStorageConfigured()) {
+      const downloaded = await downloadRawCheckpointFromCloudStorage(objectKey);
+      params.cloudBytesBase64 = downloaded.buffer.toString('base64');
+      params.sourceUri = downloaded.sourceUri;
+    }
     return this.sendCommand('connectivity_reconnect', params, 45000);
   }
 

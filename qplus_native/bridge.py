@@ -54,7 +54,12 @@ def emit(payload: Dict[str, Any]) -> None:
         sys.stdout.flush()
 
 
-def load_runtime(presigned_url: Optional[str] = None) -> Dict[str, Any]:
+def load_runtime(
+    presigned_url: Optional[str] = None,
+    object_key: Optional[str] = None,
+    cloud_bytes: Optional[bytes] = None,
+    source_uri: Optional[str] = None,
+) -> Dict[str, Any]:
     """Load and execution-verify a native sequence checkpoint from Cloud Runtime."""
     global runtime_model, runtime_seq_lm, runtime_tokenizer, runtime_metadata
     global runtime_sha256, runtime_source_uri, runtime_error, runtime_loaded_at
@@ -64,14 +69,20 @@ def load_runtime(presigned_url: Optional[str] = None) -> Dict[str, Any]:
         if not ok:
             raise RuntimeError(reason or "FAIL_CLOSED: Cloud Runtime URL rejected")
         os.environ["CHECKPOINT_PRESIGNED_URL"] = str(presigned_url)
+    if object_key:
+        os.environ["S3_CHECKPOINT_KEY"] = str(object_key)
 
-    model = NativeNeuralModel(presigned_url=presigned_url)
+    model = NativeNeuralModel(
+        presigned_url=presigned_url or source_uri,
+        object_key=object_key,
+        cloud_bytes=cloud_bytes,
+    )
     runtime_model = model
     runtime_seq_lm = model._seq_lm
     runtime_tokenizer = model.tokenizer
     runtime_metadata = dict(model.metadata or {})
     runtime_sha256 = model.checkpoint_hash or ""
-    runtime_source_uri = model.weights_source or ""
+    runtime_source_uri = source_uri or model.weights_source or ""
     runtime_error = ""
     runtime_loaded_at = time.time()
     return runtime_status()
@@ -400,7 +411,15 @@ def main() -> None:
                 })
             elif cmd in ("connectivity_reconnect", "reload_cloud_checkpoint"):
                 try:
-                    result = load_runtime(params.get("presignedUrl") or params.get("presigned_url"))
+                    import base64
+                    b64 = params.get("cloudBytesBase64") or params.get("cloud_bytes_b64")
+                    raw_bytes = base64.b64decode(b64) if b64 else None
+                    result = load_runtime(
+                        presigned_url=params.get("presignedUrl") or params.get("presigned_url"),
+                        object_key=params.get("objectKey") or params.get("object_key"),
+                        cloud_bytes=raw_bytes,
+                        source_uri=params.get("sourceUri") or params.get("source_uri"),
+                    )
                     emit({"id": req_id, "success": True, "online": True, "weightsLoaded": True, **result})
                 except Exception as exc:
                     runtime_error = str(exc)

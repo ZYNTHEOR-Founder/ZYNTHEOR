@@ -13,4 +13,5 @@ __all__ = [
     "repair",
     "safe_exec",
     "stage_bench",
+    "autonomous_tools",
 ]

@@ -38,17 +38,46 @@ def validate_plan(plan: Any) -> List[str]:
         errs.append("plan needs at least one acceptance check (no acceptance criteria = cannot claim success)")
     ids = set()
     for i, s in enumerate(plan["steps"]):
-        sid = s.get("id") if isinstance(s, dict) else None
-        if not sid or sid in ids:
-            errs.append(f"step {i}: missing or duplicate id")
-        ids.add(sid)
-        if not isinstance(s, dict) or s.get("do") not in STEP_KINDS:
+        if not isinstance(s, dict):
+            errs.append(f"step {i}: must be a dict")
+            continue
+        sid = s.get("id")
+        if not isinstance(sid, str) or not sid.strip() or sid in ids:
+            errs.append(f"step {i}: missing, non-string, or duplicate id")
+        else:
+            ids.add(sid)
+        do = s.get("do")
+        if do not in STEP_KINDS:
             errs.append(f"step {i}: unknown 'do' (allowed: {sorted(STEP_KINDS)})")
+            continue
+        if do == "write_file":
+            if not isinstance(s.get("path"), str) or not s["path"].strip():
+                errs.append(f"step {i}: write_file requires non-empty string 'path'")
+            if not isinstance(s.get("content"), str):
+                errs.append(f"step {i}: write_file requires string 'content'")
+        elif do == "read_file":
+            if not isinstance(s.get("path"), str) or not s["path"].strip():
+                errs.append(f"step {i}: read_file requires non-empty string 'path'")
+        elif do == "run":
+            argv = s.get("argv")
+            if not isinstance(argv, list) or not argv or not all(isinstance(a, str) and a for a in argv):
+                errs.append(f"step {i}: run requires non-empty list of strings 'argv'")
     for i, c in enumerate(plan.get("acceptance") or []):
         if not isinstance(c, dict) or c.get("check") not in CHECKS:
             errs.append(f"acceptance {i}: unknown check (allowed: {sorted(CHECKS)})")
-        elif c["check"] in ("returncode_zero", "output_contains") and c.get("step") not in ids:
-            errs.append(f"acceptance {i}: refers to unknown step")
+            continue
+        chk = c["check"]
+        if chk in ("returncode_zero", "output_contains"):
+            step_ref = c.get("step")
+            if not isinstance(step_ref, str) or step_ref not in ids:
+                errs.append(f"acceptance {i}: refers to unknown step")
+        if chk == "output_contains" and (not isinstance(c.get("text"), str) or not c["text"]):
+            errs.append(f"acceptance {i}: output_contains requires non-empty string 'text'")
+        if chk in ("file_exists", "file_contains"):
+            if not isinstance(c.get("path"), str) or not c["path"].strip():
+                errs.append(f"acceptance {i}: {chk} requires non-empty string 'path'")
+        if chk == "file_contains" and (not isinstance(c.get("text"), str) or not c["text"]):
+            errs.append(f"acceptance {i}: file_contains requires non-empty string 'text'")
     return errs
 
 
@@ -118,6 +147,23 @@ class Orchestrator:
                 "audit": self.sb.verify_audit(),
                 "layer_summary": {"A": len(steps_out), "B": 0},
                 "note": "Layer A is deterministic code. No language-model capability is evidenced by this result."}
+
+    def execute_tool_call(self, call: Dict[str, Any], max_repairs: int = 3) -> Dict[str, Any]:
+        """Dispatch a Phase 6 JSON tool call through Sandbox + SelfRepairEngine."""
+        dispatcher = AutonomousToolDispatcher(self.sb, max_repairs=max_repairs)
+        return dispatcher.dispatch(call)
+
+
+# Re-export Phase 6 autonomous tools after Orchestrator is defined (repair.py imports Orchestrator).
+from qplus_native.autonomous_tools import (  # noqa: E402
+    AUTONOMOUS_TOOL_SCHEMAS,
+    AutonomousToolDispatcher,
+    write_workspace_file,
+    read_workspace_file,
+    run_terminal_command,
+    run_test,
+    search_internet,
+)
 
 
 def main():  # python3 qplus_native/orchestrator.py plan.json --workdir DIR

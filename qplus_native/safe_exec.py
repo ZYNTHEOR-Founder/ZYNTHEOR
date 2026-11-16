@@ -13,9 +13,11 @@ are covered by tests (tests/native-lm-v2.test.py::SafeExec).
   * audit      : append-only JSONL, each entry hash-chained to the previous one; verify_audit() detects edits
 Not covered: this is not an OS-level sandbox (no namespaces/seccomp). Run untrusted code in a container.
 """
+import errno
 import os
 import re
 import json
+import stat
 import time
 import shutil
 import hashlib
@@ -87,7 +89,24 @@ class Sandbox:
     def resolve(self, rel: str, action: str = "path") -> str:
         if not isinstance(rel, str) or not rel or "\x00" in rel:
             self._refuse(action, "invalid path", {"path": repr(rel)[:80]})
-        full = os.path.realpath(os.path.join(self.root, rel))  # realpath follows symlinks
+        if os.path.isabs(rel):
+            self._refuse(action, "absolute paths are not permitted", {"path": rel[:80]})
+
+        # Check every existing segment along the normalized candidate for symlinks
+        # before realpath() collapses them, blocking both internal & escaping symlinks.
+        joined = os.path.normpath(os.path.join(self.root, rel))
+        if joined != self.root and not joined.startswith(self.root + os.sep):
+            self._refuse(action, "path escapes workdir", {"path": rel})
+
+        probe_rel = os.path.relpath(joined, self.root)
+        if probe_rel != ".":
+            cur = self.root
+            for part in probe_rel.split(os.sep):
+                cur = os.path.join(cur, part)
+                if os.path.islink(cur):
+                    self._refuse(action, "symlinks are not permitted inside sandbox", {"path": rel})
+
+        full = os.path.realpath(joined)  # canonical path check
         if full != self.root and not full.startswith(self.root + os.sep):
             self._refuse(action, "path escapes workdir", {"path": rel})
         relp = os.path.relpath(full, self.root).replace(os.sep, "/")
@@ -97,29 +116,56 @@ class Sandbox:
             self._refuse(action, "secret-like file name", {"path": rel})
         return full
 
+    def _open_no_follow(self, full: str, flags: int, action: str, rel: str, mode: int = 0o644) -> int:
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        try:
+            fd = os.open(full, flags | nofollow, mode)
+        except OSError as exc:
+            if exc.errno in (errno.ELOOP, errno.EISDIR, errno.EPERM):
+                self._refuse(action, f"unsafe file open refused ({exc.strerror or exc.errno})", {"path": rel})
+            raise
+        try:
+            st = os.fstat(fd)
+            if not stat.S_ISREG(st.st_mode):
+                os.close(fd)
+                self._refuse(action, "target is not a regular file", {"path": rel})
+        except Exception:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            raise
+        return fd
+
     # ---------------------------------------------------------------- files
     def read_file(self, rel: str, max_bytes: int = 1_000_000) -> str:
         p = self.resolve(rel, "read_file")
-        with open(p, "r", encoding="utf-8", errors="replace") as f:
+        fd = self._open_no_follow(p, os.O_RDONLY, "read_file", rel)
+        with os.fdopen(fd, "r", encoding="utf-8", errors="replace") as f:
             data = f.read(max_bytes)
         self._log("read_file", "OK", {"path": rel, "bytes": len(data)})
         return data
 
     def write_file(self, rel: str, content: str) -> Optional[str]:
         p = self.resolve(rel, "write_file")
-        snap = self._snapshot(p, rel) if os.path.exists(p) else None
-        os.makedirs(os.path.dirname(p), exist_ok=True)
-        with open(p, "w", encoding="utf-8") as f:
+        snap = self._snapshot(p, rel) if os.path.lexists(p) else None
+        parent = os.path.dirname(p)
+        os.makedirs(parent, exist_ok=True)
+        # Re-verify parent chain did not become a symlink before opening target
+        self.resolve(rel, "write_file")
+        fd = self._open_no_follow(p, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, "write_file", rel, 0o644)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(content)
         self._log("write_file", "OK", {"path": rel, "bytes": len(content.encode()), "snapshot": snap,
                                        "sha256": hashlib.sha256(content.encode()).hexdigest()})
         return snap
 
     def _snapshot(self, full: str, rel: str) -> str:
-        # A millisecond timestamp plus path hash can collide when a repair cycle
-        # snapshots the same file twice in one millisecond. Use nanosecond time
-        # and exclusive directory creation so a collision can never overwrite a
-        # previous recovery point.
+        # Read target via O_NOFOLLOW before allocating a snapshot directory so a
+        # swapped symlink can never pull external host data into snapshots.
+        fd = self._open_no_follow(full, os.O_RDONLY, "snapshot", rel)
+        with os.fdopen(fd, "rb") as src_f:
+            raw_bytes = src_f.read()
         snapshots_dir = os.path.join(self.state, "snapshots")
         os.makedirs(snapshots_dir, exist_ok=True)
         for attempt in range(8):
@@ -134,7 +180,8 @@ class Sandbox:
                 continue
         else:
             raise OSError("Unable to allocate a unique recovery snapshot identifier")
-        shutil.copy2(full, os.path.join(d, "data"))
+        with open(os.path.join(d, "data"), "wb") as dst_f:
+            dst_f.write(raw_bytes)
         with open(os.path.join(d, "meta.json"), "w", encoding="utf-8") as f:
             json.dump({"path": rel}, f)
         return sid
@@ -148,7 +195,12 @@ class Sandbox:
         with open(os.path.join(d, "meta.json")) as f:
             rel = json.load(f)["path"]
         p = self.resolve(rel, "rollback")
-        shutil.copy2(os.path.join(d, "data"), p)
+        with open(os.path.join(d, "data"), "rb") as src_f:
+            raw_bytes = src_f.read()
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        fd = self._open_no_follow(p, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, "rollback", rel, 0o644)
+        with os.fdopen(fd, "wb") as dst_f:
+            dst_f.write(raw_bytes)
         self._log("rollback", "OK", {"path": rel, "snapshot": snapshot_id})
         return rel
 
@@ -157,6 +209,8 @@ class Sandbox:
         if not (self.approve and self.approve("delete_file", rel) is True):
             self._refuse("delete_file", "destructive action needs explicit user approval", {"path": rel})
         snap = self._snapshot(p, rel)
+        if os.path.islink(p):
+            self._refuse("delete_file", "symlinks are not permitted inside sandbox", {"path": rel})
         os.remove(p)
         self._log("delete_file", "OK", {"path": rel, "snapshot": snap})
 
@@ -167,6 +221,35 @@ class Sandbox:
         if args[1] == "-m":
             if args[2:3] != ["unittest"]:
                 raise PolicyError("only 'python3 -I -m unittest' is allowed")
+            i = 3
+            path_flags = {"-s", "--start-directory", "-t", "--top-level-directory"}
+            value_flags = {"-p", "--pattern", "-k"}
+            bare_flags = {"discover", "-v", "--verbose", "-b", "--buffer", "-f", "--failfast", "-c", "--catch", "-q", "--quiet"}
+            while i < len(args):
+                tok = args[i]
+                if "\x00" in tok:
+                    raise PolicyError("null byte in unittest argument")
+                if tok in bare_flags:
+                    i += 1
+                    continue
+                if tok in path_flags:
+                    if i + 1 >= len(args):
+                        raise PolicyError(f"unittest flag {tok} requires a path inside workdir")
+                    self.resolve(args[i + 1], "run")
+                    i += 2
+                    continue
+                if tok in value_flags:
+                    if i + 1 >= len(args) or "\x00" in args[i + 1]:
+                        raise PolicyError(f"unittest flag {tok} requires a valid filter pattern")
+                    i += 2
+                    continue
+                if tok.startswith("-"):
+                    raise PolicyError(f"disallowed unittest flag: {tok}")
+                if "/" in tok or "\\" in tok or ".." in tok or tok.endswith(".py"):
+                    self.resolve(tok, "run")
+                elif not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", tok):
+                    raise PolicyError(f"invalid unittest target: {tok}")
+                i += 1
             return
         if args[1].startswith("-"):
             raise PolicyError("inline code and extra interpreter flags are not allowed")

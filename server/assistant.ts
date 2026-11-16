@@ -12,6 +12,8 @@ import { ConnectivityMonitor } from '../lib/ConnectivityMonitor';
 import { KnowledgeWorkspace } from '../lib/KnowledgeWorkspace';
 import { AuditLedger } from '../lib/AuditLedger';
 import { ToolGateway } from '../lib/ToolGateway';
+import { ToolRegistry } from '../lib/ToolRegistry';
+import type { SovereignRole } from '../lib/SovereignIdentity';
 import {
   AssistantBrainCore,
   type AssistantBrainStatus,
@@ -426,7 +428,87 @@ const decomposeExecutionPlanDeclaration: FunctionDeclaration = {
   },
 };
 
-const ASSISTANT_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
+const writeWorkspaceFileDeclaration: FunctionDeclaration = {
+  name: 'write_workspace_file',
+  description:
+    'Create or update a file inside the jailed ZYNTHEOR /workspace sandbox (requires verified developer/operator/admin role; blocks secret paths and path traversal).',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      path: {
+        type: Type.STRING,
+        description: 'Relative path inside /workspace (e.g. "src/auth/token.ts" or "tests/test_app.py").',
+      },
+      content: {
+        type: Type.STRING,
+        description: 'UTF-8 file content to write.',
+      },
+    },
+    required: ['path', 'content'],
+  },
+};
+
+const runTerminalCommandDeclaration: FunctionDeclaration = {
+  name: 'run_terminal_command',
+  description:
+    'Execute an allowlisted zero-shell command inside /workspace (allowed binaries: node, python3, ls, cat, head, pwd, echo, mkdir, rm, find; requires verified developer/operator/admin role).',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      command: {
+        type: Type.STRING,
+        description: 'Allowlisted binary name (e.g. "python3" or "node").',
+      },
+      argsString: {
+        type: Type.STRING,
+        description: 'Optional space-separated arguments (e.g. "-m unittest tests/test_app.py -v").',
+      },
+    },
+    required: ['command'],
+  },
+};
+
+const executePythonSandboxDeclaration: FunctionDeclaration = {
+  name: 'execute_python_sandbox',
+  description:
+    'Execute Python 3 code inside an isolated ZYNTHEOR sandbox container/subprocess (requires verified developer/operator/admin role).',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      code: {
+        type: Type.STRING,
+        description: 'Python 3 source code to run.',
+      },
+      timeoutMs: {
+        type: Type.INTEGER,
+        description: 'Timeout in milliseconds (500 to 15000, default 5000).',
+      },
+    },
+    required: ['code'],
+  },
+};
+
+const searchInternetDeclaration: FunctionDeclaration = {
+  name: 'search_internet',
+  description:
+    'Search the public internet via DuckDuckGo HTML endpoint and return verified titles, URLs, and snippets.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      query: {
+        type: Type.STRING,
+        description: 'Search query in Thai or English.',
+      },
+      maxResults: {
+        type: Type.INTEGER,
+        description: 'Maximum results to return (1 to 10, default 5).',
+      },
+    },
+    required: ['query'],
+  },
+};
+
+export const ASSISTANT_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
   getSystemTelemetryDeclaration,
   searchKnowledgeHubDeclaration,
   inspectWorkspaceFilesDeclaration,
@@ -435,6 +517,10 @@ const ASSISTANT_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
   recallOrStoreMemoryDeclaration,
   runAdaptiveReasoningDeclaration,
   decomposeExecutionPlanDeclaration,
+  writeWorkspaceFileDeclaration,
+  runTerminalCommandDeclaration,
+  executePythonSandboxDeclaration,
+  searchInternetDeclaration,
 ];
 
 export const MAX_SHORT_TERM_EXCHANGES = 12;
@@ -636,7 +722,8 @@ function buildSystemInstruction(
 
   return [
     'You are the upgraded built-in AI Assistant (ผู้ช่วย AI อัจฉริยะ) powered by ZYNTHEOR AssistantBrainCore (แกนสมองผู้ช่วย: CognitiveContextEngine + AdaptiveReasoningEngine + NativeMemoryController + AutonomousPlanner + Gemini Neural Slot).',
-    'You have real server-side tools to inspect live system telemetry (get_system_telemetry), search indexed knowledge (search_knowledge_hub), inspect /workspace sandbox files (inspect_workspace_files), audit SHA-256 logs (inspect_audit_ledger), recall/store persistent memory (recall_or_store_assistant_memory), run adaptive reasoning/verification (run_adaptive_reasoning), decompose DAG plans (decompose_execution_plan), and suggest interactive UI actions (propose_ui_action).',
+    'You have real server-side tools for Phase 6 Autonomous Execution & Verification: write_workspace_file (write files inside jailed /workspace), run_terminal_command (execute allowlisted python3/node/test commands inside /workspace with no shell), execute_python_sandbox (isolated Python sandbox execution), search_internet (live web search), inspect_workspace_files (list/read /workspace), get_system_telemetry, search_knowledge_hub, inspect_audit_ledger, recall_or_store_assistant_memory, run_adaptive_reasoning, decompose_execution_plan, and propose_ui_action.',
+    'When asked to create code, run tests, verify implementations, or research external facts autonomously (with verified developer/operator/admin authorization), follow the write -> run test -> inspect error -> self-repair loop directly using write_workspace_file, run_terminal_command, execute_python_sandbox, and search_internet instead of asking the user to manually copy-paste commands. If RBAC rejects a write/exec tool because the caller is unauthenticated/guest, inform the user clearly without fabricating execution.',
     'When the user asks about current system health, blockers, metrics, audit records, knowledge documents, or workspace files, proactively call the relevant tool instead of guessing.',
     'When a user asks to remember preferences/facts across sessions, or asks complex multi-step engineering/planning/verification questions, use recall_or_store_assistant_memory, run_adaptive_reasoning, or decompose_execution_plan.',
     'When a user wants to open a module or run an agent task, call propose_ui_action so they get a one-click button right inside the assistant response.',
@@ -657,13 +744,16 @@ function buildSystemInstruction(
     .join('\n\n');
 }
 
-async function executeLocalTool(
+export async function executeLocalTool(
   name: string,
   args: Record<string, unknown>,
   proposedActions: AssistantProposedAction[],
-  scopeCtx?: { tenantId?: string; role?: string }
+  collectedSources: AssistantGroundingSource[],
+  scopeCtx?: { tenantId?: string; role?: string; verifiedCallerRole?: SovereignRole; sessionId?: string }
 ): Promise<{ ok: boolean; summary: string; data: Record<string, unknown> }> {
   try {
+    const verifiedRole: SovereignRole = scopeCtx?.verifiedCallerRole ?? 'guest';
+    const taskId = scopeCtx?.sessionId ? `assistant_${scopeCtx.sessionId}` : undefined;
     switch (name) {
       case 'get_system_telemetry': {
         const connectivityState = await ConnectivityMonitor.getInstance().checkNow();
@@ -854,6 +944,130 @@ async function executeLocalTool(
         });
       }
 
+      case 'write_workspace_file': {
+        const res = await ToolRegistry.getInstance().executeToolCall(
+          {
+            tool: 'write_file',
+            arguments: {
+              path: typeof args.path === 'string' ? args.path : '',
+              content: typeof args.content === 'string' ? args.content : '',
+            },
+          },
+          { taskId, role: verifiedRole, callerRole: verifiedRole }
+        );
+        return {
+          ok: res.ok,
+          summary: res.ok
+            ? res.stdout || `Wrote ${String(args.path || '')}`
+            : res.error || 'write_workspace_file failed',
+          data: {
+            ok: res.ok,
+            callId: res.callId,
+            executionMode: res.executionMode,
+            output: res.output,
+            stdout: res.stdout,
+            error: res.error,
+            auditHash: res.auditHash,
+          },
+        };
+      }
+
+      case 'run_terminal_command': {
+        const res = await ToolRegistry.getInstance().executeToolCall(
+          {
+            tool: 'run_command',
+            arguments: {
+              command: typeof args.command === 'string' ? args.command : '',
+              argsString: typeof args.argsString === 'string' ? args.argsString : '',
+            },
+          },
+          { taskId, role: verifiedRole, callerRole: verifiedRole }
+        );
+        return {
+          ok: res.ok,
+          summary: res.ok
+            ? `${String(args.command || '')} exited 0 (${res.durationMs}ms)`
+            : res.error || `Command failed (exit ${res.exitCode ?? 1})`,
+          data: {
+            ok: res.ok,
+            callId: res.callId,
+            executionMode: res.executionMode,
+            exitCode: res.exitCode,
+            stdout: res.stdout,
+            stderr: res.stderr,
+            error: res.error,
+            durationMs: res.durationMs,
+            auditHash: res.auditHash,
+          },
+        };
+      }
+
+      case 'execute_python_sandbox': {
+        const execArgs: Record<string, unknown> = {
+          code: typeof args.code === 'string' ? args.code : '',
+        };
+        if (typeof args.timeoutMs === 'number' && Number.isFinite(args.timeoutMs)) {
+          execArgs.timeoutMs = Math.trunc(args.timeoutMs);
+        }
+        const res = await ToolRegistry.getInstance().executeToolCall(
+          { tool: 'execute_python', arguments: execArgs },
+          { taskId, role: verifiedRole, callerRole: verifiedRole }
+        );
+        return {
+          ok: res.ok,
+          summary: res.ok
+            ? `Python ${res.executionMode} succeeded (${res.durationMs}ms)`
+            : res.error || `Python execution failed (exit ${res.exitCode ?? 1})`,
+          data: {
+            ok: res.ok,
+            callId: res.callId,
+            executionMode: res.executionMode,
+            dockerIsolated: res.dockerIsolated,
+            exitCode: res.exitCode,
+            stdout: res.stdout,
+            stderr: res.stderr,
+            output: res.output,
+            error: res.error,
+            durationMs: res.durationMs,
+            auditHash: res.auditHash,
+          },
+        };
+      }
+
+      case 'search_internet': {
+        const searchArgs: Record<string, unknown> = {
+          query: typeof args.query === 'string' ? args.query : '',
+        };
+        if (typeof args.maxResults === 'number' && Number.isFinite(args.maxResults)) {
+          searchArgs.maxResults = Math.trunc(args.maxResults);
+        }
+        const res = await ToolRegistry.getInstance().executeToolCall(
+          { tool: 'web_search', arguments: searchArgs },
+          { taskId, role: verifiedRole, callerRole: verifiedRole }
+        );
+        const out = res.output as { count?: number; results?: Array<{ title: string; url: string; snippet: string }> } | null;
+        const items = Array.isArray(out?.results) ? out!.results : [];
+        for (const item of items) {
+          if (item?.url && /^https?:\/\//i.test(item.url) && !collectedSources.some((s) => s.url === item.url)) {
+            collectedSources.push({ title: item.title || item.url, url: item.url });
+          }
+        }
+        return {
+          ok: res.ok,
+          summary: res.ok
+            ? `${items.length} internet results`
+            : res.error || 'search_internet failed',
+          data: {
+            ok: res.ok,
+            callId: res.callId,
+            executionMode: res.executionMode,
+            output: res.output,
+            error: res.error,
+            auditHash: res.auditHash,
+          },
+        };
+      }
+
       default:
         return {
           ok: false,
@@ -946,6 +1160,7 @@ export async function runUpgradedAssistant(params: {
   history?: AssistantHistoryTurn[];
   attachments?: AssistantAttachment[];
   context?: AssistantContextInfo;
+  verifiedCallerRole?: SovereignRole;
   moduleState?: AssistantModuleState;
   workspaceMetadata?: AssistantWorkspaceMetadata;
   thinkingMode?: AssistantThinkingMode;
@@ -1099,7 +1314,7 @@ export async function runUpgradedAssistant(params: {
   const collectedSources: AssistantGroundingSource[] = [];
   const toolsUsed = new Set<string>();
 
-  const maxToolHops = 5;
+  const maxToolHops = 8;
   let finalText = '';
 
   let activeHybridBuiltIns = useHybridBuiltIns;
@@ -1172,9 +1387,11 @@ export async function runUpgradedAssistant(params: {
           args: fnArgs,
         });
 
-        const toolOutcome = await executeLocalTool(fnName, fnArgs, proposedActions, {
+        const toolOutcome = await executeLocalTool(fnName, fnArgs, proposedActions, collectedSources, {
           tenantId,
           role: mergedContext.role,
+          verifiedCallerRole: params.verifiedCallerRole ?? 'guest',
+          sessionId: resolvedSessionId,
         });
 
         params.onEvent({
