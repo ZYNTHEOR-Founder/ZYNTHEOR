@@ -1,7 +1,7 @@
 {
-  "checkpoint": "/app/applet/native_data/model_checkpoint_target_41m.pt",
-  "checkpoint_sha256": "260df2012c4cb66eedcfca363524ebcbb35c86b0ac13bdcffb5bb7f8e8289e38",
-  "metadata_sha256": "260df2012c4cb66eedcfca363524ebcbb35c86b0ac13bdcffb5bb7f8e8289e38",
+  "checkpoint": "/workspaces/ZYNTHEOR/native_data/model_checkpoint_target_41m.pt",
+  "checkpoint_sha256": "18ed252176ec16f5e00c4a416d454b914f0e2a5f822103726c50177af8314ddd",
+  "metadata_sha256": "18ed252176ec16f5e00c4a416d454b914f0e2a5f822103726c50177af8314ddd",
   "sha256_match": true,
   "config": {
     "vocab": 16384,
