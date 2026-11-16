@@ -242,7 +242,7 @@ export const KnowledgeHub: React.FC = () => {
     try {
       const res = await fetch(`/api/knowledge/documents/${viewingDoc.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ content: editContent })
       });
       const data = await res.json();
@@ -281,9 +281,9 @@ export const KnowledgeHub: React.FC = () => {
     setIsCurating(true);
     setCurationSuccess(null);
     try {
-      const res = await fetch('/api/knowledge/curate-dataset' /* auth below */, {
+      const res = await fetch('/api/knowledge/curate-dataset', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           name: datasetName,
           documentIds: selectedDocIds
@@ -314,9 +314,7 @@ export const KnowledgeHub: React.FC = () => {
         })
       });
       const data = await res.json();
-      if (data.success) {
-        setTrainOutput(data);
-      }
+      setTrainOutput(data);
     } catch (err) {
       console.error(err);
     } finally {

@@ -14,10 +14,13 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+try:
+    import numpy as np
+except ImportError:
+    from qplus_native import np_compat as np
 
 from qplus_native.architecture import (
     TARGET_TOTAL_PARAMS, TARGET_VOCAB_SIZE, TARGET_D_MODEL, TARGET_N_LAYERS,

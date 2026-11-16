@@ -256,8 +256,15 @@ def run_versioned_training(req: Dict[str, Any]) -> Dict[str, Any]:
         model = baseline_model
         resumed_from_sha256 = baseline_meta.get("sha256")
         resumed_from_file_sha256 = baseline_bundle.get("file_sha256")
+        prior_training_steps = int(
+            baseline_meta.get("cumulative_training_steps")
+            or baseline_meta.get("training_steps")
+            or baseline_meta.get("training_step")
+            or 0
+        )
         resume_mode = "weights_only"
     else:
+        prior_training_steps = 0
         bpe_res = train_bpe_merges(
             [text[:max_chars] for text in splits["train_texts"]],
             num_merges=num_merges,
@@ -489,17 +496,27 @@ def run_versioned_training(req: Dict[str, Any]) -> Dict[str, Any]:
         "rng_state": _to_json_tree(rng.getstate()),
         "training_history": training_history,
     }
+    phase_id = str(req.get("phase_id") or "").strip() or None
+    phase_label = str(req.get("phase_label") or "").strip() or None
+    cumulative_training_steps = (
+        prior_training_steps + steps if resume_mode == "weights_only" else initial_step + steps
+    )
     checkpoint_metadata = {
         "run_id": run_id,
         "created_at": created_at,
         "training_track": "BATCH28_CONTINUOUS_LEARNING",
         "training_storage_backend": "LOCAL_CANDIDATE_ONLY",
+        "phase_id": phase_id,
+        "phase_label": phase_label,
         "dataset_version": dataset_version,
         "dataset_sha256": computed_dataset_sha256,
         "training_config_sha256": training_config_sha256,
         "baseline_sha256": resumed_from_sha256,
         "baseline_file_sha256": resumed_from_file_sha256,
+        "resume_mode": resume_mode,
+        "prior_training_steps": prior_training_steps,
         "training_steps": initial_step + steps,
+        "cumulative_training_steps": cumulative_training_steps,
         "steps_this_run": steps,
         "tokens_processed": tokens_processed,
         "weights_before_sha256": weights_before_sha256,
@@ -528,12 +545,16 @@ def run_versioned_training(req: Dict[str, Any]) -> Dict[str, Any]:
             f"quality gate status={quality_gate_status}; not production-ready."
         ),
         "run_id": run_id,
+        "phase_id": phase_id,
+        "phase_label": phase_label,
         "training_storage_backend": "LOCAL_CANDIDATE_ONLY",
         "dataset_version": dataset_version,
         "dataset_sha256": computed_dataset_sha256,
         "training_config_sha256": training_config_sha256,
         "training_config": config_for_fingerprint,
+        "prior_training_steps": prior_training_steps,
         "training_steps": initial_step + steps,
+        "cumulative_training_steps": cumulative_training_steps,
         "validation_metrics": candidate_eval,
         "test_metrics": candidate_test_eval,
         "validation_passed": validation_passed,
@@ -595,6 +616,10 @@ def run_versioned_training(req: Dict[str, Any]) -> Dict[str, Any]:
         "checkpoint_lifecycle": "TRAINED",
         "benchmark_status": "NOT_RUN",
         "resume_mode": resume_mode,
+        "phase_id": phase_id,
+        "phase_label": phase_label,
+        "prior_training_steps": prior_training_steps,
+        "cumulative_training_steps": cumulative_training_steps,
         "dataset_version": dataset_version,
         "dataset_sha256": computed_dataset_sha256,
         "baseline_checkpoint_sha256": resumed_from_sha256,
@@ -616,6 +641,8 @@ def run_versioned_training(req: Dict[str, Any]) -> Dict[str, Any]:
         },
         "training": {
             **run_training_summary,
+            "prior_training_steps": prior_training_steps,
+            "cumulative_training_steps": cumulative_training_steps,
             "history": training_history,
         },
         "baseline_eval": baseline_eval,
@@ -653,6 +680,121 @@ def verify_checkpoint_integrity_file(ckpt_path: str) -> Dict[str, Any]:
     }
 
 
+def inspect_checkpoint_detailed(ckpt_path: str) -> Dict[str, Any]:
+    bundle = verify_checkpoint_bundle(ckpt_path, require_resume_state=False)
+    if not bundle.get("valid"):
+        return {
+            "valid": False,
+            "checkpoint_path": os.path.abspath(ckpt_path),
+            "error": bundle.get("error", "Checkpoint inspection failed"),
+        }
+    model = bundle["model"]
+    metadata = bundle["metadata"]
+    manifest = bundle.get("manifest") or {}
+    resume_state = bundle.get("resume_state")
+    weights_sq = 0.0
+    tensor_stats = []
+    for name in model.param_names():
+        vals = model.p[name]
+        sq = sum(float(v) * float(v) for v in vals)
+        weights_sq += sq
+        tensor_stats.append({
+            "name": name,
+            "shape": list(model.shapes[name]),
+            "params": len(vals),
+            "l2_norm": round(math.sqrt(sq), 6),
+        })
+
+    opt_info: Dict[str, Any] = {"present": False, "valid": False}
+    sched_info: Dict[str, Any] = {"present": False}
+    if isinstance(resume_state, dict):
+        opt = resume_state.get("optimizer") or {}
+        m_dict = opt.get("m") or {}
+        v_dict = opt.get("v") or {}
+        m_norm = math.sqrt(sum(float(x) * float(x) for arr in m_dict.values() for x in arr)) if m_dict else 0.0
+        v_norm = math.sqrt(sum(float(x) * float(x) for arr in v_dict.values() for x in arr)) if v_dict else 0.0
+        step_val = opt.get("step") if isinstance(opt.get("step"), int) else opt.get("t")
+        betas_val = opt.get("betas") if isinstance(opt.get("betas"), list) else [opt.get("b1"), opt.get("b2")]
+        wd_val = opt.get("weight_decay") if opt.get("weight_decay") is not None else opt.get("wd")
+        opt_info = {
+            "present": bool(opt),
+            "valid": isinstance(step_val, int) and len(m_dict) == len(model.p) and len(v_dict) == len(model.p),
+            "type": "PureAdamW",
+            "step": step_val,
+            "lr": opt.get("lr"),
+            "betas": betas_val,
+            "weight_decay": wd_val,
+            "state_tensors": len(m_dict),
+            "m_norm": round(m_norm, 6),
+            "v_norm": round(v_norm, 6),
+        }
+        sch = resume_state.get("scheduler") or {}
+        completed_steps = sch.get("completed_steps", 0)
+        base_lr = sch.get("base_lr", opt.get("lr"))
+        decay = sch.get("decay", 0.995)
+        min_ratio = sch.get("min_lr_ratio", 0.1)
+        curr_lr = (
+            max(float(base_lr) * float(min_ratio), float(base_lr) * (float(decay) ** int(completed_steps)))
+            if isinstance(base_lr, (int, float))
+            else None
+        )
+        sched_info = {
+            "present": bool(sch),
+            "type": sch.get("type"),
+            "base_lr": base_lr,
+            "decay": decay,
+            "min_lr_ratio": min_ratio,
+            "completed_steps": completed_steps,
+            "current_lr": round(curr_lr, 8) if curr_lr is not None else None,
+        }
+
+    return {
+        "valid": True,
+        "checkpoint_path": os.path.abspath(ckpt_path),
+        "file_size_bytes": os.path.getsize(ckpt_path),
+        "checkpoint_id": bundle["checkpoint_id"],
+        "sha256": bundle["sha256"],
+        "file_sha256": bundle["file_sha256"],
+        "storage_mode": bundle["storage_mode"],
+        "checkpoint_lifecycle": bundle["checkpoint_lifecycle"],
+        "lifecycle_detail": manifest.get("lifecycle_detail"),
+        "provenance_status": metadata.get("provenance_status") or ("UNTRAINED" if metadata.get("untrained") else "TRAINED"),
+        "untrained": bool(metadata.get("untrained")),
+        "total_params": bundle["total_params"],
+        "weights_l2_norm": round(math.sqrt(weights_sq), 6),
+        "config": bundle["config"],
+        "tokenizer_profile": model.tokenizer_profile,
+        "tokenizer_sha256": metadata.get("tokenizer_sha256"),
+        "bpe_merges_count": len(model.bpe_merges),
+        "run_id": metadata.get("run_id"),
+        "phase_id": metadata.get("phase_id"),
+        "phase_label": metadata.get("phase_label"),
+        "created_at": metadata.get("created_at"),
+        "dataset_version": metadata.get("dataset_version"),
+        "dataset_sha256": metadata.get("dataset_sha256"),
+        "training_steps": metadata.get("training_steps", 0),
+        "prior_training_steps": metadata.get("prior_training_steps", 0),
+        "cumulative_training_steps": metadata.get("cumulative_training_steps", metadata.get("training_steps", 0)),
+        "steps_this_run": metadata.get("steps_this_run", metadata.get("training_steps", 0)),
+        "resume_mode": metadata.get("resume_mode"),
+        "baseline_sha256": metadata.get("baseline_sha256"),
+        "parameter_delta_sha256": metadata.get("parameter_delta_sha256"),
+        "quality_gate_status": metadata.get("quality_gate_status"),
+        "validation_passed": metadata.get("validation_passed"),
+        "test_gate_passed": metadata.get("test_gate_passed"),
+        "baseline_val_nll": metadata.get("baseline_val_nll"),
+        "candidate_val_nll": metadata.get("candidate_val_nll"),
+        "baseline_test_nll": metadata.get("baseline_test_nll"),
+        "candidate_test_nll": metadata.get("candidate_test_nll"),
+        "inference_verified": metadata.get("inference_verified") is True,
+        "resume_state_valid": resume_state is not None,
+        "optimizer": opt_info,
+        "scheduler": sched_info,
+        "training_history": resume_state.get("training_history", []) if isinstance(resume_state, dict) else [],
+        "tensors": tensor_stats,
+    }
+
+
 def main() -> None:
     raw = sys.stdin.read().strip()
     if not raw:
@@ -662,6 +804,8 @@ def main() -> None:
     op = req.get("op", "train")
     if op == "verify_checkpoint":
         out = verify_checkpoint_integrity_file(str(req["checkpoint_path"]))
+    elif op == "inspect_checkpoint":
+        out = inspect_checkpoint_detailed(str(req["checkpoint_path"]))
     else:
         out = run_versioned_training(req)
     print(json.dumps(out, ensure_ascii=False))

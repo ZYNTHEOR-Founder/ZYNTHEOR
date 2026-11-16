@@ -25,6 +25,11 @@ import { AdaptiveReasoningEngine } from './lib/AdaptiveReasoningEngine';
 import { KnowledgeGraphEngine } from './lib/KnowledgeGraphEngine';
 import { PerformanceEngine } from './lib/PerformanceEngine';
 import { ContinuousLearningPipeline } from './lib/ContinuousLearningPipeline';
+import {
+  buildSevenPhaseStatus,
+  getPhaseDefinition,
+  harvestPhase7Errors,
+} from './lib/TrainingCurriculum';
 import { SelfEvaluationEngine } from './lib/SelfEvaluationEngine';
 import {
   runBatch29Evaluation,
@@ -1971,6 +1976,156 @@ app.get('/api/model/inspect', requireRole(['Developer', 'Administrator']), async
   }
 });
 
+app.get('/api/model/training-logs', requireRole(['Developer', 'Administrator']), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const pipe = ContinuousLearningPipeline.getInstance();
+    const runs = pipe.listRuns({ tenantId: req.sovereignTenantId! });
+    const latestRun = runs[0] || null;
+    const lmEvalFile = path.resolve(process.cwd(), 'artifacts', 'lm-v2-eval.json');
+    const gatedEvidenceFile = path.resolve(process.cwd(), 'artifacts', 'gated-training-evidence.json');
+    let evalJson: any = null;
+    let gatedJson: any = null;
+    try {
+      if (fs.existsSync(lmEvalFile)) evalJson = JSON.parse(fs.readFileSync(lmEvalFile, 'utf8'));
+    } catch { /* ignore */ }
+    try {
+      if (fs.existsSync(gatedEvidenceFile)) gatedJson = JSON.parse(fs.readFileSync(gatedEvidenceFile, 'utf8'));
+    } catch { /* ignore */ }
+
+    const points = runs
+      .slice()
+      .reverse()
+      .map((r, idx) => ({
+        step: r.cumulativeTrainingSteps ?? r.trainingConfig.steps * (idx + 1),
+        trainLoss: Number(r.baselineEval?.nll ?? 0),
+        valLoss: Number(r.candidateEval?.nll ?? 0),
+        gradNorm: null,
+      }))
+      .filter((p) => p.valLoss > 0);
+
+    const liveSteps = runs.slice(0, 12).reverse().map((r) => ({
+      trainingStep: r.cumulativeTrainingSteps ?? r.trainingConfig.steps,
+      timestamp: Date.parse(r.createdAt) || Date.now(),
+      lossBefore: Number(r.baselineEval?.nll ?? 0),
+      lossAfter: Number(r.candidateEval?.nll ?? 0),
+      lossReductionPct:
+        typeof r.baselineEval?.nll === 'number' && r.baselineEval.nll > 0 && typeof r.candidateEval?.nll === 'number'
+          ? Number((((r.baselineEval.nll - r.candidateEval.nll) / r.baselineEval.nll) * 100).toFixed(2))
+          : 0,
+      paramMutationDelta: typeof r.nllDelta === 'number' ? Math.abs(r.nllDelta) : 0,
+      initialParamNorm: 0,
+      finalParamNorm: 0,
+      avgGradientNorm: 0,
+    }));
+
+    const bestValLoss = points.length > 0
+      ? Math.min(...points.map((p) => p.valLoss))
+      : (typeof evalJson?.val_loss === 'number' ? evalJson.val_loss : null);
+    const bestValPerplexity = typeof bestValLoss === 'number'
+      ? Number(Math.exp(Math.min(bestValLoss, 50)).toFixed(2))
+      : (typeof evalJson?.perplexity === 'number' ? evalJson.perplexity : null);
+
+    res.json({
+      success: true,
+      v2_2m: {
+        params: latestRun?.candidateEval?.total_params ?? evalJson?.total_params ?? null,
+        bestValLoss,
+        bestValPerplexity,
+        checkpointSha256: latestRun?.candidateCheckpointSha256 ?? evalJson?.checkpoint_sha256 ?? null,
+        points,
+        gatedPoints: Array.isArray(gatedJson?.runs) ? gatedJson.runs : [],
+      },
+      liveSteps,
+      latestStep: latestRun
+        ? {
+            training_step: latestRun.cumulativeTrainingSteps ?? latestRun.trainingConfig.steps,
+            loss_before: latestRun.baselineEval?.nll,
+            loss_after: latestRun.candidateEval?.nll,
+            loss_reduction_pct:
+              typeof latestRun.baselineEval?.nll === 'number' && latestRun.baselineEval.nll > 0 && typeof latestRun.candidateEval?.nll === 'number'
+                ? Number((((latestRun.baselineEval.nll - latestRun.candidateEval.nll) / latestRun.baselineEval.nll) * 100).toFixed(2))
+                : undefined,
+            model_name: latestRun.phaseLabel || 'PureSeqLM Candidate',
+            executed_runtime_bridge: latestRun.checkpointStorageMode || 'LOCAL_CANDIDATE_ONLY',
+            timestamp: Date.parse(latestRun.createdAt) || Date.now(),
+          }
+        : null,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/model/comparison', requireRole(['Developer', 'Administrator']), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const pipe = ContinuousLearningPipeline.getInstance();
+    const runs = pipe.listRuns({ tenantId: req.sovereignTenantId! });
+    const latestTrained = runs.find((r) => r.candidateEval && r.candidateCheckpointPath) || null;
+    const promoted = runs.find((r) => r.status === 'PROMOTED') || null;
+    const valNll = typeof latestTrained?.candidateEval?.nll === 'number' ? latestTrained.candidateEval.nll : null;
+    const valPpl = typeof valNll === 'number' ? Number(Math.exp(Math.min(valNll, 50)).toFixed(2)) : null;
+
+    res.json({
+      success: true,
+      activeCheckpoint: promoted
+        ? { key: 'v2_2m', label: `${promoted.phaseLabel || promoted.runId} (Promoted)` }
+        : { key: 'none', label: 'No active Cloud Runtime checkpoint loaded' },
+      models: {
+        target41m: {
+          key: 'target41m',
+          label: 'Target 41.53M Specification',
+          checkpointPath: 'native_data/model_checkpoint_target_41m.pt',
+          status: 'SPECIFICATION_ONLY',
+          totalParams: 41_527_808,
+          architecture: { n_layers: 10, n_heads: 8, d_model: 512, vocab: 16384 },
+          trainingSteps: 0,
+          memoryFootprintMb: 158.42,
+          dtype: 'float32',
+          lastEvaluatedLoss: null,
+          lastEvaluatedPerplexity: null,
+          checkpointSha256: null,
+        },
+        v2_2m: {
+          key: 'v2_2m',
+          label: latestTrained ? `PureSeqLM (${latestTrained.phaseLabel || latestTrained.runId})` : 'PureSeqLM Local Candidate',
+          checkpointPath: latestTrained?.candidateCheckpointPath || 'checkpoints/',
+          promotedCheckpointPath: promoted?.candidateCheckpointPath || null,
+          status: promoted ? 'ACTIVE' : latestTrained ? 'VERIFIED_CANDIDATE' : 'NOT_TRAINED',
+          totalParams: latestTrained?.baselineEval?.total_params ?? null,
+          architecture: { n_layers: 1, n_heads: 4, d_model: 24, vocab: 532 },
+          trainingSteps: latestTrained?.cumulativeTrainingSteps ?? 0,
+          memoryFootprintMb: 0.25,
+          dtype: 'float32',
+          lastEvaluatedLoss: valNll,
+          lastEvaluatedPerplexity: valPpl,
+          gatedBestLoss: promoted?.candidateEval?.nll ?? null,
+          gatedBestPerplexity:
+            typeof promoted?.candidateEval?.nll === 'number'
+              ? Number(Math.exp(Math.min(promoted.candidateEval.nll, 50)).toFixed(2))
+              : null,
+          top1AccuracyPct:
+            typeof latestTrained?.candidateEval?.top1_accuracy === 'number'
+              ? Number((latestTrained.candidateEval.top1_accuracy * 100).toFixed(1))
+              : null,
+          top5AccuracyPct: null,
+          bigramBaselinePpl: null,
+          checkpointSha256: latestTrained?.candidateCheckpointSha256 || null,
+        },
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/model/promote', requireRole(['Administrator']), (_req: AuthenticatedRequest, res: Response) => {
+  return res.status(409).json({
+    success: false,
+    code: 'GOVERNANCE_PIPELINE_REQUIRED',
+    error: 'Promotion requires a verified Continuous Learning runId, passed regression & domain benchmarks, and an approved ApprovalGate request via /api/training/pipeline/promote.',
+  });
+});
+
 // ==========================================
 // 13. BATCH 28 / 29 / 30 COGNITIVE, ACTION, GOVERNANCE, TRAINING & DASHBOARD ROUTES
 // ==========================================
@@ -2145,6 +2300,149 @@ app.post('/api/training/pipeline/rollback', requireAuth('admin'), (req: Authenti
   } catch (err: any) {
     const msg = String(err?.message || err);
     res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.get('/api/training/pipeline/phases', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const pipe = ContinuousLearningPipeline.getInstance();
+    const status = buildSevenPhaseStatus(req.sovereignTenantId!, {
+      userId: req.sovereignUserId,
+      role: req.sovereignRole,
+    });
+    const checkpoints = pipe.discoverCheckpoints({ tenantId: req.sovereignTenantId! });
+    res.json({ success: true, ...status, checkpoints });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/training/pipeline/checkpoints', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const pipe = ContinuousLearningPipeline.getInstance();
+    const checkpoints = pipe.discoverCheckpoints({ tenantId: req.sovereignTenantId! });
+    res.json({ success: true, checkpoints });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/training/pipeline/inspect-checkpoint', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const pipe = ContinuousLearningPipeline.getInstance();
+    let targetPath = typeof req.body?.checkpointPath === 'string' ? req.body.checkpointPath.trim() : '';
+    if (!targetPath && typeof req.body?.runId === 'string' && req.body.runId.trim()) {
+      const run = pipe.listRuns({ tenantId: req.sovereignTenantId! }).find((r) => r.runId === req.body.runId.trim());
+      if (!run || !run.candidateCheckpointPath) {
+        return res.status(404).json({ success: false, error: 'RUN_NOT_FOUND: No checkpoint associated with that runId.' });
+      }
+      targetPath = run.candidateCheckpointPath;
+    }
+    if (!targetPath) {
+      return res.status(400).json({ success: false, error: 'checkpointPath or runId is required.' });
+    }
+    const inspection = await pipe.inspectCheckpointFile(targetPath);
+    res.json({ success: true, inspection });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('FORBIDDEN') ? 403 : msg.includes('NOT_FOUND') ? 404 : 400;
+    res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/training/pipeline/harvest-errors', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const report = harvestPhase7Errors(req.sovereignTenantId!, {
+      userId: req.sovereignUserId,
+      role: req.sovereignRole,
+    });
+    res.json({ success: true, harvest: report });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/training/pipeline/phase-run', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const body = req.body || {};
+    const phaseId = String(body.phaseId || 'phase_1_continuation');
+    const phaseDef = getPhaseDefinition(phaseId);
+    if (!phaseDef) {
+      return res.status(400).json({ success: false, error: `UNKNOWN_PHASE: '${phaseId}' is not a valid training phase.` });
+    }
+
+    let customSamples: string[] | undefined = Array.isArray(body.customSamples) && body.customSamples.length > 0
+      ? body.customSamples.map(String)
+      : undefined;
+    let curriculumSource = body.resumeFromRunId ? 'exact_resume_frozen_dataset' : `curated_${phaseId}`;
+
+    if (!body.resumeFromRunId && !customSamples) {
+      if (phaseId === 'phase_7_continuous_improvement') {
+        const harvested = harvestPhase7Errors(req.sovereignTenantId!, {
+          userId: req.sovereignUserId,
+          role: req.sovereignRole,
+        });
+        customSamples = harvested.combinedSamples;
+        curriculumSource = `phase_7_harvested(errors=${harvested.harvestedErrorSamples.length},supp=${harvested.supplementalKnowledgeSamples.length})`;
+      } else {
+        customSamples = phaseDef.curatedCorpus;
+      }
+    }
+
+    const pipe = ContinuousLearningPipeline.getInstance();
+    const run = await pipe.executePipelineRun({
+      tenantId: req.sovereignTenantId!,
+      initiatedBy: req.sovereignUserId!,
+      phaseId: phaseDef.id,
+      phaseLabel: phaseDef.titleEn,
+      curriculumSource,
+      customSamples,
+      documentIds: Array.isArray(body.documentIds) ? body.documentIds : undefined,
+      steps: body.steps !== undefined ? Number(body.steps) : phaseDef.recommendedSteps,
+      lr: body.lr !== undefined ? Number(body.lr) : phaseDef.recommendedLr,
+      margin: body.margin !== undefined ? Number(body.margin) : -0.25,
+      testMargin: body.testMargin !== undefined ? Number(body.testMargin) : 2.0,
+      weightDecay: body.weightDecay !== undefined ? Number(body.weightDecay) : 0.01,
+      gradientClip: body.gradientClip !== undefined ? Number(body.gradientClip) : 1.0,
+      schedulerDecay: body.schedulerDecay !== undefined ? Number(body.schedulerDecay) : 0.995,
+      seed: body.seed !== undefined ? Number(body.seed) : 2028,
+      baselineCheckpointPath: typeof body.baselineCheckpointPath === 'string' && body.baselineCheckpointPath.trim()
+        ? body.baselineCheckpointPath.trim()
+        : undefined,
+      resumeTraining: body.resumeTraining === true,
+      resumeFromRunId: typeof body.resumeFromRunId === 'string' && body.resumeFromRunId.trim()
+        ? body.resumeFromRunId.trim()
+        : undefined,
+    });
+
+    if (body.runPhaseVerification !== false && run.candidateCheckpointPath && fs.existsSync(run.candidateCheckpointPath)) {
+      await pipe.runPhaseEvaluation({
+        runId: run.runId,
+        tenantId: req.sovereignTenantId!,
+        phaseId: phaseDef.id,
+      });
+    }
+
+    res.json({ success: true, run });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('NOT_FOUND') ? 404 : msg.includes('FORBIDDEN') ? 403 : 400;
+    res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/training/pipeline/phase-evaluate', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = await ContinuousLearningPipeline.getInstance().runPhaseEvaluation({
+      runId: String(req.body?.runId || ''),
+      tenantId: req.sovereignTenantId!,
+      phaseId: typeof req.body?.phaseId === 'string' ? req.body.phaseId : undefined,
+    });
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('NOT_FOUND') ? 404 : msg.includes('FORBIDDEN') ? 403 : 400;
+    res.status(status).json({ success: false, error: msg });
   }
 });
 

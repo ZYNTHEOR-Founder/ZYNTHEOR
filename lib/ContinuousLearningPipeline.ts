@@ -119,6 +119,12 @@ export interface ContinuousLearningRunRecord {
   promotedAt: string | null;
   promotedBy: string | null;
   backupBeforePromote: CheckpointBackupRecord | null;
+  phaseId?: string | null;
+  phaseLabel?: string | null;
+  curriculumSource?: string | null;
+  priorTrainingSteps?: number;
+  cumulativeTrainingSteps?: number;
+  phaseEvaluation?: Record<string, any> | null;
   error?: string;
 }
 
@@ -270,6 +276,9 @@ export class ContinuousLearningPipeline {
     baselineCheckpointPath?: string;
     resumeTraining?: boolean;
     resumeFromRunId?: string;
+    phaseId?: string;
+    phaseLabel?: string;
+    curriculumSource?: string;
   }): Promise<ContinuousLearningRunRecord> {
     const runId = `cl_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
     const now = new Date().toISOString();
@@ -386,6 +395,12 @@ export class ContinuousLearningPipeline {
       promotedAt: null,
       promotedBy: null,
       backupBeforePromote: null,
+      phaseId: params.phaseId || resumeRun?.phaseId || null,
+      phaseLabel: params.phaseLabel || resumeRun?.phaseLabel || null,
+      curriculumSource: params.curriculumSource || null,
+      priorTrainingSteps: 0,
+      cumulativeTrainingSteps: 0,
+      phaseEvaluation: null,
     };
 
     const pushStage = (stage: PipelineStageName, status: 'PASS' | 'FAIL' | 'PENDING' | 'BLOCKED', detail: string) => {
@@ -557,6 +572,8 @@ export class ContinuousLearningPipeline {
         scheduler_decay: schedulerDecay,
         seed,
         resume_training: resumeTraining,
+        phase_id: record.phaseId,
+        phase_label: record.phaseLabel,
         baseline_checkpoint_path: fs.existsSync(baselineCheckpointPath) ? baselineCheckpointPath : null,
         candidate_checkpoint_path: candidatePath,
       };
@@ -607,6 +624,10 @@ export class ContinuousLearningPipeline {
       record.qualityGateStatus = pyResult.quality_gate_status || 'NOT_RUN';
       record.inferenceVerified = Boolean(pyResult.inference_verified);
       record.benchmarkStatus = pyResult.benchmark_status || 'NOT_RUN';
+      record.priorTrainingSteps = typeof pyResult.prior_training_steps === 'number' ? pyResult.prior_training_steps : 0;
+      record.cumulativeTrainingSteps = typeof pyResult.cumulative_training_steps === 'number'
+        ? pyResult.cumulative_training_steps
+        : (pyResult.training?.steps_completed ?? record.trainingConfig.steps);
 
       pushStage(
         'NATIVE_TRAINING',
@@ -901,5 +922,174 @@ export class ContinuousLearningPipeline {
 
   public listBackups(): CheckpointBackupRecord[] {
     return [...this.backups];
+  }
+
+  public discoverCheckpoints(scope?: { tenantId?: string }): Array<{
+    path: string;
+    relativePath: string;
+    name: string;
+    sizeBytes: number;
+    mtime: string;
+    runId?: string;
+    phaseId?: string | null;
+    cumulativeTrainingSteps?: number;
+    hasManifest: boolean;
+    hasResumeState: boolean;
+    isActiveTarget: boolean;
+  }> {
+    const root = process.cwd();
+    const activeTarget = this.getActiveTargetCheckpointPath();
+    const candidateDirs = [
+      this.checkpointDir,
+      path.resolve(root, 'native_data'),
+      path.resolve(root, 'checkpoints'),
+    ];
+    const seen = new Set<string>();
+    const found: Array<{
+      path: string;
+      relativePath: string;
+      name: string;
+      sizeBytes: number;
+      mtime: string;
+      runId?: string;
+      phaseId?: string | null;
+      cumulativeTrainingSteps?: number;
+      hasManifest: boolean;
+      hasResumeState: boolean;
+      isActiveTarget: boolean;
+    }> = [];
+
+    const scopedRuns = this.listRuns(scope);
+    const runByPath = new Map<string, ContinuousLearningRunRecord>();
+    for (const r of scopedRuns) {
+      if (r.candidateCheckpointPath) {
+        runByPath.set(path.resolve(r.candidateCheckpointPath), r);
+      }
+    }
+
+    for (const dir of candidateDirs) {
+      if (!fs.existsSync(dir)) continue;
+      let entries: string[] = [];
+      try {
+        entries = fs.readdirSync(dir);
+      } catch {
+        continue;
+      }
+      for (const entry of entries) {
+        if (!entry.endsWith('.pt')) continue;
+        const full = path.resolve(dir, entry);
+        if (seen.has(full) || !fs.existsSync(full)) continue;
+        seen.add(full);
+        const st = fs.statSync(full);
+        if (!st.isFile()) continue;
+        const matchedRun = runByPath.get(full);
+        found.push({
+          path: full,
+          relativePath: path.relative(root, full),
+          name: entry,
+          sizeBytes: st.size,
+          mtime: st.mtime.toISOString(),
+          runId: matchedRun?.runId,
+          phaseId: matchedRun?.phaseId || null,
+          cumulativeTrainingSteps: matchedRun?.cumulativeTrainingSteps,
+          hasManifest: fs.existsSync(`${full}.manifest.json`),
+          hasResumeState: fs.existsSync(`${full}.resume.json`),
+          isActiveTarget: full === activeTarget,
+        });
+      }
+    }
+    return found.sort((a, b) => b.mtime.localeCompare(a.mtime));
+  }
+
+  public async inspectCheckpointFile(checkpointPath: string): Promise<Record<string, any>> {
+    const resolved = path.resolve(checkpointPath);
+    const allowedRoots = [
+      path.resolve(process.cwd(), 'checkpoints'),
+      path.resolve(process.cwd(), 'native_data'),
+      path.resolve(this.checkpointDir),
+      path.resolve(this.rootDir),
+    ];
+    const inAllowedRoot = allowedRoots.some((base) => resolved === base || resolved.startsWith(base + path.sep));
+    if (!inAllowedRoot) {
+      throw new Error('FORBIDDEN: Checkpoint inspection path must reside within managed checkpoint or native_data directories.');
+    }
+    if (!fs.existsSync(resolved)) {
+      throw new Error(`CHECKPOINT_NOT_FOUND: Checkpoint '${path.basename(resolved)}' does not exist.`);
+    }
+    const scriptPath = path.resolve(process.cwd(), 'qplus_native', 'batch28_train.py');
+    const out = await new Promise<Record<string, any>>((resolve, reject) => {
+      const proc = execFile(
+        'python3',
+        ['-B', scriptPath],
+        { cwd: process.cwd(), timeout: 20_000, maxBuffer: 4 * 1024 * 1024 },
+        (err, stdout, stderr) => {
+          if (err && !stdout.trim()) {
+            return reject(new Error(stderr || err.message));
+          }
+          try {
+            resolve(JSON.parse(stdout.trim()));
+          } catch (parseErr: any) {
+            reject(new Error(`Invalid checkpoint inspection output: ${parseErr.message}`));
+          }
+        }
+      );
+      proc.stdin?.write(JSON.stringify({ op: 'inspect_checkpoint', checkpoint_path: resolved }));
+      proc.stdin?.end();
+    });
+    return out;
+  }
+
+  public async runPhaseEvaluation(params: {
+    runId: string;
+    tenantId: string;
+    phaseId?: string;
+    evalTexts?: string[];
+  }): Promise<{ run: ContinuousLearningRunRecord; evaluation: Record<string, any> }> {
+    const run = this.runs.find((candidate) => candidate.runId === params.runId);
+    if (!run) throw new Error(`RUN_NOT_FOUND: Continuous learning run '${params.runId}' does not exist.`);
+    if (run.tenantId !== params.tenantId) throw new Error('FORBIDDEN: Cross-tenant phase evaluation is denied.');
+    if (!run.candidateCheckpointPath || !fs.existsSync(run.candidateCheckpointPath)) {
+      throw new Error('CHECKPOINT_NOT_FOUND: Candidate checkpoint file is unavailable.');
+    }
+    const phaseId = params.phaseId || run.phaseId || 'phase_1_continuation';
+    const evalTexts =
+      Array.isArray(params.evalTexts) && params.evalTexts.length > 0
+        ? params.evalTexts
+        : (run.datasetManifest?.testSamples || []);
+    const scriptPath = path.resolve(process.cwd(), 'qplus_native', 'phase_curriculum.py');
+    const evaluation = await new Promise<Record<string, any>>((resolve, reject) => {
+      const proc = execFile(
+        'python3',
+        ['-B', scriptPath],
+        { cwd: process.cwd(), timeout: 30_000, maxBuffer: 4 * 1024 * 1024 },
+        (err, stdout, stderr) => {
+          if (err && !stdout.trim()) {
+            return reject(new Error(stderr || err.message));
+          }
+          try {
+            resolve(JSON.parse(stdout.trim()));
+          } catch (parseErr: any) {
+            reject(new Error(`Invalid phase evaluation output: ${parseErr.message}`));
+          }
+        }
+      );
+      proc.stdin?.write(JSON.stringify({
+        phase_id: phaseId,
+        checkpoint_path: run.candidateCheckpointPath,
+        eval_texts: evalTexts,
+      }));
+      proc.stdin?.end();
+    });
+
+    run.phaseEvaluation = evaluation;
+    run.updatedAt = new Date().toISOString();
+    this.save();
+    AuditLedger.append('EVOLVER', 'PHASE_CURRICULUM_EVALUATED', {
+      runId: run.runId,
+      phaseId,
+      status: evaluation.status,
+      summary: evaluation.summary,
+    });
+    return { run, evaluation };
   }
 }

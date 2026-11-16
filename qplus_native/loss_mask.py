@@ -1,4 +1,8 @@
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    from qplus_native import np_compat as np
+
 
 IGNORE_INDEX = -100
 

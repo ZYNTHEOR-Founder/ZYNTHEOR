@@ -26,9 +26,11 @@ import time
 import math
 import shutil
 import argparse
-import numpy as np
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    import numpy as np
+except ImportError:
+    from qplus_native import np_compat as np
 from qplus_native.tokenizer import SovereignTokenizer
 from qplus_native.corpus import build_corpus
 from qplus_native.lm_v2 import NativeLM, LMConfig, AdamW, real_vocab_size, V2_CHECKPOINT_PATH, ROOT

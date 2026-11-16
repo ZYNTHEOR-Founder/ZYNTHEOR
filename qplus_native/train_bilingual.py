@@ -21,9 +21,11 @@ import math
 import shutil
 import argparse
 from typing import Dict, List, Tuple, Any
-import numpy as np
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    import numpy as np
+except ImportError:
+    from qplus_native import np_compat as np
 from qplus_native.tokenizer import SovereignTokenizer
 from qplus_native.bilingual_corpus import build_bilingual_corpus, BILINGUAL_MANIFEST_PATH
 from qplus_native.lm_v2 import (

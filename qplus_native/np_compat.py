@@ -1182,6 +1182,8 @@ class _CompatRNG:
 
 
 class _RandomModule:
+    Generator = _CompatRNG
+
     def __init__(self):
         self._global_rng = _CompatRNG(42)
 
