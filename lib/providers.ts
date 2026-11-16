@@ -692,7 +692,7 @@ export interface ExternalBrainStatus {
 /**
  * Pluggable External Brain Slot (Hybrid Path A).
  * Connects via standard HTTPS fetch only when ZYNTHEOR_BRAIN_PROVIDER + ZYNTHEOR_BRAIN_API_KEY
- * (or local Ollama) are explicitly configured in environment variables. Fails closed otherwise.
+ * (or local local) are explicitly configured in environment variables. Fails closed otherwise.
  */
 export class ExternalBrainProvider {
   public static getStatus(): ExternalBrainStatus {
@@ -700,7 +700,7 @@ export class ExternalBrainProvider {
     const model = (process.env.ZYNTHEOR_BRAIN_MODEL || '').trim();
     const baseUrl = (process.env.ZYNTHEOR_BRAIN_BASE_URL || '').trim();
     const hasKey = Boolean((process.env.ZYNTHEOR_BRAIN_API_KEY || '').trim());
-    const configured = Boolean(provider && (hasKey || provider === 'ollama'));
+    const configured = Boolean(provider && (hasKey || provider === 'local'));
 
     return {
       configured,

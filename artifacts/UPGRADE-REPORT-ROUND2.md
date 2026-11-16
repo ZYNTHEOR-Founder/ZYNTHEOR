@@ -72,7 +72,7 @@ scrubbed env, timeout + CPU/memory/file-size limits, capped and redacted output,
 Tests: 26 pass (6 new SafeExec). Gate 2 status: PASS for the listed checks only.
 NOT covered: no OS-level isolation (namespaces/seccomp/network block); a script run by the allowlisted python3 can still open
 network sockets or read files outside the workdir by absolute path. Use a container before running untrusted generated code.
-Gates 3-12 not started in this tree. The Gemini/AI Studio TypeScript changes (lib/TaskOrchestrator.ts etc.) are unreviewed.
+Gates 3-12 not started in this tree. The External/AI Studio TypeScript changes (lib/TaskOrchestrator.ts etc.) are unreviewed.
 
 ## Round 2e — Gate 3: minimal Orchestrator (2026-11-13)
 New: `qplus_native/orchestrator.py`. Executes an explicit plan through Sandbox; delivers only if every acceptance check passes.

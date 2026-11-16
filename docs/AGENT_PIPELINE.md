@@ -4,7 +4,7 @@ New files only (nothing existing is modified):
 
 | File | Purpose |
 |---|---|
-| `qplus_native/brain.py` | `TemplateBrain` (old deterministic behaviour), `ModelBrain` (any `complete(system, user) -> text`), an HTTP adapter for Anthropic, `run_task()` reporting each stage |
+| `qplus_native/brain.py` | `TemplateBrain` (old deterministic behaviour), `ModelBrain` (any `complete(system, user) -> text`), an HTTP adapter for Native, `run_task()` reporting each stage |
 | `qplus_native/agent_bench.py` | 11 tasks with hidden check scripts; reports pass rate per stage and `false_success` |
 | `tests/agent_reference.py`, `tests/test_agent_pipeline.py` | 15 tests using scripted fake models (no network, no keys) |
 
@@ -14,9 +14,9 @@ New files only (nothing existing is modified):
 python3 -m pytest tests/test_agent_pipeline.py -q                 # 15 tests
 python3 -m qplus_native.agent_bench --brain template --out bench_template.json   # baseline
 
-export ZYNTHEOR_BRAIN_PROVIDER=anthropic
+export ZYNTHEOR_BRAIN_PROVIDER=Native
 export ZYNTHEOR_BRAIN_MODEL=<model name>     # no default on purpose; names go stale
-export ANTHROPIC_API_KEY=...                 # environment only, never committed
+export Native_API_KEY=...                 # environment only, never committed
 python3 -m qplus_native.agent_bench --brain model --out bench_model.json
 ```
 

@@ -27,7 +27,6 @@
     "@babel/parser": "^8.1.2",
     "@babel/traverse": "^8.1.2",
     "@babel/types": "^8.1.2",
-    "@google/genai": "^3.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",

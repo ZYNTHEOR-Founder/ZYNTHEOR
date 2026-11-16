@@ -47,7 +47,7 @@ class RuntimeIntegrityTests(unittest.TestCase):
         with self.assertRaises(BrainError):
             validate_brain_endpoint_url("http://127.0.0.1:8080/v1/chat/completions", allow_loopback=False)
         with self.assertRaises(BrainError):
-            make_http_complete(provider="openai", api_key="")
+            make_http_complete(provider="local", api_key="")
 
         status = get_external_brain_status()
         self.assertIn("configured", status)

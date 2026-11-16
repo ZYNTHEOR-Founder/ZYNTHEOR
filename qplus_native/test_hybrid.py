@@ -235,7 +235,7 @@ def test_external_http_connector_security_and_fail_closed():
         assert "SSRF_BLOCKED" in str(exc)
 
     try:
-        make_http_complete(provider="openai", api_key="")
+        make_http_complete(provider="local", api_key="")
         raise AssertionError("Should fail closed without API key")
     except BrainError as exc:
         assert "FAIL_CLOSED" in str(exc)

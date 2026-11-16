@@ -11,7 +11,7 @@ same Sandbox. That separates two things the brain's own tests cannot:
 
 Usage (from the repository root):
     python3 -m qplus_native.agent_bench --brain template --out bench_template.json
-    ZYNTHEOR_BRAIN_PROVIDER=anthropic ZYNTHEOR_BRAIN_MODEL=<model> ANTHROPIC_API_KEY=... \
+    ZYNTHEOR_BRAIN_PROVIDER=external ZYNTHEOR_BRAIN_MODEL=<model> external_API_KEY=... \
         python3 -m qplus_native.agent_bench --brain model --out bench_model.json
 """
 import argparse

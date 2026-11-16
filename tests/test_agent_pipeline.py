@@ -126,15 +126,15 @@ def test_apply_patch_inserts_new_files_before_the_first_run_step():
 
 
 def test_http_adapter_needs_key_and_known_provider(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("LOCAL_API_KEY", raising=False)
     with pytest.raises(BrainError, match="not set"):
-        make_http_complete("anthropic", "some-model")("s", "u")
+        make_http_complete("local", "some-model")("s", "u")
     with pytest.raises(BrainError):
         make_http_complete("nope", "m")
     with pytest.raises(BrainError):
-        make_http_complete("gemini", "m")
+        make_http_complete("local", "m")
     with pytest.raises(BrainError):
-        make_http_complete("anthropic", "")
+        make_http_complete("local", "")
 
 
 def test_completion_errors_never_leak_their_message(tmp_path):

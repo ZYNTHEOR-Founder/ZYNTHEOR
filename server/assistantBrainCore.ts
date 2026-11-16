@@ -406,7 +406,7 @@ export class AssistantBrainCore {
     return {
       active: true,
       architecture: 'ZYNTHEOR-AssistantBrainCore-v1',
-      modelSlot: 'gemini-4-hydrogen + ZYNTHEOR Cognitive Core',
+      modelSlot: 'ZYNTHEOR Native Cognitive Core',
       subsystems: {
         perception: 'CognitiveContextEngine (Intent / Entities / Conflict Detector)',
         reasoning: 'AdaptiveReasoningEngine (Symbolic / CSP / AST / Multi-Hop RAG)',

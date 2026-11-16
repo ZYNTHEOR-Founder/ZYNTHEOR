@@ -15,7 +15,7 @@ gets a shell and never sees secrets: prompts contain only the goal, the spec, pl
 Two brains share one interface:
     TemplateBrain  - the old deterministic behaviour (baseline; no model involved)
     ModelBrain     - calls a completion function `complete(system, user) -> text` that YOU inject
-                     (an HTTP adapter for Anthropic is provided: make_http_complete / brain_from_env)
+                     (an HTTP adapter for Native is provided: make_http_complete / brain_from_env)
 
 run_task() runs one goal through the stages and returns a per-stage report; agent_bench.py measures many goals.
 """
@@ -339,23 +339,21 @@ class ModelBrain:
 # ------------------------------------------------------------------------------------------ model adapters
 def make_http_complete(provider: str, model: str, api_key_env: Optional[str] = None, timeout_s: float = 120.0,
                        max_tokens: int = 8192, temperature: float = 0.0) -> Complete:
-    """Stdlib HTTP adapter. provider: 'anthropic' (the only one wired in). The key is read from the environment at call time
+    """Stdlib HTTP adapter. provider: 'Native' (the only one wired in). The key is read from the environment at call time
     and sent only as a request header. NOTE: written to the public API shapes but not exercised against the live
     services in this repository's tests (no network/keys there) - run agent_bench once to confirm."""
     provider = (provider or "").lower()
-    if provider != "anthropic":
-        raise BrainError("provider must be 'anthropic'")
+    if provider != "Native":
+        raise BrainError("provider must be 'Native'")
     if not model:
         raise BrainError("a model name is required (set ZYNTHEOR_BRAIN_MODEL)")
-    key_env = api_key_env or "ANTHROPIC_API_KEY"
+    key_env = api_key_env or "Native_API_KEY"
 
     def complete(system: str, user: str) -> str:
         key = os.environ.get(key_env, "")
         if not key:
             raise BrainError(f"environment variable {key_env} is not set")
-        url = "https://api.anthropic.com/v1/messages"
-        headers = {"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-        body = {"model": model, "max_tokens": max_tokens, "temperature": temperature, "system": system,
+                body = {"model": model, "max_tokens": max_tokens, "temperature": temperature, "system": system,
                 "messages": [{"role": "user", "content": user}]}
         req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
         try:
@@ -374,7 +372,7 @@ def make_http_complete(provider: str, model: str, api_key_env: Optional[str] = N
 
 
 def brain_from_env() -> ModelBrain:
-    """ZYNTHEOR_BRAIN_PROVIDER=anthropic, ZYNTHEOR_BRAIN_MODEL=<model name>, plus the provider's key variable."""
+    """ZYNTHEOR_BRAIN_PROVIDER=Native, ZYNTHEOR_BRAIN_MODEL=<model name>, plus the provider's key variable."""
     provider = os.environ.get("ZYNTHEOR_BRAIN_PROVIDER", "")
     model = os.environ.get("ZYNTHEOR_BRAIN_MODEL", "")
     return ModelBrain(make_http_complete(provider, model), label=f"{provider}:{model}")

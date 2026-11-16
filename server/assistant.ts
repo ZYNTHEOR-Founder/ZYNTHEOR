@@ -1,12 +1,3 @@
-import {
-  GoogleGenAI,
-  ThinkingLevel,
-  Type,
-  type Content,
-  type FunctionDeclaration,
-  type GenerateContentResponse,
-  type Part,
-} from '@google/genai';
 import { buildTruthDashboardSnapshot } from '../lib/DashboardTruth';
 import { ConnectivityMonitor } from '../lib/ConnectivityMonitor';
 import { KnowledgeWorkspace } from '../lib/KnowledgeWorkspace';
@@ -21,7 +12,7 @@ import {
   type BrainCycleTrace,
 } from './assistantBrainCore';
 
-const ASSISTANT_MODEL = 'gemini-4-hydrogen';
+const ASSISTANT_MODEL = 'zyntheor-native-core';
 
 export type AssistantThinkingMode = 'fast' | 'balanced' | 'deep';
 
@@ -201,28 +192,13 @@ const VALID_MODULE_IDS = new Set([
   'admin_console',
 ]);
 
-let cachedClient: GoogleGenAI | null = null;
+let cachedClient: any | null = null;
 let cachedKey: string | undefined;
 
-function getAssistantClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) return null;
-  if (!cachedClient || cachedKey !== apiKey) {
-    cachedKey = apiKey;
-    cachedClient = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-  }
-  return cachedClient;
-}
+
 
 export function isAssistantConfigured(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY?.trim());
+  return Boolean(process.env.ZYNTHEOR_BRAIN_API_KEY?.trim());
 }
 
 export function getAssistantModelName(): string {
@@ -721,7 +697,7 @@ function buildSystemInstruction(
       : '';
 
   return [
-    'You are the upgraded built-in AI Assistant (ผู้ช่วย AI อัจฉริยะ) powered by ZYNTHEOR AssistantBrainCore (แกนสมองผู้ช่วย: CognitiveContextEngine + AdaptiveReasoningEngine + NativeMemoryController + AutonomousPlanner + Gemini Neural Slot).',
+    'You are the upgraded built-in AI Assistant (ผู้ช่วย AI อัจฉริยะ) powered by ZYNTHEOR AssistantBrainCore (แกนสมองผู้ช่วย: CognitiveContextEngine + AdaptiveReasoningEngine + NativeMemoryController + AutonomousPlanner).',
     'You have real server-side tools for Phase 6 Autonomous Execution & Verification: write_workspace_file (write files inside jailed /workspace), run_terminal_command (execute allowlisted python3/node/test commands inside /workspace with no shell), execute_python_sandbox (isolated Python sandbox execution), search_internet (live web search), inspect_workspace_files (list/read /workspace), get_system_telemetry, search_knowledge_hub, inspect_audit_ledger, recall_or_store_assistant_memory, run_adaptive_reasoning, decompose_execution_plan, and propose_ui_action.',
     'When asked to create code, run tests, verify implementations, or research external facts autonomously (with verified developer/operator/admin authorization), follow the write -> run test -> inspect error -> self-repair loop directly using write_workspace_file, run_terminal_command, execute_python_sandbox, and search_internet instead of asking the user to manually copy-paste commands. If RBAC rejects a write/exec tool because the caller is unauthenticated/guest, inform the user clearly without fabricating execution.',
     'When the user asks about current system health, blockers, metrics, audit records, knowledge documents, or workspace files, proactively call the relevant tool instead of guessing.',
@@ -1084,37 +1060,37 @@ export async function executeLocalTool(
   }
 }
 
-function formatGeminiAssistantError(err: any, lang: 'th' | 'en'): Error {
+function formatAssistantError(err: any, lang: 'th' | 'en'): Error {
   const raw = String(err?.message || err || 'AI Assistant request failed.');
   const status = typeof err?.status === 'number' ? err.status : 0;
 
   if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(raw)) {
     return new Error(
       lang === 'th'
-        ? 'โควตาการใช้งาน Gemini API เต็มหรือเกินขีดจำกัด (429 RESOURCE_EXHAUSTED) โดยเฉพาะฟีเจอร์ค้นเว็บ (Web + URL) อาจต้องใช้คีย์แบบชำระเงิน กรุณาปิดโหมด Web + URL ชั่วคราว หรือตรวจสอบคีย์ที่ Settings > Secrets'
-        : 'Gemini API quota exceeded (429 RESOURCE_EXHAUSTED). Search grounding may require a billing-enabled key—disable Web + URL or select a billing-enabled API key in Settings > Secrets.'
+        ? 'โควตาการใช้งาน ZYNTHEOR API เต็มหรือเกินขีดจำกัด (429 RESOURCE_EXHAUSTED) โดยเฉพาะฟีเจอร์ค้นเว็บ (Web + URL) อาจต้องใช้คีย์แบบชำระเงิน กรุณาปิดโหมด Web + URL ชั่วคราว หรือตรวจสอบคีย์ที่ Settings > Secrets'
+        : 'ZYNTHEOR API quota exceeded (429 RESOURCE_EXHAUSTED). Search grounding may require a billing-enabled key—disable Web + URL or select a billing-enabled API key in Settings > Secrets.'
     );
   }
   if (status === 403 || status === 400 || /PERMISSION_DENIED|API_KEY_INVALID/i.test(raw)) {
     return new Error(
       lang === 'th'
-        ? 'คีย์ Gemini API ไม่ถูกต้องหรือไม่มีสิทธิ์ใช้งาน กรุณาตรวจสอบหรือเลือกคีย์ใหม่ในแผง Settings > Secrets'
-        : 'Gemini API key invalid or permission denied. Please check your API key in Settings > Secrets.'
+        ? 'คีย์ ZYNTHEOR API ไม่ถูกต้องหรือไม่มีสิทธิ์ใช้งาน กรุณาตรวจสอบหรือเลือกคีย์ใหม่ในแผง Settings > Secrets'
+        : 'ZYNTHEOR API key invalid or permission denied. Please check your API key in Settings > Secrets.'
     );
   }
   if (status === 404 || /NOT_FOUND/i.test(raw)) {
     return new Error(
       lang === 'th'
         ? 'ไม่พบโมเดลที่เรียกใช้งาน (404 NOT_FOUND) กรุณาตรวจสอบชื่อโมเดลบนเซิร์ฟเวอร์'
-        : 'Requested Gemini model was not found (404 NOT_FOUND).'
+        : 'Requested ZYNTHEOR model was not found (404 NOT_FOUND).'
     );
   }
   return new Error(raw);
 }
 
 async function generateWithRetry(
-  ai: GoogleGenAI,
-  params: Parameters<GoogleGenAI['models']['generateContent']>[0],
+  ai: any,
+  params: Parameters<any['models']['generateContent']>[0],
   lang: 'th' | 'en',
   maxAttempts = 2
 ): Promise<GenerateContentResponse> {
@@ -1127,12 +1103,12 @@ async function generateWithRetry(
       const status = typeof err?.status === 'number' ? err.status : 0;
       const isTransient = status === 503 || status === 500 || /timeout|ECONNRESET|ETIMEDOUT/i.test(String(err?.message || ''));
       if (!isTransient || attempt === maxAttempts) {
-        throw formatGeminiAssistantError(err, lang);
+        throw formatAssistantError(err, lang);
       }
       await new Promise((r) => setTimeout(r, 400 * attempt));
     }
   }
-  throw formatGeminiAssistantError(lastError, lang);
+  throw formatAssistantError(lastError, lang);
 }
 
 function extractGroundingSources(response: GenerateContentResponse): AssistantGroundingSource[] {
@@ -1170,7 +1146,7 @@ export async function runUpgradedAssistant(params: {
   const ai = getAssistantClient();
   if (!ai) {
     throw new Error(
-      'GEMINI_API_KEY is not configured on the server. Please attach a Gemini API key in Settings > Secrets.'
+      'ZYNTHEOR_BRAIN_API_KEY is not configured on the server. Please attach a ZYNTHEOR API key in Settings > Secrets.'
     );
   }
 
@@ -1285,7 +1261,7 @@ export async function runUpgradedAssistant(params: {
   const useHybridBuiltIns = Boolean(params.webGrounding);
 
   const tools: Array<Record<string, unknown>> = [
-    ...(useHybridBuiltIns ? [{ googleSearch: {} }] : []),
+    ...(useHybridBuiltIns ? [{ zyntheorSearch: {} }] : []),
     ...(useHybridBuiltIns && hasUrlInMessage ? [{ urlContext: {} }] : []),
     { functionDeclarations: ASSISTANT_FUNCTION_DECLARATIONS },
   ];
