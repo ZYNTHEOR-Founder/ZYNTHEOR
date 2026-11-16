@@ -816,7 +816,7 @@ export const KnowledgeHub: React.FC = () => {
                     <>
                       <button
                         onClick={handleUpdateDocument}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--z-ok)] hover:bg-[var(--z-ok)] transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#07101E] bg-[var(--z-ok)] hover:opacity-90 transition-colors cursor-pointer"
                       >
                         {lang === 'th' ? 'บันทึกการแก้ไข' : 'Save Changes'}
                       </button>

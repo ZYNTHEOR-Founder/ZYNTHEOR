@@ -78,17 +78,17 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
       case 'PLANNER':
-        return 'bg-[var(--app-accent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]';
       case 'CODER':
-        return 'bg-[var(--app-accent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]';
       case 'REVIEWER':
-        return 'bg-[var(--app-accent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]';
       case 'TESTER':
-        return 'bg-[var(--z-ok)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_60%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]';
       case 'COMMERCIAL':
-        return 'bg-[var(--app-amber)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_60%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_45%,transparent)]';
       case 'EVOLVER':
-        return 'bg-[var(--z-danger)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_60%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)]';
       default:
         return 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)]';
     }

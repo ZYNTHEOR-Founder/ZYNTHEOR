@@ -76,8 +76,8 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
         <span
           className={`px-2.5 py-1 rounded-md text-[10px] font-bold font-mono border ${
             withinBudget
-              ? 'bg-[color-mix(in_srgb,var(--z-ok)_60%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
-              : 'bg-[color-mix(in_srgb,var(--app-amber)_60%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
+              ? 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+              : 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
           }`}
         >
           {withinBudget ? 'BOUNDED OK' : 'NEAR BUDGET'}

@@ -41,7 +41,7 @@ interface ConfigAuditEntry {
 
 export const UserSettings: React.FC = () => {
   const { lang } = useLanguage();
-  const { role, setRole, session } = useAuth();
+  const { role, setRole, session, isAuthenticated, devAccessEnabled, authError, loginWithGoogle, logout } = useAuth();
   const [activeSection, setActiveSection] = useState<ControlSection>('appearance');
   const [tenantName, setTenantName] = useState(session.tenantId);
   const [memoryRetention, setMemoryRetention] = useState('infinite');
@@ -107,52 +107,85 @@ export const UserSettings: React.FC = () => {
         }
         gradientAccent="emerald"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--app-text-secondary)]">
-              {lang === 'th' ? 'สิทธิ์การเข้าถึง (RBAC):' : 'Active Role:'}
-            </span>
-            {(['User', 'Developer', 'Administrator'] as ControlRole[]).map((r) => (
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                key={r}
                 type="button"
-                onClick={() => setRole(r)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
-                  role === r
-                    ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[var(--app-accent)]'
-                    : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
-                }`}
+                onClick={() => void loginWithGoogle()}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer transition-colors"
               >
-                {r}
+                Continue with Google
               </button>
-            ))}
+              {devAccessEnabled && (
+                <>
+                  <span className="text-xs font-semibold text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'สิทธิ์การเข้าถึง (Dev Access):' : 'Dev Role:'}
+                  </span>
+                  {(['User', 'Developer', 'Administrator'] as ControlRole[]).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                        role === r && isAuthenticated
+                          ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[var(--app-accent)]'
+                          : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </>
+              )}
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-[var(--app-surface)] text-[var(--z-danger)] border border-[var(--app-card-border)] hover:border-[var(--z-danger)] cursor-pointer"
+                >
+                  Sign out
+                </button>
+              )}
+            </div>
+
+            {/* Security Invariant Badges (Protected Semantic Colors) */}
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+              {session.authMode === 'development' && (
+                <span className="px-2.5 py-1 rounded-md font-bold bg-[color-mix(in_srgb,var(--app-amber)_16%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]">
+                  DEV ACCESS
+                </span>
+              )}
+              <span
+                className="px-2.5 py-1 rounded-md font-bold flex items-center gap-1"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--z-ok) 14%, transparent)',
+                  color: 'var(--status-verified)',
+                  border: '1px solid color-mix(in srgb, var(--z-ok) 40%, transparent)'
+                }}
+              >
+                <CheckCircle2 className="w-3 h-3" />
+                SOVEREIGNTY: {sovereigntyStatus}
+              </span>
+              <span
+                className="px-2.5 py-1 rounded-md font-bold flex items-center gap-1"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--z-danger) 14%, transparent)',
+                  color: 'var(--status-blocked)',
+                  border: '1px solid color-mix(in srgb, var(--z-danger) 40%, transparent)'
+                }}
+              >
+                <Lock className="w-3 h-3" />
+                EXTERNAL AI: BLOCKED
+              </span>
+            </div>
           </div>
 
-          {/* Security Invariant Badges (Protected Semantic Colors) */}
-          <div className="flex items-center gap-2 text-[11px] font-mono">
-            <span
-              className="px-2.5 py-1 rounded-md font-bold flex items-center gap-1"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--z-ok) 14%, transparent)',
-                color: 'var(--status-verified)',
-                border: '1px solid color-mix(in srgb, var(--z-ok) 40%, transparent)'
-              }}
-            >
-              <CheckCircle2 className="w-3 h-3" />
-              SOVEREIGNTY: {sovereigntyStatus}
-            </span>
-            <span
-              className="px-2.5 py-1 rounded-md font-bold flex items-center gap-1"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--z-danger) 14%, transparent)',
-                color: 'var(--status-blocked)',
-                border: '1px solid color-mix(in srgb, var(--z-danger) 40%, transparent)'
-              }}
-            >
-              <Lock className="w-3 h-3" />
-              EXTERNAL AI: BLOCKED
-            </span>
-          </div>
+          {authError && (
+            <div className="p-2.5 rounded-lg text-xs font-mono text-[var(--z-danger)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_35%,transparent)]">
+              Auth notice: {authError}
+            </div>
+          )}
         </div>
       </VividCard>
 

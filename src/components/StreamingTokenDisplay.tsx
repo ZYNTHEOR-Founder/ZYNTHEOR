@@ -203,7 +203,7 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
               <span className="font-bold">
                 {lang === 'th' ? 'ลำดับการให้เหตุผลของสมองโมเดล (Reasoning Chain)' : 'Native Model Reasoning Chain'}
               </span>
-              <span className="px-2 py-0.5 rounded-md bg-[color-mix(in_srgb,var(--app-accent)_70%,transparent)] dark:bg-[color-mix(in_srgb,var(--app-accent)_50%,transparent)] text-[10px] font-mono text-[var(--app-accent)] dark:text-[var(--app-accent)] font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)] text-[10px] font-mono text-[var(--app-accent)] font-bold">
                 {reasoningSteps.length} {lang === 'th' ? 'ขั้นตอน' : 'Steps'}
               </span>
             </div>
@@ -284,9 +284,9 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
               return (
                 <div
                   key={section.id}
-                  className="rounded-xl overflow-hidden border border-[var(--app-card-border)] bg-[var(--app-accent)] text-[var(--app-text-primary)] my-2"
+                  className="rounded-xl overflow-hidden border border-[var(--app-card-border)] bg-[var(--app-bg)] text-[var(--app-text-primary)] my-2"
                 >
-                  <div className="px-4 py-1.5 bg-[var(--app-accent)] border-b border-[var(--app-card-border)] flex items-center justify-between text-[11px] font-mono text-[var(--app-text-secondary)]">
+                  <div className="px-4 py-1.5 bg-[var(--app-surface)] border-b border-[var(--app-card-border)] flex items-center justify-between text-[11px] font-mono text-[var(--app-text-secondary)]">
                     <span className="flex items-center gap-1.5 text-[var(--app-accent)]">
                       <Terminal className="w-3.5 h-3.5" />
                       {section.lang}

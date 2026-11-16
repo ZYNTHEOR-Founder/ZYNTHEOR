@@ -326,6 +326,9 @@ export const ResearchLab: React.FC = () => {
             <p>
               Native model evaluation, grounded Knowledge Workspace retrieval, and Adaptive Reasoning verification remain strictly separated from unverified hypotheses.
             </p>
+            <p className="text-[var(--app-text-secondary)]">
+              No PDF export is offered here until a real report-generation endpoint exists.
+            </p>
             {investigation?.reasoning && (
               <pre className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[11px] font-mono overflow-auto">
                 {JSON.stringify(investigation.reasoning, null, 2)}

@@ -158,7 +158,7 @@ export const AgentExecutionAudit: React.FC = () => {
         </div>
 
         {selectedRecord && verification && (
-          <div className="p-4 rounded-xl bg-[var(--z-ok)] border border-[var(--app-card-border)] space-y-2">
+          <div className="p-4 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs font-bold text-[var(--app-text-primary)]">
                 {verification.chainLinked ? (

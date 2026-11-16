@@ -377,7 +377,7 @@ export const ConversationalIntelligence: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 gap-2">
                         {msg.citations.map((cite, cIdx) => (
-                          <div key={cIdx} className="p-2.5 rounded-xl bg-[var(--app-accent)] border border-[var(--z-ok)] text-xs space-y-1">
+                          <div key={cIdx} className="p-2.5 rounded-xl bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] text-xs space-y-1">
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <span className="font-semibold text-[var(--z-ok)] truncate flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--z-ok)]" />
@@ -392,7 +392,7 @@ export const ConversationalIntelligence: React.FC = () => {
                                 </span>
                               </div>
                             </div>
-                            <p className="text-[11px] text-[var(--app-text-secondary)] italic line-clamp-2 bg-[var(--z-ok)] p-2 rounded-lg border border-[var(--app-surface-elevated)]">
+                            <p className="text-[11px] text-[var(--app-text-secondary)] italic line-clamp-2 bg-[var(--app-bg)] p-2 rounded-lg border border-[var(--app-card-border)]">
                               "{cite.snippet}"
                             </p>
                           </div>

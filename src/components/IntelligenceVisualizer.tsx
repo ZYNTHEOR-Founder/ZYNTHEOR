@@ -119,7 +119,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
         </div>
 
         {/* Live SVG Neural Transformer Architecture Visualizer */}
-        <div className="relative p-5 rounded-2xl bg-[var(--app-accent)] border border-[var(--app-card-border)] overflow-hidden shadow-inner">
+        <div className="relative p-5 rounded-2xl bg-[var(--app-bg)] border border-[var(--app-card-border)] overflow-hidden shadow-inner">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Brain className="w-4 h-4 text-[var(--app-accent)] animate-pulse" />
@@ -127,7 +127,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
                 {lang === 'th' ? 'โครงข่ายการประมวลผลหมอกเวกเตอร์ (Latent Manifold Projection)' : '10-Layer Transformer & Synaptic Attention Manifold'}
               </span>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-[color-mix(in_srgb,var(--app-accent)_80%,transparent)] text-[var(--app-accent)] text-[10px] font-mono border border-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] text-[var(--app-accent)] text-[10px] font-mono border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)] font-bold">
               {weightsLoaded ? 'CHECKPOINT LOADED' : 'TARGET SPECIFICATION'}
             </span>
           </div>

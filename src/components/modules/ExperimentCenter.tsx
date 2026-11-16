@@ -110,7 +110,7 @@ export const ExperimentCenter: React.FC = () => {
           gradientAccent="energy"
         >
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between p-4 bg-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_60%,transparent)] rounded-xl">
+            <div className="flex flex-wrap items-center justify-between p-4 bg-[color-mix(in_srgb,var(--z-ok)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] rounded-xl">
               <div>
                 <span className="text-xs font-semibold text-[var(--z-ok)]">Capability Benchmark Delta</span>
                 <div className="text-2xl font-black font-mono text-[var(--z-ok)]">

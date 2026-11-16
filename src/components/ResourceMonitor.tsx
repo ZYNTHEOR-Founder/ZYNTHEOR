@@ -61,7 +61,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
               <Cpu className="w-3.5 h-3.5 text-[var(--z-ok)]" /> System Load Avg
             </span>
-            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${loadRatio > 100 ? 'bg-[color-mix(in_srgb,var(--app-amber)_40%,transparent)] text-[var(--app-amber)]' : 'bg-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] text-[var(--z-ok)]'}`}>
+            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${loadRatio > 100 ? 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_35%,transparent)]' : 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_35%,transparent)]'}`}>
               {loadRatio > 100 ? 'SATURATED' : 'NOMINAL'}
             </span>
           </div>
@@ -81,7 +81,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
               <Server className="w-3.5 h-3.5 text-[var(--app-accent)]" /> Process Heap
             </span>
-            <span className="text-[10px] text-[var(--app-accent)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]">
+            <span className="text-[10px] text-[var(--app-accent)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)]">
               NODE RSS
             </span>
           </div>
@@ -101,7 +101,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
               <HardDrive className="w-3.5 h-3.5 text-[var(--app-accent)]" /> Host Memory
             </span>
-            <span className="text-[10px] text-[var(--app-accent)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]">
+            <span className="text-[10px] text-[var(--app-accent)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)]">
               PHYSICAL
             </span>
           </div>
@@ -120,7 +120,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
               <Zap className="w-3.5 h-3.5 text-[var(--app-amber)]" /> Measured Speed
             </span>
-            <span className="text-[10px] text-[var(--z-ok)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]">
+            <span className="text-[10px] text-[var(--z-ok)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] border border-[color-mix(in_srgb,var(--z-ok)_35%,transparent)]">
               FIRST-PARTY
             </span>
           </div>
@@ -203,38 +203,51 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--app-accent)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="var(--app-accent)" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#FF9A3C" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#FF9A3C" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorHeap" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--app-accent)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="var(--app-accent)" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#00F0FF" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#00F0FF" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorRss" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--app-accent)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="var(--app-accent)" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#CCFF00" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorRam" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--app-amber)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="var(--app-amber)" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#FF426D" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#FF426D" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--app-accent)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--app-card-border)" strokeOpacity={0.5} />
               <XAxis
                 dataKey="timeLabel"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: '#64748B' }}
+                tick={{ fontSize: 10, fill: '#94A3B8' }}
               />
               <YAxis
+                yAxisId="mb"
+                width={42}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: '#64748B' }}
+                tick={{ fontSize: 10, fill: '#94A3B8' }}
               />
+              {activeMetric === 'all' && (
+                <YAxis
+                  yAxisId="load"
+                  orientation="right"
+                  width={34}
+                  tickLine={false}
+                  axisLine={false}
+                  domain={[0, (max: number) => Math.max(cpuCores, Math.ceil((max || 0) * 1.2))]}
+                  tick={{ fontSize: 10, fill: '#FF9A3C' }}
+                />
+              )}
               <Tooltip content={<CustomTooltip />} />
               <Legend
                 verticalAlign="top"
@@ -245,11 +258,13 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
 
               {(activeMetric === 'all' || activeMetric === 'load') && (
                 <Area
+                  yAxisId={activeMetric === 'all' ? 'load' : 'mb'}
                   type="monotone"
                   dataKey="loadAvg1m"
                   name="Load Avg (1m)"
-                  stroke="var(--app-accent)"
+                  stroke="#FF9A3C"
                   strokeWidth={2}
+                  isAnimationActive={false}
                   fillOpacity={1}
                   fill="url(#colorLoad)"
                 />
@@ -257,11 +272,13 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
 
               {(activeMetric === 'all' || activeMetric === 'process_memory') && (
                 <Area
+                  yAxisId="mb"
                   type="monotone"
                   dataKey="processHeapUsedMb"
                   name="Heap Used (MB)"
-                  stroke="var(--app-accent)"
+                  stroke="#00F0FF"
                   strokeWidth={2}
+                  isAnimationActive={false}
                   fillOpacity={1}
                   fill="url(#colorHeap)"
                 />
@@ -269,11 +286,13 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
 
               {(activeMetric === 'all' || activeMetric === 'process_memory') && (
                 <Area
+                  yAxisId="mb"
                   type="monotone"
                   dataKey="processRssMb"
                   name="Process RSS (MB)"
-                  stroke="var(--app-accent)"
+                  stroke="#CCFF00"
                   strokeWidth={2}
+                  isAnimationActive={false}
                   fillOpacity={1}
                   fill="url(#colorRss)"
                 />
@@ -281,11 +300,13 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
 
               {(activeMetric === 'system_ram') && (
                 <Area
+                  yAxisId="mb"
                   type="monotone"
                   dataKey="systemRamUsedMb"
                   name="Host RAM Used (MB)"
-                  stroke="var(--app-amber)"
+                  stroke="#FF426D"
                   strokeWidth={2}
+                  isAnimationActive={false}
                   fillOpacity={1}
                   fill="url(#colorRam)"
                 />

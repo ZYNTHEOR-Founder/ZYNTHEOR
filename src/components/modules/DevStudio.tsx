@@ -445,7 +445,7 @@ export const DevStudio: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-2.5 py-1 text-[11px] font-bold text-white bg-[var(--z-ok)] rounded-lg hover:bg-[var(--z-ok)] cursor-pointer"
+                    className="px-2.5 py-1 text-[11px] font-bold text-[#07101E] bg-[var(--z-ok)] rounded-lg hover:opacity-90 cursor-pointer"
                   >
                     Create
                   </button>
@@ -685,7 +685,7 @@ export const DevStudio: React.FC = () => {
                     disabled={isSaving || !hasUnsavedChanges}
                     className={`flex items-center gap-1 text-xs px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                       hasUnsavedChanges
-                        ? 'bg-[var(--z-ok)] hover:bg-[var(--z-ok)] text-white shadow-sm'
+                        ? 'bg-[var(--z-ok)] hover:opacity-90 text-[#07101E] shadow-sm'
                         : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] opacity-60 cursor-not-allowed'
                     }`}
                   >
@@ -765,12 +765,12 @@ export const DevStudio: React.FC = () => {
                           <span
                             className={`font-bold px-1.5 py-0.2 rounded text-[10px] ${
                               ev.role === 'PLANNER'
-                                ? 'bg-[var(--z-ok)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_50%,transparent)]'
+                                ? 'bg-[color-mix(in_srgb,var(--z-ok)_16%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]'
                                 : ev.role === 'CODER'
-                                ? 'bg-[var(--app-amber)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_50%,transparent)]'
+                                ? 'bg-[color-mix(in_srgb,var(--app-amber)_16%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_45%,transparent)]'
                                 : ev.role === 'REVIEWER'
-                                ? 'bg-[var(--z-ok)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_50%,transparent)]'
-                                : 'bg-[var(--z-ok)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_50%,transparent)]'
+                                ? 'bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]'
+                                : 'bg-[color-mix(in_srgb,var(--z-ok)_16%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]'
                             }`}
                           >
                             {ev.role}

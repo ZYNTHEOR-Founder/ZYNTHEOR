@@ -4,6 +4,8 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { signInWithPopup, signOut } from 'firebase/auth';
+import { auth, googleAuthProvider } from '../lib/firebase';
 
 export type AuthRole = 'User' | 'Developer' | 'Administrator';
 
@@ -25,7 +27,11 @@ interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
   authReady: boolean;
+  devAccessEnabled: boolean;
+  authError: string | null;
+  clearAuthError: () => void;
   login: (role?: AuthRole, opts?: { userId?: string; tenantId?: string }) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   logout: () => void;
   authHeaders: () => Record<string, string>;
 }
@@ -72,11 +78,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authenticatedAt: ''
   });
   const [authReady, setAuthReady] = useState(false);
+  const [devAccessEnabled, setDevAccessEnabled] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const clearAuthError = useCallback(() => setAuthError(null), []);
 
   const applySession = useCallback((tok: string, sess: AuthSession, uiRole: AuthRole) => {
     setToken(tok);
     setSession(sess);
     setRoleState(uiRole);
+    setAuthError(null);
     try {
       localStorage.setItem(TOKEN_KEY, tok);
       localStorage.setItem(SESSION_KEY, JSON.stringify({ session: sess, role: uiRole }));
@@ -86,6 +97,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(() => {
+    const currentTok = loadStoredToken();
+    if (currentTok) {
+      void fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${currentTok}` }
+      }).catch(() => {});
+    }
+    void signOut(auth).catch(() => {});
     setToken(null);
     setRoleState('User');
     setSession({
@@ -104,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(
     async (requestedRole: AuthRole = 'User', opts?: { userId?: string; tenantId?: string }) => {
+      setAuthError(null);
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -116,20 +136,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         const data = await res.json();
         if (!res.ok || !data.success || !data.token) {
+          setAuthError(data?.error || data?.code || `Sign in failed (HTTP ${res.status})`);
           logout();
           return false;
         }
         const sess: AuthSession = {
           userId: data.session.userId,
-          email: '',
+          email: data.session.email || '',
           tenantId: data.session.tenantId,
           authenticatedAt: data.session.authenticatedAt,
           sovereignRole: data.session.sovereignRole,
+          authMode: data.session.authMode || 'development',
           exp: data.expiresAt
         };
         applySession(data.token, sess, data.session.role as AuthRole);
         return true;
-      } catch {
+      } catch (err: any) {
+        setAuthError(err?.message || 'Network error during authentication');
         logout();
         return false;
       }
@@ -137,10 +160,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [applySession, logout]
   );
 
-  // Bootstrap: validate stored token or obtain a fresh session
+  const loginWithGoogle = useCallback(async () => {
+    setAuthError(null);
+    try {
+      const cred = await signInWithPopup(auth, googleAuthProvider);
+      const idToken = await cred.user.getIdToken();
+      const res = await fetch('/api/auth/firebase-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`
+        }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.token) {
+        setAuthError(data?.error || `Firebase session failed (HTTP ${res.status})`);
+        return false;
+      }
+      const sess: AuthSession = {
+        userId: data.session.userId,
+        email: data.session.email || cred.user.email || '',
+        tenantId: data.session.tenantId,
+        authenticatedAt: data.session.authenticatedAt,
+        sovereignRole: data.session.sovereignRole,
+        authMode: data.session.authMode || 'firebase',
+        exp: data.expiresAt
+      };
+      applySession(data.token, sess, data.session.role as AuthRole);
+      return true;
+    } catch (err: any) {
+      const code = String(err?.code || '');
+      const msg =
+        code === 'auth/popup-blocked'
+          ? 'Google sign-in popup was blocked by your browser. Allow popups or open the app in a new tab.'
+          : code === 'auth/popup-closed-by-user'
+          ? 'Google sign-in window was closed before completing authentication.'
+          : code === 'auth/unauthorized-domain'
+          ? `Domain ${typeof window !== 'undefined' ? window.location.hostname : ''} is not authorized for Firebase OAuth popup.`
+          : err?.code || err?.message || 'Google sign-in failed';
+      setAuthError(msg);
+      return false;
+    }
+  }, [applySession]);
+
+  // Bootstrap: detect auth mode and validate stored token if present
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      try {
+        const modeRes = await fetch('/api/auth/mode');
+        if (modeRes.ok) {
+          const modeData = await modeRes.json();
+          if (!cancelled) {
+            setDevAccessEnabled(Boolean(modeData?.devAccessEnabled));
+          }
+        }
+      } catch {
+        /* ignore mode probe failure */
+      }
+
       const existing = loadStoredToken();
       if (existing) {
         try {
@@ -150,12 +228,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.session && !cancelled) {
+              let storedEmail = '';
+              let storedAuthMode: string | undefined = undefined;
+              try {
+                const rawMeta = localStorage.getItem(SESSION_KEY);
+                if (rawMeta) {
+                  const parsed = JSON.parse(rawMeta);
+                  storedEmail = parsed?.session?.email || '';
+                  storedAuthMode = parsed?.session?.authMode;
+                }
+              } catch {
+                /* ignore */
+              }
               const sess: AuthSession = {
                 userId: data.session.userId,
-                email: '',
+                email: data.session.email || storedEmail,
                 tenantId: data.session.tenantId,
                 authenticatedAt: new Date((data.session.iat || 0) * 1000).toISOString(),
                 sovereignRole: data.session.sovereignRole,
+                authMode: data.session.authMode || storedAuthMode,
                 exp: data.session.exp
               };
               applySession(existing, sess, data.session.role as AuthRole);
@@ -164,20 +255,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         } catch {
-          /* fall through to login */
+          /* fall through to signed-out state */
         }
       }
-      // Never bootstrap a privileged identity. A user must complete an explicit
-      // sign-in flow before the application receives an authenticated session.
+      // Never bootstrap a privileged identity automatically.
       if (!cancelled) {
-        logout();
+        setToken(null);
+        setRoleState('User');
+        setSession({
+          userId: 'anonymous',
+          email: '',
+          tenantId: '',
+          authenticatedAt: ''
+        });
         setAuthReady(true);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [applySession, login]);
+  }, [applySession]);
 
   /** UI role switcher: re-login to obtain a token with the requested role (server-issued). */
   const setRole = useCallback(
@@ -202,11 +299,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       token,
       isAuthenticated: Boolean(token),
       authReady,
+      devAccessEnabled,
+      authError,
+      clearAuthError,
       login,
+      loginWithGoogle,
       logout,
       authHeaders
     }),
-    [role, setRole, session, token, authReady, login, logout, authHeaders]
+    [role, setRole, session, token, authReady, devAccessEnabled, authError, clearAuthError, login, loginWithGoogle, logout, authHeaders]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

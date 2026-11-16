@@ -13,6 +13,7 @@ interface HeaderProps {
   onRefreshStatus: () => void;
   isRefreshing: boolean;
   onOpenShortcuts?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,7 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenQuickTask,
   onRefreshStatus,
   isRefreshing,
-  onOpenShortcuts
+  onOpenShortcuts,
+  onOpenSettings
 }) => {
   const { t, lang } = useLanguage();
   const { session, role, isAuthenticated } = useAuth();
@@ -69,36 +71,38 @@ export const Header: React.FC<HeaderProps> = ({
       : t('badge.private_beta');
 
   return (
-    <header className="h-16 px-4 md:px-8 bg-[color-mix(in_srgb,var(--app-surface)_85%,transparent)] backdrop-blur-md border-b border-[var(--app-card-border)] sticky top-0 z-30 flex items-center justify-between gap-4 transition-colors duration-200">
+    <header className="h-16 px-3 sm:px-4 md:px-8 bg-[color-mix(in_srgb,var(--app-surface)_85%,transparent)] backdrop-blur-md border-b border-[var(--app-card-border)] sticky top-0 z-30 flex items-center justify-between gap-2 sm:gap-4 transition-colors duration-200">
       {/* Left: Mobile Toggle & Breadcrumbs */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         <button
           onClick={onToggleMobile}
-          className="lg:hidden p-2 rounded-xl text-[var(--app-text-secondary)] hover:bg-[var(--app-surface-elevated)] dark:hover:bg-[var(--app-surface)] transition-colors"
+          className="lg:hidden p-2 rounded-xl text-[var(--app-text-secondary)] hover:bg-[var(--app-surface-elevated)] dark:hover:bg-[var(--app-surface)] transition-colors shrink-0"
           aria-label="Toggle menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 text-sm">
-          <span className="font-semibold text-[var(--app-text-secondary)] hidden sm:inline">{t('nav.ecosystem')}</span>
-          <span className="text-[var(--app-text-secondary)] dark:text-[var(--app-text-primary)] hidden sm:inline">/</span>
-          <h1 className="font-bold text-[var(--app-text-primary)] text-base md:text-lg tracking-tight whitespace-nowrap">
+        <div className="flex items-center gap-2 text-sm min-w-0 flex-1">
+          <span className="font-semibold text-[var(--app-text-secondary)] hidden sm:inline shrink-0">{t('nav.ecosystem')}</span>
+          <span className="text-[var(--app-text-secondary)] dark:text-[var(--app-text-primary)] hidden sm:inline shrink-0">/</span>
+          <h1 className="font-bold text-[var(--app-text-primary)] text-sm sm:text-base md:text-lg tracking-tight truncate">
             {getModuleTitle(activeModule)}
           </h1>
         </div>
       </div>
 
       {/* Right: Actions, Language Toggle, Sovereign Indicator & Quick Task CTA */}
-      <div className="flex items-center gap-3">
-        {/* Session Health Indicator */}
-        <div
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] tabular-nums"
-          title={hasValidSessionTime ? `Session (${role}): ${remainingMin}m remaining` : 'No active authenticated session'}
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        {/* Session Health & Role Indicator (clickable on mobile and desktop) */}
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] hover:border-[var(--app-accent)] tabular-nums cursor-pointer transition-colors whitespace-nowrap shrink-0"
+          title={hasValidSessionTime ? `Session (${role}): ${remainingMin}m remaining · Tap to manage role` : 'No active authenticated session · Tap to sign in'}
         >
-          <Clock className={`w-3.5 h-3.5 ${sessionHealthColor}`} />
-          <span>{hasValidSessionTime ? `${remainingMin}m` : 'Guest'}</span>
-        </div>
+          <Clock className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 ${sessionHealthColor}`} />
+          <span>{hasValidSessionTime ? `${role === 'Administrator' ? 'Admin' : role === 'Developer' ? 'Dev' : 'User'} · ${remainingMin}m` : 'Sign in'}</span>
+        </button>
 
         {/* Dedicated Language Switcher Component */}
         <LanguageSwitcher variant="compact" />

@@ -3,7 +3,7 @@
  * 100% First-Party Sovereign AI Operating Platform
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ModuleId, SystemStatusData, OrchestrationEvent } from './types';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -30,14 +30,141 @@ import { GovernanceSecurity } from './components/modules/GovernanceSecurity';
 import { UserSettings } from './components/modules/UserSettings';
 import { AdminConsole } from './components/modules/AdminConsole';
 
-import { Terminal, X, Play, ShieldCheck, ShieldAlert, CheckCircle2, Copy, Check, Download, Search, Volume2, VolumeX, RotateCcw, Trash2, WrapText, FileJson, Printer, Camera, History, CheckSquare, Keyboard, PanelRightClose, PanelRightOpen, Activity, Database, LockKeyhole, Network, Sparkles } from 'lucide-react';
+import { Terminal, X, Play, ShieldCheck, ShieldAlert, CheckCircle2, Copy, Check, Download, Search, Volume2, VolumeX, RotateCcw, Trash2, WrapText, FileJson, FileText, FileSpreadsheet, ChevronDown, Printer, Camera, History, CheckSquare, Keyboard, PanelRightClose, PanelRightOpen, Activity, Database, LockKeyhole, Network, Sparkles, Layers, LogIn, Settings, Regex, AlertCircle } from 'lucide-react';
+
+type LogSemanticCategory = 'I/O' | 'Computation' | 'Authentication' | 'System';
+
+const SEMANTIC_CATEGORY_ORDER: LogSemanticCategory[] = ['Authentication', 'I/O', 'Computation', 'System'];
+
+function classifyLogSemanticFunction(entry: string): LogSemanticCategory {
+  if (/\b(auth|oauth|login|logout|token|jwt|session|rbac|role|permission|credential|firebase|tenant|secret|unauthorized|forbidden|401|403|verify_id_token|identity)\b/i.test(entry)) {
+    return 'Authentication';
+  }
+  if (/\b(fetch|http|https|request|response|stream|read|write|file|disk|storage|upload|download|export|import|socket|db|database|sql|sqlite|firestore|save|load|network|api|endpoint|cache|json|csv|markdown)\b|\/api\//i.test(entry)) {
+    return 'I/O';
+  }
+  if (/\b(compute|calculate|eval|matrix|tensor|loss|grad|gradient|step|epoch|train|infer|inference|embed|vector|reason|plan|architect|coder|debugger|tester|exitcode|compile|build|lint|parse|hash|sha-256|sha256|benchmark|score|tokenize|algorithm|sort|lru)\b|^\[(?:CODER|TESTER|ARCHITECT|DEBUGGER)\]/i.test(entry)) {
+    return 'Computation';
+  }
+  return 'System';
+}
+
+function getSemanticCategoryBadgeClass(category: LogSemanticCategory): string {
+  switch (category) {
+    case 'I/O':
+      return 'bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]';
+    case 'Computation':
+      return 'bg-[color-mix(in_srgb,var(--app-amber)_16%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]';
+    case 'Authentication':
+      return 'bg-[color-mix(in_srgb,var(--z-danger)_16%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]';
+    case 'System':
+    default:
+      return 'bg-[color-mix(in_srgb,var(--z-ok)_16%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]';
+  }
+}
+
+function compileLogSearchRegex(query: string): { regex: RegExp | null; error: string | null } {
+  if (!query.trim()) return { regex: null, error: null };
+  try {
+    const trimmed = query.trim();
+    const literalMatch = trimmed.match(/^\/(.+)\/([dgimsuvy]*)$/);
+    if (literalMatch) {
+      const [, pattern, rawFlags] = literalMatch;
+      const safeFlags = rawFlags.replace(/[gy]/g, '');
+      return { regex: new RegExp(pattern, safeFlags), error: null };
+    }
+    return { regex: new RegExp(query, 'i'), error: null };
+  } catch (err) {
+    return {
+      regex: null,
+      error: err instanceof Error ? err.message : 'Invalid regular expression'
+    };
+  }
+}
+
+function escapeRegExpLiteral(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function renderMatchHighlights(
+  fragment: string,
+  highlightRegex: RegExp | null | undefined,
+  theme: 'emerald_dark' | 'high_contrast',
+  keyPrefix: string
+): React.ReactNode {
+  if (!fragment || !highlightRegex) return fragment;
+  const globalFlags = highlightRegex.flags.includes('g')
+    ? highlightRegex.flags
+    : `${highlightRegex.flags}g`;
+  let matcher: RegExp;
+  try {
+    matcher = new RegExp(highlightRegex.source, globalFlags);
+  } catch {
+    return fragment;
+  }
+
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let matchCount = 0;
+
+  while ((match = matcher.exec(fragment)) !== null && matchCount < 200) {
+    if (match[0].length === 0) {
+      if (matcher.lastIndex >= fragment.length) break;
+      matcher.lastIndex += 1;
+      continue;
+    }
+    if (match.index > lastIndex) {
+      nodes.push(
+        <React.Fragment key={`${keyPrefix}-t-${matchCount}`}>
+          {fragment.slice(lastIndex, match.index)}
+        </React.Fragment>
+      );
+    }
+    nodes.push(
+      <mark
+        key={`${keyPrefix}-m-${matchCount}`}
+        className={
+          theme === 'high_contrast'
+            ? 'bg-[var(--app-text-primary)] text-[var(--app-bg)] font-bold px-0.5 rounded-sm'
+            : 'bg-[color-mix(in_srgb,var(--app-accent)_28%,transparent)] text-[var(--app-text-primary)] border-b border-[var(--app-accent)] px-0.5 rounded-sm'
+        }
+      >
+        {match[0]}
+      </mark>
+    );
+    lastIndex = match.index + match[0].length;
+    matchCount += 1;
+  }
+
+  if (matchCount === 0) return fragment;
+  if (lastIndex < fragment.length) {
+    nodes.push(
+      <React.Fragment key={`${keyPrefix}-tail`}>
+        {fragment.slice(lastIndex)}
+      </React.Fragment>
+    );
+  }
+  return nodes;
+}
+
+const REGEX_SEARCH_PRESETS: Array<{ label: string; pattern: string }> = [
+  { label: '[ERROR] [auth]', pattern: '\\[ERROR\\]\\s*\\[auth\\]' },
+  { label: 'Stack traces', pattern: '(?:at\\s+.+:\\d+|Traceback|File\\s+".+",\\s+line\\s+\\d+)' },
+  { label: 'Non-zero / Fail', pattern: '(?:ERROR|FATAL|Exception|exitCode:\\s*[1-9]\\d*)' },
+  { label: 'Agent roles', pattern: '\\[(?:ARCHITECT|CODER|DEBUGGER|TESTER)\\]' }
+];
 
 /**
  * Basic syntax highlighting for native intelligence execution logs.
  * Uses regex to parse and highlight common keywords like [ERROR], [INIT], [DONE], [TESTER], etc.
- * with accessible, distinctive color themes.
+ * with accessible, distinctive color themes, plus optional search match highlighting.
  */
-function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contrast'): React.ReactNode {
+function renderHighlightedLog(
+  text: string,
+  theme: 'emerald_dark' | 'high_contrast',
+  highlightRegex?: RegExp | null
+): React.ReactNode {
   if (!text) return null;
 
   // Regex matches bracketed keywords like [ERROR], [INIT], [DONE], [TESTER], [ARCHITECT], [CODER], [DEBUGGER], [AUDIT], [WARN], [STEP]
@@ -45,7 +172,9 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
   const regex = /(\[(?:ERROR|INIT|DONE|TESTER|ARCHITECT|CODER|DEBUGGER|AUDIT|WARN|STEP)\]|\b(?:ERROR|FAIL|FAILED|FATAL)\b|\b(?:DONE|SUCCESS|PASSED|VERIFIED)\b|\b(?:INIT|START|STARTED)\b)/gi;
 
   const parts = text.split(regex);
-  if (parts.length === 1) return text;
+  if (parts.length === 1) {
+    return renderMatchHighlights(text, highlightRegex, theme, 'single');
+  }
 
   return parts.map((part, index) => {
     if (!part) return null;
@@ -58,7 +187,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
           key={index}
           className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px] inline-block ${
             theme === 'high_contrast'
-              ? 'bg-[var(--z-danger)] text-[var(--z-danger)] border border-[var(--z-danger)] shadow-sm'
+              ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border border-[var(--z-danger)] shadow-sm'
               : 'bg-[color-mix(in_srgb,var(--z-danger)_25%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] shadow-sm shadow-rose-950/40'
           }`}
         >
@@ -74,7 +203,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
           key={index}
           className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px] inline-block ${
             theme === 'high_contrast'
-              ? 'bg-[var(--app-accent)] text-[var(--app-accent)] border border-[var(--app-accent)] shadow-sm'
+              ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border border-[var(--app-accent)] shadow-sm'
               : 'bg-[color-mix(in_srgb,var(--app-accent)_25%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] shadow-sm '
           }`}
         >
@@ -90,7 +219,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
           key={index}
           className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px] inline-block ${
             theme === 'high_contrast'
-              ? 'bg-[var(--z-ok)] text-[var(--z-ok)] border border-[var(--z-ok)] shadow-sm'
+              ? 'bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border border-[var(--z-ok)] shadow-sm'
               : 'bg-[color-mix(in_srgb,var(--z-ok)_25%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] shadow-sm '
           }`}
         >
@@ -106,7 +235,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
           key={index}
           className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px] inline-block ${
             theme === 'high_contrast'
-              ? 'bg-[var(--app-amber)] text-[var(--app-amber)] border border-[var(--app-amber)] shadow-sm'
+              ? 'bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border border-[var(--app-amber)] shadow-sm'
               : 'bg-[color-mix(in_srgb,var(--app-amber)_25%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)] shadow-sm shadow-amber-950/40'
           }`}
         >
@@ -129,7 +258,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
           key={index}
           className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px] inline-block ${
             theme === 'high_contrast'
-              ? 'bg-[var(--app-accent)] text-[var(--app-accent)] border border-[var(--app-accent)] shadow-sm'
+              ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border border-[var(--app-accent)] shadow-sm'
               : 'bg-[color-mix(in_srgb,var(--app-accent)_25%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] shadow-sm '
           }`}
         >
@@ -138,13 +267,17 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
       );
     }
 
-    return <React.Fragment key={index}>{part}</React.Fragment>;
+    return (
+      <React.Fragment key={index}>
+        {renderMatchHighlights(part, highlightRegex, theme, `p-${index}`)}
+      </React.Fragment>
+    );
   });
 }
 
 export default function App() {
   const { t, lang } = useLanguage();
-  const { role, session, authHeaders } = useAuth();
+  const { role, session, authHeaders, login, loginWithGoogle, devAccessEnabled, authError } = useAuth();
   const [activeModule, setActiveModule] = useState<ModuleId>('command_center');
   const [statusData, setStatusData] = useState<SystemStatusData | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -188,6 +321,7 @@ export default function App() {
   const [copiedLogs, setCopiedLogs] = useState(false);
   const [logTagFilter, setLogTagFilter] = useState<'ALL' | 'INIT' | 'TESTER' | 'DONE' | 'ERROR'>('ALL');
   const [logSearchQuery, setLogSearchQuery] = useState('');
+  const [logSearchMode, setLogSearchMode] = useState<'text' | 'regex'>('text');
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [ttsRate, setTtsRate] = useState<number>(() => {
     if (typeof window !== 'undefined') {
@@ -217,6 +351,10 @@ export default function App() {
   const [logTimeMode, setLogTimeMode] = useState<'absolute' | 'relative'>('absolute');
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedLogIndices, setSelectedLogIndices] = useState<number[]>([]);
+  const [logCategories, setLogCategories] = useState<Record<number, LogSemanticCategory>>({});
+  const [groupByCategory, setGroupByCategory] = useState(false);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement | null>(null);
   const [showPerfMetrics, setShowPerfMetrics] = useState(false);
   const [verificationHash, setVerificationHash] = useState<string | null>(null);
   const [totalExecMs, setTotalExecMs] = useState<number | null>(null);
@@ -244,6 +382,36 @@ export default function App() {
     restoreFromLedger,
     recompute: recomputeIntegrity
   } = useAuditIntegrity(quickLogs);
+
+  const compiledLogSearch = useMemo(
+    () => (logSearchMode === 'regex' ? compileLogSearchRegex(logSearchQuery) : { regex: null, error: null }),
+    [logSearchMode, logSearchQuery]
+  );
+
+  const activeHighlightRegex = useMemo(() => {
+    if (!logSearchQuery.trim()) return null;
+    if (logSearchMode === 'regex') return compiledLogSearch.regex;
+    try {
+      return new RegExp(escapeRegExpLiteral(logSearchQuery.trim()), 'i');
+    } catch {
+      return null;
+    }
+  }, [logSearchMode, logSearchQuery, compiledLogSearch.regex]);
+
+  const filteredLogEntries = useMemo(() => {
+    return quickLogs
+      .map((log, originalIdx) => ({ log, originalIdx }))
+      .filter(({ log }) => {
+        const matchTag = logTagFilter === 'ALL' || log.startsWith(`[${logTagFilter}]`);
+        if (!matchTag) return false;
+        if (!logSearchQuery.trim()) return true;
+        if (logSearchMode === 'regex') {
+          if (compiledLogSearch.error || !compiledLogSearch.regex) return false;
+          return compiledLogSearch.regex.test(log);
+        }
+        return log.toLowerCase().includes(logSearchQuery.toLowerCase());
+      });
+  }, [quickLogs, logTagFilter, logSearchQuery, logSearchMode, compiledLogSearch]);
 
 
   useEffect(() => {
@@ -417,6 +585,92 @@ export default function App() {
     setTimeout(() => document.body.removeChild(iframe), 1000);
   };
 
+  const handleExportLogsCsv = () => {
+    if (quickLogs.length === 0) return;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const escapeCsv = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
+    const rows = [
+      ['Line', 'Tag', 'SemanticCategory', 'Message'].map(escapeCsv).join(','),
+      ...quickLogs.map((entry, idx) => {
+        const m = entry.match(/^\[([A-Z0-9_]+)\]\s*(.*)$/);
+        const tag = m ? m[1] : 'INFO';
+        const message = m ? m[2] : entry;
+        const category = logCategories[idx] ?? classifyLogSemanticFunction(entry);
+        return [idx + 1, tag, category, message].map(escapeCsv).join(',');
+      })
+    ];
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `zyntheor-agent-logs-${timestamp}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportLogsMarkdown = () => {
+    if (quickLogs.length === 0) return;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const escapeMd = (value: string) => value.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+    const categoryCounts: Record<LogSemanticCategory, number> = {
+      'I/O': 0,
+      Computation: 0,
+      Authentication: 0,
+      System: 0
+    };
+    const tableRows = quickLogs.map((entry, idx) => {
+      const m = entry.match(/^\[([A-Z0-9_]+)\]\s*(.*)$/);
+      const tag = m ? m[1] : 'INFO';
+      const message = m ? m[2] : entry;
+      const category = logCategories[idx] ?? classifyLogSemanticFunction(entry);
+      categoryCounts[category] += 1;
+      return `| ${idx + 1} | \`${escapeMd(tag)}\` | ${category} | ${escapeMd(message)} |`;
+    });
+    const content = [
+      `# ZYNTHEOR — Sovereign Agent Execution Trace`,
+      ``,
+      `- **Goal:** ${quickGoal || 'N/A'}`,
+      `- **Exported:** ${new Date().toISOString()}`,
+      `- **Entries:** ${quickLogs.length}`,
+      `- **Integrity:** ${integrityStatus}${rollingHash ? ` (\`${rollingHash.slice(0, 16)}\`)` : ''}`,
+      ``,
+      `## Semantic Breakdown`,
+      ``,
+      ...SEMANTIC_CATEGORY_ORDER.map((cat) => `- **${cat}:** ${categoryCounts[cat]}`),
+      ``,
+      `## Execution Logs`,
+      ``,
+      `| # | Tag | Category | Message |`,
+      `| --- | --- | --- | --- |`,
+      ...tableRows
+    ].join('\n');
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `zyntheor-agent-logs-${timestamp}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAutoCategorizeLogs = () => {
+    if (quickLogs.length === 0) return;
+    const targetIndices =
+      selectedLogIndices.length > 0
+        ? selectedLogIndices
+        : quickLogs.map((_, idx) => idx);
+    setLogCategories((prev) => {
+      const next = { ...prev };
+      for (const idx of targetIndices) {
+        if (quickLogs[idx] !== undefined) {
+          next[idx] = classifyLogSemanticFunction(quickLogs[idx]);
+        }
+      }
+      return next;
+    });
+    setGroupByCategory(true);
+  };
+
   const handleTakeSnapshot = () => {
     if (quickLogs.length === 0) return;
     const snap = {
@@ -474,6 +728,9 @@ export default function App() {
     setVerificationHash(null);
     setTotalExecMs(null);
     execStartRef.current = performance.now();
+    setLogCategories({});
+    setGroupByCategory(false);
+    setSelectedLogIndices([]);
     setQuickLogs([`[INIT] Initiating Sovereign Multi-Agent for: "${quickGoal}"`]);
 
     try {
@@ -580,6 +837,11 @@ export default function App() {
 
       // 3. Escape: Close open modals/drawers in priority order
       if (e.key === 'Escape') {
+        if (isExportMenuOpen) {
+          e.preventDefault();
+          setIsExportMenuOpen(false);
+          return;
+        }
         if (isShortcutsModalOpen) {
           e.preventDefault();
           setIsShortcutsModalOpen(false);
@@ -660,6 +922,9 @@ export default function App() {
         if (e.altKey && (e.key === 'c' || e.key === 'C')) {
           e.preventDefault();
           setQuickLogs([]);
+          setLogCategories({});
+          setGroupByCategory(false);
+          setSelectedLogIndices([]);
           return;
         }
       }
@@ -671,12 +936,84 @@ export default function App() {
     isQuickTaskOpen,
     isQuickRunning,
     quickGoal,
+    isExportMenuOpen,
     isShortcutsModalOpen,
     isSnapshotDrawerOpen,
     isMobileOpen,
     quickLogs,
     snapshots
   ]);
+
+  useEffect(() => {
+    if (!isExportMenuOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setIsExportMenuOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handleOutsideClick);
+    return () => window.removeEventListener('mousedown', handleOutsideClick);
+  }, [isExportMenuOpen]);
+
+  const renderRbacDenied = (moduleLabel: string, requiredRole: 'Developer' | 'Administrator') => (
+    <div className="p-5 sm:p-6 rounded-2xl bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] space-y-4">
+      <div className="p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_35%,transparent)] text-[var(--z-danger)] text-xs font-mono">
+        [RBAC_DENIED] {moduleLabel} requires {requiredRole} role (current: {role}). Module is not rendered for this session.
+      </div>
+      <div className="text-xs text-[var(--app-text-secondary)]">
+        {session.userId && session.userId !== 'anonymous'
+          ? `Signed in as ${session.email || session.userId} (role: ${role}${session.authMode ? `, mode: ${session.authMode}` : ''}). ${
+              devAccessEnabled
+                ? 'Select a Developer or Administrator development session below to access this workspace.'
+                : 'Your account requires a Developer or Administrator role claim to open this workspace.'
+            }`
+          : devAccessEnabled
+          ? 'Sign in with Google or select a Development Access role below to unlock this workspace.'
+          : 'Sign in with a verified Google account that holds Developer or Administrator privileges.'}
+      </div>
+      {authError && (
+        <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] text-[var(--z-danger)] text-xs">
+          {authError}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <button
+          type="button"
+          onClick={() => void loginWithGoogle()}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-black hover:opacity-90 transition-opacity cursor-pointer"
+        >
+          <LogIn className="w-3.5 h-3.5" />
+          Continue with Google
+        </button>
+        {devAccessEnabled && (
+          <>
+            <button
+              type="button"
+              onClick={() => void login('Developer')}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] transition-colors cursor-pointer"
+            >
+              Dev Access: Developer
+            </button>
+            <button
+              type="button"
+              onClick={() => void login('Administrator')}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] transition-colors cursor-pointer"
+            >
+              Dev Access: Administrator
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => setActiveModule('user_settings')}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-bg)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] transition-colors cursor-pointer"
+        >
+          <Settings className="w-3.5 h-3.5" />
+          {lang === 'th' ? 'ตั้งค่าบัญชีและสิทธิ์' : 'Open Account Settings'}
+        </button>
+      </div>
+    </div>
+  );
 
   const renderActiveModule = () => {
     switch (activeModule) {
@@ -696,9 +1033,7 @@ export default function App() {
         return role === 'Developer' || role === 'Administrator' ? (
           <DevStudio />
         ) : (
-          <div className="p-6 rounded-2xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-            [RBAC_DENIED] DevStudio requires Developer or Administrator role (current: {role}). Module is not rendered for this session.
-          </div>
+          renderRbacDenied('DevStudio', 'Developer')
         );
       case 'research_lab':
         return <ResearchLab />;
@@ -710,25 +1045,19 @@ export default function App() {
         return role === 'Developer' || role === 'Administrator' ? (
           <ModelLaboratory />
         ) : (
-          <div className="p-6 rounded-2xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-            [RBAC_DENIED] ModelLaboratory requires Developer or Administrator role (current: {role}). Module is not rendered for this session.
-          </div>
+          renderRbacDenied('ModelLaboratory', 'Developer')
         );
       case 'experiment_center':
         return role === 'Developer' || role === 'Administrator' ? (
           <ExperimentCenter />
         ) : (
-          <div className="p-6 rounded-2xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-            [RBAC_DENIED] ExperimentCenter requires Developer or Administrator role (current: {role}). Module is not rendered for this session.
-          </div>
+          renderRbacDenied('ExperimentCenter', 'Developer')
         );
       case 'api_platform':
         return role === 'Developer' || role === 'Administrator' ? (
           <ApiPlatform />
         ) : (
-          <div className="p-6 rounded-2xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-            [RBAC_DENIED] ApiPlatform requires Developer or Administrator role (current: {role}). Module is not rendered for this session.
-          </div>
+          renderRbacDenied('ApiPlatform', 'Developer')
         );
       case 'marketplace':
         return <Marketplace />;
@@ -740,9 +1069,7 @@ export default function App() {
         return role === 'Developer' || role === 'Administrator' ? (
           <GovernanceSecurity />
         ) : (
-          <div className="p-6 rounded-2xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-            [RBAC_DENIED] GovernanceSecurity requires Developer or Administrator role (current: {role}). Module is not rendered for this session.
-          </div>
+          renderRbacDenied('GovernanceSecurity', 'Developer')
         );
       case 'user_settings':
         return <UserSettings />;
@@ -750,9 +1077,7 @@ export default function App() {
         return role === 'Administrator' ? (
           <AdminConsole />
         ) : (
-          <div className="p-6 rounded-2xl bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-            [RBAC_DENIED] AdminConsole requires Administrator role (current: {role}). Module is not rendered for this session.
-          </div>
+          renderRbacDenied('AdminConsole', 'Administrator')
         );
       default:
         return <CommandCenter statusData={statusData} onNavigate={setActiveModule} onOpenQuickTask={() => setIsQuickTaskOpen(true)} />;
@@ -828,6 +1153,7 @@ export default function App() {
           onOpenQuickTask={() => setIsQuickTaskOpen(true)}
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           onRefreshStatus={fetchStatus}
+          onOpenSettings={() => setActiveModule('user_settings')}
           isRefreshing={isRefreshing}
         />
 
@@ -926,7 +1252,7 @@ export default function App() {
                 }`}
               >
                 <div
-                  className={`px-3.5 py-2 flex items-center justify-between border-b ${
+                  className={`px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 border-b ${
                     logTheme === 'high_contrast'
                       ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_30%,transparent)]'
                       : 'bg-[var(--app-surface)] border-[var(--app-card-border)]'
@@ -948,7 +1274,7 @@ export default function App() {
                     <span
                       className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                         isTampered
-                          ? 'bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] text-[var(--z-danger)] border-[var(--z-danger)] animate-pulse'
+                          ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[var(--z-danger)] animate-pulse'
                           : integrityStatus === 'EMPTY'
                           ? 'bg-[color-mix(in_srgb,var(--app-surface-elevated)_10%,transparent)] text-[var(--app-text-secondary)] border-[color-mix(in_srgb,var(--app-card-border)_30%,transparent)]'
                           : 'bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]'
@@ -959,25 +1285,7 @@ export default function App() {
                       {isTampered ? 'TAMPERED' : rollingHash ? `${rollingHash.slice(0, 8)}` : integrityStatus}
                     </span>
                   </div>
-                  {isTampered && (
-                    <div className="mx-3 mt-2 px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--z-danger)_80%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_60%,transparent)] text-[var(--z-danger)] text-[11px] font-mono flex flex-col gap-2 animate-pulse">
-                      <div className="flex items-center gap-2">
-                        <ShieldAlert className="w-4 h-4 shrink-0 text-[var(--z-danger)]" />
-                        <span>
-                          <strong>INTEGRITY ALARM:</strong> quickLogs hash no longer matches the sealed baseline.
-                          Session flagged as TAMPERED — possible unauthorized browser script mutation.
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleIntegrityAutoRecovery}
-                        className="self-start px-3 py-1.5 rounded-md text-[10px] font-bold bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] cursor-pointer"
-                      >
-                        Integrity Auto-Recovery
-                      </button>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {quickLogs.some((l) => l.includes('[ERROR]')) && !isQuickRunning && (
                       <button
                         type="button"
@@ -1062,7 +1370,12 @@ export default function App() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setQuickLogs([])}
+                      onClick={() => {
+                        setQuickLogs([]);
+                        setLogCategories({});
+                        setGroupByCategory(false);
+                        setSelectedLogIndices([]);
+                      }}
                       disabled={quickLogs.length === 0}
                       title={lang === 'th' ? 'ล้างบันทึกทั้งหมด' : 'Clear all logs'}
                       className={`p-1.5 rounded-md transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
@@ -1099,45 +1412,94 @@ export default function App() {
                       <History className="w-3 h-3" />
                       {snapshots.length}
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleExportLogsJson}
-                      disabled={quickLogs.length === 0}
-                      title={lang === 'th' ? 'ส่งออก JSON' : 'Export structured JSON'}
-                      className={`p-1.5 rounded-md transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
-                        logTheme === 'high_contrast'
-                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
-                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
-                      }`}
-                    >
-                      <FileJson className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleExportLogsPdf}
-                      disabled={quickLogs.length === 0}
-                      title={lang === 'th' ? 'ส่งออก PDF' : 'Export formatted PDF'}
-                      className={`p-1.5 rounded-md transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
-                        logTheme === 'high_contrast'
-                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
-                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
-                      }`}
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDownloadLogs}
-                      disabled={quickLogs.length === 0}
-                      title={lang === 'th' ? 'ดาวน์โหลดไฟล์ .log' : 'Download .log file'}
-                      className={`p-1.5 rounded-md transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
-                        logTheme === 'high_contrast'
-                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
-                          : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
-                      }`}
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="relative" ref={exportMenuRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsExportMenuOpen((prev) => !prev)}
+                        disabled={quickLogs.length === 0}
+                        aria-haspopup="menu"
+                        aria-expanded={isExportMenuOpen}
+                        title={lang === 'th' ? 'ส่งออกบันทึก (CSV, Markdown, JSON, Log, PDF)' : 'Export execution logs'}
+                        className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
+                          isExportMenuOpen
+                            ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
+                            : logTheme === 'high_contrast'
+                            ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
+                            : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
+                        }`}
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Export</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                      {isExportMenuOpen && quickLogs.length > 0 && (
+                        <div
+                          role="menu"
+                          className="absolute right-0 mt-1.5 w-44 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] shadow-xl py-1 z-30 text-[11px] font-mono"
+                        >
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              handleExportLogsCsv();
+                              setIsExportMenuOpen(false);
+                            }}
+                            className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer"
+                          >
+                            <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--z-ok)]" />
+                            <span>Export CSV (.csv)</span>
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              handleExportLogsMarkdown();
+                              setIsExportMenuOpen(false);
+                            }}
+                            className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-[var(--app-accent)]" />
+                            <span>Export Markdown (.md)</span>
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              handleExportLogsJson();
+                              setIsExportMenuOpen(false);
+                            }}
+                            className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer"
+                          >
+                            <FileJson className="w-3.5 h-3.5 text-[var(--app-amber)]" />
+                            <span>Export JSON (.json)</span>
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              handleDownloadLogs();
+                              setIsExportMenuOpen(false);
+                            }}
+                            className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
+                            <span>Raw Log (.log)</span>
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              handleExportLogsPdf();
+                              setIsExportMenuOpen(false);
+                            }}
+                            className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer"
+                          >
+                            <Printer className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
+                            <span>Print / PDF</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={handleCopyLogs}
@@ -1183,44 +1545,121 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+                {isTampered && (
+                  <div className="mx-3.5 mt-2 px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--z-danger)_16%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] text-[var(--z-danger)] text-[11px] font-mono flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <ShieldAlert className="w-4 h-4 shrink-0 text-[var(--z-danger)]" />
+                      <span>
+                        <strong>INTEGRITY ALARM:</strong> quickLogs hash no longer matches the sealed baseline.
+                        Session flagged as TAMPERED — possible unauthorized browser script mutation.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleIntegrityAutoRecovery}
+                      className="self-start px-3 py-1.5 rounded-md text-[10px] font-bold bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] cursor-pointer"
+                    >
+                      Integrity Auto-Recovery
+                    </button>
+                  </div>
+                )}
                 <div
-                  className={`px-3.5 py-2 flex flex-wrap items-center gap-2 border-b ${
+                  className={`px-3.5 py-2 flex flex-col gap-2 border-b ${
                     logTheme === 'high_contrast'
-                      ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_20%,transparent)]'
-                      : 'bg-[var(--z-ok)] border-[var(--app-card-border)]'
+                      ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_25%,transparent)]'
+                      : 'bg-[var(--app-surface)] border-[var(--app-card-border)]'
                   }`}
                 >
-                  <div className="relative flex-1 min-w-[160px]">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--app-text-secondary)]" />
-                    <input
-                      type="text"
-                      value={logSearchQuery}
-                      onChange={(e) => setLogSearchQuery(e.target.value)}
-                      placeholder={lang === 'th' ? 'ค้นหาในบันทึก...' : 'Filter logs by text...'}
-                      className={`w-full pl-8 pr-2.5 py-1 rounded-md text-[11px] focus:outline-none border ${
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[180px] flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--app-text-secondary)]" />
+                        <input
+                          type="text"
+                          value={logSearchQuery}
+                          onChange={(e) => setLogSearchQuery(e.target.value)}
+                          aria-label={logSearchMode === 'regex' ? 'Regex log search pattern' : 'Text log search query'}
+                          aria-invalid={logSearchMode === 'regex' && Boolean(compiledLogSearch.error)}
+                          placeholder={
+                            logSearchMode === 'regex'
+                              ? lang === 'th'
+                                ? 'Regex (เช่น \\[ERROR\\]\\s*\\[auth\\] หรือ at\\s+.*:\\d+)...'
+                                : 'Regex (e.g. \\[ERROR\\]\\s*\\[auth\\] or at\\s+.*:\\d+)...'
+                              : lang === 'th'
+                              ? 'ค้นหาในบันทึก...'
+                              : 'Filter logs by text...'
+                          }
+                          className={`w-full pl-8 ${logSearchQuery ? 'pr-7' : 'pr-2.5'} py-1 rounded-md text-[11px] focus:outline-none border ${
+                            logSearchMode === 'regex' && compiledLogSearch.error
+                              ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--z-danger)]'
+                              : logTheme === 'high_contrast'
+                              ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] placeholder:text-[var(--app-text-secondary)]'
+                              : 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-card-border)] placeholder:text-[color-mix(in_srgb,var(--app-text-secondary)_60%,transparent)]'
+                          }`}
+                        />
+                        {logSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setLogSearchQuery('')}
+                            title="Clear search"
+                            aria-label="Clear log search"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setLogSearchMode((prev) => (prev === 'text' ? 'regex' : 'text'))}
+                        aria-pressed={logSearchMode === 'regex'}
+                        title={
+                          logSearchMode === 'regex'
+                            ? 'Regex Search Mode Active (click to switch to plain text search)'
+                            : 'Switch to Regex Search Mode (e.g. \\[ERROR\\]\\s*\\[auth\\] or stack traces)'
+                        }
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono font-bold border transition-colors cursor-pointer shrink-0 ${
+                          logSearchMode === 'regex'
+                            ? logTheme === 'high_contrast'
+                              ? 'bg-[var(--app-text-primary)] text-[var(--app-bg)] border-[var(--app-text-primary)]'
+                              : 'bg-[color-mix(in_srgb,var(--app-accent)_22%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_55%,transparent)]'
+                            : logTheme === 'high_contrast'
+                            ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
+                            : 'bg-[var(--app-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)]'
+                        }`}
+                      >
+                        <Regex className="w-3.5 h-3.5" />
+                        <span>Regex</span>
+                      </button>
+                    </div>
+                    {(logSearchQuery.trim() || logTagFilter !== 'ALL') && quickLogs.length > 0 && (
+                      <span
+                        className={`px-2 py-1 rounded-md text-[10px] font-mono font-bold border shrink-0 ${
+                          logTheme === 'high_contrast'
+                            ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
+                            : 'bg-[var(--app-bg)] text-[var(--app-accent)] border-[var(--app-card-border)]'
+                        }`}
+                      >
+                        {filteredLogEntries.length}/{quickLogs.length}
+                      </span>
+                    )}
+                    <select
+                      value={logTagFilter}
+                      onChange={(e) =>
+                        setLogTagFilter(e.target.value as 'ALL' | 'INIT' | 'TESTER' | 'DONE' | 'ERROR')
+                      }
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold focus:outline-none border cursor-pointer ${
                         logTheme === 'high_contrast'
-                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_30%,transparent)] placeholder:text-[var(--app-text-secondary)]'
-                          : 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-card-border)] placeholder:text-[color-mix(in_srgb,var(--app-text-secondary)_60%,transparent)]'
+                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
+                          : 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-card-border)]'
                       }`}
-                    />
-                  </div>
-                  <select
-                    value={logTagFilter}
-                    onChange={(e) =>
-                      setLogTagFilter(e.target.value as 'ALL' | 'INIT' | 'TESTER' | 'DONE' | 'ERROR')
-                    }
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold focus:outline-none border cursor-pointer ${
-                      logTheme === 'high_contrast'
-                        ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_30%,transparent)]'
-                        : 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-card-border)]'
-                    }`}
-                  >
-                    <option value="ALL">All Tags</option>
-                    <option value="INIT">[INIT]</option>
-                    <option value="TESTER">[TESTER]</option>
-                    <option value="DONE">[DONE]</option>
-                    <option value="ERROR">[ERROR]</option>
-                  </select>
+                    >
+                      <option value="ALL">All Tags</option>
+                      <option value="INIT">[INIT]</option>
+                      <option value="TESTER">[TESTER]</option>
+                      <option value="DONE">[DONE]</option>
+                      <option value="ERROR">[ERROR]</option>
+                    </select>
                   <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--app-text-secondary)]">
                     <span>Rate {ttsRate.toFixed(1)}x</span>
                     <input
@@ -1290,52 +1729,177 @@ export default function App() {
                       ))}
                     </select>
                   )}
+                  </div>
+                  {logSearchMode === 'regex' && (
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
+                      {compiledLogSearch.error ? (
+                        <span
+                          role="alert"
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${
+                            logTheme === 'high_contrast'
+                              ? 'bg-[var(--app-bg)] text-[var(--z-danger)] border-[var(--z-danger)] font-bold'
+                              : 'bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]'
+                          }`}
+                        >
+                          <AlertCircle className="w-3 h-3 shrink-0" />
+                          <span>Invalid regex: {compiledLogSearch.error}</span>
+                        </span>
+                      ) : (
+                        <>
+                          <span className={logTheme === 'high_contrast' ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-text-secondary)]'}>
+                            Patterns:
+                          </span>
+                          {REGEX_SEARCH_PRESETS.map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() => setLogSearchQuery(preset.pattern)}
+                              className={`px-1.5 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                                logSearchQuery === preset.pattern
+                                  ? logTheme === 'high_contrast'
+                                    ? 'bg-[var(--app-text-primary)] text-[var(--app-bg)] border-[var(--app-text-primary)] font-bold'
+                                    : 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)] font-bold'
+                                  : logTheme === 'high_contrast'
+                                  ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_35%,transparent)] hover:bg-[var(--app-surface)]'
+                                  : 'bg-[var(--app-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)]'
+                              }`}
+                              title={`Apply regex: ${preset.pattern}`}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {bulkMode && selectedLogIndices.length > 0 && (
-                  <div className="px-3.5 py-1.5 flex items-center gap-2 bg-[var(--app-surface-elevated)] border-b border-[var(--app-card-border)] text-[10px] font-mono">
+                {bulkMode && (
+                  <div
+                    className={`px-3.5 py-2 flex flex-wrap items-center gap-2 border-b text-[10px] font-mono ${
+                      logTheme === 'high_contrast'
+                        ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_30%,transparent)] text-[var(--app-text-primary)]'
+                        : 'bg-[var(--app-surface-elevated)] border-[var(--app-card-border)]'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      disabled={quickLogs.length === 0}
+                      onClick={() => {
+                        if (selectedLogIndices.length === quickLogs.length) {
+                          setSelectedLogIndices([]);
+                        } else {
+                          setSelectedLogIndices(quickLogs.map((_, idx) => idx));
+                        }
+                      }}
+                      className="px-2 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-40"
+                    >
+                      {selectedLogIndices.length === quickLogs.length && quickLogs.length > 0 ? 'Deselect All' : 'Select All'}
+                    </button>
                     <span className="text-[var(--app-accent)] font-bold">{selectedLogIndices.length} selected</span>
                     <button
                       type="button"
-                      onClick={() => {
-                        setQuickLogs((prev) => prev.filter((_, i) => !selectedLogIndices.includes(i)));
-                        setSelectedLogIndices([]);
-                      }}
-                      className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] cursor-pointer"
+                      disabled={quickLogs.length === 0}
+                      onClick={handleAutoCategorizeLogs}
+                      title="Classify and group logs by semantic function (I/O, Computation, Authentication, System)"
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_18%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_28%,transparent)] font-bold cursor-pointer disabled:opacity-40"
                     >
-                      Delete
+                      <Sparkles className="w-3 h-3" />
+                      Auto-Categorize
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const subset = quickLogs.filter((_, i) => selectedLogIndices.includes(i)).join('\n');
-                        const blob = new Blob([subset], { type: 'text/plain;charset=utf-8' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `zyntheor-selected-logs-${Date.now()}.log`;
-                        a.click();
-                        URL.revokeObjectURL(url);
-                      }}
-                      className="px-2 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] cursor-pointer"
-                    >
-                      Export Selected
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQuickLogs((prev) =>
-                          prev.map((l, i) => (selectedLogIndices.includes(i) && !l.startsWith('[AUDIT]') ? `[AUDIT] ${l}` : l))
-                        );
-                        setSelectedLogIndices([]);
-                      }}
-                      className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)] cursor-pointer"
-                    >
-                      Categorize [AUDIT]
-                    </button>
+                    {Object.keys(logCategories).length > 0 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setGroupByCategory((prev) => !prev)}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border cursor-pointer ${
+                            groupByCategory
+                              ? 'bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]'
+                              : 'bg-[var(--app-bg)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]'
+                          }`}
+                        >
+                          <Layers className="w-3 h-3" />
+                          {groupByCategory ? 'Grouped' : 'Group View'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLogCategories({});
+                            setGroupByCategory(false);
+                          }}
+                          className="px-2 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] cursor-pointer"
+                        >
+                          Clear Labels
+                        </button>
+                        <div className="flex flex-wrap items-center gap-1.5 ml-auto">
+                          {SEMANTIC_CATEGORY_ORDER.map((cat) => {
+                            const count = Object.values(logCategories).filter((c) => c === cat).length;
+                            if (count === 0) return null;
+                            return (
+                              <span
+                                key={cat}
+                                className={`px-1.5 py-0.2 rounded border text-[9.5px] font-bold ${getSemanticCategoryBadgeClass(cat)}`}
+                              >
+                                {cat}: {count}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                    {selectedLogIndices.length > 0 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setQuickLogs((prev) => prev.filter((_, i) => !selectedLogIndices.includes(i)));
+                            setSelectedLogIndices([]);
+                            setLogCategories({});
+                            setGroupByCategory(false);
+                          }}
+                          className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const subset = quickLogs.filter((_, i) => selectedLogIndices.includes(i)).join('\n');
+                            const blob = new Blob([subset], { type: 'text/plain;charset=utf-8' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `zyntheor-selected-logs-${Date.now()}.log`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          className="px-2 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] cursor-pointer"
+                        >
+                          Export Selected
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setQuickLogs((prev) =>
+                              prev.map((l, i) => (selectedLogIndices.includes(i) && !l.startsWith('[AUDIT]') ? `[AUDIT] ${l}` : l))
+                            );
+                            setSelectedLogIndices([]);
+                          }}
+                          className="px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)] cursor-pointer"
+                        >
+                          Categorize [AUDIT]
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
                 {showPerfMetrics && (
-                  <div className="px-3.5 py-1.5 flex items-center gap-4 bg-[var(--app-surface)] border-b border-[var(--app-card-border)] text-[10px] font-mono text-[var(--app-text-secondary)]">
+                  <div
+                    className={`px-3.5 py-1.5 flex items-center gap-4 border-b text-[10px] font-mono ${
+                      logTheme === 'high_contrast'
+                        ? 'bg-[var(--app-bg)] border-[color-mix(in_srgb,var(--app-text-primary)_25%,transparent)] text-[var(--app-text-primary)]'
+                        : 'bg-[var(--app-surface)] border-[var(--app-card-border)] text-[var(--app-text-secondary)]'
+                    }`}
+                  >
                     <span>
                       Total Execution: <strong className="text-[var(--app-text-primary)]">{totalExecMs !== null ? `${totalExecMs} ms` : 'Running / N/A'}</strong>
                     </span>
@@ -1426,20 +1990,46 @@ export default function App() {
                         ? 'กด "สั่งการประมวลผล" เพื่อเริ่มการประมวลผลและดูเส้นทางการคิด' 
                         : 'Click "Dispatch Engine" to stream real native execution trace.'}
                     </span>
-                  ) : (
-                    quickLogs
-                      .filter((log) => {
-                        const matchTag = logTagFilter === 'ALL' || log.startsWith(`[${logTagFilter}]`);
-                        const matchText =
-                          !logSearchQuery.trim() ||
-                          log.toLowerCase().includes(logSearchQuery.toLowerCase());
-                        return matchTag && matchText;
-                      })
-                      .map((log, idx) => {
+                  ) : filteredLogEntries.length === 0 ? (
+                    <div
+                      className={`text-[11px] flex flex-wrap items-center gap-2 ${
+                        logTheme === 'high_contrast'
+                          ? 'text-[var(--app-text-primary)]'
+                          : 'text-[var(--app-text-secondary)]'
+                      }`}
+                    >
+                      <span>
+                        {logSearchMode === 'regex' && compiledLogSearch.error
+                          ? `Regex pattern error: ${compiledLogSearch.error}`
+                          : lang === 'th'
+                          ? `ไม่พบบันทึกที่ตรงกับตัวกรอง "${logSearchQuery || logTagFilter}"`
+                          : `No trace entries match ${
+                              logSearchMode === 'regex'
+                                ? `regex /${logSearchQuery}/`
+                                : `"${logSearchQuery || logTagFilter}"`
+                            }.`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLogSearchQuery('');
+                          setLogTagFilter('ALL');
+                        }}
+                        className={`px-2 py-0.5 rounded-md border text-[10px] font-bold cursor-pointer ${
+                          logTheme === 'high_contrast'
+                            ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[var(--app-text-primary)]'
+                            : 'bg-[var(--app-surface)] text-[var(--app-accent)] border-[var(--app-card-border)]'
+                        }`}
+                      >
+                        Reset Filter
+                      </button>
+                    </div>
+                  ) : (() => {
+                    const renderLogRow = (log: string, originalIdx: number) => {
                       const now = new Date();
                       const ts =
                         logTimeMode === 'relative'
-                          ? `+${(idx * 0.25).toFixed(2)}s`
+                          ? `+${(originalIdx * 0.25).toFixed(2)}s`
                           : `${String(now.getHours()).padStart(2, '0')}:${String(
                               now.getMinutes()
                             ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}:${String(
@@ -1448,17 +2038,31 @@ export default function App() {
                       const match = log.match(/^\[([A-Z0-9_]+)\]\s*(.*)$/);
                       const tag = match ? match[1] : null;
                       const message = match ? match[2] : log;
+                      const semanticCat = logCategories[originalIdx];
 
                       const badgeClass =
                         tag === 'ERROR'
-                          ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]'
+                          ? logTheme === 'high_contrast'
+                            ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[var(--z-danger)]'
+                            : 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]'
                           : tag === 'DONE'
-                          ? 'bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+                          ? logTheme === 'high_contrast'
+                            ? 'bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border-[var(--z-ok)]'
+                            : 'bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
                           : tag === 'TESTER'
-                          ? 'bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
+                          ? logTheme === 'high_contrast'
+                            ? 'bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border-[var(--app-amber)]'
+                            : 'bg-[color-mix(in_srgb,var(--app-amber)_20%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
                           : tag === 'INIT'
-                          ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]'
+                          ? logTheme === 'high_contrast'
+                            ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[var(--app-accent)]'
+                            : 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]'
+                          : logTheme === 'high_contrast'
+                          ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_50%,transparent)]'
                           : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]';
+
+                      const tagMatchedBySearch =
+                        tag && activeHighlightRegex ? activeHighlightRegex.test(`[${tag}]`) : false;
 
                       const isNegative = /\[ERROR\]|fail|error|blocked/i.test(log);
                       const isPositive = /\[DONE\]|success|verified|exitCode:\s*0|passed/i.test(log);
@@ -1470,18 +2074,18 @@ export default function App() {
 
                       return (
                         <div
-                          key={idx}
-                          className={`text-[11px] leading-relaxed flex items-start gap-2 ${
-                            logTheme === 'high_contrast' ? 'text-[var(--app-text-primary)]' : 'text-[var(--app-text-primary)]'
-                          }`}
+                          key={originalIdx}
+                          className="text-[11px] leading-relaxed flex items-start gap-2 text-[var(--app-text-primary)]"
                         >
                           {bulkMode && (
                             <input
                               type="checkbox"
-                              checked={selectedLogIndices.includes(idx)}
+                              checked={selectedLogIndices.includes(originalIdx)}
                               onChange={(e) => {
                                 setSelectedLogIndices((prev) =>
-                                  e.target.checked ? [...prev, idx] : prev.filter((i) => i !== idx)
+                                  e.target.checked
+                                    ? [...prev, originalIdx]
+                                    : prev.filter((i) => i !== originalIdx)
                                 );
                               }}
                               className="mt-1 accent-[var(--app-accent)] cursor-pointer shrink-0"
@@ -1491,26 +2095,84 @@ export default function App() {
                             className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${sentimentDotClass}`}
                             title={isNegative ? 'Alert' : isPositive ? 'Positive' : 'Neutral'}
                           />
-                          <span className="text-[10px] text-[color-mix(in_srgb,var(--app-text-secondary)_50%,transparent)] shrink-0 select-none w-5 text-right">
-                            {idx + 1}
+                          <span
+                            className={`text-[10px] shrink-0 select-none w-5 text-right ${
+                              logTheme === 'high_contrast'
+                                ? 'text-[var(--app-text-secondary)]'
+                                : 'text-[color-mix(in_srgb,var(--app-text-secondary)_50%,transparent)]'
+                            }`}
+                          >
+                            {originalIdx + 1}
                           </span>
-                          <span className="text-[10px] text-[color-mix(in_srgb,var(--app-text-secondary)_70%,transparent)] shrink-0 select-none">
+                          <span
+                            className={`text-[10px] shrink-0 select-none ${
+                              logTheme === 'high_contrast'
+                                ? 'text-[var(--app-text-secondary)]'
+                                : 'text-[color-mix(in_srgb,var(--app-text-secondary)_70%,transparent)]'
+                            }`}
+                          >
                             {ts}
                           </span>
+                          {semanticCat && (
+                            <span
+                              className={`px-1.5 py-0.2 rounded text-[9.5px] font-bold border shrink-0 ${getSemanticCategoryBadgeClass(
+                                semanticCat
+                              )}`}
+                              title={`Semantic function: ${semanticCat}`}
+                            >
+                              {semanticCat}
+                            </span>
+                          )}
                           {tag && (
                             <span
-                              className={`px-1.5 py-0.2 rounded text-[10px] font-bold border shrink-0 ${badgeClass}`}
+                              className={`px-1.5 py-0.2 rounded text-[10px] font-bold border shrink-0 ${badgeClass} ${
+                                tagMatchedBySearch
+                                  ? logTheme === 'high_contrast'
+                                    ? 'ring-2 ring-[var(--app-text-primary)]'
+                                    : 'ring-1 ring-[var(--app-accent)]'
+                                  : ''
+                              }`}
                             >
                               {tag}
                             </span>
                           )}
                           <span className={logTextWrap ? 'break-words whitespace-pre-wrap' : 'whitespace-nowrap'}>
-                            {renderHighlightedLog(message, logTheme)}
+                            {renderHighlightedLog(message, logTheme, activeHighlightRegex)}
                           </span>
                         </div>
                       );
-                    })
-                  )}
+                    };
+
+                    if (groupByCategory && Object.keys(logCategories).length > 0) {
+                      const grouped = new Map<string, Array<{ log: string; originalIdx: number }>>();
+                      for (const cat of SEMANTIC_CATEGORY_ORDER) grouped.set(cat, []);
+                      grouped.set('Uncategorized', []);
+                      for (const item of filteredLogEntries) {
+                        const cat = logCategories[item.originalIdx] ?? 'Uncategorized';
+                        grouped.get(cat)!.push(item);
+                      }
+                      return Array.from(grouped.entries())
+                        .filter(([, items]) => items.length > 0)
+                        .map(([cat, items]) => (
+                          <div key={cat} className="space-y-1.5 pb-2 border-b border-[color-mix(in_srgb,var(--app-card-border)_50%,transparent)] last:border-b-0">
+                            <div className="flex items-center gap-2 pt-1">
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[9.5px] font-bold border uppercase tracking-wider ${
+                                  cat === 'Uncategorized'
+                                    ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]'
+                                    : getSemanticCategoryBadgeClass(cat as LogSemanticCategory)
+                                }`}
+                              >
+                                {cat} ({items.length})
+                              </span>
+                            </div>
+                            {items.map(({ log, originalIdx }) => renderLogRow(log, originalIdx))}
+                          </div>
+                        ));
+                    }
+
+                    return filteredLogEntries.map(({ log, originalIdx }) => renderLogRow(log, originalIdx));
+                  })()}
                   <div ref={logsEndRef} />
                 </div>
               </div>
@@ -1614,7 +2276,7 @@ export default function App() {
                       <span className="text-[var(--app-text-secondary)]">{new Date(snap.timestamp).toLocaleTimeString()}</span>
                     </div>
                     <div className="text-xs font-semibold text-[var(--app-text-primary)] truncate">{snap.goal}</div>
-                    <div className="max-h-32 overflow-y-auto bg-[var(--z-ok)] p-2 rounded-lg border border-[var(--app-card-border)] font-mono text-[10px] text-[var(--app-text-secondary)] space-y-1">
+                    <div className="max-h-32 overflow-y-auto bg-[var(--app-surface)] p-2 rounded-lg border border-[var(--app-card-border)] font-mono text-[10px] text-[var(--app-text-secondary)] space-y-1">
                       {snap.logs.map((l, i) => (
                         <div key={i} className="truncate">
                           <span className="opacity-50 mr-1.5">{i + 1}.</span>

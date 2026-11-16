@@ -60,6 +60,7 @@ import {
 } from './lib/AuthMiddleware';
 import { SovereignIdentity, SovereignRole } from './lib/SovereignIdentity';
 import { TokenRevocation } from './lib/TokenRevocation';
+import { requireFirebaseAuth, type AuthRequest } from './src/middleware/auth';
 import { BenchmarkRunner } from './server/benchmarks/runner';
 
 const execFileAsync = promisify(execFile);
@@ -1051,13 +1052,82 @@ app.delete('/api/memory/episodic/:key', requireAuth('guest'), (req: Authenticate
  * Production deployments MUST set ZYNTHEOR_MASTER_SECRET and gate this further.
  * Client-supplied x-zyntheor-role headers are NOT used for subsequent API auth.
  */
+app.get('/api/auth/mode', (_req: Request, res: Response) => {
+  const environment = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+  const devAccessEnabled = environment !== 'production' && process.env.ZYNTHEOR_ENABLE_DEV_LOGIN === 'true';
+  res.json({
+    success: true,
+    environment,
+    googleAuthEnabled: true,
+    devAccessEnabled,
+  });
+});
+
+app.post('/api/auth/firebase-session', requireFirebaseAuth, (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user!;
+    const rawClaimRole = typeof user.sovereignRole === 'string' ? user.sovereignRole.toLowerCase() : '';
+    const sovereignRole: SovereignRole =
+      rawClaimRole === 'admin' || rawClaimRole === 'developer' || rawClaimRole === 'operator' || rawClaimRole === 'auditor'
+        ? (rawClaimRole as SovereignRole)
+        : 'guest';
+    const tenantId =
+      typeof user.tenantId === 'string' && user.tenantId.trim()
+        ? user.tenantId.trim()
+        : 'Sovereign Enterprise Prime';
+
+    const identity = SovereignIdentity.getInstance();
+    const { token, payload } = identity.signToken({
+      sub: user.uid,
+      tenantId,
+      role: sovereignRole,
+      ttlSeconds: 3600,
+      scope: ['workspace:read', 'workspace:execute', 'api:access'],
+    });
+
+    AuditLedger.append('GOVERNANCE', 'AUTH_FIREBASE_SESSION_ISSUED', {
+      sub: payload.sub,
+      email: user.email || null,
+      tenantId: payload.tenantId,
+      role: payload.role,
+      exp: payload.exp,
+      jti: payload.jti,
+    });
+
+    res.json({
+      success: true,
+      token,
+      expiresAt: payload.exp,
+      session: {
+        userId: payload.sub,
+        email: user.email || '',
+        tenantId: payload.tenantId,
+        role: SOVEREIGN_TO_UI[payload.role] || 'User',
+        sovereignRole: payload.role,
+        authMode: 'firebase',
+        authenticatedAt: new Date(payload.iat * 1000).toISOString(),
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/api/auth/login', (req: Request, res: Response) => {
   try {
     if (process.env.NODE_ENV === 'production') {
-      return res.status(403).json({ success: false, error: 'IDENTITY_PROVIDER_REQUIRED' });
+      return res.status(403).json({
+        success: false,
+        code: 'DEV_LOGIN_DISABLED',
+        error: 'IDENTITY_PROVIDER_REQUIRED',
+      });
     }
     if (process.env.ZYNTHEOR_ENABLE_DEV_LOGIN !== 'true') {
-      return res.status(403).json({ success: false, error: 'DEVELOPMENT_LOGIN_DISABLED' });
+      return res.status(403).json({
+        success: false,
+        code: 'DEV_LOGIN_DISABLED',
+        error: 'DEVELOPMENT_LOGIN_DISABLED',
+      });
     }
     const body = req.body || {};
     const requestedUiRole = (body.role as string) || 'User';
@@ -1085,6 +1155,7 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
       sub: payload.sub,
       tenantId: payload.tenantId,
       role: payload.role,
+      authMethod: 'dev_login',
       exp: payload.exp,
       jti: payload.jti
     });
@@ -1098,6 +1169,7 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
         tenantId: payload.tenantId,
         role: SOVEREIGN_TO_UI[payload.role] || 'User',
         sovereignRole: payload.role,
+        authMode: 'development',
         authenticatedAt: new Date(payload.iat * 1000).toISOString()
       }
     });
