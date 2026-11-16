@@ -6,7 +6,7 @@ interface VividCardProps {
   headerAction?: React.ReactNode;
   title?: string;
   subtitle?: string;
-  gradientAccent?: 'emerald' | 'amber' | 'emerald-amber' | 'cyan' | 'purple' | 'sunset' | 'energy' | 'none';
+  gradientAccent?: 'emerald' | 'amber' | 'emerald-amber' | 'cyan' | 'purple' | 'violet' | 'coral' | 'sunset' | 'energy' | 'none';
   variant?: 'white' | 'navy';
 }
 
@@ -29,7 +29,9 @@ export const VividCard: React.FC<VividCardProps> = ({
       case 'cyan':
         return 'h-1 w-full bg-[var(--app-accent)]';
       case 'purple':
+      case 'violet':
         return 'h-1 w-full bg-[var(--app-accent)]';
+      case 'coral':
       case 'sunset':
         return 'h-1 w-full bg-[var(--app-amber)]';
       case 'energy':
