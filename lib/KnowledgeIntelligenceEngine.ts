@@ -54,6 +54,7 @@ export interface GroundedRetrievalResponse {
   query: string;
   found: boolean;
   results: Array<RetrievalResult & { citation: GroundedCitation }>;
+  compressedContext?: string;
   notFoundReason?: string;
   latencyMs: number;
   mode: 'hybrid' | 'lexical';
@@ -405,15 +406,25 @@ export class KnowledgeIntelligenceEngine {
    */
   public hybridRetrieve(
     query: string,
-    options: { limit?: number; collection?: string; minScore?: number } = {}
+    options: {
+      limit?: number;
+      collection?: string;
+      minScore?: number;
+      tenantId?: string;
+      role?: string;
+      forbiddenTargetValues?: string[];
+    } = {}
   ): GroundedRetrievalResponse {
     const start = Date.now();
     const limit = options.limit ?? 5;
     const kw = KnowledgeWorkspace.getInstance();
-    const lexical = kw.retrieve(query, { limit: Math.max(limit * 3, 15), collection: options.collection });
+    const lexical = kw.retrieve(query, {
+      limit: Math.max(limit * 3, 15),
+      collection: options.collection,
+      tenantId: options.tenantId,
+      role: options.role,
+    });
     this.rebuildVectors(
-      // access chunks via retrieve side-effect — get from list by re-querying docs is heavy;
-      // rebuild from lexical candidates only for efficiency
       lexical.map((r) => ({
         id: r.chunkId,
         documentId: r.documentId,
@@ -436,40 +447,167 @@ export class KnowledgeIntelligenceEngine {
     reranked.sort((a, b) => b.score - a.score);
     const top = reranked.slice(0, limit);
 
-    const docs = kw.listDocuments();
+    const docs = kw.listDocuments({ tenantId: options.tenantId, role: options.role });
     const docMap = new Map(docs.map((d) => [d.id, d]));
+    const forbidden = (options.forbiddenTargetValues || []).filter(Boolean).map((v) => v.toLowerCase());
 
-    const results = top.map((r) => {
-      const doc = docMap.get(r.documentId);
-      const citation: GroundedCitation = {
-        documentId: r.documentId,
-        documentTitle: r.documentTitle,
-        collection: r.collection,
-        chunkId: r.chunkId,
-        chunkIndex: r.chunkIndex,
-        snippet: r.text.slice(0, 280),
-        score: r.score,
-        contentHash: doc?.contentHash || '',
-        provenance: doc?.provenance || 'unknown',
-        sourceReliability: reliabilityScore(doc || {}),
-        language: r.language
-      };
-      return { ...r, citation };
-    });
+    const results = top
+      .filter((r) => !forbidden.some((f) => r.text.toLowerCase().includes(f)))
+      .map((r) => {
+        const doc = docMap.get(r.documentId);
+        const citation: GroundedCitation = {
+          documentId: r.documentId,
+          documentTitle: r.documentTitle,
+          collection: r.collection,
+          chunkId: r.chunkId,
+          chunkIndex: r.chunkIndex,
+          snippet: r.text.slice(0, 280),
+          score: r.score,
+          contentHash: doc?.contentHash || '',
+          provenance: doc?.provenance || 'unknown',
+          sourceReliability: reliabilityScore(doc || {}),
+          language: r.language
+        };
+        return { ...r, citation };
+      });
 
     const minScore = options.minScore ?? 1.5;
     const filtered = results.filter((r) => r.score >= minScore);
     const found = filtered.length > 0;
+    const compressedContext = found
+      ? filtered.map((r) => `[${r.documentTitle}] ${r.citation.snippet}`).join('\n')
+      : undefined;
 
     return {
       query,
       found,
       results: found ? filtered : [],
+      compressedContext,
       notFoundReason: found
         ? undefined
         : 'No chunk exceeded the confidence threshold for this query. Try different terms or ingest relevant documents.',
       latencyMs: Date.now() - start,
       mode: 'hybrid'
+    };
+  }
+
+  /**
+   * Advanced multi-query retrieval with context-length compression & tenant isolation.
+   */
+  public advancedRetrieve(
+    query: string,
+    options: {
+      limit?: number;
+      collection?: string;
+      minScore?: number;
+      maxContextChars?: number;
+      tenantId?: string;
+      role?: string;
+    } = {}
+  ): GroundedRetrievalResponse {
+    const start = Date.now();
+    const limit = options.limit ?? 5;
+    const maxChars = options.maxContextChars ?? 4000;
+    const base = this.hybridRetrieve(query, {
+      limit: Math.max(limit * 2, 8),
+      collection: options.collection,
+      minScore: options.minScore ?? 1.2,
+      tenantId: options.tenantId,
+      role: options.role,
+    });
+
+    const seenChunks = new Set<string>();
+    const compressed: typeof base.results = [];
+    let accChars = 0;
+    for (const item of base.results) {
+      if (seenChunks.has(item.chunkId)) continue;
+      if (accChars + item.text.length > maxChars && compressed.length > 0) break;
+      seenChunks.add(item.chunkId);
+      compressed.push(item);
+      accChars += item.text.length;
+      if (compressed.length >= limit) break;
+    }
+
+    return {
+      query,
+      found: compressed.length > 0,
+      results: compressed,
+      notFoundReason: compressed.length > 0 ? undefined : base.notFoundReason,
+      latencyMs: Date.now() - start,
+      mode: 'hybrid',
+    };
+  }
+
+  /**
+   * Verifies every citation against stored KnowledgeWorkspace documents & tenant boundaries.
+   */
+  public verifyCitations(input: {
+    answer: string;
+    citations: Array<{ documentId?: string; chunkId?: string; snippet?: string; contentHash?: string }>;
+    scope?: { tenantId?: string; role?: string };
+  }): {
+    verified: boolean;
+    citationCorrectnessRate: number;
+    answerGroundingRate: number;
+    invalidCitations: string[];
+    checkedCount: number;
+  } {
+    const kw = KnowledgeWorkspace.getInstance();
+    const docs = kw.listDocuments(input.scope ? { tenantId: input.scope.tenantId, role: input.scope.role } : undefined);
+    const docMap = new Map(docs.map((d) => [d.id, d]));
+
+    const citations = Array.isArray(input.citations) ? input.citations : [];
+    if (citations.length === 0) {
+      return {
+        verified: false,
+        citationCorrectnessRate: 0,
+        answerGroundingRate: 0,
+        invalidCitations: ['NO_CITATIONS_PROVIDED'],
+        checkedCount: 0,
+      };
+    }
+
+    const invalidCitations: string[] = [];
+    let validCount = 0;
+    const answerTokens = new Set(tokenize(input.answer || ''));
+    let groundedTokens = 0;
+    const evidenceTokens = new Set<string>();
+
+    for (const cit of citations) {
+      const doc = cit.documentId ? docMap.get(cit.documentId) : undefined;
+      if (!doc) {
+        invalidCitations.push(cit.documentId || 'missing_documentId');
+        continue;
+      }
+      if (cit.contentHash && cit.contentHash !== doc.contentHash) {
+        invalidCitations.push(`${doc.id}:hash_mismatch`);
+        continue;
+      }
+      const snippet = (cit.snippet || '').trim();
+      if (snippet && !doc.content.toLowerCase().includes(snippet.toLowerCase().slice(0, 60))) {
+        invalidCitations.push(`${doc.id}:snippet_not_in_source`);
+        continue;
+      }
+      validCount += 1;
+      for (const tok of tokenize(snippet || doc.content)) {
+        evidenceTokens.add(tok);
+      }
+    }
+
+    for (const tok of answerTokens) {
+      if (evidenceTokens.has(tok)) groundedTokens += 1;
+    }
+
+    const citationCorrectnessRate = Number((validCount / citations.length).toFixed(3));
+    const answerGroundingRate =
+      answerTokens.size > 0 ? Number((groundedTokens / answerTokens.size).toFixed(3)) : 0;
+
+    return {
+      verified: invalidCitations.length === 0 && citationCorrectnessRate >= 0.99 && answerGroundingRate > 0,
+      citationCorrectnessRate,
+      answerGroundingRate,
+      invalidCitations,
+      checkedCount: citations.length,
     };
   }
 

@@ -3,6 +3,7 @@ import { VividCard } from '../ui/VividCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { SystemAuditLedger } from './SystemAuditLedger';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { NativeMemoryController, EpisodicMemoryItem, MemoryStats } from '../../services/NativeMemoryController';
 import {
   ShieldCheck,
@@ -46,6 +47,7 @@ interface TamperResult {
 
 export const GovernanceSecurity: React.FC = () => {
   const { t, lang, formatNumber, formatDate } = useLanguage();
+  const { authHeaders, isAuthenticated } = useAuth();
   const [isRunningSim, setIsRunningSim] = useState(false);
   const [simResults, setSimResults] = useState<any[] | null>(null);
 
@@ -85,9 +87,10 @@ export const GovernanceSecurity: React.FC = () => {
   const [isValidatingEpochs, setIsValidatingEpochs] = useState(false);
 
   const validateTrainingProvenance = async () => {
+    if (!isAuthenticated) return;
     setIsValidatingEpochs(true);
     try {
-      const res = await fetch('/api/audit?limit=150');
+      const res = await fetch('/api/audit?limit=150', { headers: authHeaders() });
       const data = await res.json();
       if (data.success && Array.isArray(data.entries)) {
         const entries = data.entries;
@@ -183,9 +186,10 @@ export const GovernanceSecurity: React.FC = () => {
   };
 
   const handleRunSecuritySuite = async () => {
+    if (!isAuthenticated) return;
     setIsRunningSim(true);
     try {
-      const res = await fetch('/api/identity/verify-security', { method: 'POST' });
+      const res = await fetch('/api/identity/verify-security', { method: 'POST', headers: authHeaders() });
       const data = await res.json();
       if (data.success) {
         setSimResults(data.results);
@@ -198,9 +202,10 @@ export const GovernanceSecurity: React.FC = () => {
   };
 
   const handleRunTamperVerification = async () => {
+    if (!isAuthenticated) return;
     setIsVerifyingTamper(true);
     try {
-      const res = await fetch('/api/sandbox/tamper-verify', { method: 'POST' });
+      const res = await fetch('/api/sandbox/tamper-verify', { method: 'POST', headers: authHeaders() });
       const data = await res.json();
       if (data.success) {
         setTamperResult(data);
@@ -213,9 +218,10 @@ export const GovernanceSecurity: React.FC = () => {
   };
 
   const handleRunLanguageSuite = async () => {
+    if (!isAuthenticated) return;
     setIsVerifyingLanguage(true);
     try {
-      const res = await fetch('/api/verify/language-integrity', { method: 'POST' });
+      const res = await fetch('/api/verify/language-integrity', { method: 'POST', headers: authHeaders() });
       const data = await res.json();
       if (data.success) {
         setLanguageSuiteResult(data.suite);

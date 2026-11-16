@@ -64,7 +64,7 @@ jobs:
 
           python -m compileall -q qplus_native
 
-          for file in train_lm.py eval_lm.py; do
+          for file in train_lm.py eval_lm.py qplus_native/train_lm.py qplus_native/eval_lm.py; do
             if [ -f "$file" ]; then
               python -m py_compile "$file"
             fi
@@ -93,6 +93,8 @@ jobs:
           cat model-test-files.txt
 
       - name: Run model validation tests
+        env:
+          PYTHONPATH: .
         run: |
           mapfile -t TEST_FILES < model-test-files.txt
           python -m pytest -q "${TEST_FILES[@]}" --tb=short

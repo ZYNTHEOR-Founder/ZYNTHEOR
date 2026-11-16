@@ -528,8 +528,19 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     return true;
   }
 
-  public listDocuments(filter?: { collection?: string; search?: string; tag?: string }): KnowledgeDocument[] {
-    let docs = Array.from(this.documents.values());
+  private isDocAccessible(doc: KnowledgeDocument, filter?: { tenantId?: string; role?: string }): boolean {
+    if (!filter?.tenantId) return true;
+    const isAdmin = String(filter.role || '').toLowerCase() === 'admin';
+    if (isAdmin && filter.tenantId === '*') return true;
+    if (doc.tenantId && doc.tenantId !== filter.tenantId) return false;
+    if (Array.isArray(doc.readRoles) && doc.readRoles.length > 0 && filter.role) {
+      if (!isAdmin && !doc.readRoles.includes(filter.role)) return false;
+    }
+    return true;
+  }
+
+  public listDocuments(filter?: { collection?: string; search?: string; tag?: string; tenantId?: string; role?: string }): KnowledgeDocument[] {
+    let docs = Array.from(this.documents.values()).filter((d) => this.isDocAccessible(d, filter));
 
     if (filter?.collection) {
       docs = docs.filter((d) => d.collection.toLowerCase() === filter.collection!.toLowerCase());
@@ -550,14 +561,19 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
     return docs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
 
-  public getDocument(id: string): KnowledgeDocument | null {
-    return this.documents.get(id) || null;
+  public getDocument(id: string, scope?: { tenantId?: string; role?: string }): KnowledgeDocument | null {
+    const doc = this.documents.get(id) || null;
+    if (!doc) return null;
+    if (scope && !this.isDocAccessible(doc, scope)) {
+      throw new Error(`FORBIDDEN: Document '${id}' belongs to another tenant scope.`);
+    }
+    return doc;
   }
 
   /**
    * Native Knowledge Retrieval with Keyword, N-Gram & Heading Relevance
    */
-  public retrieve(query: string, options: { limit?: number; collection?: string } = {}): RetrievalResult[] {
+  public retrieve(query: string, options: { limit?: number; collection?: string; tenantId?: string; role?: string } = {}): RetrievalResult[] {
     const limit = options.limit || 4;
     const qLower = query.toLowerCase().trim();
     if (!qLower) return [];
@@ -569,7 +585,13 @@ Each token payload enforces strict tenantId validation, role hierarchy checks, a
 
     if (queryTokens.length === 0) return [];
 
-    let targetChunks = this.chunks;
+    const accessibleDocIds = new Set(
+      Array.from(this.documents.values())
+        .filter((d) => this.isDocAccessible(d, options))
+        .map((d) => d.id)
+    );
+
+    let targetChunks = this.chunks.filter((c) => accessibleDocIds.has(c.documentId));
     if (options.collection) {
       targetChunks = targetChunks.filter((c) => c.collection.toLowerCase() === options.collection!.toLowerCase());
     }

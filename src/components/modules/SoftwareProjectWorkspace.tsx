@@ -2972,7 +2972,7 @@ export const SoftwareProjectWorkspace: React.FC<SoftwareProjectWorkspaceProps> =
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2">
-              {nativeIntelligenceGates.map((gate) => (
+              {nativeIntelligenceGates.map((gate: { id: string; order: number; name: string; state: string; reason?: string }) => (
                 <div
                   key={gate.id}
                   title={gate.reason}

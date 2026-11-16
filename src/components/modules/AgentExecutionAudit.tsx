@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { AuditRecord } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import { ShieldCheck, ShieldAlert, RefreshCw, Search, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 
 interface VerificationResult {
@@ -12,6 +13,7 @@ interface VerificationResult {
 }
 
 export const AgentExecutionAudit: React.FC = () => {
+  const { authHeaders, authReady, isAuthenticated } = useAuth();
   const [records, setRecords] = useState<AuditRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,13 +21,14 @@ export const AgentExecutionAudit: React.FC = () => {
   const [verification, setVerification] = useState<VerificationResult | null>(null);
   const [verifying, setVerifying] = useState(false);
 
-  const fetchAgentTasks = async () => {
+  const fetchAgentTasks = useCallback(async () => {
+    if (!authReady || !isAuthenticated) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/audit?limit=100');
+      const res = await fetch('/api/audit?limit=100', { headers: authHeaders() });
       const data = await res.json();
-      if (!data.success) {
+      if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to load audit ledger');
       }
       const all: AuditRecord[] = data.records || [];
@@ -43,11 +46,11 @@ export const AgentExecutionAudit: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders, authReady, isAuthenticated]);
 
   useEffect(() => {
-    fetchAgentTasks();
-  }, []);
+    void fetchAgentTasks();
+  }, [fetchAgentTasks]);
 
   const handleVerifyIntegrity = async (record: AuditRecord) => {
     setSelectedRecord(record);

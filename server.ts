@@ -4,14 +4,38 @@
  * Zero external AI APIs. 100% First-party sovereign native neural bridge and sandbox execution.
  */
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import crypto from 'crypto';
-import { NativeNeuralLMProvider } from './lib/providers';
-import { TaskOrchestrator } from './lib/TaskOrchestrator';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import { NativeNeuralLMProvider, ExternalBrainProvider } from './lib/providers';
+import { ConnectivityMonitor } from './lib/ConnectivityMonitor';
+import { TaskOrchestrator, normalizeTaskPriority } from './lib/TaskOrchestrator';
+import { ActionDrivenEngine } from './lib/ActionDrivenEngine';
+import { AutonomousPlanner } from './lib/AutonomousPlanner';
+import { ApprovalGate } from './lib/ApprovalGate';
+import { CognitiveContextEngine } from './lib/CognitiveContextEngine';
+import { AdaptiveReasoningEngine } from './lib/AdaptiveReasoningEngine';
+import { KnowledgeGraphEngine } from './lib/KnowledgeGraphEngine';
+import { PerformanceEngine } from './lib/PerformanceEngine';
+import { ContinuousLearningPipeline } from './lib/ContinuousLearningPipeline';
+import { SelfEvaluationEngine } from './lib/SelfEvaluationEngine';
+import {
+  runBatch29Evaluation,
+  loadLatestBatch29EvalReport,
+  assertNoManualScoreInjection,
+} from './lib/CognitiveEvaluationLab';
+import { getCapabilityGatesSnapshot } from './lib/CapabilityGates';
+import { getMultimodalCapabilityRegistry } from './lib/MultimodalInterfaces';
+import { ToolRegistry } from './lib/ToolRegistry';
+import { buildTruthDashboardSnapshot } from './lib/DashboardTruth';
+import { InternetIntegrationEngine } from './lib/InternetIntegrationEngine';
 import { AuditLedger } from './lib/AuditLedger';
 import { ToolGateway } from './lib/ToolGateway';
 import { CommercialManager, LaunchPhase } from './lib/CommercialManager';
@@ -33,16 +57,75 @@ import { SovereignIdentity, SovereignRole } from './lib/SovereignIdentity';
 import { TokenRevocation } from './lib/TokenRevocation';
 import { BenchmarkRunner } from './server/benchmarks/runner';
 
+const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 
-app.use(express.json());
+function hasDangerousProtoKeyInObject(obj: unknown, seen = new Set<unknown>()): boolean {
+  if (!obj || typeof obj !== 'object' || seen.has(obj)) return false;
+  seen.add(obj);
+  if (Array.isArray(obj)) {
+    return obj.some((item) => hasDangerousProtoKeyInObject(item, seen));
+  }
+  const ownKeys = Object.getOwnPropertyNames(obj);
+  for (const key of ownKeys) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      return true;
+    }
+    const val = (obj as Record<string, unknown>)[key];
+    if (hasDangerousProtoKeyInObject(val, seen)) return true;
+  }
+  return false;
+}
 
-/**
- * Legacy name kept as alias — all authorization goes through requireAuth (Bearer token).
- * allowedRoles uses UI labels mapped to SovereignRole hierarchy.
- * Client x-zyntheor-role headers are NEVER trusted for authorization.
- */
+app.use(
+  express.json({
+    limit: '10mb',
+    verify: (_req, _res, buf) => {
+      const raw = buf.toString('utf8');
+      if (/"(?:__proto__|constructor|prototype)"\s*:/.test(raw)) {
+        const err = new Error('PROTOTYPE_POLLUTION_BLOCKED: Disallowed JSON key detected');
+        (err as any).status = 400;
+        (err as any).code = 'PROTOTYPE_POLLUTION_BLOCKED';
+        throw err;
+      }
+    },
+  })
+);
+
+app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+  if (err && (err.code === 'PROTOTYPE_POLLUTION_BLOCKED' || err.status === 400 || err.type === 'entity.parse.failed')) {
+    return res.status(400).json({
+      success: false,
+      code: err.code || 'BAD_REQUEST',
+      error: err.message || 'Invalid JSON payload',
+    });
+  }
+  return next(err);
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.body && hasDangerousProtoKeyInObject(req.body)) {
+    return res.status(400).json({
+      success: false,
+      code: 'PROTOTYPE_POLLUTION_BLOCKED',
+      error: 'Disallowed prototype key in payload',
+    });
+  }
+  const reqStart = Date.now();
+  res.on('finish', () => {
+    if (req.path.startsWith('/api/')) {
+      apiSamples.push(Math.max(1, Date.now() - reqStart));
+      if (apiSamples.length > 100) apiSamples.shift();
+    }
+  });
+  return next();
+});
+
+const apiSamples: number[] = [];
+let wsClientCount = 0;
+let wsLastFrameAt: string | null = null;
+
 function requireRole(allowedRoles: Array<'User' | 'Developer' | 'Administrator'>) {
   const rank: Record<string, number> = { User: 1, Developer: 2, Administrator: 3 };
   let lowest: 'User' | 'Developer' | 'Administrator' = allowedRoles[0] || 'User';
@@ -62,9 +145,9 @@ AuditLedger.append('SYSTEM', 'SERVER_BOOT', {
   sandbox_dir: ToolGateway.getWorkspaceRoot()
 });
 
-// Resource history buffer using authentic OS and process telemetry
-let lastRecordedTokensPerSec = 0;
-let lastRecordedLatencyMs = 0;
+// Resource history buffer using authentic OS and measured inference telemetry (null until measured)
+let lastRecordedTokensPerSec: number | null = null;
+let lastRecordedLatencyMs: number | null = null;
 
 interface RealResourceSample {
   timestamp: string;
@@ -79,8 +162,9 @@ interface RealResourceSample {
   systemRamUsedMb: number;
   systemRamTotalMb: number;
   systemRamFreeMb: number;
-  tokensPerSec: number;
-  lastInferenceLatencyMs: number;
+  tokensPerSec: number | null;
+  lastInferenceLatencyMs: number | null;
+  telemetryStatus: 'MEASURED' | 'UNAVAILABLE';
   // Compatibility fields
   cpuPercent: number;
   gpuPercent: number;
@@ -124,6 +208,7 @@ function sampleResources() {
     systemRamFreeMb: freeMemMb,
     tokensPerSec: lastRecordedTokensPerSec,
     lastInferenceLatencyMs: lastRecordedLatencyMs,
+    telemetryStatus: lastRecordedLatencyMs !== null ? 'MEASURED' : 'UNAVAILABLE',
     // Compatibility fields
     cpuPercent: Math.min(100, Math.round((load[0] / cpus) * 100)),
     gpuPercent: 0,
@@ -156,60 +241,82 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
-// Online Cloud Runtime readiness. A connected API process is not proof that
-// native weights or inference are ready; these routes report the bridge state.
+// Online Cloud Runtime readiness via ConnectivityMonitor.
 app.get('/api/connectivity/health', async (_req: Request, res: Response) => {
   try {
-    const provider = NativeNeuralLMProvider.getInstance();
-    const [connectivity, model] = await Promise.all([provider.connectivityCheck(), provider.ping()]);
-    const online = Boolean(connectivity?.online && model?.inference_ready);
-    const payload = {
-      success: true,
-      online,
-      onlineConnectivityRequired: true,
-      weightsLoaded: Boolean(model?.weights_loaded),
-      inferenceReady: Boolean(model?.inference_ready),
-      runtimeState: model?.runtime_state || 'BLOCKED',
-      status: online ? 'CONNECTED' : 'FAIL_CLOSED',
-      reason: model?.readiness_reason || connectivity?.reason || 'FAIL_CLOSED: Online Connectivity Required',
-      activeParams: Number(model?.active_params || 0),
-      targetParams: model?.target_params ?? null,
-      checkpointHash: model?.checkpoint_hash || null,
-      sourceUri: model?.source_uri || null,
-      checkedAt: new Date().toISOString()
-    };
-    res.status(online ? 200 : 503).json(payload);
+    const state = await ConnectivityMonitor.getInstance().checkNow();
+    const pingSnap = ConnectivityMonitor.getInstance().getLastPingResult();
+    res.status(state.online ? 200 : 503).json({
+      success: state.online,
+      ...state,
+      inferenceReady: Boolean(state.online && state.weightsLoaded && state.executionVerified),
+      activeParams: Number(pingSnap?.active_params || 0),
+      targetParams: pingSnap?.target_params ?? null,
+      sourceUri: state.cloudSourceUri,
+    });
   } catch (err: any) {
-    res.status(503).json({ success: false, online: false, onlineConnectivityRequired: true, weightsLoaded: false, inferenceReady: false, runtimeState: 'BLOCKED', status: 'FAIL_CLOSED', reason: `FAIL_CLOSED: Online Connectivity Required — ${err.message}` });
+    res.status(503).json({
+      success: false,
+      online: false,
+      onlineConnectivityRequired: true,
+      weightsLoaded: false,
+      inferenceReady: false,
+      runtimeState: 'BLOCKED',
+      code: 'FAIL_CLOSED',
+      status: 'ONLINE_CONNECTIVITY_REQUIRED',
+      reason: `FAIL_CLOSED: Online Connectivity Required — ${err.message}`,
+    });
   }
 });
 
-app.post('/api/connectivity/reconnect', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+app.post('/api/connectivity/reconnect', async (req: Request, res: Response) => {
   try {
     const presignedUrl = req.body?.presignedUrl;
+    const objectKey = req.body?.objectKey;
     if (presignedUrl !== undefined && (typeof presignedUrl !== 'string' || presignedUrl.length > 4096)) {
       return res.status(400).json({ success: false, code: 'INVALID_URL', error: 'presignedUrl must be a valid URL string.' });
     }
-    const provider = NativeNeuralLMProvider.getInstance();
-    const result = await provider.reconnect(presignedUrl);
-    const online = Boolean(result?.online && result?.inference_ready && result?.weights_loaded);
-    if (!online) {
-      const error = String(result?.error || result?.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required');
-      const statusCode = error.includes('SSRF_BLOCKED') ? 400 : 503;
-      return res.status(statusCode).json({ success: false, online: false, onlineConnectivityRequired: true, weightsLoaded: false, inferenceReady: false, runtimeState: 'BLOCKED', code: error.includes('SSRF_BLOCKED') ? 'SSRF_BLOCKED' : 'FAIL_CLOSED', error });
+    const state = await ConnectivityMonitor.getInstance().reconnect(presignedUrl, objectKey);
+    const pingSnap = ConnectivityMonitor.getInstance().getLastPingResult();
+    if (!state.online || !state.weightsLoaded || !state.executionVerified) {
+      return res.status(503).json({
+        success: false,
+        ...state,
+        online: false,
+        weightsLoaded: state.weightsLoaded,
+        inferenceReady: false,
+        error: state.reason,
+      });
     }
     AuditLedger.append('SYSTEM', 'CLOUD_RUNTIME_CHECKPOINT_LOADED', {
-      userId: req.sovereignUserId,
-      tenantId: req.sovereignTenantId,
-      sourceUri: result.source_uri,
-      checkpointHash: result.checkpoint_hash,
-      activeParams: result.active_params
+      sourceUri: state.cloudSourceUri,
+      checkpointSha256: state.checkpointSha256,
+      activeParams: pingSnap?.active_params || 0,
     });
-    res.json({ success: true, online: true, onlineConnectivityRequired: true, weightsLoaded: true, inferenceReady: true, runtimeState: 'READY', activeParams: result.active_params, checkpointHash: result.checkpoint_hash, sourceUri: result.source_uri });
+    return res.json({
+      success: true,
+      ...state,
+      online: true,
+      onlineConnectivityRequired: false,
+      weightsLoaded: true,
+      inferenceReady: true,
+      runtimeState: 'READY',
+      activeParams: Number(pingSnap?.active_params || 0),
+      sourceUri: state.cloudSourceUri,
+    });
   } catch (err: any) {
     const error = String(err?.message || err);
-    const blockedBySsrF = error.includes('SSRF_BLOCKED');
-    res.status(blockedBySsrF ? 400 : 503).json({ success: false, online: false, onlineConnectivityRequired: true, weightsLoaded: false, inferenceReady: false, runtimeState: 'BLOCKED', code: blockedBySsrF ? 'SSRF_BLOCKED' : 'FAIL_CLOSED', error });
+    return res.status(503).json({
+      success: false,
+      online: false,
+      onlineConnectivityRequired: true,
+      weightsLoaded: false,
+      inferenceReady: false,
+      runtimeState: 'FAILED',
+      code: 'FAIL_CLOSED',
+      reason: error,
+      error,
+    });
   }
 });
 
@@ -217,25 +324,35 @@ app.post('/api/connectivity/reconnect', requireAuth('guest'), async (req: Authen
 app.get('/api/system/status', async (_req: Request, res: Response) => {
   try {
     sampleResources();
+    const monitor = ConnectivityMonitor.getInstance();
+    const connectivity = await monitor.checkNow();
     const provider = NativeNeuralLMProvider.getInstance();
-    const pingRes = await provider.ping();
+    const pingRes = monitor.getLastPingResult() || (await provider.ping());
     const integrity = AuditLedger.verifyIntegrity();
     const commercial = CommercialManager.getInstance().getMetrics();
     const files = ToolGateway.listFiles();
+    const lastEvidence = provider.getLastInferenceEvidence();
 
     res.json({
       success: true,
+      connectivity,
       model: {
         name: pingRes.model_name,
         architecture: pingRes.architecture,
         totalParams: pingRes.total_params,
         checkpointHash: pingRes.checkpoint_hash,
-        weightsLoaded: pingRes.weights_loaded,
+        checkpointPath: connectivity.checkpointPath,
+        checkpointSha256: connectivity.checkpointSha256,
+        tokenizerSha256: connectivity.tokenizerSha256,
+        activeRuntimeId: connectivity.activeRuntimeId,
+        lastInferenceEvidence: lastEvidence,
+        weightsLoaded: connectivity.weightsLoaded,
         activeParams: pingRes.active_params,
         targetParams: pingRes.target_params ?? null,
-        inferenceReady: pingRes.inference_ready,
-        runtimeState: pingRes.runtime_state,
-        readinessReason: pingRes.readiness_reason
+        inferenceReady: connectivity.online && connectivity.executionVerified,
+        runtimeState: connectivity.runtimeState,
+        readinessReason: connectivity.reason,
+        externalBrain: ExternalBrainProvider.getStatus(),
       },
       audit: {
         totalRecords: integrity.totalRecords,
@@ -274,53 +391,174 @@ app.post('/api/native/inference', requireAuth('guest'), async (req: Authenticate
   try {
     const prompt = req.body?.prompt || 'ทดสอบ';
     const role = req.body?.role || 'chat';
-    const provider = NativeNeuralLMProvider.getInstance();
-    const runtime = await provider.ping();
-    if (!runtime.inference_ready || !runtime.weights_loaded) {
-      return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required', runtimeState: runtime.runtime_state });
+    const maxTokens = Number(req.body?.maxNewTokens ?? req.body?.max_tokens ?? 64);
+    const temperature = Number(req.body?.temperature ?? 0.7);
+    const monitor = ConnectivityMonitor.getInstance();
+    const conn = await monitor.checkNow();
+    if (!conn.online || !conn.weightsLoaded || !conn.executionVerified) {
+      return res.status(503).json({
+        success: false,
+        code: 'FAIL_CLOSED',
+        message: 'Online Connectivity Required',
+        error: conn.reason || 'FAIL_CLOSED: Online Connectivity Required',
+        runtimeState: conn.runtimeState,
+      });
     }
-    const result = await provider.chat(prompt, role);
+
+    const provider = NativeNeuralLMProvider.getInstance();
+    const pingRes = monitor.getLastPingResult() || (await provider.ping());
+    const result = await provider.chat(prompt, role, { max_tokens: maxTokens, temperature });
+    lastRecordedLatencyMs = Math.max(1, Math.round(result.latency_ms || 1));
+    lastRecordedTokensPerSec = result.tokens_per_sec || 0;
+    sampleResources();
+
+    const evidence = provider.getLastInferenceEvidence();
+    const refreshedConn = await monitor.checkNow();
 
     AuditLedger.append('SYSTEM', 'NATIVE_INFERENCE_EXECUTED', {
       promptLength: prompt.length,
       inputTokens: result.input_tokens_count,
       outputTokens: result.output_tokens_count,
       latencyMs: result.latency_ms,
-      tokensPerSec: result.tokens_per_sec
+      tokensPerSec: result.tokens_per_sec,
+      checkpointSha256: refreshedConn.checkpointSha256,
     });
 
     res.json({
       success: true,
       model: 'ZYNTHEOR Q+ Sovereign',
-      architecture: runtime.architecture,
-      totalParams: runtime.active_params,
+      architecture: pingRes.architecture,
+      totalParams: pingRes.active_params,
       checkpointHash: result.checkpoint_hash,
+      weightsSource: refreshedConn.cloudSourceUri,
+      checkpointPath: evidence?.checkpointPath || refreshedConn.checkpointPath,
+      checkpointSha256: evidence?.checkpointSha256 || refreshedConn.checkpointSha256,
+      tokenizerSha256: evidence?.tokenizerSha256 || refreshedConn.tokenizerSha256,
+      activeRuntimeId: evidence?.activeRuntimeId || refreshedConn.activeRuntimeId,
+      inferenceTimestamp: evidence?.inferenceTimestamp || new Date().toISOString(),
+      executionDurationMs: evidence?.executionDurationMs || lastRecordedLatencyMs,
       prompt,
       response: result.text,
       inputTokens: result.input_tokens_count,
       outputTokens: result.output_tokens_count,
       latency_ms: result.latency_ms,
       tokens_per_sec: result.tokens_per_sec,
-      latentNorm: result.latent_norm
+      latentNorm: result.latent_norm,
     });
   } catch (err: any) {
     const blocked = String(err?.message || err).includes('FAIL_CLOSED');
-    res.status(blocked ? 503 : 500).json({ success: false, code: blocked ? 'FAIL_CLOSED' : 'INFERENCE_ERROR', error: err.message });
+    res.status(blocked ? 503 : 500).json({
+      success: false,
+      code: blocked ? 'FAIL_CLOSED' : 'INFERENCE_ERROR',
+      message: blocked ? 'Online Connectivity Required' : err.message,
+      error: err.message,
+    });
   }
 });
 
-// 2. NDJSON Agent Execution Stream (Planner -> Coder -> Reviewer -> Tester)
+// 2. NDJSON Agent Execution Stream (Supports both Online Native LM and Unified 9-Stage Action Engine)
 app.post('/api/agent/execute', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
-  const { goal } = req.body;
+  const { goal, priority: rawPriority, mode } = req.body || {};
   if (typeof goal !== 'string' || !goal.trim() || goal.length > 8000) {
     return res.status(400).json({ success: false, code: 'INVALID_TASK_GOAL', error: 'Goal must contain 1–8000 characters.' });
   }
-  const runtime = await NativeNeuralLMProvider.getInstance().ping();
-  if (!runtime.inference_ready || !runtime.weights_loaded) {
-    return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required', runtimeState: runtime.runtime_state });
+  const priority = normalizeTaskPriority(rawPriority);
+  const unifiedMode = typeof mode === 'string' && ['action_driven', 'unified', 'autonomous', 'hybrid'].includes(mode);
+
+  if (unifiedMode) {
+    res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+    res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const started = new Date().toISOString();
+    res.write(
+      JSON.stringify({
+        type: 'init',
+        priority,
+        message: `Initiating Unified 9-Stage Action-Driven Pipeline for "${goal}" [Priority: ${priority}]`,
+        data: { goal, priority, mode },
+        timestamp: started,
+      }) + '\n'
+    );
+
+    try {
+      const mission = await ActionDrivenEngine.getInstance().executeActionMission(
+        {
+          goal,
+          mode: req.body?.actionMode || 'engineering_blueprint_execute',
+          priority,
+          runtime: req.body?.runtime,
+          targetFile: req.body?.targetFile,
+          sourceCode: req.body?.sourceCode,
+          unitTestCode: req.body?.unitTestCode,
+          approvalRequestId: req.body?.approvalRequestId,
+          requireNativeModel: Boolean(req.body?.requireNativeModel),
+        },
+        {
+          tenantId: req.sovereignTenantId!,
+          userId: req.sovereignUserId!,
+          role: req.sovereignRole || 'developer',
+        }
+      );
+
+      for (const pillar of mission.pillars) {
+        res.write(
+          JSON.stringify({
+            type: 'step',
+            role: pillar.name.toUpperCase(),
+            priority,
+            message: `[${pillar.id}] ${pillar.status}: ${pillar.summary}`,
+            data: pillar,
+            timestamp: new Date().toISOString(),
+          }) + '\n'
+        );
+      }
+
+      CommercialManager.getInstance().recordTask(mission.status === 'DELIVERED', 350);
+      res.write(
+        JSON.stringify({
+          type: 'final_result',
+          priority,
+          data: {
+            success: mission.status === 'DELIVERED',
+            taskId: mission.missionId,
+            mission,
+            executionCycle: {
+              taskId: mission.missionId,
+              executionId: mission.executionId,
+              priority,
+              lifecycleStatus: mission.status === 'DELIVERED' ? 'Delivered' : mission.status === 'BLOCKED' ? 'Blocked' : 'Failed',
+              deliveryStatus: mission.status,
+              packageArtifact: mission.packageArtifact,
+              artifacts: mission.artifacts,
+              repairHistory: mission.repairHistory,
+              acceptanceCriteria: mission.acceptanceCriteria,
+              executionEvidenceHash: mission.executionEvidenceHash,
+            },
+          },
+          timestamp: new Date().toISOString(),
+        }) + '\n'
+      );
+      return res.end();
+    } catch (err: any) {
+      CommercialManager.getInstance().recordTask(false, 100);
+      res.write(JSON.stringify({ type: 'error', message: err.message, timestamp: new Date().toISOString() }) + '\n');
+      return res.end();
+    }
   }
 
-  // Set up chunked streaming only after Native Runtime readiness has been established.
+  const conn = await ConnectivityMonitor.getInstance().checkNow();
+  if (!conn.online || !conn.weightsLoaded || !conn.executionVerified) {
+    return res.status(503).json({
+      success: false,
+      code: 'FAIL_CLOSED',
+      message: 'Online Connectivity Required',
+      error: conn.reason || 'FAIL_CLOSED: Online Connectivity Required',
+      runtimeState: conn.runtimeState,
+    });
+  }
+
   res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
   res.setHeader('Transfer-Encoding', 'chunked');
   res.setHeader('Cache-Control', 'no-cache');
@@ -329,28 +567,171 @@ app.post('/api/agent/execute', requireAuth('developer'), async (req: Authenticat
   const orchestrator = TaskOrchestrator.getInstance();
 
   try {
-    const result = await orchestrator.executeTask(goal, (event) => {
-      res.write(JSON.stringify(event) + '\n');
-    }, { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! });
+    AuditLedger.append('SYSTEM', 'AGENT_DIRECT_EXECUTION_START', {
+      goal,
+      priority,
+      ownerUserId: req.sovereignUserId, tenantId: req.sovereignTenantId,
+    });
+    const result = await orchestrator.executeTask(
+      goal,
+      (event) => {
+        res.write(JSON.stringify(event) + '\n');
+      },
+      { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId!, priority }
+    );
 
     CommercialManager.getInstance().recordTask(result.success, 350);
 
-    res.write(JSON.stringify({
-      type: 'final_result',
-      data: result,
-      timestamp: new Date().toISOString()
-    }) + '\n');
+    res.write(
+      JSON.stringify({
+        type: 'final_result',
+        data: result,
+        timestamp: new Date().toISOString(),
+      }) + '\n'
+    );
 
     res.end();
   } catch (err: any) {
     CommercialManager.getInstance().recordTask(false, 100);
-    res.write(JSON.stringify({
-      type: 'error',
-      message: err.message,
-      timestamp: new Date().toISOString()
-    }) + '\n');
+    res.write(
+      JSON.stringify({
+        type: 'error',
+        message: err.message,
+        timestamp: new Date().toISOString(),
+      }) + '\n'
+    );
     res.end();
   }
+});
+
+// 2b. Queue, Persistent Task History, Resume & Deliverable Downloads (Tenant-Isolated)
+app.post('/api/agent/queue', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const goal = req.body?.goal;
+    const priority = normalizeTaskPriority(req.body?.priority);
+    if (typeof goal !== 'string' || !goal.trim() || goal.length > 8000) {
+      return res.status(400).json({ success: false, code: 'INVALID_TASK_GOAL', error: 'Goal must contain 1–8000 characters.' });
+    }
+    const task = TaskOrchestrator.getInstance().enqueueTask(goal, priority, { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! });
+    return res.status(201).json({ success: true, task });
+  } catch (err: any) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/agent/tasks', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const tasks = TaskOrchestrator.getInstance().listTasksFor({ userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! });
+    return res.json({ success: true, tasks });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/agent/tasks/batch', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const taskIds = Array.isArray(req.body?.taskIds) ? req.body.taskIds.map(String) : [];
+    const result = TaskOrchestrator.getInstance().deleteTasksBatch(taskIds, {
+      userId: req.sovereignUserId!,
+      tenantId: req.sovereignTenantId!,
+    });
+    return res.json({ success: true, ...result });
+  } catch (err: any) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/agent/queue/run-next', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  const identity = { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! };
+  const nextTask = TaskOrchestrator.getInstance().listTasksFor(identity).find((t) => t.lifecycleStatus === 'Planned');
+  if (!nextTask) {
+    return res.status(404).json({ success: false, error: 'NO_QUEUED_TASKS' });
+  }
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  try {
+    await TaskOrchestrator.getInstance().resumeTask(nextTask.taskId, (ev) => {
+      res.write(JSON.stringify(ev) + '\n');
+    }, identity);
+  } catch {
+    // Error event already streamed cleanly
+  }
+  return res.end();
+});
+
+app.post('/api/agent/tasks/:taskId/resume', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  const identity = { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! };
+  const taskId = String(req.params.taskId || '');
+  const task = TaskOrchestrator.getInstance().getTaskFor(taskId, identity);
+  if (!task) {
+    return res.status(404).json({ success: false, error: 'TASK_NOT_FOUND_OR_FORBIDDEN' });
+  }
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  try {
+    await TaskOrchestrator.getInstance().resumeTask(taskId, (ev) => {
+      res.write(JSON.stringify(ev) + '\n');
+    }, identity);
+  } catch {
+    // Error event with FAIL_CLOSED / Blocked / resumable=true already emitted
+  }
+  return res.end();
+});
+
+app.get('/api/agent/deliverables/:filename', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const filename = path.basename(String(req.params.filename || ''));
+    const identity = { userId: req.sovereignUserId!, tenantId: req.sovereignTenantId! };
+    const orchestrator = TaskOrchestrator.getInstance();
+    const ownsDeliverable =
+      orchestrator.listTasksFor(identity).some((t) => t.executionCycle?.packageArtifact?.zipFilename === filename) ||
+      ActionDrivenEngine.getInstance()
+        .listMissions({ ...identity, role: req.sovereignRole || 'developer' })
+        .some((m) => m.packageArtifact?.zipFilename === filename);
+    if (!ownsDeliverable) {
+      return res.status(403).json({ success: false, error: 'FORBIDDEN: Deliverable ownership verification failed.' });
+    }
+    const delivRoot = path.resolve(process.cwd(), 'native_data', 'deliverables');
+    const fullPath = path.resolve(delivRoot, filename);
+    if (!fullPath.startsWith(delivRoot + path.sep) || !fs.existsSync(fullPath)) {
+      return res.status(404).json({ success: false, error: 'DELIVERABLE_NOT_FOUND' });
+    }
+    return res.download(fullPath, filename);
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/agent/scheduled-checks', requireAuth('admin'), async (_req: AuthenticatedRequest, res: Response) => {
+  const conn = await ConnectivityMonitor.getInstance().checkNow();
+  const audit = AuditLedger.verifyIntegrity();
+  res.json({ success: true, connectivity: conn, auditIntegrity: audit, checkedAt: new Date().toISOString() });
+});
+
+app.get('/api/agent/metrics', requireAuth('admin'), (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, metrics: TaskOrchestrator.getInstance().getExecutionMetrics() });
+});
+
+app.get('/api/agent/cycles', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  const limit = Number(req.query.limit || 50);
+  res.json({ success: true, cycles: TaskOrchestrator.getInstance().listCycles(limit) });
+});
+
+app.get('/api/agent/plans', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const plans = AutonomousPlanner.getInstance().listPlans({
+    tenantId: req.sovereignTenantId!,
+    ownerUserId: req.sovereignUserId!,
+  });
+  res.json({ success: true, plans });
+});
+
+app.get('/api/agent/plans/:taskId', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const plan = AutonomousPlanner.getInstance().getPlan(String(req.params.taskId), {
+    tenantId: req.sovereignTenantId!,
+    ownerUserId: req.sovereignUserId!,
+  });
+  if (!plan) return res.status(404).json({ success: false, error: 'PLAN_NOT_FOUND' });
+  return res.json({ success: true, plan });
 });
 
 // 3. Real-World Execution Verification Suite (8 proofs)
@@ -425,8 +806,8 @@ app.get('/api/audit', requireRole(['Developer', 'Administrator']), async (req: R
   }
 });
 
-// 6. Workspace Files & Content
-app.get('/api/workspace/files', requireAuth('developer'), async (_req: AuthenticatedRequest, res: Response) => {
+// 6. Workspace Files & Content (shared workspace mutations/listings restricted to admin)
+app.get('/api/workspace/files', requireAuth('admin'), async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const files = ToolGateway.listFiles();
     const details = files.map((relPath) => {
@@ -483,7 +864,7 @@ app.delete('/api/workspace/file', requireRole(['Developer', 'Administrator']), a
   }
 });
 
-app.post('/api/workspace/run', requireRole(['Developer', 'Administrator']), async (req: Request, res: Response) => {
+app.post('/api/workspace/run', requireRole(['Administrator']), async (req: Request, res: Response) => {
   try {
     const { command, args } = req.body;
     if (!command) return res.status(400).json({ error: 'command is required' });
@@ -573,10 +954,11 @@ app.get('/api/memory', requireAuth('guest'), async (_req: AuthenticatedRequest, 
   }
 });
 
-app.get('/api/memory/episodic', requireAuth('guest'), (_req: AuthenticatedRequest, res: Response) => {
+app.get('/api/memory/episodic', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
   try {
     const memoryCtrl = NativeMemoryController.getInstance();
-    const items = memoryCtrl.listAll();
+    const scope = { tenantId: req.sovereignTenantId, userId: req.sovereignUserId, role: req.sovereignRole };
+    const items = memoryCtrl.listAll(scope);
     const stats = memoryCtrl.getStats();
     res.json({ success: true, items, stats });
   } catch (err: any) {
@@ -586,13 +968,24 @@ app.get('/api/memory/episodic', requireAuth('guest'), (_req: AuthenticatedReques
 
 app.post('/api/memory/episodic', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { key, value, category, metadata } = req.body;
+    const { key, value, category, metadata, ttlSeconds } = req.body;
     if (!key || value === undefined) {
       return res.status(400).json({ error: 'key and value are required' });
     }
     const memoryCtrl = NativeMemoryController.getInstance();
-    const item = memoryCtrl.storeMemory(key, value, category, metadata);
-    res.json({ success: true, item });
+    const scope = { tenantId: req.sovereignTenantId, userId: req.sovereignUserId, role: req.sovereignRole };
+    const item = memoryCtrl.storeMemory(key, value, category, metadata, { scope, ttlSeconds });
+    res.json({ success: true, item: { ...item, tenantId: req.sovereignTenantId } });
+  } catch (err: any) {
+    const forbidden = String(err?.message || '').includes('FORBIDDEN:');
+    res.status(forbidden ? 403 : 500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/memory/verify-integrity', requireAuth('guest'), (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const integrity = NativeMemoryController.getInstance().verifyStoreIntegrity();
+    res.json({ success: true, integrity });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -601,37 +994,43 @@ app.post('/api/memory/episodic', requireAuth('guest'), (req: AuthenticatedReques
 app.get('/api/memory/episodic/:key', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
   try {
     const memoryCtrl = NativeMemoryController.getInstance();
-    const item = memoryCtrl.retrieveMemory(req.params.key);
+    const scope = { tenantId: req.sovereignTenantId, userId: req.sovereignUserId, role: req.sovereignRole };
+    const item = memoryCtrl.retrieveMemory(req.params.key, scope);
     if (!item) {
       return res.status(404).json({ success: false, error: 'Memory item not found' });
     }
     res.json({ success: true, item });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const forbidden = String(err?.message || '').includes('FORBIDDEN:');
+    res.status(forbidden ? 403 : 500).json({ success: false, error: err.message });
   }
 });
 
 app.put('/api/memory/episodic/:key', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { value, category, metadata } = req.body;
+    const { value, category, metadata, ttlSeconds } = req.body;
     if (value === undefined) {
       return res.status(400).json({ error: 'value is required for memory update' });
     }
     const memoryCtrl = NativeMemoryController.getInstance();
-    const item = memoryCtrl.updateMemory(req.params.key, value, category, metadata);
+    const scope = { tenantId: req.sovereignTenantId, userId: req.sovereignUserId, role: req.sovereignRole };
+    const item = memoryCtrl.updateMemory(req.params.key, value, category, metadata, { scope, ttlSeconds });
     res.json({ success: true, item });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const forbidden = String(err?.message || '').includes('FORBIDDEN:');
+    res.status(forbidden ? 403 : 500).json({ success: false, error: err.message });
   }
 });
 
 app.delete('/api/memory/episodic/:key', requireAuth('guest'), (req: AuthenticatedRequest, res: Response) => {
   try {
     const memoryCtrl = NativeMemoryController.getInstance();
-    const deleted = memoryCtrl.deleteMemory(req.params.key);
+    const scope = { tenantId: req.sovereignTenantId, userId: req.sovereignUserId, role: req.sovereignRole };
+    const deleted = memoryCtrl.deleteMemory(req.params.key, scope);
     res.json({ success: true, deleted });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const forbidden = String(err?.message || '').includes('FORBIDDEN:');
+    res.status(forbidden ? 403 : 500).json({ success: false, error: err.message });
   }
 });
 
@@ -1029,10 +1428,18 @@ app.post('/api/chat/message', requireAuth('guest'), async (req: AuthenticatedReq
 
   const correlationId = (req.body?.correlationId || req.headers['x-correlation-id'] || `corr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`) as string;
   const startTime = Date.now();
+  const monitor = ConnectivityMonitor.getInstance();
+  const conn = await monitor.checkNow();
   const provider = NativeNeuralLMProvider.getInstance();
-  const runtime = await provider.ping();
-  if (!runtime.inference_ready || !runtime.weights_loaded) {
-    return res.status(503).json({ success: false, code: 'FAIL_CLOSED', error: runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required', runtimeState: runtime.runtime_state });
+  const runtime = monitor.getLastPingResult() || (await provider.ping());
+  if (!conn.online || !runtime.inference_ready || !runtime.weights_loaded) {
+    return res.status(503).json({
+      success: false,
+      code: 'FAIL_CLOSED',
+      message: 'Online Connectivity Required',
+      error: conn.reason || runtime.readiness_reason || 'FAIL_CLOSED: Online Connectivity Required',
+      runtimeState: conn.runtimeState || runtime.runtime_state,
+    });
   }
 
   // Set up chunked streaming only after inference readiness has been established.
@@ -1135,6 +1542,8 @@ app.post('/api/chat/message', requireAuth('guest'), async (req: AuthenticatedReq
       fullText: cleanContent,
       thought: thoughtText,
       citations,
+      weightsSource: conn.cloudSourceUri,
+      totalParams: runtime.active_params,
       timestamp: new Date().toISOString()
     }) + '\n');
     res.end();
@@ -1562,8 +1971,636 @@ app.get('/api/model/inspect', requireRole(['Developer', 'Administrator']), async
   }
 });
 
-// Mount Vite middleware in development or serve static in production.
-// ZYNTHEOR_API_ONLY=1 skips Vite for live API acceptance tests.
+// ==========================================
+// 13. BATCH 28 / 29 / 30 COGNITIVE, ACTION, GOVERNANCE, TRAINING & DASHBOARD ROUTES
+// ==========================================
+app.get('/api/observability/operations', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const conn = await ConnectivityMonitor.getInstance().checkNow();
+    res.json({
+      success: true,
+      connectivity: conn,
+      externalBrain: ExternalBrainProvider.getStatus(),
+      tools: ToolRegistry.getInstance().getTelemetry(),
+      plans: AutonomousPlanner.getInstance().listPlans({ tenantId: req.sovereignTenantId!, ownerUserId: req.sovereignUserId! }),
+      metrics: TaskOrchestrator.getInstance().getExecutionMetrics(),
+      evaluation: SelfEvaluationEngine.getInstance().getLatestBenchmarkReport(),
+      performance: PerformanceEngine.getInstance().getTelemetry(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/tools/telemetry', requireAuth('developer'), (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, telemetry: ToolRegistry.getInstance().getTelemetry(), tools: ToolRegistry.getInstance().listDefinitions() });
+});
+
+app.post('/api/reasoning/verify', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { op, steps, expected_final, tasks, max_total_cost, source, candidates } = req.body || {};
+    const outcome = await AdaptiveReasoningEngine.getInstance().executeReasoning({
+      prompt: `Verify reasoning op=${op || 'auto'}`,
+      scope: { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' },
+      mathSteps: Array.isArray(steps) ? steps : undefined,
+      expectedFinal: expected_final !== undefined ? Number(expected_final) : undefined,
+      cspTasks: Array.isArray(tasks) ? tasks : undefined,
+      maxCost: max_total_cost !== undefined ? Number(max_total_cost) : undefined,
+      pythonSource: typeof source === 'string' ? source : undefined,
+    });
+    res.json({
+      success: true,
+      result: {
+        verified: outcome.verified,
+        strategy: outcome.selectedStrategy,
+        problemClass: outcome.problemClass,
+        outcome,
+        candidatesCount: Array.isArray(candidates) ? candidates.length : 0,
+      },
+    });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/governance/approvals', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    requests: ApprovalGate.getInstance().listRequests({ tenantId: req.sovereignTenantId! }),
+  });
+});
+
+app.post('/api/governance/approvals', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { actionType, resourceId, description } = req.body || {};
+    const request = ApprovalGate.getInstance().requestApproval({
+      actionType,
+      resourceId,
+      description,
+      requestedByUserId: req.sovereignUserId!,
+      requestedByRole: req.sovereignRole || 'developer',
+      tenantId: req.sovereignTenantId!,
+    });
+    res.status(201).json({ success: true, request });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/governance/approvals/:requestId/approve', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const request = ApprovalGate.getInstance().approveRequest(
+      String(req.params.requestId),
+      { userId: req.sovereignUserId!, role: req.sovereignRole || 'admin', tenantId: req.sovereignTenantId! },
+      req.body?.note
+    );
+    res.json({ success: true, request });
+  } catch (err: any) {
+    const forbidden = String(err?.message || '').includes('FORBIDDEN');
+    res.status(forbidden ? 403 : 400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/governance/approvals/:requestId/reject', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const request = ApprovalGate.getInstance().rejectRequest(
+      String(req.params.requestId),
+      { userId: req.sovereignUserId!, role: req.sovereignRole || 'admin', tenantId: req.sovereignTenantId! },
+      req.body?.note
+    );
+    res.json({ success: true, request });
+  } catch (err: any) {
+    const forbidden = String(err?.message || '').includes('FORBIDDEN');
+    res.status(forbidden ? 403 : 400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/evaluation/batch28', requireAuth('developer'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const report = await SelfEvaluationEngine.getInstance().runBatch28Benchmark();
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/training/pipeline/runs', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const pipe = ContinuousLearningPipeline.getInstance();
+  res.json({
+    success: true,
+    runs: pipe.listRuns({ tenantId: req.sovereignTenantId! }),
+    backups: pipe.listBackups(),
+  });
+});
+
+app.post('/api/training/pipeline/run', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const run = await ContinuousLearningPipeline.getInstance().executePipelineRun({
+      tenantId: req.sovereignTenantId!,
+      initiatedBy: req.sovereignUserId!,
+      ...(req.body || {}),
+    });
+    res.json({ success: true, run });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('NOT_FOUND') ? 404 : 400;
+    res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/training/pipeline/benchmark', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const run = await ContinuousLearningPipeline.getInstance().runDomainBenchmarks({
+      runId: String(req.body?.runId || ''),
+      tenantId: req.sovereignTenantId!,
+    });
+    res.json({ success: true, run });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    const status = msg.includes('NOT_FOUND') || msg.includes('RUN_NOT_FOUND') ? 404 : 400;
+    res.status(status).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/training/pipeline/promote', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const run = ContinuousLearningPipeline.getInstance().promoteApprovedRun({
+      runId: String(req.body?.runId || ''),
+      actor: { userId: req.sovereignUserId!, role: req.sovereignRole || 'admin', tenantId: req.sovereignTenantId! },
+    });
+    res.json({ success: true, run });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/training/pipeline/rollback', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const out = ContinuousLearningPipeline.getInstance().rollbackCheckpoint({
+      backupId: String(req.body?.backupId || ''),
+      actor: { userId: req.sovereignUserId!, role: req.sovereignRole || 'admin', tenantId: req.sovereignTenantId! },
+    });
+    res.json({ success: true, ...out });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+// Batch 29 Cognitive API Routes
+app.get('/api/cognitive/operations', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'guest' };
+    const ctxEngine = CognitiveContextEngine.getInstance();
+    const rsnEngine = AdaptiveReasoningEngine.getInstance();
+    const kgEngine = KnowledgeGraphEngine.getInstance();
+    const memCtrl = NativeMemoryController.getInstance();
+    const perf = PerformanceEngine.getInstance();
+    const multimodal = await getMultimodalCapabilityRegistry();
+    const gates = await getCapabilityGatesSnapshot({ multimodal });
+    const latestEval = loadLatestBatch29EvalReport();
+
+    res.json({
+      success: true,
+      contextStats: ctxEngine.getSummaryStats({ tenantId: scope.tenantId }),
+      reasoningHistory: rsnEngine.getHistory(10),
+      knowledgeGraph: kgEngine.getGraphSummary({ tenantId: scope.tenantId, role: scope.role }),
+      memoryLifecycle: memCtrl.analyzeMemoryLifecycle(scope),
+      performance: perf.getTelemetry(),
+      multimodal,
+      gates,
+      latestEvaluation: latestEval,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive/context/analyze', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const input = String(req.body?.input || '');
+    if (!input.trim()) return res.status(400).json({ success: false, error: 'input string required' });
+    const conn = await ConnectivityMonitor.getInstance().getStatus();
+    const analysis = CognitiveContextEngine.getInstance().analyzeContext({
+      input,
+      query: req.body?.query,
+      nativeNeuralState: conn.runtimeState === 'READY' ? 'READY' : 'BLOCKED',
+    });
+    return res.json({ success: true, analysis });
+  } catch (err: any) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/cognitive/context/sessions', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' };
+  res.json({ success: true, sessions: CognitiveContextEngine.getInstance().listSessions(scope) });
+});
+
+app.post('/api/cognitive/context/sessions', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { sessionId, role, text, pinAsFact } = req.body || {};
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' };
+    const result = CognitiveContextEngine.getInstance().upsertSessionTurn({
+      sessionId: String(sessionId || `sess_${Date.now()}`),
+      role: role === 'assistant' || role === 'system' ? role : 'user',
+      text: String(text || ''),
+      pinAsFact: Boolean(pinAsFact),
+      scope,
+    });
+    res.status(201).json({ success: true, ...result });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN:') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/cognitive/reasoning/execute', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' };
+    const outcome = await AdaptiveReasoningEngine.getInstance().executeReasoning({
+      ...(req.body || {}),
+      prompt: String(req.body?.prompt || ''),
+      scope,
+    });
+    res.json({ success: true, outcome });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive/reasoning/benchmark', requireAuth('developer'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const benchmark = await AdaptiveReasoningEngine.getInstance().evaluateAgainstIndependentBenchmark();
+    res.json({ success: true, benchmark });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive/graph/build', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const result = KnowledgeGraphEngine.getInstance().buildFromWorkspace({
+    tenantId: req.sovereignTenantId!,
+    role: req.sovereignRole || 'developer',
+  });
+  res.json({ success: true, result });
+});
+
+app.post('/api/cognitive/graph/traverse', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const result = KnowledgeGraphEngine.getInstance().traverseMultiHop(String(req.body?.query || ''), {
+    maxHops: Number(req.body?.maxHops || 2),
+    limit: Number(req.body?.limit || 5),
+    scope: { tenantId: req.sovereignTenantId!, role: req.sovereignRole || 'developer' },
+  });
+  res.json({ success: true, result });
+});
+
+app.get('/api/cognitive/graph/verify', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const scope = { tenantId: req.sovereignTenantId!, role: req.sovereignRole || 'developer' };
+  res.json({
+    success: true,
+    consistency: KnowledgeGraphEngine.getInstance().verifyGraphConsistency(scope),
+    contradictions: KnowledgeGraphEngine.getInstance().detectGraphContradictions(scope),
+  });
+});
+
+app.post('/api/cognitive/memory/consolidate', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = NativeMemoryController.getInstance().consolidateEpisodicToSemanticReversible({
+      targetKey: String(req.body?.targetKey || `semantic_cons_${Date.now()}`),
+      sourceCategory: req.body?.sourceCategory || 'episodic',
+      maxSources: Number(req.body?.maxSources || 10),
+      archiveSourcesFromActive: req.body?.archiveSourcesFromActive ?? true,
+      scope: { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' },
+    });
+    res.json({ success: true, result });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive/memory/rollback', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = NativeMemoryController.getInstance().rollbackConsolidation(String(req.body?.consolidationId || ''), {
+      tenantId: req.sovereignTenantId!,
+      userId: req.sovereignUserId!,
+      role: req.sovereignRole || 'developer',
+    });
+    res.json({ success: true, result });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    res.status(msg.includes('FORBIDDEN:') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.get('/api/cognitive/memory/lifecycle', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' };
+  res.json({
+    success: true,
+    lifecycle: NativeMemoryController.getInstance().analyzeMemoryLifecycle(scope),
+    integrity: NativeMemoryController.getInstance().verifyStoreIntegrity(),
+  });
+});
+
+app.post('/api/cognitive/performance/optimize', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const snapshot = PerformanceEngine.getInstance().applyOptimization({
+      updates: req.body?.updates || {},
+      reason: String(req.body?.reason || 'Operator optimization'),
+      appliedBy: req.sovereignUserId!,
+    });
+    res.json({ success: true, snapshot });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cognitive/performance/rollback', requireAuth('admin'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const snapshot = PerformanceEngine.getInstance().rollbackOptimization(
+      String(req.body?.snapshotId || ''),
+      req.sovereignUserId!
+    );
+    res.json({ success: true, snapshot });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/cognitive/multimodal/capabilities', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  const registry = await getMultimodalCapabilityRegistry();
+  res.json({ success: true, registry });
+});
+
+app.get('/api/cognitive/evaluation', requireAuth('guest'), (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, report: loadLatestBatch29EvalReport() });
+});
+
+app.post('/api/cognitive/evaluation', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    assertNoManualScoreInjection(req.body);
+    const report = await runBatch29Evaluation();
+    return res.json({ success: true, report });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    return res.status(msg.includes('INVALID_EVALUATION_INPUT') ? 400 : 500).json({ success: false, error: msg });
+  }
+});
+
+app.get('/api/cognitive/gates', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const snapshot = await getCapabilityGatesSnapshot();
+    res.json({ success: true, ...snapshot });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Batch 30 Action-Driven Routes
+app.get('/api/action/capabilities', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const capabilities = await ActionDrivenEngine.getInstance().getCapabilities({
+      tenantId: req.sovereignTenantId!,
+      userId: req.sovereignUserId!,
+      role: req.sovereignRole || 'guest',
+    });
+    res.json({ success: true, capabilities });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/action/perceive', requireAuth('guest'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const perception = await ActionDrivenEngine.getInstance().perceiveEnvironment(String(req.body?.goal || ''), {
+      tenantId: req.sovereignTenantId!,
+      userId: req.sovereignUserId!,
+      role: req.sovereignRole || 'guest',
+    });
+    res.json({ success: true, perception });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/action/missions', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const missions = ActionDrivenEngine.getInstance().listMissions({
+    tenantId: req.sovereignTenantId!,
+    userId: req.sovereignUserId!,
+    role: req.sovereignRole || 'developer',
+  });
+  res.json({ success: true, missions });
+});
+
+app.get('/api/action/missions/:missionId', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const mission = ActionDrivenEngine.getInstance().getMission(String(req.params.missionId), {
+      tenantId: req.sovereignTenantId!,
+      userId: req.sovereignUserId!,
+      role: req.sovereignRole || 'developer',
+    });
+    if (!mission) return res.status(404).json({ success: false, error: 'MISSION_NOT_FOUND' });
+    return res.json({ success: true, mission });
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    return res.status(msg.includes('FORBIDDEN') ? 403 : 400).json({ success: false, error: msg });
+  }
+});
+
+app.post('/api/action/missions/run', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const mission = await ActionDrivenEngine.getInstance().executeActionMission(req.body || {}, {
+      tenantId: req.sovereignTenantId!,
+      userId: req.sovereignUserId!,
+      role: req.sovereignRole || 'developer',
+    });
+    return res.json({ success: true, mission });
+  } catch (err: any) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Unified Truth Dashboard + 20-Task Stage Benchmarks + Research & Automation Routes
+app.get('/api/dashboard/truth', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const avgLatency =
+      apiSamples.length > 0 ? Math.round(apiSamples.reduce((a, b) => a + b, 0) / apiSamples.length) : null;
+    const connectivityState = await ConnectivityMonitor.getInstance().checkNow();
+    const truth = await buildTruthDashboardSnapshot(connectivityState, {
+      wsClientCount,
+      wsLastFrameAt,
+      apiAvgLatencyMs: avgLatency,
+      apiSampleCount: apiSamples.length,
+      lastRecordedTokensPerSec,
+      lastInferenceLatencyMs: lastRecordedLatencyMs,
+    });
+    res.json({ success: true, truth });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+const STAGE_BENCH_EVIDENCE_PATH = path.resolve(process.cwd(), 'native_data', 'stage_bench_latest.json');
+
+app.get('/api/benchmarks/stages', requireAuth('developer'), (_req: AuthenticatedRequest, res: Response) => {
+  let latest: any = null;
+  if (fs.existsSync(STAGE_BENCH_EVIDENCE_PATH)) {
+    try {
+      latest = JSON.parse(fs.readFileSync(STAGE_BENCH_EVIDENCE_PATH, 'utf8'));
+    } catch {
+      latest = null;
+    }
+  }
+  res.json({
+    success: true,
+    externalBrain: ExternalBrainProvider.getStatus(),
+    latest,
+  });
+});
+
+app.post('/api/benchmarks/stages/run', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const mode = req.body?.mode === 'external' ? 'external' : 'specification';
+    const args = ['-m', 'qplus_native.stage_bench', '--json'];
+    if (mode === 'external') {
+      args.push('--real');
+    }
+
+    let stdout = '';
+    try {
+      const execRes = await execFileAsync('python3', args, {
+        cwd: process.cwd(),
+        env: { ...process.env, PYTHONPATH: process.cwd() },
+        timeout: 120000,
+      });
+      stdout = execRes.stdout || '';
+    } catch (execErr: any) {
+      const errStdout = typeof execErr?.stdout === 'string' ? execErr.stdout.trim() : '';
+      if (errStdout.startsWith('{')) {
+        const failPayload = JSON.parse(errStdout);
+        return res.status(412).json({
+          success: false,
+          code: failPayload.status || 'FAIL_CLOSED',
+          error: failPayload.error || execErr.message,
+          report: {
+            mode: mode === 'external' ? 'REAL_EXTERNAL_BRAIN_SANDBOX' : 'FAIL_CLOSED_SPECIFICATION',
+            attribution: failPayload.status || 'FAIL_CLOSED',
+            total_tasks: 0,
+            error: failPayload.error || execErr.message,
+            status: failPayload.status || 'FAIL_CLOSED',
+          },
+        });
+      }
+      throw execErr;
+    }
+
+    const raw = JSON.parse(stdout.trim());
+    const stagesObj = raw?.summary?.stages;
+    const stagePassRates = stagesObj
+      ? Object.fromEntries(
+          Object.entries(stagesObj).map(([k, v]: [string, any]) => [
+            k,
+            {
+              passed: Number(v?.passed || 0),
+              total: Number(v?.total || 0),
+              rate: Number(v?.ratePct || 0) / 100,
+              ratePct: Number(v?.ratePct || 0),
+            },
+          ])
+        )
+      : undefined;
+
+    const report = {
+      ...raw,
+      mode: raw.mode || raw.status || 'FAIL_CLOSED_SPECIFICATION',
+      attribution: raw.mode || raw.status || 'FAIL_CLOSED_SPECIFICATION',
+      total_tasks: typeof raw.evaluatedTasks === 'number' ? raw.evaluatedTasks : Number(raw.totalTasks || 0),
+      delivered_count: raw?.summary?.delivered,
+      hidden_pass_rate_pct: raw?.summary?.hiddenPassRatePct,
+      stage_pass_rates: stagePassRates,
+    };
+
+    if (report.stage_pass_rates) {
+      fs.mkdirSync(path.dirname(STAGE_BENCH_EVIDENCE_PATH), { recursive: true });
+      fs.writeFileSync(STAGE_BENCH_EVIDENCE_PATH, JSON.stringify(report, null, 2), 'utf8');
+    }
+
+    AuditLedger.append('SYSTEM', 'STAGE_BENCHMARK_EXECUTED', {
+      userId: req.sovereignUserId,
+      mode: report.mode,
+      attribution: report.attribution,
+      totalTasks: report.total_tasks,
+      stageRates: report.stage_pass_rates || null,
+    });
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/research/investigate', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const query = String(req.body?.query || '').trim();
+    if (!query) return res.status(400).json({ success: false, error: 'query string required' });
+    const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' };
+    const knowledgeHits = KnowledgeIntelligenceEngine.getInstance().advancedRetrieve(query, {
+      tenantId: scope.tenantId,
+      role: scope.role,
+      limit: 5,
+    });
+    const graphPaths = KnowledgeGraphEngine.getInstance().traverseMultiHop(query, { maxHops: 2, limit: 5, scope });
+    let webResearch: any = { ok: false, note: 'Online topic lookup not requested' };
+    if (req.body?.includeWeb === true) {
+      webResearch = await InternetIntegrationEngine.getInstance().researchWebTopic(query, {
+        tenantId: scope.tenantId,
+        userId: scope.userId,
+      });
+    }
+    const reasoning = await AdaptiveReasoningEngine.getInstance().executeReasoning({ prompt: query, scope });
+    res.json({
+      success: true,
+      query,
+      knowledgeHits,
+      graphPaths,
+      webResearch,
+      reasoning,
+      externalBrain: ExternalBrainProvider.getStatus(),
+    });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/automation/jobs', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  const scope = { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' };
+  const missions = ActionDrivenEngine.getInstance().listMissions(scope).slice(0, 20);
+  const plans = AutonomousPlanner.getInstance().listPlans({ tenantId: scope.tenantId, ownerUserId: scope.userId });
+  res.json({
+    success: true,
+    missions,
+    plans,
+    metrics: TaskOrchestrator.getInstance().getExecutionMetrics(),
+  });
+});
+
+app.post('/api/automation/run', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const mission = await ActionDrivenEngine.getInstance().executeActionMission(
+      {
+        goal: String(req.body?.goal || 'Run scheduled system integrity & security verification sweep'),
+        mode: req.body?.mode || 'system_integrity_audit',
+        priority: normalizeTaskPriority(req.body?.priority),
+      },
+      { tenantId: req.sovereignTenantId!, userId: req.sovereignUserId!, role: req.sovereignRole || 'developer' }
+    );
+    res.json({ success: true, mission });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Mount Vite middleware in development or serve static in production + WebSocket /ws/runtime.
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';
   const apiOnly = process.env.ZYNTHEOR_API_ONLY === '1';
@@ -1588,7 +2625,52 @@ async function startServer() {
     }
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = http.createServer(app);
+  const wss = new WebSocketServer({ server, path: '/ws/runtime' });
+
+  const monitor = ConnectivityMonitor.getInstance();
+  monitor.subscribe((state) => {
+    const frame = JSON.stringify({ type: 'runtime_state', data: state, timestamp: new Date().toISOString() });
+    wsLastFrameAt = new Date().toISOString();
+    for (const client of wss.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(frame);
+      }
+    }
+  });
+
+  wss.on('connection', async (ws) => {
+    wsClientCount = wss.clients.size;
+    try {
+      const state = await monitor.checkNow();
+      wsLastFrameAt = new Date().toISOString();
+      ws.send(JSON.stringify({ type: 'runtime_state', data: state, timestamp: wsLastFrameAt }));
+    } catch {
+      // Ignore transient probe errors
+    }
+
+    ws.on('message', async (raw) => {
+      try {
+        const msg = JSON.parse(String(raw));
+        if (msg?.type === 'ping') {
+          wsLastFrameAt = new Date().toISOString();
+          ws.send(JSON.stringify({ type: 'pong', timestamp: wsLastFrameAt }));
+        } else if (msg?.type === 'check') {
+          const state = await monitor.checkNow();
+          wsLastFrameAt = new Date().toISOString();
+          ws.send(JSON.stringify({ type: 'runtime_state', data: state, timestamp: wsLastFrameAt }));
+        }
+      } catch {
+        // Ignore malformed client WS frames
+      }
+    });
+
+    ws.on('close', () => {
+      wsClientCount = wss.clients.size;
+    });
+  });
+
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`[ZYNTHEOR SOVEREIGN SERVER] Running on http://0.0.0.0:${PORT} apiOnly=${apiOnly}`);
   });
 }

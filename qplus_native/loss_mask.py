@@ -2,7 +2,7 @@ import numpy as np
 
 IGNORE_INDEX = -100
 
-def masked_cross_entropy_loss_and_backward(logits, labels, model_weights=None):
+def masked_cross_entropy_loss_and_backward(logits, labels, model_weights=None, ignore_index: int = IGNORE_INDEX):
     """
     Computes loss and backward gradients with Target-only Loss and Gradient Masking.
     - logits: shape (Batch, SeqLen, VocabSize) or (SeqLen, VocabSize)
@@ -22,7 +22,7 @@ def masked_cross_entropy_loss_and_backward(logits, labels, model_weights=None):
     batch_indices = np.arange(labels.shape[0])[:, None]
     seq_indices = np.arange(labels.shape[1])[None, :]
     
-    valid_mask = (labels != IGNORE_INDEX)
+    valid_mask = (labels != ignore_index)
     safe_labels = np.where(valid_mask, labels, 0)
     
     selected_probs = probs[batch_indices, seq_indices, safe_labels]

@@ -25,11 +25,18 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenShortcuts
 }) => {
   const { t, lang } = useLanguage();
-  const { session, role } = useAuth();
-  const sessionAgeMin = Math.floor((Date.now() - new Date(session.authenticatedAt).getTime()) / 60000);
-  const remainingMin = Math.max(0, 60 - sessionAgeMin);
-  const sessionHealthColor =
-    remainingMin > 15 ? 'text-[var(--z-ok)]' : remainingMin > 0 ? 'text-[var(--app-amber)]' : 'text-[var(--z-danger)]';
+  const { session, role, isAuthenticated } = useAuth();
+  const authMs = session.authenticatedAt ? new Date(session.authenticatedAt).getTime() : NaN;
+  const hasValidSessionTime = isAuthenticated && Number.isFinite(authMs);
+  const sessionAgeMin = hasValidSessionTime ? Math.max(0, Math.floor((Date.now() - authMs) / 60000)) : 0;
+  const remainingMin = hasValidSessionTime ? Math.max(0, 60 - sessionAgeMin) : 0;
+  const sessionHealthColor = !hasValidSessionTime
+    ? 'text-[var(--app-text-secondary)]'
+    : remainingMin > 15
+    ? 'text-[var(--z-ok)]'
+    : remainingMin > 0
+    ? 'text-[var(--app-amber)]'
+    : 'text-[var(--z-danger)]';
 
   const getModuleTitle = (mod: ModuleId): string => {
     switch (mod) {
@@ -86,11 +93,11 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3">
         {/* Session Health Indicator */}
         <div
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)]"
-          title={`Session (${role}): ${remainingMin}m remaining`}
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] tabular-nums"
+          title={hasValidSessionTime ? `Session (${role}): ${remainingMin}m remaining` : 'No active authenticated session'}
         >
           <Clock className={`w-3.5 h-3.5 ${sessionHealthColor}`} />
-          <span>{remainingMin}m</span>
+          <span>{hasValidSessionTime ? `${remainingMin}m` : 'Guest'}</span>
         </div>
 
         {/* Dedicated Language Switcher Component */}

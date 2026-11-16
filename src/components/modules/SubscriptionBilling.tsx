@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { SystemStatusData } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import { CreditCard, Check, ShieldCheck, DollarSign, Zap, ArrowRight } from 'lucide-react';
 
 interface SubscriptionBillingProps {
@@ -10,6 +11,7 @@ interface SubscriptionBillingProps {
 }
 
 export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ statusData, onRefresh }) => {
+  const { authHeaders, isAuthenticated } = useAuth();
   const commercial = statusData?.commercial;
   const currentPlan = commercial?.activePlanId || 'tier_free';
   const currentPhase = commercial?.currentPhase || 'PRIVATE_BETA';
@@ -61,11 +63,12 @@ export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ status
   ];
 
   const handleSelectPlan = async (planId: string) => {
+    if (!isAuthenticated) return;
     setSwitching(true);
     try {
       await fetch('/api/commercial/plan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ planId })
       });
       onRefresh();
@@ -77,10 +80,11 @@ export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ status
   };
 
   const handleSelectPhase = async (phase: string) => {
+    if (!isAuthenticated) return;
     try {
       await fetch('/api/commercial/phase', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ phase })
       });
       onRefresh();

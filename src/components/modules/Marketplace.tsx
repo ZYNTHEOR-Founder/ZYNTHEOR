@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { VividCard } from '../ui/VividCard';
+import { useAuth } from '../../context/AuthContext';
 import { ShoppingBag, CheckCircle2, Download, Terminal, Star, ArrowRight } from 'lucide-react';
 
 interface SkillItem {
@@ -14,6 +15,7 @@ interface SkillItem {
 }
 
 export const Marketplace: React.FC = () => {
+  const { authHeaders, isAuthenticated } = useAuth();
   const [deployedId, setDeployedId] = useState<string | null>(null);
 
   const skills: SkillItem[] = [
@@ -60,12 +62,13 @@ export const Marketplace: React.FC = () => {
   ];
 
   const handleDeploySkill = async (skill: SkillItem) => {
+    if (!isAuthenticated) return;
     setDeployedId(skill.id);
     try {
       // Execute deployment by creating file in /workspace
       await fetch('/api/workspace/run', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           command: 'node',
           args: ['-e', `console.log("Deployed skill: ${skill.name}");`]

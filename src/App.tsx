@@ -144,7 +144,7 @@ function renderHighlightedLog(text: string, theme: 'emerald_dark' | 'high_contra
 
 export default function App() {
   const { t, lang } = useLanguage();
-  const { role, session } = useAuth();
+  const { role, session, authHeaders } = useAuth();
   const [activeModule, setActiveModule] = useState<ModuleId>('command_center');
   const [statusData, setStatusData] = useState<SystemStatusData | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -479,9 +479,14 @@ export default function App() {
     try {
       const response = await fetch('/api/agent/execute', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ goal: quickGoal })
       });
+
+      if (!response.ok) {
+        const errPayload = await response.json().catch(() => ({}));
+        throw new Error(errPayload.error || errPayload.message || `Execution failed (HTTP ${response.status})`);
+      }
 
       if (!response.body) throw new Error('Stream unavailable');
 
@@ -502,18 +507,28 @@ export default function App() {
           try {
             const ev: OrchestrationEvent = JSON.parse(line);
             if (ev.type === 'step') {
-              setQuickLogs((prev) => [...prev, `[${ev.role}] ${ev.message}`]);
+              setQuickLogs((prev) => [...prev, `[${ev.role || 'STEP'}] ${ev.message}`]);
             } else if (ev.type === 'test') {
               setQuickLogs((prev) => [
                 ...prev,
                 `[TESTER] exitCode: ${ev.data?.exitCode} | ${ev.message}`
               ]);
-            } else if (ev.type === 'done') {
-              setQuickLogs((prev) => [...prev, `[DONE] ${ev.message}`]);
-              setQuickDone(true);
+            } else if (ev.type === 'done' || (ev as any).type === 'final_result') {
+              if (ev.data?.executionCycle?.executionEvidenceHash) {
+                setVerificationHash(ev.data.executionCycle.executionEvidenceHash);
+              }
+              if (typeof ev.data?.durationMs === 'number') {
+                setTotalExecMs(ev.data.durationMs);
+              }
+              if (ev.type === 'done') {
+                setQuickLogs((prev) => [...prev, `[DONE] ${ev.message}`]);
+                setQuickDone(true);
+              }
+            } else if (ev.type === 'error') {
+              setQuickLogs((prev) => [...prev, `[ERROR] ${ev.message}`]);
             }
-          } catch (e) {
-            // ignore JSON parse
+          } catch {
+            // ignore partial NDJSON line
           }
         }
       }

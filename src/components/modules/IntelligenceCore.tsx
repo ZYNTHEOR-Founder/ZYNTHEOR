@@ -3,6 +3,7 @@ import { SystemStatusData } from '../../types';
 import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
+import { useAuth } from '../../context/AuthContext';
 import { Activity, BrainCircuit, Cloud, Layers3, Send, ShieldCheck } from 'lucide-react';
 
 interface IntelligenceCoreProps {
@@ -13,6 +14,7 @@ const TARGET_PARAMS = 41_527_808;
 const count = (value?: number | null) => typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString() : '—';
 
 export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({ statusData }) => {
+  const { authHeaders } = useAuth();
   const model = statusData?.model;
   const ready = Boolean(model?.weightsLoaded && model?.inferenceReady);
   const [prompt, setPrompt] = useState('Explain how to verify a native model checkpoint.');
@@ -28,7 +30,7 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({ statusData }
     try {
       const response = await fetch('/api/native/inference', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ prompt: prompt.trim(), role: 'analysis' })
       });
       const data = await response.json();

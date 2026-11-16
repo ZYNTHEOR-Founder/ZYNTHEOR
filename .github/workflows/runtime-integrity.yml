@@ -52,6 +52,8 @@ jobs:
           "
 
       - name: Run runtime tests
+        env:
+          PYTHONPATH: .
         run: |
           if [ -d tests/runtime ]; then
             pytest -q tests/runtime

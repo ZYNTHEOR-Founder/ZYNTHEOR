@@ -70,6 +70,40 @@ export interface ResourceSample {
   ramTotalMb?: number;
 }
 
+export interface ConnectivityHealthState {
+  online: boolean;
+  onlineConnectivityRequired: boolean;
+  browserOnline: boolean;
+  status: string;
+  runtimeState: string;
+  executionVerified: boolean;
+  executionError?: string | null;
+  trainedProvenance?: string | null;
+  weightsRole?: string | null;
+  code?: string | null;
+  reason?: string | null;
+  cloudSource?: string | null;
+  cloudStorageConfigured?: boolean;
+  cloudStorageReachable?: boolean;
+  cloudConfigValid?: boolean;
+  cloudConfigProvider?: string;
+  cloudConfigMissingKeys?: string[];
+  cloudConfigError?: string | null;
+  pythonBridgeReachable?: boolean;
+  bridgeLifecycle?: string;
+  weightsLoaded: boolean;
+  weightsSource?: string | null;
+  checkpointPath?: string | null;
+  checkpointSha256?: string | null;
+  tokenizerSha256?: string | null;
+  activeRuntimeId?: string | null;
+  totalParams: number;
+  modelName?: string | null;
+  latencyMs?: number;
+  lastCheckedAt?: string | null;
+  lastOnlineAt?: string | null;
+}
+
 export interface SystemStatusData {
   success: boolean;
   model: {
@@ -83,6 +117,9 @@ export interface SystemStatusData {
     inferenceReady: boolean;
     runtimeState: string;
     readinessReason?: string;
+    executionVerified?: boolean;
+    onlineConnectivityRequired?: boolean;
+    failClosedReason?: string;
   };
   audit: {
     totalRecords: number;
@@ -112,6 +149,8 @@ export interface SystemStatusData {
     current: ResourceSample;
     history: ResourceSample[];
   };
+  connectivity?: ConnectivityHealthState | null;
+  truthDashboard?: any;
   serverTime: string;
   uptimeSeconds: number;
 }
@@ -173,4 +212,281 @@ export interface OrchestrationEvent {
   message: string;
   data?: any;
   timestamp: string;
+}
+
+export interface VisualElementNode {
+  zId: string;
+  tagName: string;
+  label: string;
+  textContent: string;
+  className?: string;
+  styles: {
+    color?: string;
+    backgroundColor?: string;
+    padding?: string;
+    fontSize?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+export interface VisualPropertyPatchInput {
+  targetId: string;
+  textContent?: string;
+  color?: string;
+  backgroundColor?: string;
+  padding?: string;
+  fontSize?: string;
+  message?: string;
+  runChecks?: boolean;
+  styles?: Record<string, string | null | undefined>;
+}
+
+export interface ProjectRepairResult {
+  project: any;
+  revision: any;
+  repaired: boolean;
+  modifiedFiles: string[];
+  diagnoses: string[];
+  summary: string;
+}
+
+export interface SoftwareBenchmarkDimensionScore {
+  dimension: string;
+  status: string;
+  scorePct: number | null;
+  measurement: string;
+  evidenceSource: string;
+}
+
+export interface SoftwareBenchmarkTaskResult {
+  level: number;
+  taskId: string;
+  title: string;
+  stack: string;
+  passed: boolean;
+  durationMs: number;
+  buildVerified: boolean;
+  testsPassed: number;
+  testsTotal: number;
+  securityFindingsHighMedium: number;
+  uiContractChecksPassed: number;
+  uiContractChecksTotal: number;
+  evidenceHash: string;
+  summary: string;
+}
+
+export interface SoftwareBenchmarkSuiteReport {
+  runId: string;
+  executedAt: string;
+  environment: string;
+  totalDurationMs: number;
+  levelsAttempted: number;
+  levelsPassed: number;
+  dimensions: SoftwareBenchmarkDimensionScore[];
+  tasks: SoftwareBenchmarkTaskResult[];
+  reproducibility: string;
+}
+
+export interface PersistentTaskRecord {
+  taskId: string;
+  goal: string;
+  priority: 'High' | 'Medium' | 'Low';
+  lifecycleStatus: 'Planned' | 'Running' | 'Blocked' | 'Delivered' | 'Failed';
+  resumable: boolean;
+  blockedReason?: string | null;
+  ownerUserId: string;
+  tenantId: string;
+  createdAt: string;
+  updatedAt: string;
+  executionCycle?: any;
+}
+
+export interface ProjectIntegrationBinding {
+  integrationId: string;
+  type: 'http_api' | 'websocket' | 'database' | 'auth' | 'registry_pkg';
+  name: string;
+  endpoint: string;
+  secretRefAlias?: string | null;
+  secretHeaderName?: string | null;
+  notes?: string;
+  createdAt: string;
+  lastTestedAt?: string | null;
+  lastStatus?: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED' | 'FAILED';
+  lastHttpStatus?: number | null;
+  lastLatencyMs?: number | null;
+  lastResponseSha256?: string | null;
+  lastError?: string | null;
+}
+
+export interface DeploymentHistoryTimelineItem {
+  deploymentId: string;
+  revisionId: string;
+  executionId: string;
+  timestamp: string;
+  status: 'NOT_CONFIGURED' | 'BLOCKED' | 'PENDING_APPROVAL' | 'DEPLOYED' | 'FAILED';
+  targetProvider: string | null;
+  targetEndpoint: string | null;
+  approvalRequestId: string | null;
+  artifactZip: string | null;
+  artifactSha256: string | null;
+  runtimeHttpStatus: number | null;
+  runtimeResponseSha256?: string | null;
+  latencyMs?: number | null;
+  reason: string;
+  evidenceHash: string;
+  linkedLogIds: string[];
+  projectId: string;
+  projectName: string;
+  projectSlug: string;
+  stack: SoftwareProjectRecord['stack'];
+  verificationState: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
+  logsUrl: string;
+  linkedLogs: Array<{
+    logId: string;
+    timestamp: string;
+    level: 'INFO' | 'WARN' | 'ERROR';
+    source: string;
+    message: string;
+    deploymentId?: string;
+    executionId?: string;
+    stage?: string;
+  }>;
+  verificationEvidence: {
+    deploymentHash: {
+      artifactSha256: string | null;
+      evidenceHash: string;
+      artifactZip: string | null;
+      revisionId: string;
+      hashVerified: boolean;
+    };
+    cloudRuntimeResponse: {
+      state: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
+      endpoint: string | null;
+      provider: string | null;
+      httpStatus: number | null;
+      responseSha256: string | null;
+      latencyMs: number | null;
+      summary: string;
+    };
+    automatedTestResults: {
+      state: 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
+      status: 'VERIFIED' | 'FAILED' | 'UNVERIFIED';
+      passed: number;
+      total: number;
+      summary: string;
+      executedAt: string | null;
+    };
+  };
+}
+
+export interface SoftwareCapabilityStatusEntry {
+  id: string;
+  name: string;
+  status: 'IMPLEMENTED' | 'PARTIAL' | 'BLOCKED' | 'UNVERIFIED' | 'NOT_IMPLEMENTED' | 'NOT_CONFIGURED';
+  evidenceSource: string;
+  lastVerifiedAt: string;
+  detail: string;
+  missingDependency?: string;
+}
+
+export interface SoftwareProjectRecord {
+  projectId: string;
+  tenantId: string;
+  ownerUserId: string;
+  name: string;
+  slug: string;
+  description: string;
+  stack: 'node_fullstack' | 'node_api' | 'python_service' | 'static_web';
+  attribution: 'deterministic_engineering_engine' | 'native_cloud_model_assisted';
+  nativeNeuralState: string;
+  workspaceDir: string;
+  currentRevision: string;
+  createdAt: string;
+  updatedAt: string;
+  requirementsSpec: {
+    rawPrompt: string;
+    objectives: string[];
+    endpoints: Array<{ method: string; path: string; purpose: string }>;
+    dependencies: string[];
+    risks: string[];
+    architectureSummary: string;
+  };
+  stages: Array<{
+    stage: string;
+    order: number;
+    label: string;
+    status: string;
+    completedAt: string | null;
+    summary: string;
+    artifactReference: string | null;
+    evidenceHash: string | null;
+  }>;
+  stageExecutions: Array<any>;
+  revisions: Array<{
+    revisionId: string;
+    revisionNumber: number;
+    createdAt: string;
+    createdBy: string;
+    message: string;
+    treeSha256: string;
+    files: Array<{
+      relativePath: string;
+      bytes: number;
+      sha256: string;
+      snapshotId: string | null;
+    }>;
+  }>;
+  evidenceHistory: Array<any>;
+  lastBuild: {
+    status: string;
+    executedAt: string | null;
+    durationMs: number;
+    checkedFiles: number;
+    summary: string;
+    output: string;
+  } | null;
+  lastTests: {
+    status: string;
+    executedAt: string | null;
+    durationMs: number;
+    passed: number;
+    total: number;
+    summary: string;
+    output: string;
+  } | null;
+  lastSecurityScan: {
+    status: string;
+    scannedAt: string | null;
+    findings: Array<{ severity: string; file: string; rule: string; detail: string }>;
+    summary: string;
+  } | null;
+  deployment: {
+    status: 'NOT_CONFIGURED' | 'BLOCKED' | 'PENDING_APPROVAL' | 'DEPLOYED' | 'FAILED';
+    approvalRequestId: string | null;
+    targetProvider: string | null;
+    targetEndpoint: string | null;
+    artifactZip: string | null;
+    artifactSha256: string | null;
+    deployedAt: string | null;
+    runtimeVerifiedAt: string | null;
+    runtimeHttpStatus: number | null;
+    runtimeResponseSha256?: string | null;
+    latencyMs?: number | null;
+    lastDeploymentId?: string | null;
+    lastExecutionId?: string | null;
+    reason: string;
+  };
+  deploymentHistory: Array<any>;
+  integrations?: ProjectIntegrationBinding[];
+  researchNotes?: Array<any>;
+  runtimeLogs: Array<{
+    logId: string;
+    timestamp: string;
+    level: 'INFO' | 'WARN' | 'ERROR';
+    source: string;
+    message: string;
+    deploymentId?: string;
+    executionId?: string;
+    stage?: string;
+  }>;
 }

@@ -6,8 +6,8 @@ interface VividCardProps {
   headerAction?: React.ReactNode;
   title?: string;
   subtitle?: string;
-  gradientAccent?: 'emerald' | 'amber' | 'emerald-amber' | 'cyan' | 'purple' | 'violet' | 'coral' | 'sunset' | 'energy' | 'none';
-  variant?: 'white' | 'navy';
+  gradientAccent?: 'emerald' | 'amber' | 'emerald-amber' | 'cyan' | 'purple' | 'violet' | 'coral' | 'sunset' | 'energy' | 'none' | 'lime' | 'blue' | 'magenta';
+  variant?: 'white' | 'navy' | 'midnight';
 }
 
 export const VividCard: React.FC<VividCardProps> = ({
@@ -22,17 +22,20 @@ export const VividCard: React.FC<VividCardProps> = ({
   const getGradientLine = () => {
     switch (gradientAccent) {
       case 'emerald':
+      case 'lime':
         return 'h-1 w-full bg-[var(--app-accent)]';
       case 'amber':
         return 'h-1 w-full bg-[var(--app-amber)]';
       case 'emerald-amber':
       case 'cyan':
+      case 'blue':
         return 'h-1 w-full bg-[var(--app-accent)]';
       case 'purple':
       case 'violet':
         return 'h-1 w-full bg-[var(--app-accent)]';
       case 'coral':
       case 'sunset':
+      case 'magenta':
         return 'h-1 w-full bg-[var(--app-amber)]';
       case 'energy':
         return 'h-1 w-full bg-[var(--app-accent)]';
@@ -41,7 +44,7 @@ export const VividCard: React.FC<VividCardProps> = ({
     }
   };
 
-  const isNavy = variant === 'navy';
+  const isNavy = variant === 'navy' || variant === 'midnight';
 
   return (
     <div

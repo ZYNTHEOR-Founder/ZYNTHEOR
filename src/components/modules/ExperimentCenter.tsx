@@ -3,6 +3,7 @@ import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { EvolutionRecord } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import {
   Microscope,
   Play,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export const ExperimentCenter: React.FC = () => {
+  const { authHeaders } = useAuth();
   const [isEvolving, setIsEvolving] = useState(false);
   const [currentEvolution, setCurrentEvolution] = useState<EvolutionRecord | null>(null);
   const [selectedDomain, setSelectedDomain] = useState('algorithm_resilience');
@@ -26,7 +28,7 @@ export const ExperimentCenter: React.FC = () => {
     try {
       const res = await fetch('/api/self-evolve/run', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ domain: selectedDomain })
       });
       const data = await res.json();

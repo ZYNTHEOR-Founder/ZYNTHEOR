@@ -1,0 +1,1 @@
+{"snapshotId":"snap_1794818623644_a58c1149","relativePath":"projects/proj_mwj0o0aj_cf7cf1/config/runtime.template","sha256":"aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf","createdAt":"2026-11-16T08:43:43.644Z","content":"PORT=8080\nNODE_ENV=production\nDATA_FILE=./data/store.json\n"}

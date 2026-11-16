@@ -3,6 +3,7 @@ import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { BrainCircuit, Cloud, Database, FileCheck, RefreshCw, ShieldAlert } from 'lucide-react';
 
 const TARGET_PARAMS = 41_527_808;
@@ -10,6 +11,7 @@ const count = (value?: number | null) => typeof value === 'number' && Number.isF
 
 export const ModelLaboratory: React.FC = () => {
   const { lang } = useLanguage();
+  const { authHeaders, authReady, isAuthenticated } = useAuth();
   const [modelStatus, setModelStatus] = useState<any>(null);
   const [datasets, setDatasets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -19,10 +21,11 @@ export const ModelLaboratory: React.FC = () => {
     setLoading(true);
     setLastError('');
     try {
+      const headers = authHeaders();
       const [runtimeResponse, inspectResponse, datasetsResponse] = await Promise.all([
         fetch('/api/system/status'),
-        fetch('/api/model/inspect'),
-        fetch('/api/knowledge/datasets')
+        isAuthenticated ? fetch('/api/model/inspect', { headers }) : Promise.resolve(new Response('{}', { status: 401 })),
+        isAuthenticated ? fetch('/api/knowledge/datasets', { headers }) : Promise.resolve(new Response('{}', { status: 401 }))
       ]);
       const [runtime, inspect, datasetData] = await Promise.all([
         runtimeResponse.json(), inspectResponse.json(), datasetsResponse.json()
@@ -39,7 +42,9 @@ export const ModelLaboratory: React.FC = () => {
     }
   };
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    if (authReady) void refresh();
+  }, [authReady, isAuthenticated]);
 
   const runtime = modelStatus?.runtime;
   const inspect = modelStatus?.inspect;

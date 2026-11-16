@@ -57,7 +57,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
 
 // Minimal glowing status point used by dense operational surfaces.
 // It intentionally never turns IMPLEMENTED into VERIFIED.
-export type MinimalIndicatorState = StatusLevel | 'ONLINE' | 'READY' | 'ACTIVE' | 'CHECKING' | 'INITIALIZING' | 'REPAIRED' | 'PENDING' | 'NOT_RUN' | 'NOT RUN' | 'COMPLETED' | 'DELIVERED' | 'CURRENT' | 'SKIPPED' | 'FAIL_CLOSED' | 'NOT_TRAINED' | 'NOT_LOADED' | 'NOT_CONFIGURED' | 'NOT_FOUND';
+export type MinimalIndicatorState = StatusLevel | 'FAILED' | 'NOT_IMPLEMENTED' | 'UNAVAILABLE' | 'ONLINE' | 'READY' | 'ACTIVE' | 'CHECKING' | 'INITIALIZING' | 'REPAIRED' | 'PENDING' | 'NOT_RUN' | 'NOT RUN' | 'COMPLETED' | 'DELIVERED' | 'CURRENT' | 'SKIPPED' | 'FAIL_CLOSED' | 'NOT_TRAINED' | 'NOT_LOADED' | 'NOT_CONFIGURED' | 'NOT_FOUND';
 
 export interface StatusDotProps {
   status: string;
@@ -89,6 +89,7 @@ const DOT_STYLE: Record<string, { color: string; glow: string; pulse?: boolean; 
   NOT_TRAINED: { color: '#FF5E3A', glow: '0 0 8px rgba(255,94,58,.45)', critical: true },
   NOT_LOADED: { color: '#FF5E3A', glow: '0 0 8px rgba(255,94,58,.45)', critical: true },
   NOT_CONFIGURED: { color: '#9AA8C7', glow: 'none', critical: true },
+  UNAVAILABLE: { color: '#9AA8C7', glow: 'none', critical: true },
   NOT_FOUND: { color: '#FF007F', glow: '0 0 8px rgba(255,0,127,.45)', critical: true },
   COMPLETED: { color: '#00F0FF', glow: '0 0 6px rgba(0,240,255,.35)' },
   DELIVERED: { color: '#CCFF00', glow: '0 0 8px rgba(204,255,0,.45)' },

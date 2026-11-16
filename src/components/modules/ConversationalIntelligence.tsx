@@ -3,6 +3,7 @@ import { VividCard } from '../ui/VividCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { StreamingTokenDisplay } from '../StreamingTokenDisplay';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { Citation, ChatMessage, ChatSession } from '../../types';
 import {
   MessageSquare,
@@ -29,6 +30,7 @@ import {
 
 export const ConversationalIntelligence: React.FC = () => {
   const { t, lang, setLang } = useLanguage();
+  const { authHeaders, authReady, isAuthenticated } = useAuth();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>('session-default');
   const [inputMessage, setInputMessage] = useState('');
@@ -47,8 +49,9 @@ export const ConversationalIntelligence: React.FC = () => {
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchSessions = async () => {
+    if (!isAuthenticated) return;
     try {
-      const res = await fetch('/api/chat/sessions');
+      const res = await fetch('/api/chat/sessions', { headers: authHeaders() });
       const data = await res.json();
       if (data.success && data.sessions.length > 0) {
         setSessions(data.sessions);
@@ -59,7 +62,9 @@ export const ConversationalIntelligence: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchSessions();
+    if (authReady && isAuthenticated) {
+      fetchSessions();
+    }
     fetch('/api/system/status').then((response) => response.json()).then((data) => {
       const ready = Boolean(data?.model?.weightsLoaded && data?.model?.inferenceReady);
       setRuntimeStatus(ready ? 'VERIFIED' : 'BLOCKED');
@@ -68,7 +73,7 @@ export const ConversationalIntelligence: React.FC = () => {
       setRuntimeStatus('UNVERIFIED');
       setRuntimeReason('Runtime status could not be retrieved.');
     });
-  }, []);
+  }, [authReady, isAuthenticated]);
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || {
     id: 'session-default',
@@ -129,7 +134,7 @@ export const ConversationalIntelligence: React.FC = () => {
       const response = await fetch('/api/chat/message', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          ...authHeaders(),
           'X-Correlation-ID': correlationId
         },
         body: JSON.stringify({

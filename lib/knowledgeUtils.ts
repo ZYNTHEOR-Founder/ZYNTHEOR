@@ -61,3 +61,11 @@ export function semanticChunk(
 export function contentHash(text: string): string {
   return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
 }
+
+export function normalizeIntegrityText(text: string): string {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/\r\n/g, '\n')
+    .replace(/\s+/g, ' ')
+    .trim();
+}

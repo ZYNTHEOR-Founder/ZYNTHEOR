@@ -66,6 +66,9 @@ jobs:
               Path("train_lm.py"),
               Path("train_target.py"),
               Path("eval_lm.py"),
+              Path("qplus_native/train_lm.py"),
+              Path("qplus_native/train_target.py"),
+              Path("qplus_native/eval_lm.py"),
           ]
 
           existing = [p for p in candidates if p.is_file()]
@@ -144,6 +147,8 @@ jobs:
           PY
 
       - name: Run training tests
+        env:
+          PYTHONPATH: .
         run: |
           if [ ! -d tests/training ]; then
             echo "::error::Training tests are not implemented."

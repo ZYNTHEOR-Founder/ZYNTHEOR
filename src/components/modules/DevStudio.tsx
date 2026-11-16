@@ -3,6 +3,7 @@ import { VividCard } from '../ui/VividCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { BenchmarkArena } from './BenchmarkArena';
 import { OrchestrationEvent, WorkspaceFileDetail } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import {
   Code2,
   Play,
@@ -40,6 +41,7 @@ interface AuditRecord {
 }
 
 export const DevStudio: React.FC = () => {
+  const { authHeaders, authReady, isAuthenticated } = useAuth();
   const [goal, setGoal] = useState('Build a resilient In-Memory LRU Cache with TTL and unit test verification');
   const [isRunning, setIsRunning] = useState(false);
   const [events, setEvents] = useState<OrchestrationEvent[]>([]);
@@ -84,8 +86,9 @@ export const DevStudio: React.FC = () => {
   ];
 
   const fetchFiles = async () => {
+    if (!isAuthenticated) return;
     try {
-      const res = await fetch('/api/workspace/files');
+      const res = await fetch('/api/workspace/files', { headers: authHeaders() });
       const data = await res.json();
       if (data.success) {
         setWorkspaceFiles(data.files || []);
@@ -99,8 +102,11 @@ export const DevStudio: React.FC = () => {
   };
 
   const fetchFileContent = async (fileName: string) => {
+    if (!isAuthenticated) return;
     try {
-      const res = await fetch(`/api/workspace/file?path=${encodeURIComponent(fileName)}`);
+      const res = await fetch(`/api/workspace/file?path=${encodeURIComponent(fileName)}`, {
+        headers: authHeaders(),
+      });
       const data = await res.json();
       if (data.success) {
         setFileContent(data.content);
@@ -113,13 +119,13 @@ export const DevStudio: React.FC = () => {
   };
 
   const handleSaveFile = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !isAuthenticated) return;
     setIsSaving(true);
     setSaveSuccess(false);
     try {
       const res = await fetch('/api/workspace/file', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ path: selectedFile, content: fileContent })
       });
       const data = await res.json();
@@ -146,7 +152,7 @@ export const DevStudio: React.FC = () => {
         : '// ZYNTHEOR Sovereign Sandbox Module\nconsole.log("Hello from /workspace sandbox");\n';
       const res = await fetch('/api/workspace/file', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ path: cleanPath, content: initialTemplate })
       });
       const data = await res.json();
@@ -162,10 +168,11 @@ export const DevStudio: React.FC = () => {
   };
 
   const handleDeleteFile = async (fileName: string) => {
-    if (!confirm(`Are you sure you want to delete '${fileName}' from /workspace?`)) return;
+    if (!isAuthenticated) return;
     try {
       const res = await fetch(`/api/workspace/file?path=${encodeURIComponent(fileName)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: authHeaders(),
       });
       const data = await res.json();
       if (data.success) {
@@ -181,13 +188,14 @@ export const DevStudio: React.FC = () => {
   };
 
   const handleRunSandbox = async () => {
+    if (!isAuthenticated) return;
     setIsExecutingSandbox(true);
     setSandboxResult(null);
     try {
       const argsArray = sandboxArgs.trim() ? sandboxArgs.trim().split(/\s+/) : [];
       const res = await fetch('/api/workspace/run', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ command: sandboxCmd, args: argsArray })
       });
       const data = await res.json();
@@ -204,8 +212,9 @@ export const DevStudio: React.FC = () => {
   };
 
   const fetchAuditRecords = async () => {
+    if (!isAuthenticated) return;
     try {
-      const res = await fetch('/api/audit?limit=25');
+      const res = await fetch('/api/audit?limit=25', { headers: authHeaders() });
       const data = await res.json();
       if (data.success) {
         setAuditRecords(data.records || []);
@@ -217,9 +226,11 @@ export const DevStudio: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchFiles();
-    fetchAuditRecords();
-  }, []);
+    if (authReady && isAuthenticated) {
+      fetchFiles();
+      fetchAuditRecords();
+    }
+  }, [authReady, isAuthenticated]);
 
   const handleRunAgent = async () => {
     if (!goal || isRunning) return;
@@ -237,9 +248,14 @@ export const DevStudio: React.FC = () => {
     try {
       const response = await fetch('/api/agent/execute', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ goal })
       });
+
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(errBody.error || errBody.message || `Execution failed (HTTP ${response.status})`);
+      }
 
       if (!response.body) {
         throw new Error('No readable stream returned from /api/agent/execute');

@@ -1,0 +1,1 @@
+{"snapshotId":"snap_1794818611629_f807666f","relativePath":"missions/b30_fail_1794818611496.js","sha256":"535841404d2714598b85faae1d91e4389f82b065a0d193ea77f7476c412b32ed","createdAt":"2026-11-16T08:43:31.629Z","content":"console.log(nonExistentVariableShouldFail);\n"}

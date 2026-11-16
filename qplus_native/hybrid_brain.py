@@ -23,7 +23,7 @@ API ที่อ้างอิงจริง (ไม่ได้เดา):
 """
 import json
 import re
-from typing import Any, Callable, Dict, List, Optional, Protocol
+from typing import Any, Callable, Dict, Optional, Protocol
 
 Complete = Callable[[str, str], str]  # (system_prompt, user_prompt) -> model text
 
@@ -152,23 +152,25 @@ class HybridBrain:
             "plan",
         )
         # ตรวจรับด้วยของเดิม ไม่ใช่ตรวจเอง
-        ok = self.validate_plan(plan)
+        res = self.validate_plan(plan)
+        ok = (len(res) == 0) if isinstance(res, list) else bool(res)
         if not ok:
-            raise BrainError("[plan] validate_plan rejected brain plan — fail-closed, not auto-fixed")
+            detail = "; ".join(str(x) for x in res[:5]) if isinstance(res, list) else "rejected"
+            raise BrainError(f"[plan] validate_plan rejected brain plan ({detail}) — fail-closed, not auto-fixed")
         return plan
 
     def build(self, plan: Dict[str, Any], spec: Dict[str, Any]) -> Dict[str, str]:
         proposal = self._call_brain(
             "You are the build stage. Return JSON only: {files: {path: content}}. No shell commands, no extra keys.",
-            f"PLAN:\n{json.dumps(plan, ensure_ascii=False)[:10000]}\nSPEC:\n{json.dumps(spec, ensure_ascii=False)[:5000]}",
+            f"PLAN:\n{json.dumps(plan, ensure_ascii=False)[:12000]}\nSPEC:\n{json.dumps(spec, ensure_ascii=False)[:6000]}",
             "build",
         )
         files = proposal.get("files")
         if not isinstance(files, dict) or not files:
             raise BrainError("[build] brain must return {files: {path: content}} non-empty")
         for path, content in files.items():
-            if len(path) > MAX_PATH_CHARS:
-                raise BrainError(f"[build] path too long: {path[:80]}")
+            if not isinstance(path, str) or not path.strip() or len(path) > MAX_PATH_CHARS:
+                raise BrainError(f"[build] invalid or overly long path: {str(path)[:80]}")
             if not isinstance(content, str) or len(content) > MAX_FILE_CHARS:
                 raise BrainError(f"[build] file too long or not str: {path}")
         return files
@@ -183,14 +185,21 @@ class HybridBrain:
         if not isinstance(new_files, dict) or not new_files:
             raise BrainError("[repair] brain must return {files: {...}} non-empty")
         merged = dict(files)
-        merged.update(new_files)
+        for path, content in new_files.items():
+            if not isinstance(path, str) or len(path) > MAX_PATH_CHARS or not isinstance(content, str) or len(content) > MAX_FILE_CHARS:
+                raise BrainError(f"[repair] invalid repaired file entry: {str(path)[:80]}")
+            merged[path] = content
         return merged
 
     def run_task(self, goal: str, hidden_test_code: Optional[str] = None) -> Dict[str, Any]:
-        """รัน 1 goal ครบ 6 ขั้น รายงานแยกขั้น — ไม่เคยอ้าง hidden_ok ถ้าไม่ได้รัน hidden test จริง"""
+        """รัน 1 goal ครบทุกขั้น รายงานแยกขั้น — ไม่เคยอ้าง hidden_ok ถ้าไม่ได้รัน hidden test จริง"""
         report: Dict[str, Any] = {
-            "goal": goal, "mode": "HYBRID_EXTERNAL_BRAIN", "stages": {},
-            "delivered": False, "hidden_ok": None, "false_success": None,
+            "goal": goal,
+            "mode": "HYBRID_EXTERNAL_BRAIN",
+            "stages": {},
+            "delivered": False,
+            "hidden_ok": None,
+            "false_success": None,
         }
 
         def mark(stage: str, ok: bool, detail: str = ""):
@@ -220,17 +229,20 @@ class HybridBrain:
         # test: ต้องรันผ่าน sandbox ที่ฉีดมาเท่านั้น ห้ามสมมติว่าผ่าน
         try:
             if hasattr(self.sandbox, "run_tests") and hidden_test_code is not None:
-                # test ขั้นนี้คือรัน test ที่ brain เสนอมาใน plan (ถ้ามี) — ใน bench นี้ใช้ hidden แยกอีกทีข้างล่าง
                 result = self.sandbox.run_tests(files, hidden_test_code)
                 passed = bool(result.get("passed")) if isinstance(result, dict) else False
                 mark("test", passed, str(result)[:500])
                 if not passed:
-                    # repair 1 รอบ แล้วรันซ้ำ
                     try:
                         files = self.repair_proposal(plan, files, str(result)[:8000])
-                        mark("repair", True, "repair proposal returned")
+                        # Also apply deterministic repair hook if scaffold supports repair_deterministic
+                        if hasattr(self.sandbox, "repair_deterministic"):
+                            det = self.sandbox.repair_deterministic(plan, files, goal=goal)
+                            if isinstance(det, dict) and isinstance(det.get("files"), dict):
+                                files = det["files"]
                         result2 = self.sandbox.run_tests(files, hidden_test_code)
                         passed2 = bool(result2.get("passed")) if isinstance(result2, dict) else False
+                        mark("repair", passed2, f"repair_retest={'PASS' if passed2 else 'FAIL'}: {str(result2)[:300]}")
                         mark("test_after_repair", passed2, str(result2)[:500])
                         passed = passed2
                     except BrainError as e:
@@ -239,7 +251,6 @@ class HybridBrain:
                 else:
                     mark("repair", True, "not needed")
             else:
-                # ไม่มี sandbox/test ให้รัน -> ต้องรายงานว่า test ไม่ได้รัน ห้ามอ้างผ่าน
                 mark("test", False, "no sandbox.run_tests or no hidden_test_code — test not executed")
                 mark("repair", False, "skipped — test not executed")
                 return report
@@ -253,13 +264,13 @@ class HybridBrain:
                 if hasattr(self.planner, "package_deliverable"):
                     pkg = self.planner.package_deliverable(plan, files)
                     mark("deliver", True, str(pkg)[:300])
+                    report["package"] = pkg
                 else:
                     mark("deliver", True, "no package_deliverable — files ready, not packaged")
                 report["delivered"] = True
                 report["files"] = files
-                # hidden_ok ใน run_task นี้ = ผลจาก sandbox.run_tests ที่รัน hidden_test_code จริงเมื่อกี้
                 report["hidden_ok"] = passed
-                report["false_success"] = (report["delivered"] and not passed)
+                report["false_success"] = bool(report["delivered"] and not passed)
             except Exception as e:
                 mark("deliver", False, f"package failed: {e!r}")
                 return report
@@ -268,3 +279,4 @@ class HybridBrain:
             report["hidden_ok"] = False
             report["false_success"] = False
         return report
+

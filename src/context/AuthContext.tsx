@@ -13,6 +13,7 @@ export interface AuthSession {
   tenantId: string;
   authenticatedAt: string;
   sovereignRole?: string;
+  authMode?: string;
   exp?: number;
 }
 
@@ -41,6 +42,24 @@ function loadStoredToken(): string | null {
   } catch {
     return null;
   }
+}
+
+export function getStoredAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (typeof window === 'undefined') return headers;
+  try {
+    const tok = localStorage.getItem(TOKEN_KEY);
+    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+    const rawMeta = localStorage.getItem(SESSION_KEY);
+    if (rawMeta) {
+      const parsed = JSON.parse(rawMeta);
+      const tid = parsed?.session?.tenantId;
+      if (typeof tid === 'string' && tid) headers['x-zyntheor-tenant'] = tid;
+    }
+  } catch {
+    /* ignore storage errors */
+  }
+  return headers;
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

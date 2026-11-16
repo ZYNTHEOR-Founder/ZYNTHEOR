@@ -83,12 +83,10 @@ class NativeNeuralModel:
                     _, obj = without_scheme.split("/", 1)
                     self.object_key = obj
             elif cloud_bytes is None:
-                # [FIXED] คอมเมนต์บล็อก FAIL_CLOSED ออกชั่วคราว เพื่อยอมรับการอ่านไฟล์จากโลคอลดิสก์สำหรับการเทส
-                pass
-                # raise RuntimeError(
-                #     f"FAIL_CLOSED: Online Connectivity Required — local disk checkpoint reads are disabled ({src}). "
-                #     "Load model weights exclusively from Cloud Object Storage (S3/R2/HTTPS) or Cloud Runtime."
-                # )
+                raise RuntimeError(
+                    f"FAIL_CLOSED: Online Connectivity Required — local disk checkpoint reads are disabled ({src}). "
+                    "Load model weights exclusively from Cloud Object Storage (S3/R2/HTTPS) or Cloud Runtime."
+                )
 
         self.weights_source = ""
         self.checkpoint_path = ""
@@ -213,25 +211,6 @@ class NativeNeuralModel:
             raise RuntimeError(f"FAIL_CLOSED: Execution verification failed — {exc}") from exc
 
     def load_checkpoint(self, cloud_bytes: Optional[bytes] = None):
-        
-        self.weights_loaded = True
-        self.learned_weights_loaded = True
-        self.execution_verified = True
-        self.quality_gate_passed = True
-        self.quality_gate_status = "PASS"
-        self.runtime_state = "READY"
-        self.trained_provenance = True
-        self.config.total_params = 231168
-        self.checkpoint_hash = "local_mock_hash_25_25"
-        self.metadata = {
-            "quality_gate_status": "PASS",
-            "validation_passed": True,
-            "test_gate_passed": True,
-            "provenance_status": "VERIFIED_READY",
-            "total_params": 231168
-        }
-        return
-
         t_total_start = time.perf_counter()
         self.runtime_state = "INITIALIZING"
         self.weights_loaded = False
@@ -254,20 +233,10 @@ class NativeNeuralModel:
                 raw_container = cloud_bytes
                 source_uri = self.presigned_url or (f"s3://{os.environ.get('S3_BUCKET', 'cloud')}/{self.object_key}" if self.object_key else "cloud://memory-stream")
             else:
-                try:
-                    metadata, payload, actual_sha256, raw_container, source_uri = load_checkpoint_container_from_cloud(
-                        object_key=self.object_key,
-                        presigned_url=self.presigned_url,
-                    )
-                except Exception:
-                    # [FIXED] เพิ่มระบบ fallback อ่านจากดิสก์โลคอลหากโหลดจากคลาวด์ไม่สำเร็จ
-                    if TARGET_CHECKPOINT_PATH and os.path.exists(TARGET_CHECKPOINT_PATH):
-                        with open(TARGET_CHECKPOINT_PATH, "rb") as f:
-                            raw_container = f.read()
-                        metadata, payload, actual_sha256 = parse_checkpoint_container(raw_container)
-                        source_uri = TARGET_CHECKPOINT_PATH
-                    else:
-                        raise
+                metadata, payload, actual_sha256, raw_container, source_uri = load_checkpoint_container_from_cloud(
+                    object_key=self.object_key,
+                    presigned_url=self.presigned_url,
+                )
             t_fetch_ms = round((time.perf_counter() - t_fetch_start) * 1000.0, 2)
 
             self.weights_source = source_uri
@@ -533,10 +502,11 @@ class NativeNeuralModel:
         except Exception as e:
             self.weights_loaded = False
             self.execution_verified = False
+            self.runtime_state = "FAILED"
             msg = str(e)
             if "FAIL_CLOSED:" in msg:
                 raise RuntimeError(msg) from e
-            # raise RuntimeError(f"FAIL_CLOSED: Failed to load checkpoint: {msg}") from e
+            raise RuntimeError(f"FAIL_CLOSED: Failed to load checkpoint: {msg}") from e
 
     def load_parameters_from_flat(self, flat_floats: List[float]):
         offset = 0
@@ -588,23 +558,30 @@ class NativeNeuralModel:
             try:
                 with open(MEMORY_STORE_PATH, "r", encoding="utf-8") as f:
                     self.memory_cache = json.load(f)
+                return
             except Exception:
                 self.memory_cache = {}
-        else:
-            self.memory_cache = {
-                "sessions": [],
-                "verified_knowledge": {
-                    "architecture": "ZYNTHEOR Q+ Native Target 41.53M",
-                    "sovereignty_rule": "Online-first Native neural inference",
-                    "sandbox_root": "/workspace"
-                }
-            }
-            self.save_memory()
+                return
+        self.memory_cache = {
+            "sessions": [],
+            "verified_knowledge": {
+                "architecture": "ZYNTHEOR Q+ Native Target 41.53M",
+                "sovereignty_rule": "Online-first Native neural inference",
+                "sandbox_root": "/workspace",
+            },
+        }
 
     def save_memory(self):
         os.makedirs(os.path.dirname(MEMORY_STORE_PATH), exist_ok=True)
         with open(MEMORY_STORE_PATH, "w", encoding="utf-8") as f:
             json.dump(self.memory_cache, f, indent=2, ensure_ascii=False)
+
+    def _resolve_active_lm(self) -> Tuple[Optional[Any], Dict[str, Any], str]:
+        if self._seq_lm is not None:
+            return self._seq_lm, self._seq_lm_meta, "seq_lm"
+        if self._target_lm is not None:
+            return self._target_lm, self._target_lm_meta, "target_lm"
+        return None, {}, "subgraph"
 
     def compute_embedding_projection(self, token_ids: List[int]) -> List[float]:
         emb = [0.0] * self.config.d_model
@@ -651,22 +628,144 @@ class NativeNeuralModel:
             new_tokens.append(next_tid)
         return new_tokens
 
-    def generate(self, prompt: str, role: str = "assistant", max_tokens: int = 1024, temperature: float = 0.2, correlation_id: Optional[str] = None) -> Dict[str, Any]:
+    def stream_generate_with_meta(
+        self,
+        prompt: str,
+        *,
+        role: str = "chat",
+        correlation_id: Optional[str] = None,
+        max_new_tokens: int = 32,
+        temperature: float = 0.0,
+        seed: Optional[int] = None,
+    ) -> Generator[Dict[str, Any], None, None]:
         if not self.weights_loaded or not self.execution_verified:
             raise RuntimeError("FAIL_CLOSED: Verified native weights not ready.")
-        start_time = time.time()
         cid = correlation_id or f"corr_{int(time.time() * 1000)}"
-        input_tokens = self.tokenizer.encode(prompt)
-        auto_tokens = self.autoregressive_generate(input_tokens[:16], max_new_tokens=8)
-        output_text = f"ZYNTHEOR Sovereign Response to: {prompt.strip()[:60]}"
-        output_tokens = self.tokenizer.encode(output_text)
-        duration = time.time() - start_time
-        return {
-            "text": output_text,
+        start_time = time.perf_counter()
+
+        if role == "planner":
+            from qplus_native.planner import interpret_goal
+            spec = interpret_goal(prompt)
+            text = json.dumps(spec, ensure_ascii=False)
+            in_toks = self.tokenizer.encode(prompt)
+            out_toks = self.tokenizer.encode(text)
+            if text:
+                yield {"type": "chunk", "text": text, "correlation_id": cid}
+            elapsed = max(time.perf_counter() - start_time, 1e-6)
+            yield {
+                "type": "done",
+                "text": text,
+                "correlation_id": cid,
+                "input_tokens_count": len(in_toks),
+                "output_tokens_count": len(out_toks),
+                "effective_context_len": min(len(in_toks), self.config.max_seq_len),
+                "max_context_len": self.config.max_seq_len,
+                "prompt_truncated": len(in_toks) > self.config.max_seq_len,
+                "latency_ms": round(elapsed * 1000.0, 2),
+                "tokens_per_sec": round(len(out_toks) / elapsed, 2),
+                "inference_origin": "orchestrator_structured",
+                "weights_role": self.weights_role,
+                "cancelled": False,
+            }
+            return
+
+        lm, _, _ = self._resolve_active_lm()
+        in_toks = self.tokenizer.encode(prompt) or [1]
+        max_ctx = int(getattr(getattr(lm, "cfg", None), "ctx", self.config.max_seq_len))
+        prompt_truncated = len(in_toks) > max_ctx
+        bounded_ids = in_toks[-max_ctx:] if prompt_truncated else in_toks
+        limit = max(1, min(int(max_new_tokens), 512))
+        stop_ids = {self.tokenizer.token_to_id.get("[EOS]", 2)}
+        cancelled = False
+
+        if lm is not None and hasattr(lm, "generate_ids_stream"):
+            generated: List[int] = []
+            prev_text = ""
+            pending_tail = ""
+            for tid in lm.generate_ids_stream(
+                bounded_ids,
+                max_new_tokens=limit,
+                temperature=max(0.0, float(temperature)),
+                seed=seed,
+                stop_ids=stop_ids,
+            ):
+                if self.is_cancelled(cid):
+                    cancelled = True
+                    break
+                generated.append(int(tid))
+                full_text = self.tokenizer.decode(generated, skip_instruction_markers=True)
+                delta = full_text[len(prev_text):] if full_text.startswith(prev_text) else full_text
+                prev_text = full_text
+                safe, pending_tail = self.tokenizer.split_thai_safe_stream_prefix(pending_tail + delta, flush=False)
+                if safe:
+                    yield {"type": "chunk", "text": safe, "correlation_id": cid}
+            if pending_tail:
+                yield {"type": "chunk", "text": pending_tail, "correlation_id": cid}
+            final_text = self.tokenizer.decode(generated, skip_instruction_markers=True)
+            out_count = len(generated)
+            origin = "native_model_logits"
+        else:
+            auto_tokens = self.autoregressive_generate(bounded_ids[:16], max_new_tokens=min(limit, 12))
+            final_text = self.tokenizer.decode(auto_tokens, skip_instruction_markers=True)
+            if final_text:
+                yield {"type": "chunk", "text": final_text, "correlation_id": cid}
+            out_count = len(auto_tokens)
+            origin = "subgraph_forward"
+
+        elapsed = max(time.perf_counter() - start_time, 1e-6)
+        yield {
+            "type": "done",
+            "text": final_text,
             "correlation_id": cid,
-            "input_tokens_count": len(input_tokens),
-            "output_tokens_count": len(output_tokens),
-            "latency_ms": round(duration * 1000, 2),
+            "input_tokens_count": len(in_toks),
+            "output_tokens_count": out_count,
+            "effective_context_len": len(bounded_ids),
+            "max_context_len": max_ctx,
+            "prompt_truncated": prompt_truncated,
+            "latency_ms": round(elapsed * 1000.0, 2),
+            "tokens_per_sec": round(out_count / elapsed, 2),
+            "inference_origin": origin,
+            "weights_role": self.weights_role,
+            "cancelled": cancelled,
+        }
+
+    def generate(
+        self,
+        prompt: str,
+        role: str = "assistant",
+        max_tokens: int = 32,
+        temperature: float = 0.0,
+        correlation_id: Optional[str] = None,
+        seed: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        if not self.weights_loaded or not self.execution_verified:
+            raise RuntimeError("FAIL_CLOSED: Verified native weights not ready.")
+        done_ev: Dict[str, Any] = {}
+        chunks: List[str] = []
+        for ev in self.stream_generate_with_meta(
+            prompt,
+            role=role,
+            correlation_id=correlation_id,
+            max_new_tokens=max_tokens,
+            temperature=temperature,
+            seed=seed,
+        ):
+            if ev.get("type") == "chunk":
+                chunks.append(ev.get("text", ""))
+            elif ev.get("type") == "done":
+                done_ev = ev
+        return {
+            "text": "".join(chunks) or done_ev.get("text", ""),
+            "correlation_id": done_ev.get("correlation_id", correlation_id),
+            "input_tokens_count": done_ev.get("input_tokens_count", 0),
+            "output_tokens_count": done_ev.get("output_tokens_count", 0),
+            "effective_context_len": done_ev.get("effective_context_len", 0),
+            "max_context_len": done_ev.get("max_context_len", self.config.max_seq_len),
+            "prompt_truncated": done_ev.get("prompt_truncated", False),
+            "latency_ms": done_ev.get("latency_ms", 0.0),
+            "tokens_per_sec": done_ev.get("tokens_per_sec", 0.0),
+            "inference_origin": done_ev.get("inference_origin", "native_model_logits"),
+            "weights_role": self.weights_role,
             "checkpoint_hash": self.checkpoint_hash,
             "total_params": self.config.total_params,
             "runtime_state": self.runtime_state,

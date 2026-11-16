@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { AuditRecord } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import {
   ShieldCheck,
   Search,
@@ -24,6 +25,7 @@ interface SystemAuditLedgerProps {
 }
 
 export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className = '' }) => {
+  const { authHeaders, authReady, isAuthenticated } = useAuth();
   const [records, setRecords] = useState<AuditRecord[]>([]);
   const [integrity, setIntegrity] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -31,12 +33,13 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const fetchLedger = async () => {
+  const fetchLedger = useCallback(async () => {
+    if (!authReady || !isAuthenticated) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/audit?limit=100');
+      const res = await fetch('/api/audit?limit=100', { headers: authHeaders() });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setRecords(data.records || []);
         setIntegrity(data.integrity);
       }
@@ -45,11 +48,11 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders, authReady, isAuthenticated]);
 
   useEffect(() => {
-    fetchLedger();
-  }, []);
+    void fetchLedger();
+  }, [fetchLedger]);
 
   const filteredRecords = useMemo(() => {
     return records.filter((rec) => {
