@@ -1,0 +1,1798 @@
+{
+  "version": "ZYNTHEOR_KG_V1",
+  "updatedAt": "2026-11-18T19:36:21.666Z",
+  "nodes": [
+    {
+      "nodeId": "kgn_8e70cb7df9e2",
+      "label": "TenantA Secret 1795015983794",
+      "canonicalKey": "tenanta secret 1795015983794",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795015983794"
+      ],
+      "documentIds": [
+        "doc_1795015983802_0onpx"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T15:33:03.802Z"
+    },
+    {
+      "nodeId": "kgn_ec9b1f57c758",
+      "label": "rbac",
+      "canonicalKey": "rbac",
+      "kind": "CONCEPT",
+      "aliases": [
+        "rbac"
+      ],
+      "documentIds": [
+        "doc_1795015983802_0onpx",
+        "doc_1795015199382_vjin2",
+        "doc_1795013811222_9bhkn",
+        "doc_1795008341911_onkqs",
+        "doc_1795008179886_rhihv",
+        "doc_1795006882320_a49cv",
+        "doc_1795005916286_w28m9",
+        "doc_1795000805193_544eh"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T11:20:05.194Z"
+    },
+    {
+      "nodeId": "kgn_4d3600cc7777",
+      "label": "TenantA Secret 1795015199371",
+      "canonicalKey": "tenanta secret 1795015199371",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795015199371"
+      ],
+      "documentIds": [
+        "doc_1795015199382_vjin2"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T15:19:59.382Z"
+    },
+    {
+      "nodeId": "kgn_4e08ed1d1f7e",
+      "label": "Synthetic Test Benchmark Generation",
+      "canonicalKey": "synthetic test benchmark generation",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Synthetic Test Benchmark Generation"
+      ],
+      "documentIds": [
+        "doc_1795015186019_oa2d5",
+        "doc_1795013791367_exhcj"
+      ],
+      "updatedAt": "2026-11-18T14:56:31.368Z"
+    },
+    {
+      "nodeId": "kgn_9dafb9fa3ad8",
+      "label": "general",
+      "canonicalKey": "general",
+      "kind": "CONCEPT",
+      "aliases": [
+        "general"
+      ],
+      "documentIds": [
+        "doc_1795015186019_oa2d5",
+        "doc_1795013791367_exhcj"
+      ],
+      "updatedAt": "2026-11-18T14:56:31.368Z"
+    },
+    {
+      "nodeId": "kgn_69bbf1bd67c8",
+      "label": "TenantA Secret 1795013811213",
+      "canonicalKey": "tenanta secret 1795013811213",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795013811213"
+      ],
+      "documentIds": [
+        "doc_1795013811222_9bhkn"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T14:56:51.223Z"
+    },
+    {
+      "nodeId": "kgn_60b7ed7463b0",
+      "label": "TenantA Secret 1795008341903",
+      "canonicalKey": "tenanta secret 1795008341903",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795008341903"
+      ],
+      "documentIds": [
+        "doc_1795008341911_onkqs"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T13:25:41.911Z"
+    },
+    {
+      "nodeId": "kgn_a82473118d63",
+      "label": "TenantA Secret 1795008179878",
+      "canonicalKey": "tenanta secret 1795008179878",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795008179878"
+      ],
+      "documentIds": [
+        "doc_1795008179886_rhihv"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T13:22:59.886Z"
+    },
+    {
+      "nodeId": "kgn_afabb725d500",
+      "label": "TenantA Secret 1795006882313",
+      "canonicalKey": "tenanta secret 1795006882313",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795006882313"
+      ],
+      "documentIds": [
+        "doc_1795006882320_a49cv"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T13:01:22.320Z"
+    },
+    {
+      "nodeId": "kgn_ab6d26ae48ac",
+      "label": "TenantA Secret 1795005916280",
+      "canonicalKey": "tenanta secret 1795005916280",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795005916280"
+      ],
+      "documentIds": [
+        "doc_1795005916286_w28m9"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T12:45:16.287Z"
+    },
+    {
+      "nodeId": "kgn_7c9816a180ee",
+      "label": "TenantA Secret 1795000805185",
+      "canonicalKey": "tenanta secret 1795000805185",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795000805185"
+      ],
+      "documentIds": [
+        "doc_1795000805193_544eh"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-18T11:20:05.194Z"
+    },
+    {
+      "nodeId": "kgn_6792c04284d0",
+      "label": "governance",
+      "canonicalKey": "governance",
+      "kind": "CONCEPT",
+      "aliases": [
+        "governance"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_04fafe202cf8",
+      "label": "รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard",
+      "canonicalKey": "รัฐธรรมนูญวิศวกรรม zero-fake engineering standard",
+      "kind": "THAI_TERM",
+      "aliases": [
+        "รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_bbb4e6d72b95",
+      "label": "1. กฎเหล็ก 7 ข้อ",
+      "canonicalKey": "1. กฎเหล็ก 7 ข้อ",
+      "kind": "THAI_TERM",
+      "aliases": [
+        "1. กฎเหล็ก 7 ข้อ"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_f23afddeb885",
+      "label": "Zero-Fake Engineering Constitution & Evidence Cl",
+      "canonicalKey": "zero-fake engineering constitution & evidence cl",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Zero-Fake Engineering Constitution & Evidence Cl"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_2af5c6351ff5",
+      "label": "zero-fake",
+      "canonicalKey": "zero-fake",
+      "kind": "CONCEPT",
+      "aliases": [
+        "zero-fake"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_12dcdd2fae92",
+      "label": "evidence",
+      "canonicalKey": "evidence",
+      "kind": "CONCEPT",
+      "aliases": [
+        "evidence"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_9e3b1e02a0e1",
+      "label": "audit",
+      "canonicalKey": "audit",
+      "kind": "CONCEPT",
+      "aliases": [
+        "audit"
+      ],
+      "documentIds": [
+        "doc_1794904396215_7bj9c"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.215Z"
+    },
+    {
+      "nodeId": "kgn_ab1440a7687b",
+      "label": "SovereignTokenizer",
+      "canonicalKey": "sovereigntokenizer",
+      "kind": "MODEL",
+      "aliases": [
+        "tokenizer"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_b3ec5f9635ba",
+      "label": "มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR",
+      "canonicalKey": "มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ zyntheor",
+      "kind": "THAI_TERM",
+      "aliases": [
+        "มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_885b45c404e0",
+      "label": "1. ขอบเขต",
+      "canonicalKey": "1. ขอบเขต",
+      "kind": "THAI_TERM",
+      "aliases": [
+        "1. ขอบเขต"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_aaab18b37015",
+      "label": "Tokenizer source",
+      "canonicalKey": "tokenizer source",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Tokenizer source"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_156634b5a995",
+      "label": "vocabulary construction and Thai Unicode handling",
+      "canonicalKey": "vocabulary construction and thai unicode handling",
+      "kind": "CONCEPT",
+      "aliases": [
+        "vocabulary construction and Thai Unicode handling"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_73184fcd8472",
+      "label": "2. การตรวจสอบภาษา",
+      "canonicalKey": "2. การตรวจสอบภาษา",
+      "kind": "THAI_TERM",
+      "aliases": [
+        "2. การตรวจสอบภาษา"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_efaecbab73ae",
+      "label": "Thai-English Bilingual Tokenizer Standard & Char",
+      "canonicalKey": "thai-english bilingual tokenizer standard & char",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Thai-English Bilingual Tokenizer Standard & Char"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_5613ba6c904a",
+      "label": "thai",
+      "canonicalKey": "thai",
+      "kind": "CONCEPT",
+      "aliases": [
+        "thai"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_8fc1adb56451",
+      "label": "english",
+      "canonicalKey": "english",
+      "kind": "CONCEPT",
+      "aliases": [
+        "english"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_4589fbcbf706",
+      "label": "unicode",
+      "canonicalKey": "unicode",
+      "kind": "CONCEPT",
+      "aliases": [
+        "unicode"
+      ],
+      "documentIds": [
+        "doc_1794904396214_74j0t"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_630b612d734f",
+      "label": "security",
+      "canonicalKey": "security",
+      "kind": "CONCEPT",
+      "aliases": [
+        "security"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_3f12ff10e5f3",
+      "label": "Sovereign HMAC Token Verification Standard",
+      "canonicalKey": "sovereign hmac token verification standard",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Sovereign HMAC Token Verification Standard"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_889c380975f1",
+      "label": "1. Timing-Attack Defense",
+      "canonicalKey": "1. timing-attack defense",
+      "kind": "METRIC",
+      "aliases": [
+        "1. Timing-Attack Defense"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_61e81edb59e4",
+      "label": "Token verification",
+      "canonicalKey": "token verification",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Token verification"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_7733cfda89f8",
+      "label": "constant-time comparison via crypto",
+      "canonicalKey": "constant-time comparison via crypto",
+      "kind": "CONCEPT",
+      "aliases": [
+        "constant-time comparison via crypto"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_2cd1bd6af1b1",
+      "label": "2. Minimum Entropy & Tenant Isolation",
+      "canonicalKey": "2. minimum entropy & tenant isolation",
+      "kind": "METRIC",
+      "aliases": [
+        "2. Minimum Entropy & Tenant Isolation"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_421d860ac94d",
+      "label": "Each token payload",
+      "canonicalKey": "each token payload",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Each token payload"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_aec8519de240",
+      "label": "strict tenantId validation",
+      "canonicalKey": "strict tenantid validation",
+      "kind": "CONCEPT",
+      "aliases": [
+        "strict tenantId validation"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_daa16f112e54",
+      "label": "Sovereign Token Verification & Constant-Time Sec",
+      "canonicalKey": "sovereign token verification & constant-time sec",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Sovereign Token Verification & Constant-Time Sec"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_f121ed2304f1",
+      "label": "HMAC_TimingSafeEqual",
+      "canonicalKey": "hmac_timingsafeequal",
+      "kind": "SECURITY",
+      "aliases": [
+        "hmac"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_d26b59dabd28",
+      "label": "timing-attack",
+      "canonicalKey": "timing-attack",
+      "kind": "CONCEPT",
+      "aliases": [
+        "timing-attack"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_1868a252bedf",
+      "label": "tenant-isolation",
+      "canonicalKey": "tenant-isolation",
+      "kind": "CONCEPT",
+      "aliases": [
+        "tenant-isolation"
+      ],
+      "documentIds": [
+        "doc_1794904396214_osjcn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.214Z"
+    },
+    {
+      "nodeId": "kgn_b28febe96d1a",
+      "label": "architecture",
+      "canonicalKey": "architecture",
+      "kind": "CONCEPT",
+      "aliases": [
+        "architecture"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_7109a9bed6d7",
+      "label": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "canonicalKey": "zyntheor native architecture & checkpoint evidence",
+      "kind": "CONCEPT",
+      "aliases": [
+        "ZYNTHEOR Native Architecture & Checkpoint Evidence"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_a865f2f015d6",
+      "label": "1. Architecture target",
+      "canonicalKey": "1. architecture target",
+      "kind": "METRIC",
+      "aliases": [
+        "1. Architecture target"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_2407c5f75aaa",
+      "label": "The source",
+      "canonicalKey": "the source",
+      "kind": "CONCEPT",
+      "aliases": [
+        "The source"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_86e2bc882e22",
+      "label": "a target decoder architecture of 10 layers",
+      "canonicalKey": "a target decoder architecture of 10 layers",
+      "kind": "METRIC",
+      "aliases": [
+        "a target decoder architecture of 10 layers"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_41f88b1d5901",
+      "label": "472. These",
+      "canonicalKey": "472. these",
+      "kind": "METRIC",
+      "aliases": [
+        "472. These"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_75e1b159761b",
+      "label": "design specifications",
+      "canonicalKey": "design specifications",
+      "kind": "CONCEPT",
+      "aliases": [
+        "design specifications"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_1fdddf393c04",
+      "label": "2. Measured checkpoint evidence (2026-11-15",
+      "canonicalKey": "2. measured checkpoint evidence (2026-11-15",
+      "kind": "METRIC",
+      "aliases": [
+        "2. Measured checkpoint evidence (2026-11-15)"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_12e2b36a0621",
+      "label": "payload inspected in this source archive",
+      "canonicalKey": "payload inspected in this source archive",
+      "kind": "CONCEPT",
+      "aliases": [
+        "payload inspected in this source archive"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_e2e243ecba8e",
+      "label": "231",
+      "canonicalKey": "231",
+      "kind": "METRIC",
+      "aliases": [
+        "231"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_e69cbc7cce9c",
+      "label": "808 parameter target",
+      "canonicalKey": "808 parameter target",
+      "kind": "METRIC",
+      "aliases": [
+        "808 parameter target"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_5750e8d7b1d7",
+      "label": "specification",
+      "canonicalKey": "specification",
+      "kind": "CONCEPT",
+      "aliases": [
+        "specification"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_20222c588bee",
+      "label": "target checkpoint files in this archive",
+      "canonicalKey": "target checkpoint files in this archive",
+      "kind": "CONCEPT",
+      "aliases": [
+        "target checkpoint files in this archive"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_66a787064ac2",
+      "label": "descriptors",
+      "canonicalKey": "descriptors",
+      "kind": "CONCEPT",
+      "aliases": [
+        "descriptors"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_8bb100db32e8",
+      "label": "remains blocked until a compatible checkpoint",
+      "canonicalKey": "remains blocked until a compatible checkpoint",
+      "kind": "CONCEPT",
+      "aliases": [
+        "remains blocked until a compatible checkpoint"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_00b0a9efe04b",
+      "label": "fetched and verified by the Cloud Runtime",
+      "canonicalKey": "fetched and verified by the cloud runtime",
+      "kind": "CONCEPT",
+      "aliases": [
+        "fetched and verified by the Cloud Runtime"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_06a334f03309",
+      "label": "3. Evidence and training policy",
+      "canonicalKey": "3. evidence and training policy",
+      "kind": "METRIC",
+      "aliases": [
+        "3. Evidence and training policy"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_01142c5046ef",
+      "label": "Knowledge retrieval",
+      "canonicalKey": "knowledge retrieval",
+      "kind": "CONCEPT",
+      "aliases": [
+        "Knowledge retrieval"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_ea055a77df64",
+      "label": "distinct from weight training",
+      "canonicalKey": "distinct from weight training",
+      "kind": "CONCEPT",
+      "aliases": [
+        "distinct from weight training"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_95f770372d74",
+      "label": "New datasets",
+      "canonicalKey": "new datasets",
+      "kind": "CONCEPT",
+      "aliases": [
+        "New datasets"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_43d9dd0b9eaa",
+      "label": "explicit human approval and provenance evidence before training",
+      "canonicalKey": "explicit human approval and provenance evidence before training",
+      "kind": "CONCEPT",
+      "aliases": [
+        "explicit human approval and provenance evidence before training"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_8d08d66c7d3d",
+      "label": "and inference readiness",
+      "canonicalKey": "and inference readiness",
+      "kind": "CONCEPT",
+      "aliases": [
+        "and inference readiness"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_e22e285df9ea",
+      "label": "separate claims",
+      "canonicalKey": "separate claims",
+      "kind": "CONCEPT",
+      "aliases": [
+        "separate claims"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_c4e71782232c",
+      "label": "A status",
+      "canonicalKey": "a status",
+      "kind": "CONCEPT",
+      "aliases": [
+        "A status"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_e9f76961cbe7",
+      "label": "reported only when supported by recorded runtime/test evidence",
+      "canonicalKey": "reported only when supported by recorded runtime/test evidence",
+      "kind": "CONCEPT",
+      "aliases": [
+        "reported only when supported by recorded runtime/test evidence"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_c7f95ea498ce",
+      "label": "ZYNTHEOR Native Architecture & Checkpoint Eviden",
+      "canonicalKey": "zyntheor native architecture & checkpoint eviden",
+      "kind": "CONCEPT",
+      "aliases": [
+        "ZYNTHEOR Native Architecture & Checkpoint Eviden"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_29e6e8134b34",
+      "label": "transformer",
+      "canonicalKey": "transformer",
+      "kind": "CONCEPT",
+      "aliases": [
+        "transformer"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_42d6971f3bdd",
+      "label": "rope",
+      "canonicalKey": "rope",
+      "kind": "CONCEPT",
+      "aliases": [
+        "rope"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    },
+    {
+      "nodeId": "kgn_d5ee9e1e3aad",
+      "label": "swiglu",
+      "canonicalKey": "swiglu",
+      "kind": "CONCEPT",
+      "aliases": [
+        "swiglu"
+      ],
+      "documentIds": [
+        "doc_1794904396212_gh0qn"
+      ],
+      "updatedAt": "2026-11-17T08:33:16.212Z"
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "kge_b00b964cb30e",
+      "subjectId": "kgn_8e70cb7df9e2",
+      "subjectLabel": "TenantA Secret 1795015983794",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795015983802_0onpx",
+      "documentTitle": "TenantA Secret 1795015983794",
+      "contentHash": "f5ba80970f182ef4e9dcbd36083237a65d113c365d243bb5d02feeaf2bd25fbc",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T15:33:03.802Z",
+      "updatedAt": "2026-11-18T15:33:03.802Z",
+      "freshnessScore": 0.997,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795015983794' (RBAC)"
+    },
+    {
+      "edgeId": "kge_80f681f770c1",
+      "subjectId": "kgn_4d3600cc7777",
+      "subjectLabel": "TenantA Secret 1795015199371",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795015199382_vjin2",
+      "documentTitle": "TenantA Secret 1795015199371",
+      "contentHash": "7fbd352e0397176c491d6dccebda6ea04acdd091c35a9ad9eb7eac58d19de0ca",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T15:19:59.382Z",
+      "updatedAt": "2026-11-18T15:19:59.382Z",
+      "freshnessScore": 0.997,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795015199371' (RBAC)"
+    },
+    {
+      "edgeId": "kge_5a394226bbbe",
+      "subjectId": "kgn_4e08ed1d1f7e",
+      "subjectLabel": "Synthetic Test Benchmark Generation",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_9dafb9fa3ad8",
+      "objectLabel": "general",
+      "documentId": "doc_1795015186019_oa2d5",
+      "documentTitle": "Synthetic Test Benchmark Generation",
+      "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+      "provenance": "Synthetic LLM generation",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T15:19:46.019Z",
+      "updatedAt": "2026-11-18T15:19:46.019Z",
+      "freshnessScore": 0.997,
+      "snippet": "Document 'Synthetic Test Benchmark Generation' (Synthetic_Test)"
+    },
+    {
+      "edgeId": "kge_85025bc11443",
+      "subjectId": "kgn_69bbf1bd67c8",
+      "subjectLabel": "TenantA Secret 1795013811213",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795013811222_9bhkn",
+      "documentTitle": "TenantA Secret 1795013811213",
+      "contentHash": "6380d9e88d1104f67e524693c199422a071624d22c619f61afaa4039b03ed3b0",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T14:56:51.223Z",
+      "updatedAt": "2026-11-18T14:56:51.223Z",
+      "freshnessScore": 0.997,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795013811213' (RBAC)"
+    },
+    {
+      "edgeId": "kge_181be15accf5",
+      "subjectId": "kgn_4e08ed1d1f7e",
+      "subjectLabel": "Synthetic Test Benchmark Generation",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_9dafb9fa3ad8",
+      "objectLabel": "general",
+      "documentId": "doc_1795013791367_exhcj",
+      "documentTitle": "Synthetic Test Benchmark Generation",
+      "contentHash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6",
+      "provenance": "Synthetic LLM generation",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T14:56:31.368Z",
+      "updatedAt": "2026-11-18T14:56:31.368Z",
+      "freshnessScore": 0.997,
+      "snippet": "Document 'Synthetic Test Benchmark Generation' (Synthetic_Test)"
+    },
+    {
+      "edgeId": "kge_d24ca0ffdf01",
+      "subjectId": "kgn_60b7ed7463b0",
+      "subjectLabel": "TenantA Secret 1795008341903",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795008341911_onkqs",
+      "documentTitle": "TenantA Secret 1795008341903",
+      "contentHash": "97a886df478e56a79250abe97e6b650ffff6edee4e68db845912735f552a684e",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T13:25:41.911Z",
+      "updatedAt": "2026-11-18T13:25:41.911Z",
+      "freshnessScore": 0.996,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795008341903' (RBAC)"
+    },
+    {
+      "edgeId": "kge_87d9a963b48c",
+      "subjectId": "kgn_a82473118d63",
+      "subjectLabel": "TenantA Secret 1795008179878",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795008179886_rhihv",
+      "documentTitle": "TenantA Secret 1795008179878",
+      "contentHash": "3fe3a228a447de5e92b2815036118a0212ba3996a6f686428dd39d8e21af770e",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T13:22:59.886Z",
+      "updatedAt": "2026-11-18T13:22:59.886Z",
+      "freshnessScore": 0.996,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795008179878' (RBAC)"
+    },
+    {
+      "edgeId": "kge_2c2e7e9d8461",
+      "subjectId": "kgn_afabb725d500",
+      "subjectLabel": "TenantA Secret 1795006882313",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795006882320_a49cv",
+      "documentTitle": "TenantA Secret 1795006882313",
+      "contentHash": "0173c0ebba7644ef21da51464d1d9cd53eb7ebea8134349c668dead1e369cff9",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T13:01:22.320Z",
+      "updatedAt": "2026-11-18T13:01:22.320Z",
+      "freshnessScore": 0.995,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795006882313' (RBAC)"
+    },
+    {
+      "edgeId": "kge_4809429d4e9c",
+      "subjectId": "kgn_ab6d26ae48ac",
+      "subjectLabel": "TenantA Secret 1795005916280",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795005916286_w28m9",
+      "documentTitle": "TenantA Secret 1795005916280",
+      "contentHash": "cf666753135f049b3edf1833a8f7256429a078a83bae06b0f4b8b8e3848231d1",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T12:45:16.287Z",
+      "updatedAt": "2026-11-18T12:45:16.287Z",
+      "freshnessScore": 0.995,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795005916280' (RBAC)"
+    },
+    {
+      "edgeId": "kge_a6a1525bb7ed",
+      "subjectId": "kgn_7c9816a180ee",
+      "subjectLabel": "TenantA Secret 1795000805185",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795000805193_544eh",
+      "documentTitle": "TenantA Secret 1795000805185",
+      "contentHash": "dc8818b4a0f3033065865ca8cc31d83c3cc9ebfb42546a2b965ce72653f7a309",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-18T11:20:05.194Z",
+      "updatedAt": "2026-11-18T11:20:05.194Z",
+      "freshnessScore": 0.994,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795000805185' (RBAC)"
+    },
+    {
+      "edgeId": "kge_812ce1f31346",
+      "subjectId": "kgn_6792c04284d0",
+      "subjectLabel": "governance",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_04fafe202cf8",
+      "objectLabel": "รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard",
+      "documentId": "doc_1794904396215_7bj9c",
+      "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+      "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+      "provenance": "Foundational operating charter of the ZYNTHEOR project",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.215Z",
+      "updatedAt": "2026-11-17T08:33:16.215Z",
+      "freshnessScore": 0.976,
+      "snippet": "รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard"
+    },
+    {
+      "edgeId": "kge_a95987638a4f",
+      "subjectId": "kgn_6792c04284d0",
+      "subjectLabel": "governance",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_bbb4e6d72b95",
+      "objectLabel": "1. กฎเหล็ก 7 ข้อ",
+      "documentId": "doc_1794904396215_7bj9c",
+      "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+      "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+      "provenance": "Foundational operating charter of the ZYNTHEOR project",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.215Z",
+      "updatedAt": "2026-11-17T08:33:16.215Z",
+      "freshnessScore": 0.976,
+      "snippet": "1. กฎเหล็ก 7 ข้อ"
+    },
+    {
+      "edgeId": "kge_f02a509f9d13",
+      "subjectId": "kgn_f23afddeb885",
+      "subjectLabel": "Zero-Fake Engineering Constitution & Evidence Cl",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_6792c04284d0",
+      "objectLabel": "governance",
+      "documentId": "doc_1794904396215_7bj9c",
+      "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+      "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+      "provenance": "Foundational operating charter of the ZYNTHEOR project",
+      "confidence": 0.75,
+      "validFrom": "2026-11-17T08:33:16.215Z",
+      "updatedAt": "2026-11-17T08:33:16.215Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' (Governance)"
+    },
+    {
+      "edgeId": "kge_e5dfbe05a0b3",
+      "subjectId": "kgn_6792c04284d0",
+      "subjectLabel": "governance",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_2af5c6351ff5",
+      "objectLabel": "zero-fake",
+      "documentId": "doc_1794904396215_7bj9c",
+      "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+      "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+      "provenance": "Foundational operating charter of the ZYNTHEOR project",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.215Z",
+      "updatedAt": "2026-11-17T08:33:16.215Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' tags: governance, zero-fake, evidence, audit"
+    },
+    {
+      "edgeId": "kge_d3016c46f4b9",
+      "subjectId": "kgn_2af5c6351ff5",
+      "subjectLabel": "zero-fake",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_12dcdd2fae92",
+      "objectLabel": "evidence",
+      "documentId": "doc_1794904396215_7bj9c",
+      "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+      "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+      "provenance": "Foundational operating charter of the ZYNTHEOR project",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.215Z",
+      "updatedAt": "2026-11-17T08:33:16.215Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' tags: governance, zero-fake, evidence, audit"
+    },
+    {
+      "edgeId": "kge_f93dff87199c",
+      "subjectId": "kgn_12dcdd2fae92",
+      "subjectLabel": "evidence",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_9e3b1e02a0e1",
+      "objectLabel": "audit",
+      "documentId": "doc_1794904396215_7bj9c",
+      "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+      "contentHash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+      "provenance": "Foundational operating charter of the ZYNTHEOR project",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.215Z",
+      "updatedAt": "2026-11-17T08:33:16.215Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' tags: governance, zero-fake, evidence, audit"
+    },
+    {
+      "edgeId": "kge_0dd474699172",
+      "subjectId": "kgn_ab1440a7687b",
+      "subjectLabel": "SovereignTokenizer",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_b3ec5f9635ba",
+      "objectLabel": "มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR"
+    },
+    {
+      "edgeId": "kge_1b07c87061c7",
+      "subjectId": "kgn_ab1440a7687b",
+      "subjectLabel": "SovereignTokenizer",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_885b45c404e0",
+      "objectLabel": "1. ขอบเขต",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "1. ขอบเขต"
+    },
+    {
+      "edgeId": "kge_c70bf99395b3",
+      "subjectId": "kgn_aaab18b37015",
+      "subjectLabel": "Tokenizer source",
+      "relation": "REQUIRES_OR_USES",
+      "objectId": "kgn_156634b5a995",
+      "objectLabel": "vocabulary construction and Thai Unicode handling",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.86,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Tokenizer source defines vocabulary construction and Thai Unicode handling. Vocabulary size, effective vocabulary count, unknown-token rate, and round-trip fidelity must be reporte"
+    },
+    {
+      "edgeId": "kge_079ad3aee806",
+      "subjectId": "kgn_ab1440a7687b",
+      "subjectLabel": "SovereignTokenizer",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_73184fcd8472",
+      "objectLabel": "2. การตรวจสอบภาษา",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "2. การตรวจสอบภาษา"
+    },
+    {
+      "edgeId": "kge_f9a35e2ad4a1",
+      "subjectId": "kgn_efaecbab73ae",
+      "subjectLabel": "Thai-English Bilingual Tokenizer Standard & Char",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ab1440a7687b",
+      "objectLabel": "SovereignTokenizer",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.75,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' (Bilingual Language)"
+    },
+    {
+      "edgeId": "kge_8394c99737ce",
+      "subjectId": "kgn_ab1440a7687b",
+      "subjectLabel": "SovereignTokenizer",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_5613ba6c904a",
+      "objectLabel": "thai",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' tags: tokenizer, thai, english, unicode, vocab"
+    },
+    {
+      "edgeId": "kge_afda63a328ea",
+      "subjectId": "kgn_5613ba6c904a",
+      "subjectLabel": "thai",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_8fc1adb56451",
+      "objectLabel": "english",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' tags: tokenizer, thai, english, unicode, vocab"
+    },
+    {
+      "edgeId": "kge_2bec3fc420df",
+      "subjectId": "kgn_8fc1adb56451",
+      "subjectLabel": "english",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_4589fbcbf706",
+      "objectLabel": "unicode",
+      "documentId": "doc_1794904396214_74j0t",
+      "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+      "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+      "provenance": "Internal linguistic standard for zero-loss Thai character encoding",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' tags: tokenizer, thai, english, unicode, vocab"
+    },
+    {
+      "edgeId": "kge_6a4fb9923ab1",
+      "subjectId": "kgn_630b612d734f",
+      "subjectLabel": "security",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_3f12ff10e5f3",
+      "objectLabel": "Sovereign HMAC Token Verification Standard",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Sovereign HMAC Token Verification Standard"
+    },
+    {
+      "edgeId": "kge_75561e84cc43",
+      "subjectId": "kgn_630b612d734f",
+      "subjectLabel": "security",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_889c380975f1",
+      "objectLabel": "1. Timing-Attack Defense",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "1. Timing-Attack Defense"
+    },
+    {
+      "edgeId": "kge_ac650e8ae52f",
+      "subjectId": "kgn_61e81edb59e4",
+      "subjectLabel": "Token verification",
+      "relation": "REQUIRES_OR_USES",
+      "objectId": "kgn_7733cfda89f8",
+      "objectLabel": "constant-time comparison via crypto",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.86,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Token verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks."
+    },
+    {
+      "edgeId": "kge_473709ca9990",
+      "subjectId": "kgn_630b612d734f",
+      "subjectLabel": "security",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_2cd1bd6af1b1",
+      "objectLabel": "2. Minimum Entropy & Tenant Isolation",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "2. Minimum Entropy & Tenant Isolation"
+    },
+    {
+      "edgeId": "kge_ff70aa823f6e",
+      "subjectId": "kgn_421d860ac94d",
+      "subjectLabel": "Each token payload",
+      "relation": "REQUIRES_OR_USES",
+      "objectId": "kgn_aec8519de240",
+      "objectLabel": "strict tenantId validation",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.86,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Each token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits."
+    },
+    {
+      "edgeId": "kge_4b481e286c68",
+      "subjectId": "kgn_daa16f112e54",
+      "subjectLabel": "Sovereign Token Verification & Constant-Time Sec",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_630b612d734f",
+      "objectLabel": "security",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.75,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' (Security Invariants)"
+    },
+    {
+      "edgeId": "kge_56276fb4cbe4",
+      "subjectId": "kgn_630b612d734f",
+      "subjectLabel": "security",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_f121ed2304f1",
+      "objectLabel": "HMAC_TimingSafeEqual",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' tags: security, hmac, timing-attack, tenant-isolation, sha256"
+    },
+    {
+      "edgeId": "kge_83b5c2b93e13",
+      "subjectId": "kgn_f121ed2304f1",
+      "subjectLabel": "HMAC_TimingSafeEqual",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_d26b59dabd28",
+      "objectLabel": "timing-attack",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' tags: security, hmac, timing-attack, tenant-isolation, sha256"
+    },
+    {
+      "edgeId": "kge_5a5bcadb22c2",
+      "subjectId": "kgn_d26b59dabd28",
+      "subjectLabel": "timing-attack",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_1868a252bedf",
+      "objectLabel": "tenant-isolation",
+      "documentId": "doc_1794904396214_osjcn",
+      "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+      "contentHash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+      "provenance": "Hardened cryptographic authentication protocol specification",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.214Z",
+      "updatedAt": "2026-11-17T08:33:16.214Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' tags: security, hmac, timing-attack, tenant-isolation, sha256"
+    },
+    {
+      "edgeId": "kge_d8871f9dc28b",
+      "subjectId": "kgn_b28febe96d1a",
+      "subjectLabel": "architecture",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_7109a9bed6d7",
+      "objectLabel": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "ZYNTHEOR Native Architecture & Checkpoint Evidence"
+    },
+    {
+      "edgeId": "kge_ff12a1470907",
+      "subjectId": "kgn_b28febe96d1a",
+      "subjectLabel": "architecture",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_a865f2f015d6",
+      "objectLabel": "1. Architecture target",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "1. Architecture target"
+    },
+    {
+      "edgeId": "kge_7033a90c3556",
+      "subjectId": "kgn_2407c5f75aaa",
+      "subjectLabel": "The source",
+      "relation": "REQUIRES_OR_USES",
+      "objectId": "kgn_86e2bc882e22",
+      "objectLabel": "a target decoder architecture of 10 layers",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.86,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "The source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof o"
+    },
+    {
+      "edgeId": "kge_e01f686b5a46",
+      "subjectId": "kgn_41f88b1d5901",
+      "subjectLabel": "472. These",
+      "relation": "IS_A",
+      "objectId": "kgn_75e1b159761b",
+      "objectLabel": "design specifications",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "The source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof o"
+    },
+    {
+      "edgeId": "kge_5fa316b6586c",
+      "subjectId": "kgn_b28febe96d1a",
+      "subjectLabel": "architecture",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_1fdddf393c04",
+      "objectLabel": "2. Measured checkpoint evidence (2026-11-15",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "2. Measured checkpoint evidence (2026-11-15)"
+    },
+    {
+      "edgeId": "kge_3428f6db3222",
+      "subjectId": "kgn_12e2b36a0621",
+      "subjectLabel": "payload inspected in this source archive",
+      "relation": "REQUIRES_OR_USES",
+      "objectId": "kgn_e2e243ecba8e",
+      "objectLabel": "231",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.86,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
+    },
+    {
+      "edgeId": "kge_13313152f221",
+      "subjectId": "kgn_e69cbc7cce9c",
+      "subjectLabel": "808 parameter target",
+      "relation": "IS_A",
+      "objectId": "kgn_5750e8d7b1d7",
+      "objectLabel": "specification",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
+    },
+    {
+      "edgeId": "kge_c844363316ce",
+      "subjectId": "kgn_20222c588bee",
+      "subjectLabel": "target checkpoint files in this archive",
+      "relation": "IS_A",
+      "objectId": "kgn_66a787064ac2",
+      "objectLabel": "descriptors",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
+    },
+    {
+      "edgeId": "kge_65a2e51b3c76",
+      "subjectId": "kgn_8bb100db32e8",
+      "subjectLabel": "remains blocked until a compatible checkpoint",
+      "relation": "IS_A",
+      "objectId": "kgn_00b0a9efe04b",
+      "objectLabel": "fetched and verified by the Cloud Runtime",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
+    },
+    {
+      "edgeId": "kge_9792499295ac",
+      "subjectId": "kgn_b28febe96d1a",
+      "subjectLabel": "architecture",
+      "relation": "COVERED_IN",
+      "objectId": "kgn_06a334f03309",
+      "objectLabel": "3. Evidence and training policy",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.72,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "3. Evidence and training policy"
+    },
+    {
+      "edgeId": "kge_3cf1cbb2dfeb",
+      "subjectId": "kgn_01142c5046ef",
+      "subjectLabel": "Knowledge retrieval",
+      "relation": "IS_A",
+      "objectId": "kgn_ea055a77df64",
+      "objectLabel": "distinct from weight training",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "Knowledge retrieval is distinct from weight training."
+    },
+    {
+      "edgeId": "kge_8ceab8a315d4",
+      "subjectId": "kgn_95f770372d74",
+      "subjectLabel": "New datasets",
+      "relation": "REQUIRES_OR_USES",
+      "objectId": "kgn_43d9dd0b9eaa",
+      "objectLabel": "explicit human approval and provenance evidence before training",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.86,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "New datasets require explicit human approval and provenance evidence before training."
+    },
+    {
+      "edgeId": "kge_f1486c8a5d2f",
+      "subjectId": "kgn_8d08d66c7d3d",
+      "subjectLabel": "and inference readiness",
+      "relation": "IS_A",
+      "objectId": "kgn_e22e285df9ea",
+      "objectLabel": "separate claims",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "Checkpoint integrity, training quality, and inference readiness are separate claims."
+    },
+    {
+      "edgeId": "kge_959ef7ccfc91",
+      "subjectId": "kgn_c4e71782232c",
+      "subjectLabel": "A status",
+      "relation": "IS_A",
+      "objectId": "kgn_e9f76961cbe7",
+      "objectLabel": "reported only when supported by recorded runtime/test evidence",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.8,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "A status is reported only when supported by recorded runtime/test evidence."
+    },
+    {
+      "edgeId": "kge_60f9cd109f7c",
+      "subjectId": "kgn_c7f95ea498ce",
+      "subjectLabel": "ZYNTHEOR Native Architecture & Checkpoint Eviden",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_b28febe96d1a",
+      "objectLabel": "architecture",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.75,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' (Architecture)"
+    },
+    {
+      "edgeId": "kge_aa1b7fb9e4a9",
+      "subjectId": "kgn_b28febe96d1a",
+      "subjectLabel": "architecture",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_29e6e8134b34",
+      "objectLabel": "transformer",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' tags: architecture, transformer, rope, swiglu, sovereign"
+    },
+    {
+      "edgeId": "kge_079d48641cc5",
+      "subjectId": "kgn_29e6e8134b34",
+      "subjectLabel": "transformer",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_42d6971f3bdd",
+      "objectLabel": "rope",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' tags: architecture, transformer, rope, swiglu, sovereign"
+    },
+    {
+      "edgeId": "kge_598b32d85a27",
+      "subjectId": "kgn_42d6971f3bdd",
+      "subjectLabel": "rope",
+      "relation": "RELATED_DOMAIN",
+      "objectId": "kgn_d5ee9e1e3aad",
+      "objectLabel": "swiglu",
+      "documentId": "doc_1794904396212_gh0qn",
+      "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+      "contentHash": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+      "provenance": "First-party engineering specification authored by ZYNTHEOR Core Team",
+      "confidence": 0.7,
+      "validFrom": "2026-11-17T08:33:16.212Z",
+      "updatedAt": "2026-11-17T08:33:16.212Z",
+      "freshnessScore": 0.976,
+      "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' tags: architecture, transformer, rope, swiglu, sovereign"
+    }
+  ]
+}

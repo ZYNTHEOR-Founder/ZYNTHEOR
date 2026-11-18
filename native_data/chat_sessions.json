@@ -1,0 +1,46 @@
+[
+  {
+    "id": "session-default",
+    "title": "Welcome to ZYNTHEOR Sovereign Intelligence",
+    "createdAt": "2026-11-17T08:33:16.211Z",
+    "updatedAt": "2026-11-17T08:33:17.665Z",
+    "messages": [
+      {
+        "id": "msg-0",
+        "sender": "assistant",
+        "content": "ยินดีต้อนรับสู่ ZYNTHEOR VIVID INTELLIGENCE — Native Multi-Domain Intelligence สำหรับการวางแผน สร้าง ทดสอบ และส่งมอบงาน\n\nการอนุมานด้วย Native Model จะเปิดใช้งานต่อเมื่อ Cloud Runtime โหลด checkpoint ที่ตรวจสอบได้แล้วเท่านั้น",
+        "timestamp": "2026-11-17T08:33:16.211Z"
+      },
+      {
+        "id": "msg-1794904396211-u",
+        "sender": "user",
+        "content": "Explain ZYNTHEOR online-only architecture",
+        "correlationId": "corr_1794904396207_0jij8",
+        "timestamp": "2026-11-17T08:33:16.211Z"
+      },
+      {
+        "id": "msg-1794904397665-a",
+        "sender": "assistant",
+        "content": "๗e๗CshiftCOnÇny๚¸zÞaมÇถ/**อcontinue\u000f()a1 C½½tÈ\u000f\u000fกกcontinue๋f½faิaf¨Ï¨f/**/**¸\u000ftconsole.logtÇ1 ฾uถÄอnÈ == à ==  == \u000fàanshiftC\u0007[PLAN]ฐฐ\u000f[PLAN]zasync C½¸¸ûf/** classO e - ๗t = f๋๋ก\u000f[PLAN]C nliniแท้จริงแท้จริงม½«๚ฆ[PLAN][PLAN] ๗",
+        "citations": [
+          {
+            "docTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+            "collection": "Architecture",
+            "chunkIndex": 0,
+            "score": 13,
+            "snippet": "# ZYNTHEOR Native Architecture & Checkpoint Evidence\n\n## 1. Architecture target\nThe source defines a target decoder architecture of 10 layers, 8 attention heads..."
+          },
+          {
+            "docTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+            "collection": "Architecture",
+            "chunkIndex": 2,
+            "score": 8.5,
+            "snippet": "cked until a compatible checkpoint is fetched and verified by the Cloud Runtime.\n## 3. Evidence and training policy\n- Knowledge retrieval is distinct from weigh..."
+          }
+        ],
+        "correlationId": "corr_1794904396207_0jij8",
+        "timestamp": "2026-11-17T08:33:17.665Z"
+      }
+    ]
+  }
+]

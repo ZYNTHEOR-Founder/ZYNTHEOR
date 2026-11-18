@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SQL_DB_NAME:-zyntheor}
+      POSTGRES_USER: ${SQL_USER:-zyntheor_app}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD:?Set SQL_PASSWORD in .env}
+    volumes:
+      - zyntheor_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  object-storage:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID in .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY in .env}
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - zyntheor_s3data:/data
+
+  object-storage-init:
+    image: minio/mc:latest
+    depends_on:
+      - object-storage
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        until mc alias set local http://object-storage:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done
+        mc mb --ignore-existing "local/$$S3_BUCKET"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID in .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY in .env}
+      S3_BUCKET: ${S3_BUCKET:-zyntheor-checkpoints}
+    restart: "no"
+
+  zyntheor-cloud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      object-storage-init:
+        condition: service_completed_successfully
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      SQL_HOST: postgres
+      SQL_DB_NAME: ${SQL_DB_NAME:-zyntheor}
+      SQL_USER: ${SQL_USER:-zyntheor_app}
+      SQL_PASSWORD: ${SQL_PASSWORD:?Set SQL_PASSWORD in .env}
+      SQL_ADMIN_USER: ${SQL_ADMIN_USER:-${SQL_USER:-zyntheor_app}}
+      SQL_ADMIN_PASSWORD: ${SQL_ADMIN_PASSWORD:-${SQL_PASSWORD}}
+      DATABASE_URL: ${DATABASE_URL:-}
+      S3_BUCKET: ${S3_BUCKET:-zyntheor-checkpoints}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://object-storage:9000}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID in .env}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY in .env}
+      S3_CHECKPOINT_KEY: ${S3_CHECKPOINT_KEY:-checkpoints/model_checkpoint.pt}
+      CHECKPOINT_STORAGE_PROVIDER: ${CHECKPOINT_STORAGE_PROVIDER:-s3}
+      CHECKPOINT_PRESIGNED_URL: ${CHECKPOINT_PRESIGNED_URL:-}
+      CHECKPOINT_UPLOAD_URL: ${CHECKPOINT_UPLOAD_URL:-}
+      CLOUD_RUNTIME_URL: ${CLOUD_RUNTIME_URL:-}
+      ZYNTHEOR_CONNECTIVITY_PROBE_URL: ${ZYNTHEOR_CONNECTIVITY_PROBE_URL:-}
+      ZYNTHEOR_ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?Set ALLOWED_ORIGINS in .env}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?Set ALLOWED_ORIGINS in .env}
+      ZYNTHEOR_MASTER_SECRET: ${ZYNTHEOR_MASTER_SECRET:?Set ZYNTHEOR_MASTER_SECRET (>=32 chars)}
+      ZYNTHEOR_ENABLE_DEV_LOGIN: "false"
+
+volumes:
+  zyntheor_pgdata:
+  zyntheor_s3data:

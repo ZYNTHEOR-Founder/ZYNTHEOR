@@ -1,0 +1,14 @@
+{
+  "schema_version": "zyntheor.dataset-provenance.v1",
+  "dataset_id": "zyntheor-native-41m-pending-review",
+  "near_duplicate_threshold": 0.9,
+  "documents": [],
+  "governance_status": "PENDING_HUMAN_REVIEW_AND_TRUSTED_APPROVAL",
+  "required_actions": [
+    "Provide actual dataset content file(s) with immutable SHA-256 matching document_sha256",
+    "Split non-overlapping documents into train, validation, and test (zero exact or near-duplicate leakage >= 0.90)",
+    "Attach verified https:// source URL, publisher, SPDX license id + https:// URL, rights basis/scope",
+    "Pin local evidence files under evidence/{source,license,rights,approval} with exact SHA-256",
+    "Sign each document record via external trusted HMAC key (mode 0600, NOT committed to repo)"
+  ]
+}

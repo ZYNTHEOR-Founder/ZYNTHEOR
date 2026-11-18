@@ -1,0 +1,27 @@
+{
+  "missionId": "ACT-1794672709240-02625c",
+  "auditedAt": "2026-11-14T16:11:49.304Z",
+  "auditLedger": {
+    "valid": true,
+    "totalRecords": 68,
+    "headHash": "0f0ad6aa84be7db512cb79f28c32112981bffa35e979ef20acef24c9050372f7"
+  },
+  "memoryIntegrity": {
+    "valid": true,
+    "totalItems": 7,
+    "verifiedItems": 7,
+    "tamperedKeys": [],
+    "expiredPurgedCount": 0,
+    "storeSha256": "e640168e2938192eff1dd1713b824e4a7f515eb797b51119bd8afbab475cb878",
+    "checkedAt": "2026-11-14T16:11:49.302Z"
+  },
+  "knowledgeGraph": {
+    "valid": true,
+    "nodeCount": 35,
+    "edgeCount": 27,
+    "danglingEdges": 0
+  },
+  "dockerAvailable": false,
+  "ssrfHardened": true,
+  "runtimeState": "NOT_CONFIGURED"
+}

@@ -1,0 +1,437 @@
+[
+  {
+    "reasoningId": "rsn_1794922445442_421311",
+    "timestamp": "2026-11-17T13:34:05.442Z",
+    "problemClass": "hybrid_execution",
+    "selectedStrategy": "multi_path_synthesis",
+    "contextAnalysis": {
+      "contextId": "ctx_1794922445405_891522",
+      "intent": "general",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+      "evidenceRefs": [
+        {
+          "documentId": "doc_1794904396214_74j0t",
+          "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+          "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        }
+      ],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": true,
+      "score": 0.88
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.88,
+      "epistemicUncertainty": 0.12,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 34.299
+    },
+    "answerSummary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol. Evidence: Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_95babb3e4c",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_rag_graph_1' passed verifier 'knowledge_graph_hybrid_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+          "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        ],
+        "evidenceHash": "95babb3e4cef6a1d67357a59c142a78cd864a1528ba26345bdaed85e7394ea30",
+        "timestamp": "2026-11-17T13:34:05.442Z"
+      },
+      {
+        "claimId": "claim_adapti_ab06b833e5",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.88 (uncertainty=0.12)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "ab06b833e5cd1f22ba7974bcaba928c8cc0b530c8e286358734d2d25af1ea476",
+        "timestamp": "2026-11-17T13:34:05.442Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794922361585_4b3e35",
+    "timestamp": "2026-11-17T13:32:41.585Z",
+    "problemClass": "hybrid_execution",
+    "selectedStrategy": "multi_path_synthesis",
+    "contextAnalysis": {
+      "contextId": "ctx_1794922361545_4c5c6a",
+      "intent": "general",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+      "evidenceRefs": [
+        {
+          "documentId": "doc_1794904396214_74j0t",
+          "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+          "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        }
+      ],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": true,
+      "score": 0.88
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.88,
+      "epistemicUncertainty": 0.12,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 38.445
+    },
+    "answerSummary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol. Evidence: Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_95babb3e4c",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_rag_graph_1' passed verifier 'knowledge_graph_hybrid_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+          "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        ],
+        "evidenceHash": "95babb3e4cef6a1d67357a59c142a78cd864a1528ba26345bdaed85e7394ea30",
+        "timestamp": "2026-11-17T13:32:41.585Z"
+      },
+      {
+        "claimId": "claim_adapti_ab06b833e5",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.88 (uncertainty=0.12)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "ab06b833e5cd1f22ba7974bcaba928c8cc0b530c8e286358734d2d25af1ea476",
+        "timestamp": "2026-11-17T13:32:41.585Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794922353538_bf5a1e",
+    "timestamp": "2026-11-17T13:32:33.538Z",
+    "problemClass": "hybrid_execution",
+    "selectedStrategy": "multi_path_synthesis",
+    "contextAnalysis": {
+      "contextId": "ctx_1794922353497_c9e130",
+      "intent": "general",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+      "evidenceRefs": [
+        {
+          "documentId": "doc_1794904396214_74j0t",
+          "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+          "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        }
+      ],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": true,
+      "score": 0.88
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.88,
+      "epistemicUncertainty": 0.12,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 38.801
+    },
+    "answerSummary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol. Evidence: Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_95babb3e4c",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_rag_graph_1' passed verifier 'knowledge_graph_hybrid_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+          "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        ],
+        "evidenceHash": "95babb3e4cef6a1d67357a59c142a78cd864a1528ba26345bdaed85e7394ea30",
+        "timestamp": "2026-11-17T13:32:33.538Z"
+      },
+      {
+        "claimId": "claim_adapti_ab06b833e5",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.88 (uncertainty=0.12)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "ab06b833e5cd1f22ba7974bcaba928c8cc0b530c8e286358734d2d25af1ea476",
+        "timestamp": "2026-11-17T13:32:33.538Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794922318452_010bd1",
+    "timestamp": "2026-11-17T13:31:58.452Z",
+    "problemClass": "hybrid_execution",
+    "selectedStrategy": "multi_path_synthesis",
+    "contextAnalysis": {
+      "contextId": "ctx_1794922318412_ceac4c",
+      "intent": "general",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+      "evidenceRefs": [
+        {
+          "documentId": "doc_1794904396214_74j0t",
+          "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+          "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        }
+      ],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": true,
+      "score": 0.88
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.88,
+      "epistemicUncertainty": 0.12,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 38.273
+    },
+    "answerSummary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol. Evidence: Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_95babb3e4c",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_rag_graph_1' passed verifier 'knowledge_graph_hybrid_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+          "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        ],
+        "evidenceHash": "95babb3e4cef6a1d67357a59c142a78cd864a1528ba26345bdaed85e7394ea30",
+        "timestamp": "2026-11-17T13:31:58.452Z"
+      },
+      {
+        "claimId": "claim_adapti_ab06b833e5",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.88 (uncertainty=0.12)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "ab06b833e5cd1f22ba7974bcaba928c8cc0b530c8e286358734d2d25af1ea476",
+        "timestamp": "2026-11-17T13:31:58.452Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  },
+  {
+    "reasoningId": "rsn_1794922309064_c73be6",
+    "timestamp": "2026-11-17T13:31:49.064Z",
+    "problemClass": "hybrid_execution",
+    "selectedStrategy": "multi_path_synthesis",
+    "contextAnalysis": {
+      "contextId": "ctx_1794922309026_e72c27",
+      "intent": "general",
+      "language": "en",
+      "conflictsDetected": 0,
+      "attribution": "deterministic_preprocessor"
+    },
+    "constraints": [],
+    "hypothesesEvaluated": 1,
+    "winningHypothesis": {
+      "hypothesisId": "hyp_rag_graph_1",
+      "strategy": "multi_hop_graph_rag",
+      "summary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+      "evidenceRefs": [
+        {
+          "documentId": "doc_1794904396214_74j0t",
+          "title": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+          "contentHash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        }
+      ],
+      "constraintsChecked": [],
+      "counterexampleTested": true,
+      "counterexamplePassed": true,
+      "counterexampleDetail": "Absent-concept probe yielded 0 fabricated citations.",
+      "verifierPassed": true,
+      "score": 0.88
+    },
+    "uncertainty": {
+      "calibratedConfidence": 0.88,
+      "epistemicUncertainty": 0.12,
+      "abstentionRecommended": false
+    },
+    "reasoningMetadata": {
+      "traceDigestSha256": "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+      "redactedPrivateTrace": true,
+      "verifierAttribution": "knowledge_graph_hybrid_verifier",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "durationMs": 35.322
+    },
+    "answerSummary": "Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol. Evidence: Grounded in 1 workspace chunk(s) and 5 knowledge-graph path(s). Top source: Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol.",
+    "verified": true,
+    "truthClaims": [
+      {
+        "claimId": "claim_adapti_95babb3e4c",
+        "domain": "adaptive_reasoning",
+        "statement": "Winning hypothesis 'hyp_rag_graph_1' passed verifier 'knowledge_graph_hybrid_verifier' and counterexample probe",
+        "classification": "VERIFIED_FACT",
+        "basis": "Verifier=knowledge_graph_hybrid_verifier; counterexamplePassed=true",
+        "evidenceRefs": [
+          "a0801b728ce2517dd9b19d35d43d75cfd48e9e1e8c108897b1493b5b9defe7bc",
+          "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+        ],
+        "evidenceHash": "95babb3e4cef6a1d67357a59c142a78cd864a1528ba26345bdaed85e7394ea30",
+        "timestamp": "2026-11-17T13:31:49.064Z"
+      },
+      {
+        "claimId": "claim_adapti_ab06b833e5",
+        "domain": "adaptive_reasoning",
+        "statement": "Epistemic confidence=0.88 (uncertainty=0.12)",
+        "classification": "ASSUMPTION",
+        "basis": "Heuristic scoring formula combining verifier pass/fail and context conflict penalty",
+        "evidenceHash": "ab06b833e5cd1f22ba7974bcaba928c8cc0b530c8e286358734d2d25af1ea476",
+        "timestamp": "2026-11-17T13:31:49.064Z"
+      }
+    ],
+    "truthSummary": {
+      "totalClaims": 2,
+      "countsByClass": {
+        "VERIFIED_FACT": 1,
+        "ASSUMPTION": 1,
+        "UNVERIFIED": 0,
+        "CONTRADICTED": 0,
+        "PROPOSED": 0
+      },
+      "verifiedCount": 1,
+      "unverifiedCount": 0,
+      "contradictedCount": 0,
+      "assumptionCount": 1,
+      "proposedCount": 0,
+      "allClassified": true
+    }
+  }
+]

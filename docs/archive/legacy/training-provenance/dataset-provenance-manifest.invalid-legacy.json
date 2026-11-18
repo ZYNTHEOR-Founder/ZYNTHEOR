@@ -1,0 +1,10 @@
+{
+  "documents": [
+    {
+      "id": "real-doc-001",
+      "source": "native_data/real_dataset.jsonl",
+      "license": "internal-sovereign",
+      "hash": "1a124924fc7c70757f6171073e14230e6d74d8444466ea871f2483bc3a75702a"
+    }
+  ]
+}

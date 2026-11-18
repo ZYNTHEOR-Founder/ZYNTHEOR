@@ -1,0 +1,99 @@
+{
+  "manifest": {
+    "datasetId": "ds_1794922258067",
+    "name": "test",
+    "version": "1.0.0",
+    "createdAt": "2026-11-17T13:30:58.068Z",
+    "sourceDocIds": [
+      "doc_1794922240367_ht73z",
+      "doc_1794904396215_7bj9c",
+      "doc_1794904396214_74j0t",
+      "doc_1794904396214_osjcn",
+      "doc_1794904396212_gh0qn"
+    ],
+    "totalSamples": 7,
+    "trainSamples": 5,
+    "valSamples": 0,
+    "evalSamples": 2,
+    "totalTokensEstimate": 703,
+    "thaiScriptRatio": 0.173,
+    "englishScriptRatio": 0.827,
+    "datasetHash": "aa295bb3541b53077436e359963a9c788398fb6a483a7a90135e06ef65c46284",
+    "syntheticCount": 0,
+    "originalCount": 7,
+    "qualityScoreAvg": 80,
+    "status": "NEEDS_REVIEW"
+  },
+  "items": [
+    {
+      "id": "item_ds_1794922258067_0",
+      "sourceDocId": "doc_1794922240367_ht73z",
+      "text": "cross-tenant isolation probe content unique 19538774",
+      "tokenCount": 13,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "item_ds_1794922258067_1",
+      "sourceDocId": "doc_1794904396215_7bj9c",
+      "text": "# รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard\n\n## 1. กฎเหล็ก 7 ข้อ\n1. ห้ามสร้างโมเดลจำลองหรือรายงานผล benchmark เท็จ\n2. แยกแยะอย่างชัดเจนระหว่าง INITIALIZED WEIGHTS (ค่าน้ำหนักเริ่มต้น/สัญลักษณ์) และ LEARNED WEIGHTS (ค่าน้ำหนักที่ผ่านการฝึกจริง)\n3. การอัปโหลดเอกสารเข้า Knowledge Workspace ไม่ถือว่าเป็นการฝึก Model Weights\n4. จำแนกสถานะตามความเป็นจริง: VERIFIED, IMPLEMENTED, PARTIAL, BLOCKED, NOT IMPLEMENTED, MOCK\n5. ทุกการเปลี่ยนแปลงต้องตรวจสอบผ่านหลักฐานจริงใน Filesystem และ Runtime Logs",
+      "tokenCount": 125,
+      "split": "eval",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "item_ds_1794922258067_2",
+      "sourceDocId": "doc_1794904396214_74j0t",
+      "text": "# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR\n\n## 1. ขอบเขต\nTokenizer source defines vocabulary construction and Thai Unicode handling. Vocabulary size, effective vocabulary count, unknown-token rate, and round-trip fidelity must be reported from the actual runtime test result; this document does not assert fixed performance numbers.\n\n## 2. การตรวจสอบภาษา\nการรองรับข้อความไทย อังกฤษ และการสลับภาษาต้องพิสูจน์ด้วยผลทดสอบที่บันทึกจริงก่อนจัดสถานะ VERIFIED.",
+      "tokenCount": 114,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "item_ds_1794922258067_3",
+      "sourceDocId": "doc_1794904396214_osjcn",
+      "text": "# Sovereign HMAC Token Verification Standard\n\n## 1. Timing-Attack Defense\nToken verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks.\nUnder no circumstances may plain string equality (===) be used on HMAC signatures.\n\n## 2. Minimum Entropy & Tenant Isolation\nSecret keys must have at least 32 bytes of cryptographic entropy loaded from environment variables.\nEach token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits.",
+      "tokenCount": 132,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "item_ds_1794922258067_4",
+      "sourceDocId": "doc_1794904396212_gh0qn",
+      "text": "# ZYNTHEOR Native Architecture & Checkpoint Evidence\n\n## 1. Architecture target\nThe source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof of loaded model weights.",
+      "tokenCount": 71,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "item_ds_1794922258067_5",
+      "sourceDocId": "doc_1794904396212_gh0qn",
+      "text": "width 1,472. These are design specifications, not proof of loaded model weights.\n## 2. Measured checkpoint evidence (2026-11-15)\nThe primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized payload. The 41,527,808 parameter target is a specification; target checkpoint files in this archive are descriptors, not full tensor payloads. Native Cloud inference remains blocked until a compatible checkpoint is fetched and verified by the Cloud Runtime.",
+      "tokenCount": 142,
+      "split": "train",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "item_ds_1794922258067_6",
+      "sourceDocId": "doc_1794904396212_gh0qn",
+      "text": "cked until a compatible checkpoint is fetched and verified by the Cloud Runtime.\n## 3. Evidence and training policy\n- Knowledge retrieval is distinct from weight training.\n- New datasets require explicit human approval and provenance evidence before training.\n- Checkpoint integrity, training quality, and inference readiness are separate claims.\n- A status is reported only when supported by recorded runtime/test evidence.",
+      "tokenCount": 106,
+      "split": "eval",
+      "qualityScore": 80,
+      "isSynthetic": false,
+      "status": "NEEDS_REVIEW"
+    }
+  ]
+}

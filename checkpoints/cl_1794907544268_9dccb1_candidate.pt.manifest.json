@@ -1,0 +1,98 @@
+{
+  "benchmark_status": "NOT_RUN",
+  "checkpoint_file": "cl_1794907544268_9dccb1_candidate.pt",
+  "checkpoint_file_sha256": "2dc98255e8cd33ea4cb58eba7a7ced19dd955163a60f6ee9ae70f074a9a9f346",
+  "checkpoint_id": "bd5182b0b40540029bc75736ddca60a1",
+  "checkpoint_lifecycle": "TRAINED",
+  "config": {
+    "ctx": 12,
+    "d_ffn": 48,
+    "d_model": 24,
+    "n_heads": 4,
+    "n_layers": 1,
+    "vocab": 918
+  },
+  "created_at": "2026-11-17T09:25:49Z",
+  "cumulative_training_steps": 12,
+  "dataset_sha256": "a405831ed9c2cdb2928a2cc385cd6889b78e75574f9eefd8fba17f9f0ad05891",
+  "dataset_version": "ds_v_1794907544271",
+  "inference_verified": true,
+  "lifecycle_detail": "Integrity, tokenizer, optimizer/RNG state, and checkpoint reload verified; quality_gate_status=PASS, inference_verified=True; domain benchmark not run.",
+  "lifecycle_history": [
+    {
+      "at": "2026-11-17T09:25:49Z",
+      "detail": "Integrity-checked training candidate preserved for inspection; quality gate status=PASS; not production-ready.",
+      "state": "TRAINED"
+    },
+    {
+      "at": "2026-11-17T09:25:49Z",
+      "detail": "Integrity, tokenizer, optimizer/RNG state, and checkpoint reload verified; quality_gate_status=PASS, inference_verified=True; domain benchmark not run.",
+      "state": "TRAINED"
+    }
+  ],
+  "lifecycle_state": "TRAINED",
+  "manifest_version": 1,
+  "payload_sha256": "c51589721aae33eb17ddfeb66c42a13880c4077096d06660408d0e07b5150182",
+  "phase_id": "phase_1_continuation",
+  "phase_label": "Phase 1 — Existing Model Continuation",
+  "prior_training_steps": 0,
+  "quality_gate_status": "PASS",
+  "resume_state_file": "cl_1794907544268_9dccb1_candidate.pt.resume.json",
+  "resume_state_sha256": "cd31b6322d05110c6c3c794b3d441a625b3598d50d87dca11506619bc4962b97",
+  "run_id": "cl_1794907544268_9dccb1",
+  "storage_mode": "LEARNED_WEIGHTS_SEQ_PURE_PY",
+  "test_gate_passed": true,
+  "test_metrics": {
+    "beats_bigram": true,
+    "bigram_bpb": 4.8554,
+    "bigram_nll": 4.8379,
+    "bigram_ppl": 126.2034,
+    "bpb": 4.5014,
+    "bytes": 69,
+    "nll": 4.4852,
+    "positions": 48,
+    "ppl": 88.6961,
+    "top1_accuracy": 0.0625,
+    "top5_accuracy": 0.2292
+  },
+  "tokenizer_profile": "bilingual_bpe",
+  "tokenizer_sha256": "ee021b778b5a6ddd729482f8923b56e268c343831be53a36c3f6f0d740760cdb",
+  "training_config": {
+    "gradient_clip": 1.0,
+    "lr": 0.02,
+    "max_chars": 600,
+    "min_lr_ratio": 0.1,
+    "model_config": {
+      "ctx": 12,
+      "d_ffn": 48,
+      "d_model": 24,
+      "n_heads": 4,
+      "n_layers": 1,
+      "vocab": 918
+    },
+    "model_seed": 42,
+    "scheduler_decay": 0.995,
+    "seed": 2028,
+    "test_margin": 2.0,
+    "tokenizer_sha256": "ee021b778b5a6ddd729482f8923b56e268c343831be53a36c3f6f0d740760cdb",
+    "validation_margin": -0.25,
+    "weight_decay": 0.01
+  },
+  "training_config_sha256": "920f86365787d5006e5514492864c6cf9a856a815c438389fddb2c74057504d7",
+  "training_steps": 12,
+  "training_storage_backend": "LOCAL_CANDIDATE_ONLY",
+  "validation_metrics": {
+    "beats_bigram": true,
+    "bigram_bpb": 6.3808,
+    "bigram_nll": 5.7128,
+    "bigram_ppl": 302.727,
+    "bpb": 5.4203,
+    "bytes": 62,
+    "nll": 4.8529,
+    "positions": 48,
+    "ppl": 128.1118,
+    "top1_accuracy": 0.0833,
+    "top5_accuracy": 0.2083
+  },
+  "validation_passed": true
+}

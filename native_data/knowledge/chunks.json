@@ -1,0 +1,162 @@
+[
+  {
+    "id": "chk_doc_1794904396212_gh0qn_0",
+    "documentId": "doc_1794904396212_gh0qn",
+    "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+    "collection": "Architecture",
+    "chunkIndex": 0,
+    "text": "# ZYNTHEOR Native Architecture & Checkpoint Evidence\n\n## 1. Architecture target\nThe source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof of loaded model weights.",
+    "language": "en",
+    "hash": "47b54347e91654231691314dfa38b7febe73bfc83b96003aa9bac104edcb49c0"
+  },
+  {
+    "id": "chk_doc_1794904396212_gh0qn_1",
+    "documentId": "doc_1794904396212_gh0qn",
+    "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+    "collection": "Architecture",
+    "chunkIndex": 1,
+    "text": "width 1,472. These are design specifications, not proof of loaded model weights.\n## 2. Measured checkpoint evidence (2026-11-15)\nThe primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized payload. The 41,527,808 parameter target is a specification; target checkpoint files in this archive are descriptors, not full tensor payloads. Native Cloud inference remains blocked until a compatible checkpoint is fetched and verified by the Cloud Runtime.",
+    "language": "en",
+    "hash": "8a4ce23474130ff6fa3965843f491642848e6fe7045f294eb4f598728bccaa92"
+  },
+  {
+    "id": "chk_doc_1794904396212_gh0qn_2",
+    "documentId": "doc_1794904396212_gh0qn",
+    "documentTitle": "ZYNTHEOR Native Architecture & Checkpoint Evidence",
+    "collection": "Architecture",
+    "chunkIndex": 2,
+    "text": "cked until a compatible checkpoint is fetched and verified by the Cloud Runtime.\n## 3. Evidence and training policy\n- Knowledge retrieval is distinct from weight training.\n- New datasets require explicit human approval and provenance evidence before training.\n- Checkpoint integrity, training quality, and inference readiness are separate claims.\n- A status is reported only when supported by recorded runtime/test evidence.",
+    "language": "en",
+    "hash": "ee446ad172d1a89f33a9148775d3b0b49afba4b3f2560bc4d1a00e8fd408ce87"
+  },
+  {
+    "id": "chk_doc_1794904396214_74j0t_0",
+    "documentId": "doc_1794904396214_74j0t",
+    "documentTitle": "Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol",
+    "collection": "Bilingual Language",
+    "chunkIndex": 0,
+    "text": "# มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR\n\n## 1. ขอบเขต\nTokenizer source defines vocabulary construction and Thai Unicode handling. Vocabulary size, effective vocabulary count, unknown-token rate, and round-trip fidelity must be reported from the actual runtime test result; this document does not assert fixed performance numbers.\n\n## 2. การตรวจสอบภาษา\nการรองรับข้อความไทย อังกฤษ และการสลับภาษาต้องพิสูจน์ด้วยผลทดสอบที่บันทึกจริงก่อนจัดสถานะ VERIFIED.",
+    "language": "mixed",
+    "hash": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8"
+  },
+  {
+    "id": "chk_doc_1794904396214_osjcn_0",
+    "documentId": "doc_1794904396214_osjcn",
+    "documentTitle": "Sovereign Token Verification & Constant-Time Security Specification",
+    "collection": "Security Invariants",
+    "chunkIndex": 0,
+    "text": "# Sovereign HMAC Token Verification Standard\n\n## 1. Timing-Attack Defense\nToken verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks.\nUnder no circumstances may plain string equality (===) be used on HMAC signatures.\n\n## 2. Minimum Entropy & Tenant Isolation\nSecret keys must have at least 32 bytes of cryptographic entropy loaded from environment variables.\nEach token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits.",
+    "language": "en",
+    "hash": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6"
+  },
+  {
+    "id": "chk_doc_1794904396215_7bj9c_0",
+    "documentId": "doc_1794904396215_7bj9c",
+    "documentTitle": "Zero-Fake Engineering Constitution & Evidence Classification Matrix",
+    "collection": "Governance",
+    "chunkIndex": 0,
+    "text": "# รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard\n\n## 1. กฎเหล็ก 7 ข้อ\n1. ห้ามสร้างโมเดลจำลองหรือรายงานผล benchmark เท็จ\n2. แยกแยะอย่างชัดเจนระหว่าง INITIALIZED WEIGHTS (ค่าน้ำหนักเริ่มต้น/สัญลักษณ์) และ LEARNED WEIGHTS (ค่าน้ำหนักที่ผ่านการฝึกจริง)\n3. การอัปโหลดเอกสารเข้า Knowledge Workspace ไม่ถือว่าเป็นการฝึก Model Weights\n4. จำแนกสถานะตามความเป็นจริง: VERIFIED, IMPLEMENTED, PARTIAL, BLOCKED, NOT IMPLEMENTED, MOCK\n5. ทุกการเปลี่ยนแปลงต้องตรวจสอบผ่านหลักฐานจริงใน Filesystem และ Runtime Logs",
+    "language": "mixed",
+    "hash": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7"
+  },
+  {
+    "id": "chk_doc_1795000805193_544eh_0",
+    "documentId": "doc_1795000805193_544eh",
+    "documentTitle": "TenantA Secret 1795000805185",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 04e98420",
+    "language": "en",
+    "hash": "dc8818b4a0f3033065865ca8cc31d83c3cc9ebfb42546a2b965ce72653f7a309"
+  },
+  {
+    "id": "chk_doc_1795005916286_w28m9_0",
+    "documentId": "doc_1795005916286_w28m9",
+    "documentTitle": "TenantA Secret 1795005916280",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 5fdba7ab",
+    "language": "en",
+    "hash": "cf666753135f049b3edf1833a8f7256429a078a83bae06b0f4b8b8e3848231d1"
+  },
+  {
+    "id": "chk_doc_1795006882320_a49cv_0",
+    "documentId": "doc_1795006882320_a49cv",
+    "documentTitle": "TenantA Secret 1795006882313",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 281ad634",
+    "language": "en",
+    "hash": "0173c0ebba7644ef21da51464d1d9cd53eb7ebea8134349c668dead1e369cff9"
+  },
+  {
+    "id": "chk_doc_1795008179886_rhihv_0",
+    "documentId": "doc_1795008179886_rhihv",
+    "documentTitle": "TenantA Secret 1795008179878",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 0f4bc697",
+    "language": "en",
+    "hash": "3fe3a228a447de5e92b2815036118a0212ba3996a6f686428dd39d8e21af770e"
+  },
+  {
+    "id": "chk_doc_1795008341911_onkqs_0",
+    "documentId": "doc_1795008341911_onkqs",
+    "documentTitle": "TenantA Secret 1795008341903",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 58483986",
+    "language": "en",
+    "hash": "97a886df478e56a79250abe97e6b650ffff6edee4e68db845912735f552a684e"
+  },
+  {
+    "id": "chk_doc_1795013791367_exhcj_0",
+    "documentId": "doc_1795013791367_exhcj",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1795013811222_9bhkn_0",
+    "documentId": "doc_1795013811222_9bhkn",
+    "documentTitle": "TenantA Secret 1795013811213",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 8a7e4b06",
+    "language": "en",
+    "hash": "6380d9e88d1104f67e524693c199422a071624d22c619f61afaa4039b03ed3b0"
+  },
+  {
+    "id": "chk_doc_1795015186019_oa2d5_0",
+    "documentId": "doc_1795015186019_oa2d5",
+    "documentTitle": "Synthetic Test Benchmark Generation",
+    "collection": "Synthetic_Test",
+    "chunkIndex": 0,
+    "text": "Synthetic machine generated data for testing quarantine protocol.",
+    "language": "en",
+    "hash": "0b4108ada959d6d29bb00f639ea294fa8e934d1cbadc93bac0768aabaf05c5c6"
+  },
+  {
+    "id": "chk_doc_1795015199382_vjin2_0",
+    "documentId": "doc_1795015199382_vjin2",
+    "documentTitle": "TenantA Secret 1795015199371",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique c648e02e",
+    "language": "en",
+    "hash": "7fbd352e0397176c491d6dccebda6ea04acdd091c35a9ad9eb7eac58d19de0ca"
+  },
+  {
+    "id": "chk_doc_1795015983802_0onpx_0",
+    "documentId": "doc_1795015983802_0onpx",
+    "documentTitle": "TenantA Secret 1795015983794",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 31462acd",
+    "language": "en",
+    "hash": "f5ba80970f182ef4e9dcbd36083237a65d113c365d243bb5d02feeaf2bd25fbc"
+  }
+]

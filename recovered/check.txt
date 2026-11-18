@@ -1,0 +1,10 @@
+    PID     ELAPSED     TIME %CPU CMD
+  27542       05:29 00:00:00  0.0 bash
+total 28
+-rw-rw-rw- 1 codespace codespace   77 Nov 17 07:01 check.txt
+-rw-rw-rw- 1 codespace codespace   22 Nov 17 06:55 eval_run.log
+-rw-rw-rw- 1 codespace codespace  128 Nov 17 06:18 orig_step5800.sha
+-rw-rw-rw- 1 codespace codespace 2991 Nov 17 06:36 train_r3.log
+-rw-rw-rw- 1 codespace codespace 2991 Nov 17 06:36 train_r3_lr1e-4_stopped_step300.log
+-rw-rw-rw- 1 codespace codespace 5204 Nov 17 06:43 train_r4.log
+nohup: ignoring input

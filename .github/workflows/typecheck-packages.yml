@@ -1,0 +1,175 @@
+name: TypeScript Compiler Check (Updated Packages)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tsc-packages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck-updated-packages:
+    name: Type-check Updated Packages (tsc)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm install --no-audit --no-fund
+          else
+            npm install
+          fi
+
+      - name: Detect updated packages and run tsc
+        id: tsc
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { execSync, spawnSync } = require('node:child_process');
+
+          const eventName = process.env.GITHUB_EVENT_NAME || '';
+          const beforeSha = process.env.GITHUB_EVENT_BEFORE || '';
+          const baseRef = process.env.GITHUB_BASE_REF || '';
+
+          let changedFiles = [];
+          try {
+            if (eventName === 'pull_request' && baseRef) {
+              const out = execSync(`git diff --name-only origin/${baseRef}...HEAD`, { encoding: 'utf8' });
+              changedFiles = out.split(/\r?\n/).filter(Boolean);
+            } else if (eventName === 'push' && beforeSha && !/^0+$/.test(beforeSha)) {
+              const out = execSync(`git diff --name-only ${beforeSha}..HEAD`, { encoding: 'utf8' });
+              changedFiles = out.split(/\r?\n/).filter(Boolean);
+            }
+          } catch (err) {
+            console.warn('Could not compute git diff; checking all available packages:', err.message);
+          }
+
+          const discoverAllTypePackages = () => {
+            if (!fs.existsSync('types')) return [];
+            const pkgs = [];
+            for (const entry of fs.readdirSync('types', { withFileTypes: true })) {
+              if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+              const p = path.join('types', entry.name);
+              if (entry.name.startsWith('@')) {
+                for (const sub of fs.readdirSync(p, { withFileTypes: true })) {
+                  if (sub.isDirectory() && !sub.name.startsWith('.')) {
+                    pkgs.push(path.join(p, sub.name));
+                  }
+                }
+              } else {
+                pkgs.push(p);
+              }
+            }
+            return pkgs.sort();
+          };
+
+          const updatedPackages = new Set();
+          let rootChanged = changedFiles.length === 0;
+
+          for (const file of changedFiles) {
+            const norm = file.replace(/\\/g, '/');
+            if (norm.startsWith('types/')) {
+              const parts = norm.split('/');
+              if (parts[1] && parts[1].startsWith('@') && parts[2]) {
+                const dir = `types/${parts[1]}/${parts[2]}`;
+                if (fs.existsSync(dir)) updatedPackages.add(dir);
+              } else if (parts[1]) {
+                const dir = `types/${parts[1]}`;
+                if (fs.existsSync(dir)) updatedPackages.add(dir);
+              }
+            } else if (
+              norm.startsWith('src/') ||
+              norm.startsWith('lib/') ||
+              norm.startsWith('server/') ||
+              norm === 'server.ts' ||
+              norm === 'tsconfig.json' ||
+              norm === 'package.json'
+            ) {
+              rootChanged = true;
+            }
+          }
+
+          if (updatedPackages.size === 0 && changedFiles.length === 0) {
+            for (const pkg of discoverAllTypePackages()) {
+              updatedPackages.add(pkg);
+            }
+          }
+
+          let hasFailure = false;
+          const summaryLines = ['### TypeScript Compiler (`tsc`) Check', ''];
+
+          if (rootChanged) {
+            console.log('Running tsc --noEmit on root tsconfig.json...');
+            const res = spawnSync('npx', ['tsc', '--noEmit'], { encoding: 'utf8' });
+            process.stdout.write(res.stdout || '');
+            process.stderr.write(res.stderr || '');
+            if (res.status !== 0) {
+              hasFailure = true;
+              summaryLines.push('- **Root (`tsconfig.json`)**: FAILED');
+            } else {
+              summaryLines.push('- **Root (`tsconfig.json`)**: PASSED');
+            }
+          }
+
+          if (updatedPackages.size === 0) {
+            console.log('No updated package directories under types/ detected.');
+            summaryLines.push('- **Updated `types/` packages**: None detected in this push.');
+          } else {
+            for (const pkgDir of [...updatedPackages].sort()) {
+              const tsconfig = path.join(pkgDir, 'tsconfig.json');
+              if (!fs.existsSync(tsconfig)) {
+                console.error(`Missing ${tsconfig}`);
+                summaryLines.push(`- **${pkgDir}**: FAILED (missing tsconfig.json)`);
+                hasFailure = true;
+                continue;
+              }
+              console.log(`Running tsc --noEmit -p ${tsconfig}...`);
+              const res = spawnSync('npx', ['tsc', '--noEmit', '-p', tsconfig], { encoding: 'utf8' });
+              process.stdout.write(res.stdout || '');
+              process.stderr.write(res.stderr || '');
+              if (res.status !== 0) {
+                hasFailure = true;
+                summaryLines.push(`- **${pkgDir}**: FAILED`);
+              } else {
+                summaryLines.push(`- **${pkgDir}**: PASSED`);
+              }
+            }
+          }
+
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryLines.join('\n') + '\n');
+          }
+
+          if (hasFailure) {
+            process.exit(1);
+          }
+          NODE
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+
+      - name: Verify tsconfig.json and index.d.ts structure
+        run: node scripts/verify-type-packages.mjs

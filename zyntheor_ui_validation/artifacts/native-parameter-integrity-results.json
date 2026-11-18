@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-12",
+  "checkpoint": {
+    "active_parameters": 231168,
+    "target_parameters": 41527808,
+    "payload_bytes": 924672,
+    "payload_sha256": "70058acbacb87fa32778ac7cc4e147065614d0c769de8da842daef7a20c0e5af",
+    "active_graph": {"d_model":128,"d_ffn":384,"n_layers":1,"n_heads":4,"d_head":32,"tokenizer_vocab_size":16384,"active_lm_head_vocab":128},
+    "status": "ACTIVE_SUBGRAPH_PARTIAL"
+  },
+  "tests": {
+    "native_parameter_integrity": {"passed":4,"failed":0},
+    "identity_trust": {"passed":20,"failed":0},
+    "knowledge_intelligence": {"passed":18,"failed":0},
+    "security_rbac": {"passed":22,"failed":0,"blocked":1},
+    "product_integrity": {"passed":15,"failed":0},
+    "typescript_tsx_syntax": {"files":62,"errors":0},
+    "python_compileall": "PASS",
+    "full_typescript_build": "BLOCKED_DEPENDENCIES_UNAVAILABLE",
+    "live_http": "BLOCKED_SERVER_NOT_RUNNING"
+  }
+}

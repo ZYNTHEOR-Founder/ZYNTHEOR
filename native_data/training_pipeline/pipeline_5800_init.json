@@ -1,0 +1,3724 @@
+{
+  "schemaVersion": "zyntheor.training-pipeline-init.v1",
+  "pipelineId": "pipe5800_1795029676945",
+  "initializedAt": "2026-11-18T19:21:16.945Z",
+  "trainingExecuted": false,
+  "canExecuteTraining": false,
+  "status": "BLOCKED",
+  "cloudPreflight": {
+    "passed": false,
+    "status": "PREFLIGHT_BLOCKED",
+    "checks": {
+      "credentialsValid": false,
+      "bucketAvailable": false,
+      "checkpointExists": false,
+      "checkpointAccessible": false,
+      "readWriteVerified": false
+    },
+    "bucket": null,
+    "region": "us-east-1",
+    "endpoint": null,
+    "checkpointKey": "checkpoints/model_checkpoint.pt",
+    "checkpointSizeBytes": null,
+    "checkpointETag": null,
+    "checkpointLastModified": null,
+    "headerMagicValid": null,
+    "httpStatusCode": null,
+    "missingCredentials": [
+      "S3_BUCKET",
+      "S3_ACCESS_KEY_ID",
+      "S3_SECRET_ACCESS_KEY"
+    ],
+    "blockers": [
+      "missing_s3_credentials"
+    ],
+    "error": "Missing required AWS S3 storage credentials: S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY",
+    "latencyMs": 6,
+    "checkedAt": "2026-11-18T19:21:04.919Z"
+  },
+  "numpyEnvironment": {
+    "status": "NUMPY_NATIVE_READY",
+    "pythonAvailable": true,
+    "pythonExecutable": "/usr/bin/python3",
+    "pythonVersion": "3.11.2",
+    "numpyAvailable": true,
+    "numpyVersion": "1.24.2",
+    "numpyModuleFile": "/usr/lib/python3/dist-packages/numpy/__init__.py",
+    "boto3Available": true,
+    "boto3Version": "1.26.27",
+    "float32Verified": true,
+    "npCompatAvailable": true,
+    "pipAvailable": false,
+    "ensurepipAvailable": false,
+    "venvAvailable": true,
+    "trainTargetScriptPresent": true,
+    "configuredPythonBin": null,
+    "probeLatencyMs": 379,
+    "error": null,
+    "remediationCommands": [],
+    "checkedAt": "2026-11-18T19:21:04.919Z"
+  },
+  "config": {
+    "targetSteps": 5800,
+    "steps": null,
+    "evalEvery": 25,
+    "saveEvery": 100,
+    "batch": 2,
+    "lr": 0.0003,
+    "weightDecay": 0.01,
+    "tokenizerProfile": "v2_base",
+    "initCheckpoint": "native_data/model_checkpoint_target_41m.pt",
+    "outCheckpoint": "native_data/model_checkpoint_target_41m_step5800.pt",
+    "cloudObjectKey": "checkpoints/model_checkpoint.pt",
+    "datasetFile": "native_data/datasets",
+    "provenanceManifest": "artifacts/dataset-provenance-manifest.json",
+    "evidenceRoot": "artifacts/dataset-provenance-evidence",
+    "approvalKeyFile": "/app/applet/native_data/training_pipeline/approval.key",
+    "approvalRequestId": null,
+    "humanApprovalConfirmed": false,
+    "allowFreshInit": false
+  },
+  "schedule": {
+    "startStep": 0,
+    "targetSteps": 5800,
+    "plannedRunSteps": 5800,
+    "finalStep": 5800,
+    "evalEvery": 25,
+    "saveEvery": 100,
+    "evalCount": 232,
+    "checkpointCount": 58,
+    "milestones": [
+      {
+        "kind": "periodic_verification",
+        "localStep": 100,
+        "globalStep": 100,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 200,
+        "globalStep": 200,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 300,
+        "globalStep": 300,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 400,
+        "globalStep": 400,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 500,
+        "globalStep": 500,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 600,
+        "globalStep": 600,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 700,
+        "globalStep": 700,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 800,
+        "globalStep": 800,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 900,
+        "globalStep": 900,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1000,
+        "globalStep": 1000,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1100,
+        "globalStep": 1100,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1200,
+        "globalStep": 1200,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1300,
+        "globalStep": 1300,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1400,
+        "globalStep": 1400,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1500,
+        "globalStep": 1500,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1600,
+        "globalStep": 1600,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1700,
+        "globalStep": 1700,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1800,
+        "globalStep": 1800,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 1900,
+        "globalStep": 1900,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2000,
+        "globalStep": 2000,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2100,
+        "globalStep": 2100,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2200,
+        "globalStep": 2200,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2300,
+        "globalStep": 2300,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2400,
+        "globalStep": 2400,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2500,
+        "globalStep": 2500,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2600,
+        "globalStep": 2600,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2700,
+        "globalStep": 2700,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2800,
+        "globalStep": 2800,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 2900,
+        "globalStep": 2900,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3000,
+        "globalStep": 3000,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3100,
+        "globalStep": 3100,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3200,
+        "globalStep": 3200,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3300,
+        "globalStep": 3300,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3400,
+        "globalStep": 3400,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3500,
+        "globalStep": 3500,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3600,
+        "globalStep": 3600,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3700,
+        "globalStep": 3700,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3800,
+        "globalStep": 3800,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 3900,
+        "globalStep": 3900,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4000,
+        "globalStep": 4000,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4100,
+        "globalStep": 4100,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4200,
+        "globalStep": 4200,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4300,
+        "globalStep": 4300,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4400,
+        "globalStep": 4400,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4500,
+        "globalStep": 4500,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4600,
+        "globalStep": 4600,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4700,
+        "globalStep": 4700,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4800,
+        "globalStep": 4800,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 4900,
+        "globalStep": 4900,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5000,
+        "globalStep": 5000,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5100,
+        "globalStep": 5100,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5200,
+        "globalStep": 5200,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5300,
+        "globalStep": 5300,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5400,
+        "globalStep": 5400,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5500,
+        "globalStep": 5500,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5600,
+        "globalStep": 5600,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "periodic_verification",
+        "localStep": 5700,
+        "globalStep": 5700,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal"
+        ]
+      },
+      {
+        "kind": "final_verification",
+        "localStep": 5800,
+        "globalStep": 5800,
+        "checks": [
+          "finite_logits_loss",
+          "finite_gradients_and_norm",
+          "finite_float32_weights",
+          "sha256_payload_seal",
+          "sha256_container_seal",
+          "param_count_41527808",
+          "best_val_checkpoint_selection"
+        ]
+      }
+    ]
+  },
+  "gates": [
+    {
+      "id": "cloud_preflight",
+      "label": "AWS S3 Cloud Preflight & Checkpoint Access",
+      "passed": false,
+      "detail": "Missing required AWS S3 storage credentials: S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY"
+    },
+    {
+      "id": "native_numpy",
+      "label": "Native NumPy C-Extension Backend",
+      "passed": true,
+      "detail": "NumPy 1.24.2 (float32 verified) via /usr/bin/python3"
+    },
+    {
+      "id": "checkpoint_paths",
+      "label": "Checkpoint & Output Path Integrity",
+      "passed": true,
+      "detail": "Init: native_data/model_checkpoint_target_41m.pt → Out: native_data/model_checkpoint_target_41m_step5800.pt"
+    },
+    {
+      "id": "verified_dataset",
+      "label": "Frozen Dataset Splits (test excluded)",
+      "passed": true,
+      "detail": "Dataset file present: native_data/datasets"
+    },
+    {
+      "id": "provenance_manifest",
+      "label": "Dataset Provenance Manifest & HMAC Key",
+      "passed": false,
+      "detail": "0 documents verified — awaiting Admin HTTPS source/license URLs and HMAC signature"
+    },
+    {
+      "id": "human_approval",
+      "label": "Explicit Human Approval Gate",
+      "passed": false,
+      "detail": "Human approval not confirmed."
+    }
+  ],
+  "blockers": [
+    "missing_s3_credentials",
+    "human_approval_confirmation_missing",
+    "dataset_governance_blocked",
+    "s3_preflight_blocked:NOT_CONFIGURED"
+  ],
+  "pythonPreflight": {
+    "schema_version": "zyntheor.training-preflight.v1",
+    "status": "BLOCKED",
+    "training_executed": false,
+    "gates": {
+      "gate_1_checkpoint_and_numpy": "VERIFIED",
+      "gate_2_dataset_jsonl_and_provenance": "VERIFIED",
+      "gate_3_dataset_governance": "BLOCKED",
+      "gate_4_s3_credentials_and_bucket": "BLOCKED",
+      "gate_5_approval_key_0600": "VERIFIED",
+      "gate_6_human_approval": "BLOCKED"
+    },
+    "backend": {
+      "backend": "numpy",
+      "numpy_available": true,
+      "version": "1.24.2",
+      "module_file": "/usr/lib/python3/dist-packages/numpy/__init__.py",
+      "boto3_available": true,
+      "boto3_version": "1.26.27",
+      "python_executable": "/usr/bin/python3",
+      "python_version": "3.11.2",
+      "float32_verified": true
+    },
+    "target_architecture": {
+      "vocab": 16384,
+      "d_model": 512,
+      "n_layers": 10,
+      "n_heads": 8,
+      "d_ffn": 1472,
+      "ctx": 64,
+      "target_total_params": 41527808
+    },
+    "tokenizer": {
+      "profile": "v2_base",
+      "vocab_size": 16384,
+      "fingerprint": "8829827ad56abe3fbcea531942e295f011646677777c4953e8976a2e7fad39a8"
+    },
+    "init_checkpoint": {
+      "path": "/app/applet/native_data/model_checkpoint_target_41m.pt",
+      "exists": true,
+      "structural_audit": {
+        "integrity_status": "STRUCTURAL_CHECKS_PASS",
+        "runtime_compatibility": "PARTIAL_STRUCTURAL_SUPPORT",
+        "container_bytes": 166132833,
+        "container_sha256": "08888055f676a31f0b0a153d34e654391cc925d546c46242f591a8ca403371e5",
+        "payload_sha256": "16c608bd7255865b8739f9d8981d1fdc0afc18a6fb00e145194c028659d4a742",
+        "total_params": 41527808,
+        "errors": []
+      },
+      "tokenizer_match": true
+    },
+    "out_checkpoint": "/app/applet/native_data/model_checkpoint_target_41m_step5800.pt",
+    "resume_state": {
+      "requested": false,
+      "path": null
+    },
+    "target_steps": 5800,
+    "start_step": 0,
+    "dataset": {
+      "path": "/app/applet/native_data/datasets",
+      "exists": true,
+      "split_counts": {
+        "train": 116,
+        "validation": 27,
+        "test": 27,
+        "total": 170
+      },
+      "load_error": null,
+      "provenance_manifest": {
+        "path": "/app/applet/artifacts/dataset-provenance-manifest.json",
+        "exists": true
+      },
+      "evidence_root": {
+        "path": "/app/applet/artifacts/dataset-provenance-evidence",
+        "exists": true,
+        "subdirs": {
+          "source": {
+            "exists": true,
+            "file_count": 1
+          },
+          "license": {
+            "exists": true,
+            "file_count": 1
+          },
+          "rights": {
+            "exists": true,
+            "file_count": 1
+          },
+          "approval": {
+            "exists": true,
+            "file_count": 1
+          }
+        }
+      }
+    },
+    "dataset_governance": {
+      "status": "BLOCKED",
+      "issues": [],
+      "documents": [
+        {
+          "document_id": "README.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "124cf7ea7621935f5fa4b2e181c24f1a81b963371c3e71f33cfa78fb11e6db2e",
+          "declared_document_sha256": "124cf7ea7621935f5fa4b2e181c24f1a81b963371c3e71f33cfa78fb11e6db2e",
+          "split": "validation"
+        },
+        {
+          "document_id": "docs/AGENTS_AUDIT.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "254528aa547eef714c021da1a42fea67fe41a89e48ade8dd89897aa5e3ba1e9a",
+          "declared_document_sha256": "254528aa547eef714c021da1a42fea67fe41a89e48ade8dd89897aa5e3ba1e9a",
+          "split": "test"
+        },
+        {
+          "document_id": "docs/AGENT_PIPELINE.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7c5537b6b4defc3dd07babe03965b22fd2cf6b4dc6ab5c85760cb57e706be53c",
+          "declared_document_sha256": "7c5537b6b4defc3dd07babe03965b22fd2cf6b4dc6ab5c85760cb57e706be53c",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/AUTH_RESTORATION.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "0ffdd0ada57243d5b5a011a3286172a9de07d100c41ffb518f2d69178e9408be",
+          "declared_document_sha256": "0ffdd0ada57243d5b5a011a3286172a9de07d100c41ffb518f2d69178e9408be",
+          "split": "validation"
+        },
+        {
+          "document_id": "docs/CONTRIBUTING.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "88ba61d28e8da0214bec4e6aba06a15c5908d79d4c94e8ac15e78f939c6d3c29",
+          "declared_document_sha256": "88ba61d28e8da0214bec4e6aba06a15c5908d79d4c94e8ac15e78f939c6d3c29",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/IMPLEMENTATION_REPORT.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "06c1b0ccbb833ad21e9541e361f828ba24af64c4504b46c4940d98fd439cb4a9",
+          "declared_document_sha256": "06c1b0ccbb833ad21e9541e361f828ba24af64c4504b46c4940d98fd439cb4a9",
+          "split": "test"
+        },
+        {
+          "document_id": "docs/IMPLEMENTATION_REPORT_BENCHMARK_HARDENING.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b1e732141265fc95f557bf81b355e483eb4407a4c40dd33e2e469897f349c658",
+          "declared_document_sha256": "b1e732141265fc95f557bf81b355e483eb4407a4c40dd33e2e469897f349c658",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/README_PATTERNS.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1e6d6524c8e4d4152967c3fe5ebd13e40ec5a7141fd7668992300ab7717d92cd",
+          "declared_document_sha256": "1e6d6524c8e4d4152967c3fe5ebd13e40ec5a7141fd7668992300ab7717d92cd",
+          "split": "validation"
+        },
+        {
+          "document_id": "docs/SECURITY.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "49f527210ff8f10aa9f41c58500129c56b80de122fb276a413c8d46912cee5d3",
+          "declared_document_sha256": "49f527210ff8f10aa9f41c58500129c56b80de122fb276a413c8d46912cee5d3",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/SOURCE-REVIEW-LEDGER-AND-REPAIR-HARDENING-2026-11-15.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "79541406589d6faaaff79eb35bf773cb50acd8cc55cf11893e6acd93a6aca5d8",
+          "declared_document_sha256": "79541406589d6faaaff79eb35bf773cb50acd8cc55cf11893e6acd93a6aca5d8",
+          "split": "test"
+        },
+        {
+          "document_id": "docs/TECHNICAL_REPORT.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "9c31ae424812f2777a4fab347b24627b27ffa15f595589814bedce80bab995e4",
+          "declared_document_sha256": "9c31ae424812f2777a4fab347b24627b27ffa15f595589814bedce80bab995e4",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/ZYNTHEOR-VIVID-IMPLEMENTATION-REPORT-2026-11-15.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "74dfa6b6eb04370da068625d62139ea82502fd44371372eccd033c54aa406961",
+          "declared_document_sha256": "74dfa6b6eb04370da068625d62139ea82502fd44371372eccd033c54aa406961",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/preflight-integrity-report.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "74cbc4019ae7f6c4010f7140b5af7a7411381beb81d3a2aa2dc975ee52a8a911",
+          "declared_document_sha256": "74cbc4019ae7f6c4010f7140b5af7a7411381beb81d3a2aa2dc975ee52a8a911",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/BATCH-25-FOUNDATION-REPORT-2026-11-14.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b140f7d7cf7699276eb58bd585cf3ec6d2af89378622d842d82c31d52678829b",
+          "declared_document_sha256": "b140f7d7cf7699276eb58bd585cf3ec6d2af89378622d842d82c31d52678829b",
+          "split": "test"
+        },
+        {
+          "document_id": "docs/reports/COMMAND-CENTER-MULTI-DOMAIN-REDESIGN-2026-11-15.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "32ac78b87ad2b7e4d473bc641e961b427a2c2cedc83b30fd96b25b0bb08a731f",
+          "declared_document_sha256": "32ac78b87ad2b7e4d473bc641e961b427a2c2cedc83b30fd96b25b0bb08a731f",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/DASHBOARD.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "e3dc24a01b47adad0c2156cb99f6ece553cb0c7da39d20f2608e3140ee9e7da0",
+          "declared_document_sha256": "e3dc24a01b47adad0c2156cb99f6ece553cb0c7da39d20f2608e3140ee9e7da0",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/DEPLOY_CLOUD.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "5876e5074ae55d3a8a0853cc14d03b40e543b4e0e8b7f83315605da135160626",
+          "declared_document_sha256": "5876e5074ae55d3a8a0853cc14d03b40e543b4e0e8b7f83315605da135160626",
+          "split": "test"
+        },
+        {
+          "document_id": "docs/reports/EXECUTION-TRAINING-REPORT.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2f02b779183dc0d752cc17a17e483636a63d1d6d2206278d5b8342d1efa7949b",
+          "declared_document_sha256": "2f02b779183dc0d752cc17a17e483636a63d1d6d2206278d5b8342d1efa7949b",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/NATIVE-LM-V2-TRAINING-REPORT-2026-11-15.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "25f1098826bff0f6f204fc449c25e4e99cfbd69e53b1962cf52a1c1d18bb4e3c",
+          "declared_document_sha256": "25f1098826bff0f6f204fc449c25e4e99cfbd69e53b1962cf52a1c1d18bb4e3c",
+          "split": "validation"
+        },
+        {
+          "document_id": "docs/reports/REVIEW-AND-IMPROVEMENT-REPORT.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "c0de3ad7faf72208862034976ef814775ad7a05a4d8ba72f58fcd12893b43ce6",
+          "declared_document_sha256": "c0de3ad7faf72208862034976ef814775ad7a05a4d8ba72f58fcd12893b43ce6",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/TASK-DB-REPOSITORY-BATCH-1-REPORT-2026-11-14.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2e420990f5dcd7c1e9127caa8621bcbf5f9397cba4e8f1adc6be2321eb4dd05a",
+          "declared_document_sha256": "2e420990f5dcd7c1e9127caa8621bcbf5f9397cba4e8f1adc6be2321eb4dd05a",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/TASK-DB-WORKER-CLAIM-BATCH-2-REPORT-2026-11-14.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1da9f5caa55baa00d352f8340828cb1e958b5e45a7fcb7033722c2c9c3854c3b",
+          "declared_document_sha256": "1da9f5caa55baa00d352f8340828cb1e958b5e45a7fcb7033722c2c9c3854c3b",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/TASK-PERSISTENCE-HARDENING-REPORT-2026-11-14.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2f59d603be7b17e0dcc5c8bce887da368e7e4065e2ee62ae560899694fcf0329",
+          "declared_document_sha256": "2f59d603be7b17e0dcc5c8bce887da368e7e4065e2ee62ae560899694fcf0329",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/TENANT-ISOLATION-IMPLEMENTATION-REPORT-2026-11-14.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b1ad420b9c15463de0fcd611a2c19f8b4b19cfc41ff772c9dc5df49005b8da77",
+          "declared_document_sha256": "b1ad420b9c15463de0fcd611a2c19f8b4b19cfc41ff772c9dc5df49005b8da77",
+          "split": "train"
+        },
+        {
+          "document_id": "docs/reports/UI-REDESIGN-REPORT-2026-11-14.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "07089bdba75bc335d970df4c71832016b1bbc5c6051a2d98aa8676040aede9d5",
+          "declared_document_sha256": "07089bdba75bc335d970df4c71832016b1bbc5c6051a2d98aa8676040aede9d5",
+          "split": "test"
+        },
+        {
+          "document_id": "docs/reports/VISUAL-IDENTITY-REFRESH-2026-11-15.md",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "e7c01197b08fd83dda99aec5ad4b29d8d794e52c405ecc210a16828b4b28b61a",
+          "declared_document_sha256": "e7c01197b08fd83dda99aec5ad4b29d8d794e52c405ecc210a16828b4b28b61a",
+          "split": "train"
+        },
+        {
+          "document_id": "knowledge:doc_1794904396212_gh0qn",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+          "declared_document_sha256": "986675dd83585f21548d0e64f14266f37023db7e31960c433789f03a08fb8681",
+          "split": "train"
+        },
+        {
+          "document_id": "knowledge:doc_1794904396214_74j0t",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+          "declared_document_sha256": "1d94ef2b9f97e3d2c96596167cdfe8a92b9acf2c263764b9745599caf8aa80f8",
+          "split": "train"
+        },
+        {
+          "document_id": "knowledge:doc_1794904396214_osjcn",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+          "declared_document_sha256": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+          "split": "validation"
+        },
+        {
+          "document_id": "knowledge:doc_1794904396215_7bj9c",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+          "declared_document_sha256": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/AdaptiveReasoningEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "fb7e5659c0544866de42cd61152785b6665a977a8971dc4e8c5950b225f70d0f",
+          "declared_document_sha256": "fb7e5659c0544866de42cd61152785b6665a977a8971dc4e8c5950b225f70d0f",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/ApprovalGate.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "3697a9a2311d00b8999990fc62db74327183ea658001c1220d07dde7235a512e",
+          "declared_document_sha256": "3697a9a2311d00b8999990fc62db74327183ea658001c1220d07dde7235a512e",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/AuditLedger.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "5770040390e420c8f643d600e614618ed9a795f7155697d2b0662223e27c077b",
+          "declared_document_sha256": "5770040390e420c8f643d600e614618ed9a795f7155697d2b0662223e27c077b",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/AuthMiddleware.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "f4ad6f1e67ef7fb28f414002f69784ea3c9c1eca1c4b3e396c83a0d16f1c0864",
+          "declared_document_sha256": "f4ad6f1e67ef7fb28f414002f69784ea3c9c1eca1c4b3e396c83a0d16f1c0864",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/AutonomousPlanner.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "3f7a3b1080e6fb0f8ae23aeab2a2ae7c47f922b3ededf6e7b2e811e26cccbd3c",
+          "declared_document_sha256": "3f7a3b1080e6fb0f8ae23aeab2a2ae7c47f922b3ededf6e7b2e811e26cccbd3c",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/CapabilityGates.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "8db4f3a4ed24b97cf986116f750faa220b74ea36521d834818ae1802950fb67a",
+          "declared_document_sha256": "8db4f3a4ed24b97cf986116f750faa220b74ea36521d834818ae1802950fb67a",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/CheckpointIntegrityMonitor.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "dc231218107f7ab638195459f6a9cca488f5f7619ffed7b7e88c659d84979cba",
+          "declared_document_sha256": "dc231218107f7ab638195459f6a9cca488f5f7619ffed7b7e88c659d84979cba",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/Cloud41MCheckpointVerifier.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "ab4f8e86d46573ff7bf313e619432d424fae25d563699e1652c287f0e615249b",
+          "declared_document_sha256": "ab4f8e86d46573ff7bf313e619432d424fae25d563699e1652c287f0e615249b",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/CloudCheckpointStorage.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "a42e300bf0f0a748e610813022f393abb89ae116f2ac121f57b9bea7cc024d9b",
+          "declared_document_sha256": "a42e300bf0f0a748e610813022f393abb89ae116f2ac121f57b9bea7cc024d9b",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/CloudObjectStorageService.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "c2ed752ba2403255125c5566691b958f715d45fd4b06f529f4c8bbbbaa0521a9",
+          "declared_document_sha256": "c2ed752ba2403255125c5566691b958f715d45fd4b06f529f4c8bbbbaa0521a9",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/CognitiveContextEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "a034fa5586da14b6342f587be53251f7a6d9c68f7508ef7e3b513002e3e71056",
+          "declared_document_sha256": "a034fa5586da14b6342f587be53251f7a6d9c68f7508ef7e3b513002e3e71056",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/CognitiveCore.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "5d2ac577e2c7660b574befc8ff08f5d5ea7eafbb7d0fba94891b2258fbf8f742",
+          "declared_document_sha256": "5d2ac577e2c7660b574befc8ff08f5d5ea7eafbb7d0fba94891b2258fbf8f742",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/CognitiveEvaluationLab.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "f6637c506d50497e986bbf54dff90c98f245e0ec8fc10c2e4ed58a8687b2a0da",
+          "declared_document_sha256": "f6637c506d50497e986bbf54dff90c98f245e0ec8fc10c2e4ed58a8687b2a0da",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/CommercialManager.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "578aad8a5b1e49ca8324a9716088000daa1de75be6635bee2fee6307f4f9429e",
+          "declared_document_sha256": "578aad8a5b1e49ca8324a9716088000daa1de75be6635bee2fee6307f4f9429e",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/ConnectivityMonitor.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "fd57ed0f470aaa8d6d3fcb1708553313f64f5718812d326c6957d287716a81ff",
+          "declared_document_sha256": "fd57ed0f470aaa8d6d3fcb1708553313f64f5718812d326c6957d287716a81ff",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/ContinuousLearningPipeline.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b8c3945766d0f94613fd111e826ac255fb5d3d1c328c83893ca37481fa8e240a",
+          "declared_document_sha256": "b8c3945766d0f94613fd111e826ac255fb5d3d1c328c83893ca37481fa8e240a",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/DashboardTruth.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "215fb91ed9bccf8894e61263d2189b174c21be8c9edae7d7faa61f826122faad",
+          "declared_document_sha256": "215fb91ed9bccf8894e61263d2189b174c21be8c9edae7d7faa61f826122faad",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/DocumentBinaryParser.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "ab8bde255099f5f6bec6caceac1dc8e56adbc9640dc474924033857074459e95",
+          "declared_document_sha256": "ab8bde255099f5f6bec6caceac1dc8e56adbc9640dc474924033857074459e95",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/InternetIntegrationEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "8241f263715740cc2049276646a1bbcbb5e314a4def5a56ca74eca0e1221b361",
+          "declared_document_sha256": "8241f263715740cc2049276646a1bbcbb5e314a4def5a56ca74eca0e1221b361",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/KnowledgeGraphEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b1dbac9b2485d6ba790a0a54c8f720342374310b8c1931134b7155f5563faa7c",
+          "declared_document_sha256": "b1dbac9b2485d6ba790a0a54c8f720342374310b8c1931134b7155f5563faa7c",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/KnowledgeIntelligenceEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7d3ae3601fc3a5da35897e06394042c4018af280100be2bc4c188c10a62841ec",
+          "declared_document_sha256": "7d3ae3601fc3a5da35897e06394042c4018af280100be2bc4c188c10a62841ec",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/MultimodalInterfaces.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "decd4aaad4aa2f4ce3502fe5fa76eb292b22972c3569b677244644a112f95dde",
+          "declared_document_sha256": "decd4aaad4aa2f4ce3502fe5fa76eb292b22972c3569b677244644a112f95dde",
+          "split": "test"
+        },
+        {
+          "document_id": "lib/NativeMemoryController.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1132ade66b109c395f1726518527b7dd8c3e48dec7df80025d8362b2d7551170",
+          "declared_document_sha256": "1132ade66b109c395f1726518527b7dd8c3e48dec7df80025d8362b2d7551170",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/NativeNumpyTrainingService.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "447ea4e8e2aca936f3284388ffb17d96b4019bcec42ce8625ca8a589a6d093b3",
+          "declared_document_sha256": "447ea4e8e2aca936f3284388ffb17d96b4019bcec42ce8625ca8a589a6d093b3",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/PerformanceEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1171d0c7f3e1743edd6350cc6a4fa025768a9aef0b146eb4bd91562e121da1d9",
+          "declared_document_sha256": "1171d0c7f3e1743edd6350cc6a4fa025768a9aef0b146eb4bd91562e121da1d9",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/RateLimit.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "5fec7c658f6061794108c7650a48118589601bef6f0774afcac9d57f8dad1fd1",
+          "declared_document_sha256": "5fec7c658f6061794108c7650a48118589601bef6f0774afcac9d57f8dad1fd1",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/SelfEvaluationEngine.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7bd45275a4060dc7c1c3798934eac1cfb028ccf7c7e6a78bc87bf5f0942c982c",
+          "declared_document_sha256": "7bd45275a4060dc7c1c3798934eac1cfb028ccf7c7e6a78bc87bf5f0942c982c",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/SovereignIdentity.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "f52f101c871238cc1dbc727e23620f5d32cfc5f2ccec3c93c7ae119314f5bc5d",
+          "declared_document_sha256": "f52f101c871238cc1dbc727e23620f5d32cfc5f2ccec3c93c7ae119314f5bc5d",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/TaskOrchestrator.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "d30fc8d2415a5bac887df40300f4bb8acded9e51c0af953d456c5dc4d2f2626d",
+          "declared_document_sha256": "d30fc8d2415a5bac887df40300f4bb8acded9e51c0af953d456c5dc4d2f2626d",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/TokenRevocation.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "d902a8a6db51188ba3ce2feee5b4dac2afad078a2fa5ba768e374d2972ca0c2f",
+          "declared_document_sha256": "d902a8a6db51188ba3ce2feee5b4dac2afad078a2fa5ba768e374d2972ca0c2f",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/ToolGateway.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "23b44c3afe00d8f9eeefcedee2f097de7b33aea4291c89dd14af57837c376347",
+          "declared_document_sha256": "23b44c3afe00d8f9eeefcedee2f097de7b33aea4291c89dd14af57837c376347",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/ToolRegistry.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b34bfd08bc7bfd8a71c461c63560c8688f0f9fb1d7bce9934f6ec080a7bb708a",
+          "declared_document_sha256": "b34bfd08bc7bfd8a71c461c63560c8688f0f9fb1d7bce9934f6ec080a7bb708a",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/TrainingCurriculum.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "55167bd1f77a1e56c0b0286cf53e69c90977bf60310ce42fc939ca14d34f6bb1",
+          "declared_document_sha256": "55167bd1f77a1e56c0b0286cf53e69c90977bf60310ce42fc939ca14d34f6bb1",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/TruthKernel.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "6d743bf347edf835b5f57b0cd40b08fb2bbead61a130b0d5c4b09f033d209273",
+          "declared_document_sha256": "6d743bf347edf835b5f57b0cd40b08fb2bbead61a130b0d5c4b09f033d209273",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/VisualAstEditor.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "f692e8bdcc99ebceb5c49220be6c8af25845a4fbc14e03d90c98e8af9649aed4",
+          "declared_document_sha256": "f692e8bdcc99ebceb5c49220be6c8af25845a4fbc14e03d90c98e8af9649aed4",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/knowledgeUtils.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "0d2b4abff2d689c31882214817550501067568fbc90de7b271144f753968e4ec",
+          "declared_document_sha256": "0d2b4abff2d689c31882214817550501067568fbc90de7b271144f753968e4ec",
+          "split": "validation"
+        },
+        {
+          "document_id": "lib/multipartMemory.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "abef0127c67601cbda91e2930787becddb2f8c088811ca0356bff56321b9ce40",
+          "declared_document_sha256": "abef0127c67601cbda91e2930787becddb2f8c088811ca0356bff56321b9ce40",
+          "split": "train"
+        },
+        {
+          "document_id": "lib/providers.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2c0ceddca626f1b16110cfee1b32c3c7d4e011498ab0c1afbb3d3d3a362eca03",
+          "declared_document_sha256": "2c0ceddca626f1b16110cfee1b32c3c7d4e011498ab0c1afbb3d3d3a362eca03",
+          "split": "test"
+        },
+        {
+          "document_id": "pipeline:smoke-test-007",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "29a25b05ac8d0794a3942043d4b5f93d652da2e31b579b6388d9f5ce6bd7ff07",
+          "declared_document_sha256": "29a25b05ac8d0794a3942043d4b5f93d652da2e31b579b6388d9f5ce6bd7ff07",
+          "split": "test"
+        },
+        {
+          "document_id": "pipeline:smoke-test-008",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "0f61619c89be038cc7a91a9e8e04d3e811b36df8def57facebae91c36231845c",
+          "declared_document_sha256": "0f61619c89be038cc7a91a9e8e04d3e811b36df8def57facebae91c36231845c",
+          "split": "test"
+        },
+        {
+          "document_id": "pipeline:smoke-train-001",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "3b865349faf3ef2592a6332f4d9aa6cd75312d19d675f75c6ae3adda9bf1a7dd",
+          "declared_document_sha256": "3b865349faf3ef2592a6332f4d9aa6cd75312d19d675f75c6ae3adda9bf1a7dd",
+          "split": "train"
+        },
+        {
+          "document_id": "pipeline:smoke-train-002",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1a7ae5359d2b64740623a6b499efd26bc70f151deb41fb21027af770001c31fe",
+          "declared_document_sha256": "1a7ae5359d2b64740623a6b499efd26bc70f151deb41fb21027af770001c31fe",
+          "split": "train"
+        },
+        {
+          "document_id": "pipeline:smoke-train-003",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "be127c22a8506014c978913fa2f7b44c399b40d1659e4a297d59e496b17380c7",
+          "declared_document_sha256": "be127c22a8506014c978913fa2f7b44c399b40d1659e4a297d59e496b17380c7",
+          "split": "train"
+        },
+        {
+          "document_id": "pipeline:smoke-train-004",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "e5b1d508320c3d13d4a3ad0844f9b8a37a1af518853c684415fc1de8271c491a",
+          "declared_document_sha256": "e5b1d508320c3d13d4a3ad0844f9b8a37a1af518853c684415fc1de8271c491a",
+          "split": "train"
+        },
+        {
+          "document_id": "pipeline:smoke-val-005",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b0ca57e840e346d1379daa2f70947b530e84b2f6742f5a6d3495f8ebcd9dd2c0",
+          "declared_document_sha256": "b0ca57e840e346d1379daa2f70947b530e84b2f6742f5a6d3495f8ebcd9dd2c0",
+          "split": "validation"
+        },
+        {
+          "document_id": "pipeline:smoke-val-006",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "0760bf1a03cbbac7d6cc68dd42515fa49ae746552858892df1f46dcbf81bcf35",
+          "declared_document_sha256": "0760bf1a03cbbac7d6cc68dd42515fa49ae746552858892df1f46dcbf81bcf35",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/__init__.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "65fb4b186a52cc3217274a95db4b0e9bf1c87de634ff7938756ef16009abab69",
+          "declared_document_sha256": "65fb4b186a52cc3217274a95db4b0e9bf1c87de634ff7938756ef16009abab69",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/agent_bench.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "5190cff976a0730d73251f33665d30633b64e9f595fef7640ec906f13c85624f",
+          "declared_document_sha256": "5190cff976a0730d73251f33665d30633b64e9f595fef7640ec906f13c85624f",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/architecture.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "73ea58d72bcd07119f20be6dcda09800379d340df9dccc3737abb1170d74e9b9",
+          "declared_document_sha256": "73ea58d72bcd07119f20be6dcda09800379d340df9dccc3737abb1170d74e9b9",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/audit_target_checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "786e09de29653d2cd9c82ad316ac38b8ea1359b36d51a157520fcd54a76e68bc",
+          "declared_document_sha256": "786e09de29653d2cd9c82ad316ac38b8ea1359b36d51a157520fcd54a76e68bc",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/autonomous_tools.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "9413096ff70fd55616f46d9a649d25e20b832d498b80fdf56cbdb4df77faf321",
+          "declared_document_sha256": "9413096ff70fd55616f46d9a649d25e20b832d498b80fdf56cbdb4df77faf321",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch10_unified_cognitive.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "342bec60298cbe324b8bc6420396d73c1f4dd9b8dfdc5c3a6b67fc6316f34475",
+          "declared_document_sha256": "342bec60298cbe324b8bc6420396d73c1f4dd9b8dfdc5c3a6b67fc6316f34475",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch11_scalable_neural.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "3780af8d2a90618be1d026d48c661b483a3d8901d672ea3fd6de520970ce704b",
+          "declared_document_sha256": "3780af8d2a90618be1d026d48c661b483a3d8901d672ea3fd6de520970ce704b",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/batch12_generalization_scaling.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "0d32718b210c561a3b11118e6eb05039c0f0f153c8bd2d1eaad073d7fae1d767",
+          "declared_document_sha256": "0d32718b210c561a3b11118e6eb05039c0f0f153c8bd2d1eaad073d7fae1d767",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch13_14_cognitive_evolution.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "4bc9dcfef17c8ef6f47cf31c451baa95cd606eef1930cdd37127d7967de82657",
+          "declared_document_sha256": "4bc9dcfef17c8ef6f47cf31c451baa95cd606eef1930cdd37127d7967de82657",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/batch17_cognitive_reliability.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "a8237d815d2f9f4e995436646b429d42ddbc90baba0ad05f7f78d4b024085eb4",
+          "declared_document_sha256": "a8237d815d2f9f4e995436646b429d42ddbc90baba0ad05f7f78d4b024085eb4",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch18_generalization_adaptation.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "daba68f9e076dc0e2008891f0c4582d751b2c97463d527745a7efa84d9cb6ff2",
+          "declared_document_sha256": "daba68f9e076dc0e2008891f0c4582d751b2c97463d527745a7efa84d9cb6ff2",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch19_autonomous_evolution.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "45d983a5dae220d4ece12c4400a6bb5220f0d79e9ae41fa53c8e4908689f5a32",
+          "declared_document_sha256": "45d983a5dae220d4ece12c4400a6bb5220f0d79e9ae41fa53c8e4908689f5a32",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch20_sovereign_release.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "973cff90caa3a103f99acc14d7d861ac3d56f27953ca5c40bffe08365f610a67",
+          "declared_document_sha256": "973cff90caa3a103f99acc14d7d861ac3d56f27953ca5c40bffe08365f610a67",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch21_24_integrity_recovery.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "3eedeb0cd382d416d14a688872bfc67caec83fc701211f195438a17845010519",
+          "declared_document_sha256": "3eedeb0cd382d416d14a688872bfc67caec83fc701211f195438a17845010519",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch27_eval.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "fd3c0768c3757c2b3b306e12479dd540f099d6c8ace92f7ba38d6c3797a14b1b",
+          "declared_document_sha256": "fd3c0768c3757c2b3b306e12479dd540f099d6c8ace92f7ba38d6c3797a14b1b",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/batch28_reasoning.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "856e6e4e11668e1519fb3147de147d265e7fe3fc61f65cdc50f4de06bbe2bb60",
+          "declared_document_sha256": "856e6e4e11668e1519fb3147de147d265e7fe3fc61f65cdc50f4de06bbe2bb60",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch28_train.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "6b906998f3adaa1a146996aa07f3c3ece709f3be65f845ac984b736ea3c6ef7c",
+          "declared_document_sha256": "6b906998f3adaa1a146996aa07f3c3ece709f3be65f845ac984b736ea3c6ef7c",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/batch29_cognitive_probe.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "275a4c10961f81b58e16eefa08594a2e225a63bc8d55377a0bd40214d9a70c12",
+          "declared_document_sha256": "275a4c10961f81b58e16eefa08594a2e225a63bc8d55377a0bd40214d9a70c12",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch6_cognitive_expansion.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "4210d9fa4f23e5884dd73bc9a9431bb5d1f91f64ddd1140de3f310e2755be0f2",
+          "declared_document_sha256": "4210d9fa4f23e5884dd73bc9a9431bb5d1f91f64ddd1140de3f310e2755be0f2",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch7_neural_advancement.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "eddc19b3643c3b0d7fd90e9d0f5d47506d8b3f9b94904d07442e9f69fb58708e",
+          "declared_document_sha256": "eddc19b3643c3b0d7fd90e9d0f5d47506d8b3f9b94904d07442e9f69fb58708e",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch8_autonomous_learning.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1507c787c18c897d301058c57a19132a2503bd46c182695308e1f7c0fe75c6d7",
+          "declared_document_sha256": "1507c787c18c897d301058c57a19132a2503bd46c182695308e1f7c0fe75c6d7",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/batch9_self_improving.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "6831647ed3bf93d2f8fe7f2b4e890c28d1429dcc97c1c72fe27dab67e624fff0",
+          "declared_document_sha256": "6831647ed3bf93d2f8fe7f2b4e890c28d1429dcc97c1c72fe27dab67e624fff0",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/benchmark.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "71e1d6ec69d2b71c7eedb055d2b69b10c0f2426116dfb2ee4324dc0ee40c76c7",
+          "declared_document_sha256": "71e1d6ec69d2b71c7eedb055d2b69b10c0f2426116dfb2ee4324dc0ee40c76c7",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/benchmark_framework.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "752b64f02f02c23a0b069cf517ed0b8e5667ea3e4e828d8e722710e129dfc510",
+          "declared_document_sha256": "752b64f02f02c23a0b069cf517ed0b8e5667ea3e4e828d8e722710e129dfc510",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/bilingual_corpus.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "6fe20a094389da675ec2ed09909ed9589c47f4f0549e27947e229cb525e64abf",
+          "declared_document_sha256": "6fe20a094389da675ec2ed09909ed9589c47f4f0549e27947e229cb525e64abf",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/brain.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b32fae404a9e1261947a0272b75d687cfc8bb42554b7ddcacb75e02fa1c9cdb7",
+          "declared_document_sha256": "b32fae404a9e1261947a0272b75d687cfc8bb42554b7ddcacb75e02fa1c9cdb7",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/bridge.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2d06f7b6a064d9237aa124198714e4fd6872aefb54ec66685c3df8b0cc0236d6",
+          "declared_document_sha256": "2d06f7b6a064d9237aa124198714e4fd6872aefb54ec66685c3df8b0cc0236d6",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/candidate_audit.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7ef9f01a59e8e769183196bd2fda93dcd4ef294e4025de6460fbddf3672ec496",
+          "declared_document_sha256": "7ef9f01a59e8e769183196bd2fda93dcd4ef294e4025de6460fbddf3672ec496",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "c4442d45c89e25be145d28a4bc6b9559e1d66fdcd650bb57f8d0b87ee2b596d4",
+          "declared_document_sha256": "c4442d45c89e25be145d28a4bc6b9559e1d66fdcd650bb57f8d0b87ee2b596d4",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/cloud_storage.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "edf910121e52b4f3e5ffcc2e29fa92a3c2f53c68f9b6f8fb624201d325070ca1",
+          "declared_document_sha256": "edf910121e52b4f3e5ffcc2e29fa92a3c2f53c68f9b6f8fb624201d325070ca1",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/cognitive_core.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "8d36fa23811e43c9b1fc165b9658841c087de90a404e13b2d17111f4c74e4042",
+          "declared_document_sha256": "8d36fa23811e43c9b1fc165b9658841c087de90a404e13b2d17111f4c74e4042",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/compare_models.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "578fcf6814fc2711a933242b2674fcbe6c159a0ad7003d8ad5279502ed3d53c2",
+          "declared_document_sha256": "578fcf6814fc2711a933242b2674fcbe6c159a0ad7003d8ad5279502ed3d53c2",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/create_frozen_manifest.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "6db9be821fe4ca6adfbf6d8557b46e79c519289eaedcce0d1886edcdbf2e0f5d",
+          "declared_document_sha256": "6db9be821fe4ca6adfbf6d8557b46e79c519289eaedcce0d1886edcdbf2e0f5d",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/dataset_admission_audit.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "8e2accb86c109c9b741ce6b6dbc6077684bbc005b25c724cae82bf0c57cd3509",
+          "declared_document_sha256": "8e2accb86c109c9b741ce6b6dbc6077684bbc005b25c724cae82bf0c57cd3509",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/dataset_governance.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "a61cc3f46ada95c36128320f3d5989999128a664545cdc9c8637fd7789788aaa",
+          "declared_document_sha256": "a61cc3f46ada95c36128320f3d5989999128a664545cdc9c8637fd7789788aaa",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/decoding.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "19746c79e09c76c58f34383a28a454564f34526c8f06d5f0380c96b7b7911f3c",
+          "declared_document_sha256": "19746c79e09c76c58f34383a28a454564f34526c8f06d5f0380c96b7b7911f3c",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/domain_benchmark.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "4a7ea8226be7e2af004ccd7cfe8b9384baff8493d9e085bfd7b029de6b11fb6b",
+          "declared_document_sha256": "4a7ea8226be7e2af004ccd7cfe8b9384baff8493d9e085bfd7b029de6b11fb6b",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/engine.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "f5ee97abd5265dbfa1b7384d35b516a37e797e153f0b6c6c58128b81d0e5031d",
+          "declared_document_sha256": "f5ee97abd5265dbfa1b7384d35b516a37e797e153f0b6c6c58128b81d0e5031d",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/eval_bilingual.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7c11e340e7295030ff8dd366c9ef25b1d6f9ae5e47f4eb5b1a53fb7cf85cb0bf",
+          "declared_document_sha256": "7c11e340e7295030ff8dd366c9ef25b1d6f9ae5e47f4eb5b1a53fb7cf85cb0bf",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/eval_lm.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7cccfed0cadb9ae8264050c9a3e8d9ae93069167fe32f2642bcbb910ca55baab",
+          "declared_document_sha256": "7cccfed0cadb9ae8264050c9a3e8d9ae93069167fe32f2642bcbb910ca55baab",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/evaluate_target_checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "143700706a6c1a64169b59481932bc4f49d9e46ef6df66098b5abcd6e4f64005",
+          "declared_document_sha256": "143700706a6c1a64169b59481932bc4f49d9e46ef6df66098b5abcd6e4f64005",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/external_brain.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "d78c9331a59838a72408ca4fefc7e5304d8b04cf33c46bc3645bb6f066f4faab",
+          "declared_document_sha256": "d78c9331a59838a72408ca4fefc7e5304d8b04cf33c46bc3645bb6f066f4faab",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/hybrid_brain.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "74f11c7d16d3d6fed10b9018374064cb23888573187114a6fb8c12c4eef4a557",
+          "declared_document_sha256": "74f11c7d16d3d6fed10b9018374064cb23888573187114a6fb8c12c4eef4a557",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/init_weights.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "ebfdabd0bb3fe57d2ed491cc0675ea4bcb1e86c118c3d969d4fa2e56e9811c33",
+          "declared_document_sha256": "ebfdabd0bb3fe57d2ed491cc0675ea4bcb1e86c118c3d969d4fa2e56e9811c33",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/intelligence_benchmark.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7306b64a8e795c5356c685dc348db9cecad93f52a2308117333df7410883f7f4",
+          "declared_document_sha256": "7306b64a8e795c5356c685dc348db9cecad93f52a2308117333df7410883f7f4",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/intelligence_evolution_batch.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "851882b5079e43b440b8e187943f6bee780f6459240991d384179908c905d212",
+          "declared_document_sha256": "851882b5079e43b440b8e187943f6bee780f6459240991d384179908c905d212",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/lm_v2.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b7ee0b5a454b03b3dfd4025b134c50679db4f7d8777f7ec9f1fc2911198d668a",
+          "declared_document_sha256": "b7ee0b5a454b03b3dfd4025b134c50679db4f7d8777f7ec9f1fc2911198d668a",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/loss_mask.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7c5f35fedf22285019558d5d6941c9a366dee4dd12d436e2a8b336d1792a4f14",
+          "declared_document_sha256": "7c5f35fedf22285019558d5d6941c9a366dee4dd12d436e2a8b336d1792a4f14",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/model.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2efbedf624a115467a0e889e0811bc2d889d69f3be4e5aeeb31d0418fedaa4bc",
+          "declared_document_sha256": "2efbedf624a115467a0e889e0811bc2d889d69f3be4e5aeeb31d0418fedaa4bc",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/np_compat.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "730c67121fa8e35f4e02c7b2bf32875b29e8a6efa4192cc321f9445e2186385a",
+          "declared_document_sha256": "730c67121fa8e35f4e02c7b2bf32875b29e8a6efa4192cc321f9445e2186385a",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/orchestrator.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "f1f28f303ccf9f799abc705983b248ecd42b5c6f26b8d75c4b4e65ae68ae9ad0",
+          "declared_document_sha256": "f1f28f303ccf9f799abc705983b248ecd42b5c6f26b8d75c4b4e65ae68ae9ad0",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/phase_curriculum.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "9e1c1a84cdc960624b7555409ee1698ef42ed0225b46f41f4c624b05d3acd3ec",
+          "declared_document_sha256": "9e1c1a84cdc960624b7555409ee1698ef42ed0225b46f41f4c624b05d3acd3ec",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/planner.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1517292dac788e16b8519d463d2c807cddeda81ae0b0f61f43f2c319462d1dd3",
+          "declared_document_sha256": "1517292dac788e16b8519d463d2c807cddeda81ae0b0f61f43f2c319462d1dd3",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/reasoning_engine.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "d92114ce892c95e62d8a337c9519164d9abf0031ed792ef5aa4b7f720e4083cf",
+          "declared_document_sha256": "d92114ce892c95e62d8a337c9519164d9abf0031ed792ef5aa4b7f720e4083cf",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/repair.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "769e9604013d2c2ec8b8f50826e23c57297e83c7613cbc33a9ff995a60a70081",
+          "declared_document_sha256": "769e9604013d2c2ec8b8f50826e23c57297e83c7613cbc33a9ff995a60a70081",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/run_batch8.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2136154c101679ad9a25befcc18b2174e5d6a8156bcd7d7f30c23eee651530ea",
+          "declared_document_sha256": "2136154c101679ad9a25befcc18b2174e5d6a8156bcd7d7f30c23eee651530ea",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/safe_exec.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "ad69e68dc052b9735f0911aa07923d773c69046d456dc0e47d1f65740e8ca3e1",
+          "declared_document_sha256": "ad69e68dc052b9735f0911aa07923d773c69046d456dc0e47d1f65740e8ca3e1",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/seq_lm.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "69aaec7659507a070a4612fb2234c4bf6ef6942c500c1289947c04491f80c244",
+          "declared_document_sha256": "69aaec7659507a070a4612fb2234c4bf6ef6942c500c1289947c04491f80c244",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/stage_bench.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2a1643d3830215873159ae561bc8c9ca882c78870855d9de300a29364b6673cd",
+          "declared_document_sha256": "2a1643d3830215873159ae561bc8c9ca882c78870855d9de300a29364b6673cd",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/test_hybrid.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "08248e20ff7629cbc123a36264ef13cbc8dbc6e40ec002c938c3a5ff3fb0b2c0",
+          "declared_document_sha256": "08248e20ff7629cbc123a36264ef13cbc8dbc6e40ec002c938c3a5ff3fb0b2c0",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/tokenizer.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "a53649b5ce3814c4e0ee14f0622e41cca7260859b781acf17f727f299ecfb5d9",
+          "declared_document_sha256": "a53649b5ce3814c4e0ee14f0622e41cca7260859b781acf17f727f299ecfb5d9",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/train_bilingual.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "987641d6e6b3201aacd7fbcf604f2ac559b26d339998f3c531b1f98ed4226b78",
+          "declared_document_sha256": "987641d6e6b3201aacd7fbcf604f2ac559b26d339998f3c531b1f98ed4226b78",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/train_execution.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2c19ee050bf7732774f7b56def216b6e3970c3ed8349905daccd69c143f893fa",
+          "declared_document_sha256": "2c19ee050bf7732774f7b56def216b6e3970c3ed8349905daccd69c143f893fa",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/train_gated.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "bee59720dbe89023b0971a560c9da68df068dc2ee315fe30f85915817174726c",
+          "declared_document_sha256": "bee59720dbe89023b0971a560c9da68df068dc2ee315fe30f85915817174726c",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/train_lm.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "af2b1d8101cc7762296b6cc4a952c9071a860a861e5e3a87a41fc56c37d9ce2f",
+          "declared_document_sha256": "af2b1d8101cc7762296b6cc4a952c9071a860a861e5e3a87a41fc56c37d9ce2f",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/train_target.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "af89771fc80e104ade44a6d9b21bccf7a18e6f24273af3a5f08df22e0c192902",
+          "declared_document_sha256": "af89771fc80e104ade44a6d9b21bccf7a18e6f24273af3a5f08df22e0c192902",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/trainer.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "cbe271e3b72257bce3c2b2330036fff61a4c71740633042016327d397fb2d1a1",
+          "declared_document_sha256": "cbe271e3b72257bce3c2b2330036fff61a4c71740633042016327d397fb2d1a1",
+          "split": "test"
+        },
+        {
+          "document_id": "qplus_native/training_readiness.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "8edf6a249b125a8c02e6d3d0c62ba1b948d67334686b54bdb53cef838a6877f4",
+          "declared_document_sha256": "8edf6a249b125a8c02e6d3d0c62ba1b948d67334686b54bdb53cef838a6877f4",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/training_state.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "af90db33c6fa4a9f0fcf437b4a7bb8db5008bc1eaba8a053285834b4160e680e",
+          "declared_document_sha256": "af90db33c6fa4a9f0fcf437b4a7bb8db5008bc1eaba8a053285834b4160e680e",
+          "split": "train"
+        },
+        {
+          "document_id": "qplus_native/trusted_api.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "60c5317847d195e744511c53df71f43239094e1fb70be66b5df67aba3bf96f54",
+          "declared_document_sha256": "60c5317847d195e744511c53df71f43239094e1fb70be66b5df67aba3bf96f54",
+          "split": "validation"
+        },
+        {
+          "document_id": "qplus_native/trusted_approvals.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "4b3d35da7520539b0d397c74a594c2919a96f6588c5f99c814839ef06ec1bddd",
+          "declared_document_sha256": "4b3d35da7520539b0d397c74a594c2919a96f6588c5f99c814839ef06ec1bddd",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/audit.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "341037320f6bf9bb6c3211cb43f6ae4cc67b9035a8bfccb63dc176ac597333b4",
+          "declared_document_sha256": "341037320f6bf9bb6c3211cb43f6ae4cc67b9035a8bfccb63dc176ac597333b4",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/check_checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "526ec3582c9bd4f8e9a75d4caf6e5792e4ad36e9b997ba5c85b71285b6c6cf90",
+          "declared_document_sha256": "526ec3582c9bd4f8e9a75d4caf6e5792e4ad36e9b997ba5c85b71285b6c6cf90",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/check_model.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "4cff7f6b88353bb9a17941e579404403d7b8a571f4af1c12ac22848d468563f9",
+          "declared_document_sha256": "4cff7f6b88353bb9a17941e579404403d7b8a571f4af1c12ac22848d468563f9",
+          "split": "validation"
+        },
+        {
+          "document_id": "scripts/init_target_checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "2ee0e82dc6e1a4ed29d521678c927ef9b9fe86a9ef61ac5ae1a43af51ad7395f",
+          "declared_document_sha256": "2ee0e82dc6e1a4ed29d521678c927ef9b9fe86a9ef61ac5ae1a43af51ad7395f",
+          "split": "test"
+        },
+        {
+          "document_id": "scripts/prepare_tool_call_dataset.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "4c244bda40ee63a56d62e681d5aee059a3f04c34d683436e39cacca2462b8c7e",
+          "declared_document_sha256": "4c244bda40ee63a56d62e681d5aee059a3f04c34d683436e39cacca2462b8c7e",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/run_test.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "b4581efd6f12b2f3e3b045657c466e34a92d9df2bb638519ae4d00634244f663",
+          "declared_document_sha256": "b4581efd6f12b2f3e3b045657c466e34a92d9df2bb638519ae4d00634244f663",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/sign_dataset_provenance.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "03e9c07b437d1baabc3ae946e7eb15c4c289fd17de0611dbc3f23fa6db546f39",
+          "declared_document_sha256": "03e9c07b437d1baabc3ae946e7eb15c4c289fd17de0611dbc3f23fa6db546f39",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/train_target.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7c6221cd3ae2f65f89a77a0536adaa597e858db7cd74df2d78b47c259a0c2f72",
+          "declared_document_sha256": "7c6221cd3ae2f65f89a77a0536adaa597e858db7cd74df2d78b47c259a0c2f72",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/verify_checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "0764c4c98e603f9fdac37c54752d2441c7ba5ab53428dbdf32bf1512c0c64597",
+          "declared_document_sha256": "0764c4c98e603f9fdac37c54752d2441c7ba5ab53428dbdf32bf1512c0c64597",
+          "split": "train"
+        },
+        {
+          "document_id": "scripts/verify_target_checkpoint.py",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "7a654ee76bb52a58834cae8596c28233a8fdfd75309dd95b4d7fcce9c87f7989",
+          "declared_document_sha256": "7a654ee76bb52a58834cae8596c28233a8fdfd75309dd95b4d7fcce9c87f7989",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/code_shape_lru",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "048981ee99ca20037e3f746964b943568d56e3070869753efc0336a5fcb904b8",
+          "declared_document_sha256": "048981ee99ca20037e3f746964b943568d56e3070869753efc0336a5fcb904b8",
+          "split": "test"
+        },
+        {
+          "document_id": "seed/eight_stage_trace",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "07a7b05a56036ff439ed0f56158695fc539942c2cb25e84f6d675544bcbe95f5",
+          "declared_document_sha256": "07a7b05a56036ff439ed0f56158695fc539942c2cb25e84f6d675544bcbe95f5",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/expense_ledger",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "22002059f494186850aa4366573408b5522cd9ae891fe055cfe6cfe8420f02eb",
+          "declared_document_sha256": "22002059f494186850aa4366573408b5522cd9ae891fe055cfe6cfe8420f02eb",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/fail_closed_delivery",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "28c2aba2ca7597bbfeac8d8ddfff0df006490d0def04a4d9e14bb634b3c74c3a",
+          "declared_document_sha256": "28c2aba2ca7597bbfeac8d8ddfff0df006490d0def04a4d9e14bb634b3c74c3a",
+          "split": "test"
+        },
+        {
+          "document_id": "seed/hmac_validator_goal_plan",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "5967060955cecbc9690c1104b7f1a1fb40c5aecedd53ce386b3ae5447b00d1ce",
+          "declared_document_sha256": "5967060955cecbc9690c1104b7f1a1fb40c5aecedd53ce386b3ae5447b00d1ce",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/lru_cache_goal_plan",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "9856445c2ae3f74c68a550baa2f39cd1a573be7939ef1d091cc268f34c2710cf",
+          "declared_document_sha256": "9856445c2ae3f74c68a550baa2f39cd1a573be7939ef1d091cc268f34c2710cf",
+          "split": "validation"
+        },
+        {
+          "document_id": "seed/matrix_multiplier",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "e463888084f788ed88d77ebe184081c23e300bca84af994f31548f51950dd577",
+          "declared_document_sha256": "e463888084f788ed88d77ebe184081c23e300bca84af994f31548f51950dd577",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/repair_loop_exemplar",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "39d42681c8556d001d3c8ab756f5a1f03ea8bb9a149e00dcd5b4ee8cc622141f",
+          "declared_document_sha256": "39d42681c8556d001d3c8ab756f5a1f03ea8bb9a149e00dcd5b4ee8cc622141f",
+          "split": "test"
+        },
+        {
+          "document_id": "seed/sandbox_rules",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "3060a458f9fcbcf685e3606a92636eb82895c01ff55bbbafc29cfe882d40f896",
+          "declared_document_sha256": "3060a458f9fcbcf685e3606a92636eb82895c01ff55bbbafc29cfe882d40f896",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/task_manager_build",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "51bb8ed46839b43356bcea4ef22cd794ea962b651d823bda27272b3ea930ebfa",
+          "declared_document_sha256": "51bb8ed46839b43356bcea4ef22cd794ea962b651d823bda27272b3ea930ebfa",
+          "split": "train"
+        },
+        {
+          "document_id": "seed/thai_engineering_goal",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "02f998bdf7d2f19120c302a34c6b97b8b441f0d6e1f4d623f46236870f6b6452",
+          "declared_document_sha256": "02f998bdf7d2f19120c302a34c6b97b8b441f0d6e1f4d623f46236870f6b6452",
+          "split": "train"
+        },
+        {
+          "document_id": "server/assistant.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "1ff125a0ff941b8ef9e9cfa4fd6d34b0d9a5629e7021c336f1345d6b2278ee31",
+          "declared_document_sha256": "1ff125a0ff941b8ef9e9cfa4fd6d34b0d9a5629e7021c336f1345d6b2278ee31",
+          "split": "train"
+        },
+        {
+          "document_id": "server/assistantBrainCore.ts",
+          "status": "BLOCKED",
+          "issues": [
+            "source_url_missing_or_not_https",
+            "license_url_missing_or_not_https",
+            "human_approval_not_approved",
+            "approver_missing",
+            "approval_timestamp_missing",
+            "approval_signature_missing",
+            "approval_key_id_missing"
+          ],
+          "computed_document_sha256": "8030be781056ae63664f77d6b130bb8862fd42c3ec7d5b683b363f2c4cfcaea8",
+          "declared_document_sha256": "8030be781056ae63664f77d6b130bb8862fd42c3ec7d5b683b363f2c4cfcaea8",
+          "split": "train"
+        }
+      ],
+      "split_audit": {
+        "status": "READY_FOR_REVIEW",
+        "split_counts": {
+          "test": 27,
+          "train": 116,
+          "validation": 27
+        },
+        "missing_splits": [],
+        "exact_duplicates": [],
+        "cross_split_near_duplicates": [],
+        "errors": [],
+        "near_duplicate_threshold": 0.9
+      },
+      "corpus_sha256": "01ede0b6f8a01370d2e455c3e418f3f34daf44bcd99ccda67c3a384465f85c52",
+      "verified_documents": 0,
+      "document_count": 170,
+      "test_documents_excluded_from_training": true
+    },
+    "s3_probe": {
+      "probe_requested": true,
+      "config_valid": false,
+      "provider": "none",
+      "missing_keys": [
+        "CHECKPOINT_PRESIGNED_URL",
+        "S3_BUCKET"
+      ],
+      "source_uri": null,
+      "validation_error": "FAIL_CLOSED: Online Connectivity Required — neither CHECKPOINT_PRESIGNED_URL nor S3_BUCKET is configured.",
+      "env_presence": {
+        "S3_BUCKET": false,
+        "S3_REGION": false,
+        "S3_ENDPOINT": false,
+        "S3_ACCESS_KEY_ID": false,
+        "S3_SECRET_ACCESS_KEY": false,
+        "S3_CHECKPOINT_KEY": false,
+        "CHECKPOINT_PRESIGNED_URL": false
+      },
+      "connectivity": {
+        "online": false,
+        "status": "ONLINE_CONNECTIVITY_REQUIRED",
+        "error_code": "NOT_CONFIGURED",
+        "runtime_state_hint": "NOT_CONFIGURED",
+        "reason": "FAIL_CLOSED: Online Connectivity Required — neither CHECKPOINT_PRESIGNED_URL nor S3_BUCKET is configured.",
+        "source_uri": null,
+        "http_status": null,
+        "content_length": null,
+        "latency_ms": 0.02
+      }
+    },
+    "approval_key": {
+      "configured": true,
+      "path": "/app/applet/native_data/training_pipeline/approval.key",
+      "exists": true,
+      "is_symlink": false,
+      "is_regular_file": true,
+      "mode_octal": "0600",
+      "permissions_0600_or_stricter": true,
+      "verifier_loaded": true,
+      "error": null
+    },
+    "human_approval_confirmed": false,
+    "blockers": [
+      "dataset_governance_blocked",
+      "s3_preflight_blocked:NOT_CONFIGURED",
+      "human_approval_confirmation_missing"
+    ]
+  },
+  "cliCommand": "/usr/bin/python3 -m qplus_native.train_target --init native_data/model_checkpoint_target_41m.pt --out native_data/model_checkpoint_target_41m_step5800.pt --target-steps 5800 --eval-every 25 --save-every 100 --batch 2 --lr 0.0003 --tokenizer-profile v2_base --dataset-file native_data/datasets --approval-key-file /app/applet/native_data/training_pipeline/approval.key --human-approval-confirmed",
+  "manifestPath": "native_data/training_pipeline/pipeline_5800_init.json"
+}

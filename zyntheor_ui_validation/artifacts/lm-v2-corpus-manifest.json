@@ -1,0 +1,738 @@
+{
+ "corpus_sha256": "456ef0d9baf8d92cd11289d602f123df4592adb36f31caf5f1a1286fbb2d2fec",
+ "summary": {
+  "documents": 98,
+  "train_docs": 76,
+  "val_docs": 22,
+  "train_chars": 939788,
+  "val_chars": 290865,
+  "thai_chars": 9492,
+  "excluded": 9
+ },
+ "excluded": [
+  {
+   "id": "src/context/AuthContext.tsx",
+   "reason": "secret_like_literal"
+  },
+  {
+   "id": "qplus_native/model.py",
+   "reason": "secret_like_literal"
+  },
+  {
+   "id": "tests/knowledge-live-http.run.mjs",
+   "reason": "secret_like_literal"
+  },
+  {
+   "id": "knowledge:doc_1794400643128_p3pun",
+   "reason": "not_curatedForTraining"
+  },
+  {
+   "id": "knowledge:doc_1794400668036_qipgn",
+   "reason": "not_curatedForTraining"
+  },
+  {
+   "id": "knowledge:doc_1794400809715_mljct",
+   "reason": "not_curatedForTraining"
+  },
+  {
+   "id": "knowledge:doc_1794401856020_56xxl",
+   "reason": "not_curatedForTraining"
+  },
+  {
+   "id": "knowledge:doc_1794401912406_uy6xl",
+   "reason": "not_curatedForTraining"
+  },
+  {
+   "id": "knowledge:doc_1794405924002_oos3b",
+   "reason": "not_curatedForTraining"
+  }
+ ],
+ "docs": [
+  {
+   "id": "README.md",
+   "kind": "doc",
+   "sha256": "4d7447636ce45cc29e72ffd0e062810b6269d84abd375a1cf57dc6501ff59527",
+   "split": "train",
+   "chars": 24711
+  },
+  {
+   "id": "IMPLEMENTATION_REPORT.md",
+   "kind": "doc",
+   "sha256": "0b138666045e4bc5c6fe9603cc8fcf3055c16c0de8c2860728446f3b69620f36",
+   "split": "train",
+   "chars": 2259
+  },
+  {
+   "id": "SECURITY.md",
+   "kind": "doc",
+   "sha256": "4883e5b1abd96d0c0c4188f67349c4034298814b849bab1ff7ab5b2db244cfc6",
+   "split": "val",
+   "chars": 1100
+  },
+  {
+   "id": "CONTRIBUTING.md",
+   "kind": "doc",
+   "sha256": "65de49382174e980bc8ac248d7688704bc9fd3254b9b7b64b38323870e5ab434",
+   "split": "val",
+   "chars": 1177
+  },
+  {
+   "id": "artifacts/PARAMETER-AUDIT-AND-FULL-SOURCE-REVIEW-2026-11-12.md",
+   "kind": "doc",
+   "sha256": "7addbbf543ecdbfafd8a50b889385c87fd6c1ec2e4a2363bab0eea8aad565c97",
+   "split": "train",
+   "chars": 6007
+  },
+  {
+   "id": "artifacts/ROUND-ONE-IMPLEMENTATION-REPORT.md",
+   "kind": "doc",
+   "sha256": "76b68e0b2571a792f818d788311174b99543e7391d258b00dfa32757ef22d41d",
+   "split": "train",
+   "chars": 7509
+  },
+  {
+   "id": "artifacts/UPGRADE-REPORT-2026-11-12.md",
+   "kind": "doc",
+   "sha256": "bbd879503bc551a0b7366fa93c67b65eaa479dd0a8cc0497b053cb7ddbe27ffb",
+   "split": "train",
+   "chars": 5986
+  },
+  {
+   "id": "artifacts/UPGRADE-REPORT-ROUND2.md",
+   "kind": "doc",
+   "sha256": "b14695fbc5cfa1f676cd86db00cbb918ded300d8fa960236e0c3bed5540c4571",
+   "split": "val",
+   "chars": 3520
+  },
+  {
+   "id": "src/hooks/useAuditIntegrity.ts",
+   "kind": "source",
+   "sha256": "b99dea995f8c3c3c1118bc6f957a3d772fb3eca534ca8fa2b075f843d7af87c6",
+   "split": "train",
+   "chars": 6790
+  },
+  {
+   "id": "src/services/NativeMemoryController.ts",
+   "kind": "source",
+   "sha256": "280d819da73c4547bb44aeb5697cef2e90d404f96d5c007d53860fda6f8291bd",
+   "split": "train",
+   "chars": 5368
+  },
+  {
+   "id": "src/types.ts",
+   "kind": "source",
+   "sha256": "36a0cff82a0ac3e6f309f33cf8061a02dac19ccb675817235f05810ff2b03c5b",
+   "split": "train",
+   "chars": 4256
+  },
+  {
+   "id": "src/utils/auditLedger.ts",
+   "kind": "source",
+   "sha256": "bbacff2b6eeb2f9618a2af30159040f48bddfef0aa2c2117a920562b261bdac8",
+   "split": "train",
+   "chars": 12251
+  },
+  {
+   "id": "src/App.tsx",
+   "kind": "source",
+   "sha256": "790ba2536e4d173d89ca2ee6050b2fcb45ff058f11099498672b0bf0ab5d38cb",
+   "split": "train",
+   "chars": 107565
+  },
+  {
+   "id": "src/components/GradientNormOverlay.tsx",
+   "kind": "source",
+   "sha256": "61fe3dfe5c0160a010be336e1a044dc278c613d11494e0d2496184553c37feea",
+   "split": "train",
+   "chars": 6998
+  },
+  {
+   "id": "src/components/HardwareMonitor.tsx",
+   "kind": "source",
+   "sha256": "d74908c7ede3cab9da3921a4de5acef030f9daa3b600952b89a86a0031f9d714",
+   "split": "val",
+   "chars": 5176
+  },
+  {
+   "id": "src/components/Header.tsx",
+   "kind": "source",
+   "sha256": "f38a7f7de7c0695d891f3a2f0d71a8b2fadc29244f0d4d99f0f49e0b2838121f",
+   "split": "train",
+   "chars": 8235
+  },
+  {
+   "id": "src/components/IntelligenceVisualizer.tsx",
+   "kind": "source",
+   "sha256": "111576a173e114d540f68c05d74fe8ba37f3b29cb6bcf896c54ddc57d9703eed",
+   "split": "train",
+   "chars": 14555
+  },
+  {
+   "id": "src/components/LanguageSwitcher.tsx",
+   "kind": "source",
+   "sha256": "7be6949f93835cd71d84e5cba1154ae5ee4a3c4b93a37b6724050ab76dbce0fd",
+   "split": "train",
+   "chars": 2811
+  },
+  {
+   "id": "src/components/MemoryShardMap.tsx",
+   "kind": "source",
+   "sha256": "b1cc89d90eb81d0175f2673d42754f2be323a4d7d6f8616bfbdc8acf52887f49",
+   "split": "train",
+   "chars": 6048
+  },
+  {
+   "id": "src/components/MobileNav.tsx",
+   "kind": "source",
+   "sha256": "ac0a2d248990986c69aeee3704048a4921fb6435fa3ab39d820bc6c68befe16b",
+   "split": "train",
+   "chars": 2230
+  },
+  {
+   "id": "src/components/ModelBenchmarking.tsx",
+   "kind": "source",
+   "sha256": "0b16f2e62e956f0a1977bcfa5a3f108e43cab1412a25551f2f905271d7365e8a",
+   "split": "train",
+   "chars": 15269
+  },
+  {
+   "id": "src/components/ResourceMonitor.tsx",
+   "kind": "source",
+   "sha256": "5bfb67cb9142bf2e25d6c1acce3d1fa2688fa3ef656bb138b40746e412ea4636",
+   "split": "train",
+   "chars": 13001
+  },
+  {
+   "id": "src/components/Sidebar.tsx",
+   "kind": "source",
+   "sha256": "842fe4ec3a326b8cb5258d0c354dd8f3ee9c760faae9ce342454221f5b19731d",
+   "split": "train",
+   "chars": 7556
+  },
+  {
+   "id": "src/components/StreamingTokenDisplay.tsx",
+   "kind": "source",
+   "sha256": "6e7f712e6b9d6484439f1b5c086412c470b293ad7c530b027c35e8850db89b92",
+   "split": "train",
+   "chars": 14022
+  },
+  {
+   "id": "src/components/ThemeSwitcher.tsx",
+   "kind": "source",
+   "sha256": "50f9c02655af0111ff001494d55e92f877ae5b580d85b41da9f2c4332ec5489a",
+   "split": "val",
+   "chars": 12244
+  },
+  {
+   "id": "src/components/TrainingProgress.tsx",
+   "kind": "source",
+   "sha256": "a6c30f643c912b8e5219ffabb58094e6ca104d991031a42105cbd7435f06aa75",
+   "split": "train",
+   "chars": 3191
+  },
+  {
+   "id": "src/components/modules/AdminConsole.tsx",
+   "kind": "source",
+   "sha256": "f28bc5bceac04319ee774c580c0e2c1ff0d3c12fd8a87203044f3d575c1f117e",
+   "split": "train",
+   "chars": 9466
+  },
+  {
+   "id": "src/components/modules/AgentExecutionAudit.tsx",
+   "kind": "source",
+   "sha256": "96a98bfe0dc6b8004028ae3c32c287b65874b62bb8d7f30fac988280286023a4",
+   "split": "train",
+   "chars": 8786
+  },
+  {
+   "id": "src/components/modules/AnalyticsBI.tsx",
+   "kind": "source",
+   "sha256": "93d1755064f838a3e1691c59bf3f22002fbeb7109309a503b2d323d7dca198d6",
+   "split": "train",
+   "chars": 5008
+  },
+  {
+   "id": "src/components/modules/ApiPlatform.tsx",
+   "kind": "source",
+   "sha256": "00880e41116d3575c419bac3d7dd573dcbf882416d7e0b5bbbb1ee0086925b9f",
+   "split": "train",
+   "chars": 6201
+  },
+  {
+   "id": "src/components/modules/AutomationCenter.tsx",
+   "kind": "source",
+   "sha256": "d3563a373e2216e6bf138b25428f62d609b9df143fb951ff2354868916b7c9b7",
+   "split": "train",
+   "chars": 6441
+  },
+  {
+   "id": "src/components/modules/CommandCenter.tsx",
+   "kind": "source",
+   "sha256": "6e1e5a9d9f03e3aab9e184a3fbd21b61072d56ba16d5233c4b20bb33994d7a47",
+   "split": "train",
+   "chars": 17956
+  },
+  {
+   "id": "src/components/modules/ConversationalIntelligence.tsx",
+   "kind": "source",
+   "sha256": "a7de86aea13078c6d2c53763914d53f95c55f85b7d798f1aafd0ca6d02eb3031",
+   "split": "train",
+   "chars": 23924
+  },
+  {
+   "id": "src/components/modules/DevStudio.tsx",
+   "kind": "source",
+   "sha256": "3dbb278573f79464ff486b08d77e4cb6e8b294e40626eed940d7b0675827a5d8",
+   "split": "train",
+   "chars": 81077
+  },
+  {
+   "id": "src/components/modules/ExperimentCenter.tsx",
+   "kind": "source",
+   "sha256": "f49e681d79e538e7a27a5a7174f3e3754c63cb73f83e7345642bce6920bd3bb9",
+   "split": "train",
+   "chars": 6294
+  },
+  {
+   "id": "src/components/modules/GovernanceSecurity.tsx",
+   "kind": "source",
+   "sha256": "9b3ec9adbe9ce38a3b90c4be39850f9feb7da1c02787a7affbfc81fd402f9659",
+   "split": "train",
+   "chars": 60875
+  },
+  {
+   "id": "src/components/modules/IntelligenceCore.tsx",
+   "kind": "source",
+   "sha256": "997bfe4c98ec2c28d6a6951964ad48c059c58dd419fa6a27879cc59b33e733f6",
+   "split": "train",
+   "chars": 24821
+  },
+  {
+   "id": "src/components/modules/KnowledgeHub.tsx",
+   "kind": "source",
+   "sha256": "ffb9b6cb6710856355874f2147d6b89904044c21638653ee55d07a44de71d731",
+   "split": "val",
+   "chars": 91487
+  },
+  {
+   "id": "src/components/modules/Marketplace.tsx",
+   "kind": "source",
+   "sha256": "e501892fdb77bcc62590d7dbb6dbadbe8b4cf737157e9146a7fc6c0d1ae8f362",
+   "split": "train",
+   "chars": 5442
+  },
+  {
+   "id": "src/components/modules/ModelLaboratory.tsx",
+   "kind": "source",
+   "sha256": "8a36e8acdb100871c23867b99d49269a4f525eeaef30a1c1aa16473460ca5ae6",
+   "split": "train",
+   "chars": 20134
+  },
+  {
+   "id": "src/components/modules/ResearchLab.tsx",
+   "kind": "source",
+   "sha256": "3d7f5de4026e1547b1e247a28af1bab13b93e1081e2ee6271898c26b450669b3",
+   "split": "train",
+   "chars": 15346
+  },
+  {
+   "id": "src/components/modules/SubscriptionBilling.tsx",
+   "kind": "source",
+   "sha256": "16032c39888f7f84f6d6800d13ca494fc7621295bcb0681945b0f2cb42c3d515",
+   "split": "val",
+   "chars": 7838
+  },
+  {
+   "id": "src/components/modules/SystemAuditLedger.tsx",
+   "kind": "source",
+   "sha256": "4049ea908c5cf0b98712de405227d8f50bd215131fbc7876d1e5f693a175ba59",
+   "split": "train",
+   "chars": 14481
+  },
+  {
+   "id": "src/components/modules/UserSettings.tsx",
+   "kind": "source",
+   "sha256": "5cba39034d3412992edee2e745a4bd746da7f98ccd517bf046f936d36059fc1b",
+   "split": "train",
+   "chars": 16118
+  },
+  {
+   "id": "src/components/ui/MetricCard.tsx",
+   "kind": "source",
+   "sha256": "bab7b84b29fc93d9fce020654787445316b53a6bc2e617048b16622a5c4adaa9",
+   "split": "train",
+   "chars": 2852
+  },
+  {
+   "id": "src/components/ui/StatusBadge.tsx",
+   "kind": "source",
+   "sha256": "a5b667fe61061f611ac27e62feddf705a48ae458e36ad54d086e0d05bdd088b8",
+   "split": "train",
+   "chars": 1988
+  },
+  {
+   "id": "src/components/ui/VividCard.tsx",
+   "kind": "source",
+   "sha256": "b56acc60e56574cbab3055827c4b5f0216a26d909adb3fb72d3100943cab5814",
+   "split": "val",
+   "chars": 2833
+  },
+  {
+   "id": "src/context/LanguageContext.tsx",
+   "kind": "source",
+   "sha256": "1692d5176eb68ba668990639f20006dce83987468020e542ed3cb74011429cd2",
+   "split": "train",
+   "chars": 9721
+  },
+  {
+   "id": "src/context/ThemeContext.tsx",
+   "kind": "source",
+   "sha256": "394d9c1c2e37bfc009f9493c0052bb07ac4856cb6bdce770b464ce5623211d59",
+   "split": "train",
+   "chars": 5386
+  },
+  {
+   "id": "src/main.tsx",
+   "kind": "source",
+   "sha256": "e3c7dcefb815971deabfa9e72c3204a9653568a3f72f4ee86305796edf35a04c",
+   "split": "train",
+   "chars": 470
+  },
+  {
+   "id": "lib/AuditLedger.ts",
+   "kind": "source",
+   "sha256": "88a708fcc97559548d5c0e356a31b57680bd286cd99bed297644ef172f27a176",
+   "split": "train",
+   "chars": 7343
+  },
+  {
+   "id": "lib/AuthMiddleware.ts",
+   "kind": "source",
+   "sha256": "aadd62013473e034a85c7f6baef21d90725ba8c8889807e1541fad211df6a35c",
+   "split": "val",
+   "chars": 9067
+  },
+  {
+   "id": "lib/CommercialManager.ts",
+   "kind": "source",
+   "sha256": "f06fc0b9c77a2ee92c0996a319730cfb2f07d57ad9c73386434a605246d35990",
+   "split": "train",
+   "chars": 6870
+  },
+  {
+   "id": "lib/DocumentBinaryParser.ts",
+   "kind": "source",
+   "sha256": "99edd54ef6939a83d7f9ca51fe4a96816bb9f7ef9f6f2540812ad9c0dcae3fb3",
+   "split": "val",
+   "chars": 9642
+  },
+  {
+   "id": "lib/KnowledgeIntelligenceEngine.ts",
+   "kind": "source",
+   "sha256": "273ad65978983b98637203282dc3e6d7f7ad25688a4d423a259c642ce381772a",
+   "split": "val",
+   "chars": 22633
+  },
+  {
+   "id": "lib/KnowledgeWorkspace.ts",
+   "kind": "source",
+   "sha256": "de7dca3976ddad33323c26dbdcacf6fe6dd4375dfa19784023a290283a0cd434",
+   "split": "train",
+   "chars": 27884
+  },
+  {
+   "id": "lib/NativeMemoryController.ts",
+   "kind": "source",
+   "sha256": "dbbf93c1a68917f45e0a807e137323ce32c1009c21093ee1a5435cac43862a8d",
+   "split": "train",
+   "chars": 8306
+  },
+  {
+   "id": "lib/RateLimit.ts",
+   "kind": "source",
+   "sha256": "f5608516885125047f732d223c8551226ef67c23022ec2dcdc76ccd82d9aff07",
+   "split": "train",
+   "chars": 3294
+  },
+  {
+   "id": "lib/SovereignIdentity.ts",
+   "kind": "source",
+   "sha256": "56272d665ae1d519052a56bea789868af78ec16a2f742674b28845383de9692c",
+   "split": "train",
+   "chars": 15580
+  },
+  {
+   "id": "lib/TaskOrchestrator.ts",
+   "kind": "source",
+   "sha256": "7d32ca8055b7dbb25394044fa02e51265f4664c2db4da5c1cf2c4431187f71bb",
+   "split": "train",
+   "chars": 13429
+  },
+  {
+   "id": "lib/TokenRevocation.ts",
+   "kind": "source",
+   "sha256": "8774c6dc90f67c41559932b3698d11a8fb23322d79598cf9d4449b24d8a85cd3",
+   "split": "train",
+   "chars": 2858
+  },
+  {
+   "id": "lib/ToolGateway.ts",
+   "kind": "source",
+   "sha256": "cd2088d08d990f21a9e9bf6e39a3b252f83da65255905e413992dc3300d99a9c",
+   "split": "train",
+   "chars": 10022
+  },
+  {
+   "id": "lib/knowledgeUtils.ts",
+   "kind": "source",
+   "sha256": "7b8872dfc7fa62f4515f496fcaf841096433cc5e67127c7bbdd8e83568439418",
+   "split": "train",
+   "chars": 1867
+  },
+  {
+   "id": "lib/multipartMemory.ts",
+   "kind": "source",
+   "sha256": "ef0fb850c3f4670a24e50201381c703af855a2d998e960c71bbe529b9ea5b957",
+   "split": "train",
+   "chars": 2957
+  },
+  {
+   "id": "lib/providers.ts",
+   "kind": "source",
+   "sha256": "f0ca9585599e5def27ef75e5c24d9f1c57309d8392828eb5293e9e785d06f6ce",
+   "split": "train",
+   "chars": 10767
+  },
+  {
+   "id": "server.ts",
+   "kind": "source",
+   "sha256": "1233fc09a16c41e488b48574248141254de0915e7e145872e240d1f5b8c89a2f",
+   "split": "train",
+   "chars": 100452
+  },
+  {
+   "id": "qplus_native/architecture.py",
+   "kind": "source",
+   "sha256": "cc75b0f77dc2d0083d009cdfe8614f1ff99a6258e395e7c7549350da474cce2a",
+   "split": "val",
+   "chars": 1093
+  },
+  {
+   "id": "qplus_native/audit_target_checkpoint.py",
+   "kind": "source",
+   "sha256": "8e4ad8149d729b8a8b37ecb2214a042b178eb2bc194c519db690c0593d911d43",
+   "split": "val",
+   "chars": 4576
+  },
+  {
+   "id": "qplus_native/bridge.py",
+   "kind": "source",
+   "sha256": "824de68500ae65f5e1b0cb8c48da3d281bb6ebeb3fa02c1e5591e1c884187a3e",
+   "split": "val",
+   "chars": 36542
+  },
+  {
+   "id": "qplus_native/checkpoint.py",
+   "kind": "source",
+   "sha256": "661b001846cd7a5ad09665991cc3b6a66ae345554d708d493b012390e30f7c4e",
+   "split": "train",
+   "chars": 3912
+  },
+  {
+   "id": "qplus_native/compare_models.py",
+   "kind": "source",
+   "sha256": "cf0a0f8e9d2f0a3540091ba94ff2880ad667d39001d5769f9098b1d143bad649",
+   "split": "train",
+   "chars": 5425
+  },
+  {
+   "id": "qplus_native/corpus.py",
+   "kind": "source",
+   "sha256": "02cbbd3cab001762771606c6e9f80350c8cea16d2104bccdb32d056009e69f39",
+   "split": "train",
+   "chars": 3465
+  },
+  {
+   "id": "qplus_native/create_frozen_manifest.py",
+   "kind": "source",
+   "sha256": "708b7af15f4ecd0b047fd35319369f1aaa7ad166804338faac1fd9393896943a",
+   "split": "val",
+   "chars": 4388
+  },
+  {
+   "id": "qplus_native/decoding.py",
+   "kind": "source",
+   "sha256": "2a9beb21715a98c1074ca4076bf7834f5fd1e8db305cd714f80bff95b6272e0c",
+   "split": "val",
+   "chars": 3430
+  },
+  {
+   "id": "qplus_native/engine.py",
+   "kind": "source",
+   "sha256": "e12baccc8d774271a097da4864d2b5efb56ffee9c70cd73e403e0ac7dd4a9a57",
+   "split": "train",
+   "chars": 19103
+  },
+  {
+   "id": "qplus_native/eval_lm.py",
+   "kind": "source",
+   "sha256": "cbb36dfc6c43b79e5569e86cfe77cff99cc9854e865da07b476bbb7f0722da6d",
+   "split": "val",
+   "chars": 6025
+  },
+  {
+   "id": "qplus_native/init_weights.py",
+   "kind": "source",
+   "sha256": "49b48208b29f0b8339631463270d1b9e17e4301bee127dbd2579e2f6f18106aa",
+   "split": "train",
+   "chars": 404
+  },
+  {
+   "id": "qplus_native/lm_v2.py",
+   "kind": "source",
+   "sha256": "2b8d9eb58706a836d8debb9fa44068c8e3116fddd71b1411c2cded4970066ac2",
+   "split": "val",
+   "chars": 21403
+  },
+  {
+   "id": "qplus_native/tokenizer.py",
+   "kind": "source",
+   "sha256": "77b49d64a99cfe61d5bc26027188d0630640925ad006ed5a177da1832f249673",
+   "split": "train",
+   "chars": 5940
+  },
+  {
+   "id": "qplus_native/train_gated.py",
+   "kind": "source",
+   "sha256": "17f8fcffa02e94f03a7fd30dbe7d4540d7ad085232d8c33671d50314bdd88a35",
+   "split": "val",
+   "chars": 10813
+  },
+  {
+   "id": "qplus_native/train_lm.py",
+   "kind": "source",
+   "sha256": "0f94c33f4464a8c7c4ba3bfe0d8dafddeb5bccd89fe8de4dbb08cc4f3442dc34",
+   "split": "train",
+   "chars": 7611
+  },
+  {
+   "id": "qplus_native/train_target.py",
+   "kind": "source",
+   "sha256": "09ab67098506541ecb27639ffb378a304e960bcb385bd29479e7f4cdb8befce3",
+   "split": "train",
+   "chars": 7025
+  },
+  {
+   "id": "qplus_native/trainer.py",
+   "kind": "source",
+   "sha256": "99b5d9a54fd961f16cc82cf09d1d80e71c9cbb5df82ba57640ec09adaf2bb5ee",
+   "split": "val",
+   "chars": 17037
+  },
+  {
+   "id": "tests/identity-trust.test.ts",
+   "kind": "source",
+   "sha256": "ce8cdeac986a058607042c3a2c7e1d795c1e188dd788508fa7e49197100e9e22",
+   "split": "val",
+   "chars": 6480
+  },
+  {
+   "id": "tests/knowledge_e2e.test.ts",
+   "kind": "source",
+   "sha256": "5ab417ee0f242c96a6baeeb9c383237b43acbf1cfe6617210814cb33f72a5e93",
+   "split": "train",
+   "chars": 6050
+  },
+  {
+   "id": "tests/sovereignty.test.ts",
+   "kind": "source",
+   "sha256": "16ceed8a58cc40f436b2b242dbb92c624e9bf4baf27b041d7e3579783a539e09",
+   "split": "val",
+   "chars": 12361
+  },
+  {
+   "id": "tests/continue-training-e2e.mjs",
+   "kind": "source",
+   "sha256": "ba52cae1c846169fc19cad787ae36530dcd262cb913211f52e1d671dca7e3f1a",
+   "split": "train",
+   "chars": 2345
+  },
+  {
+   "id": "tests/identity-trust.run.mjs",
+   "kind": "source",
+   "sha256": "a8c1f8de8da7d8adcc5345cf838f75286491222c40504e0a4463107074ebccf4",
+   "split": "train",
+   "chars": 11406
+  },
+  {
+   "id": "tests/knowledge-intelligence.run.mjs",
+   "kind": "source",
+   "sha256": "de3fae1572b31934a4f1d469a30c1bb463d2e2249dfcd4cf8c860828ab870e4f",
+   "split": "train",
+   "chars": 6982
+  },
+  {
+   "id": "tests/live-training-e2e.mjs",
+   "kind": "source",
+   "sha256": "764d77760078ebc2a28e8571e51a92bb55e6c72e05f6f05fc6dbaf46cf397e2b",
+   "split": "train",
+   "chars": 3985
+  },
+  {
+   "id": "tests/online-product-integrity.test.mjs",
+   "kind": "source",
+   "sha256": "478d7dbbdb8d1a9bbe4a563d1b2254d94020657a179061b55d241be78c7fc333",
+   "split": "train",
+   "chars": 1678
+  },
+  {
+   "id": "tests/security-rbac-integrity.run.mjs",
+   "kind": "source",
+   "sha256": "c161544a95adc19b347df3a8a2fa363060954042b962236a347adc6b2a4c965b",
+   "split": "train",
+   "chars": 10132
+  },
+  {
+   "id": "tests/native-lm-v2.test.py",
+   "kind": "source",
+   "sha256": "753b654364701ace594b5ec4eaca1152a41bd449c9a9be67e0ab2335408717df",
+   "split": "train",
+   "chars": 8113
+  },
+  {
+   "id": "tests/native-parameter-integrity.test.py",
+   "kind": "source",
+   "sha256": "4c98f80120d5cd81eb11333d319c22fe166b732ee692af42ac5ab10be3286c46",
+   "split": "train",
+   "chars": 2970
+  },
+  {
+   "id": "knowledge:doc_1794398039733_p78a9",
+   "kind": "knowledge",
+   "sha256": "57d6764dd5694bd1613982e2e98e38babf0a4a413b3a1ce3164e33e0402ff95a",
+   "split": "train",
+   "chars": 700
+  },
+  {
+   "id": "knowledge:doc_1794398039734_igy57",
+   "kind": "knowledge",
+   "sha256": "cf040279ee6302f9c62b41809364c233cdde1283191ed31197806e1bbbb7a27a",
+   "split": "train",
+   "chars": 483
+  },
+  {
+   "id": "knowledge:doc_1794398039735_aph6y",
+   "kind": "knowledge",
+   "sha256": "320bb2de0ea7cf0bf972f3c40550c8f7bd475a9ec0c74f79fc342a3923c634c6",
+   "split": "train",
+   "chars": 526
+  },
+  {
+   "id": "knowledge:doc_1794398039736_umc9j",
+   "kind": "knowledge",
+   "sha256": "fec9a29679d196d70b028fc802be2ab5238e9991f85479c59b4f009762e9c7d7",
+   "split": "train",
+   "chars": 499
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0-SOVEREIGN",
+  "lastPersisted": "2026-11-17T13:31:57.950Z",
+  "verified_knowledge": {
+    "architecture": "ZYNTHEOR Native Core; active checkpoint size must be read from verified Cloud Runtime evidence",
+    "sovereignty_rule": "Native model is the intelligence core; runtime readiness requires a verified Cloud checkpoint and recorded evidence",
+    "sandbox_root": "/workspace",
+    "multilingual_engine": "Thai-English Dual Native Vocabulary & Code-Switching"
+  },
+  "sessions": [],
+  "episodic": {},
+  "consolidations": {}
+}

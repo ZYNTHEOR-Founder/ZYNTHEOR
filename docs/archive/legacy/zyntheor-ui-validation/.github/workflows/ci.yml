@@ -1,0 +1,436 @@
+
+name: ZYNTHEOR Native Intelligence CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Native Core Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          pip install pytest
+
+      - name: Validate Python syntax
+        run: |
+          python -m compileall -q .
+
+      - name: Validate native model files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          required = [
+              "qplus_native",
+          ]
+
+          for item in required:
+              path = Path(item)
+              if not path.exists():
+                  raise SystemExit(f"BLOCKED: Missing {item}")
+              print(f"OK: {item}")
+
+          PY
+
+      - name: Run native core tests
+        run: |
+          if [ -d tests ]; then
+            pytest -q tests
+          else
+            echo "BLOCKED: No tests directory found"
+            exit 1
+          fi
+
+      - name: Build frontend
+        if: hashFiles('package.json') != ''
+        run: |
+          npm ci
+          npm run build --if-present
+
+      - name: CI result
+        if: success()
+        run: echo "PASS: All configured CI checks completed"
+
+  eslint-types:
+    name: ESLint TypeScript Definition Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      eslint_status: ${{ steps.run-eslint.outputs.status }}
+      checked_files_count: ${{ steps.run-eslint.outputs.files_count }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Node dependencies
+        if: hashFiles('package.json') != ''
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run ESLint across TypeScript test files in types/
+        id: run-eslint
+        continue-on-error: true
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { spawnSync } = require('node:child_process');
+
+          const walk = (dir, acc = []) => {
+            if (!fs.existsSync(dir)) return acc;
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                walk(full, acc);
+              } else if (/\.(?:ts|tsx)$/i.test(entry.name) && !entry.name.endsWith('.d.ts')) {
+                acc.push(full.replace(/\\/g, '/'));
+              }
+            }
+            return acc;
+          };
+
+          const testFiles = walk('types');
+          fs.writeFileSync('eslint-types-report.txt', '');
+
+          const setOutput = (k, v) => {
+            if (process.env.GITHUB_OUTPUT) {
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`);
+            }
+          };
+
+          setOutput('files_count', String(testFiles.length));
+
+          if (testFiles.length === 0) {
+            const msg = 'No TypeScript test files found under types/ directory.';
+            console.log(msg);
+            fs.writeFileSync('eslint-types-report.txt', msg + '\n');
+            setOutput('status', 'skipped');
+            process.exit(0);
+          }
+
+          // Ensure ESLint + TypeScript parser/plugin are available in CI runner
+          const hasLocalEslint = fs.existsSync('node_modules/.bin/eslint');
+          if (!hasLocalEslint) {
+            const install = spawnSync(
+              'npm',
+              ['install', '--no-save', 'eslint', '@typescript-eslint/parser', '@typescript-eslint/eslint-plugin'],
+              { stdio: 'inherit' }
+            );
+            if (install.status !== 0) {
+              setOutput('status', 'failed');
+              process.exit(install.status || 1);
+            }
+          }
+
+          // Use existing eslint config if present; otherwise generate a transient flat config for types/
+          const hasConfig = [
+            'eslint.config.js',
+            'eslint.config.mjs',
+            'eslint.config.cjs',
+            '.eslintrc.json',
+            '.eslintrc.js',
+            '.eslintrc.cjs',
+            '.eslintrc.yml',
+          ].some((f) => fs.existsSync(f));
+
+          const eslintArgs = ['eslint'];
+          let tempConfig = null;
+          if (!hasConfig) {
+            tempConfig = '.eslint.types.tmp.mjs';
+            fs.writeFileSync(
+              tempConfig,
+              [
+                "import tsParser from '@typescript-eslint/parser';",
+                "import tsPlugin from '@typescript-eslint/eslint-plugin';",
+                'export default [{',
+                '  files: ["types/**/*.{ts,tsx}"],',
+                '  languageOptions: { parser: tsParser, ecmaVersion: "latest", sourceType: "module" },',
+                '  plugins: { "@typescript-eslint": tsPlugin },',
+                '  rules: {',
+                '    "no-var": "error",',
+                '    "prefer-const": "warn",',
+                '    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]',
+                '  }',
+                '}];',
+                '',
+              ].join('\n')
+            );
+            eslintArgs.push('--config', tempConfig);
+          }
+          eslintArgs.push(...testFiles);
+
+          const res = spawnSync('npx', eslintArgs, { encoding: 'utf8' });
+          if (tempConfig && fs.existsSync(tempConfig)) {
+            fs.unlinkSync(tempConfig);
+          }
+
+          const combined = [res.stdout || '', res.stderr || ''].filter(Boolean).join('\n');
+          process.stdout.write(combined);
+          fs.writeFileSync(
+            'eslint-types-report.txt',
+            combined || `ESLint passed cleanly across ${testFiles.length} file(s).\n`
+          );
+
+          if (res.status !== 0) {
+            setOutput('status', 'failed');
+            process.exit(res.status || 1);
+          }
+          setOutput('status', 'passed');
+          NODE
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-types-report
+          path: eslint-types-report.txt
+          if-no-files-found: ignore
+
+      - name: Fail if ESLint reported errors
+        if: steps.run-eslint.outputs.status == 'failed'
+        run: exit 1
+
+  typecheck-and-pr-summary:
+    name: Typecheck Definitions & Post PR Summary
+    runs-on: ubuntu-latest
+    needs: [eslint-types]
+    if: always()
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Node dependencies
+        if: hashFiles('package.json') != ''
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Download ESLint report artifact
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          name: eslint-types-report
+        continue-on-error: true
+
+      - name: Check package definitions & compile with tsc
+        id: compile-check
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { spawnSync } = require('node:child_process');
+
+          const discoverTypePackages = () => {
+            if (!fs.existsSync('types')) return [];
+            const pkgs = [];
+            for (const entry of fs.readdirSync('types', { withFileTypes: true })) {
+              if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+              const full = path.join('types', entry.name);
+              if (entry.name.startsWith('@')) {
+                for (const sub of fs.readdirSync(full, { withFileTypes: true })) {
+                  if (sub.isDirectory() && !sub.name.startsWith('.')) {
+                    pkgs.push({ name: `${entry.name}/${sub.name}`, dir: path.join(full, sub.name) });
+                  }
+                }
+              } else {
+                pkgs.push({ name: entry.name, dir: full });
+              }
+            }
+            return pkgs.sort((a, b) => a.name.localeCompare(b.name));
+          };
+
+          // Run structural verifier script if present
+          let structureReport = '';
+          let structureFailed = false;
+          if (fs.existsSync('scripts/verify-type-packages.mjs')) {
+            const verify = spawnSync('node', ['scripts/verify-type-packages.mjs'], { encoding: 'utf8' });
+            structureReport = [verify.stdout || '', verify.stderr || ''].filter(Boolean).join('\n').trim();
+            if (verify.status !== 0) structureFailed = true;
+          }
+
+          const checkedPackages = [];
+          const compilationErrors = [];
+
+          // 1. Check root TypeScript configuration
+          if (fs.existsSync('tsconfig.json')) {
+            const rootRes = spawnSync('npx', ['tsc', '--noEmit'], { encoding: 'utf8' });
+            const output = [rootRes.stdout || '', rootRes.stderr || ''].filter(Boolean).join('\n').trim();
+            const ok = rootRes.status === 0;
+            checkedPackages.push({ name: 'root (tsconfig.json)', status: ok ? 'PASS' : 'FAIL' });
+            if (!ok) {
+              compilationErrors.push({ pkg: 'root (tsconfig.json)', output: output || 'tsc exited with non-zero status' });
+            }
+          }
+
+          // 2. Check every package under types/
+          for (const pkg of discoverTypePackages()) {
+            const tsconfig = path.join(pkg.dir, 'tsconfig.json');
+            if (!fs.existsSync(tsconfig)) {
+              checkedPackages.push({ name: pkg.name, status: 'FAIL (missing tsconfig.json)' });
+              compilationErrors.push({ pkg: pkg.name, output: `Missing ${tsconfig}` });
+              continue;
+            }
+            const res = spawnSync('npx', ['tsc', '--noEmit', '-p', tsconfig], { encoding: 'utf8' });
+            const output = [res.stdout || '', res.stderr || ''].filter(Boolean).join('\n').trim();
+            const ok = res.status === 0;
+            checkedPackages.push({ name: pkg.name, status: ok ? 'PASS' : 'FAIL' });
+            if (!ok) {
+              compilationErrors.push({ pkg: pkg.name, output: output || 'tsc exited with non-zero status' });
+            }
+          }
+
+          const eslintStatus = process.env.ESLINT_STATUS || 'unknown';
+          const eslintFilesCount = process.env.ESLINT_FILES_COUNT || '0';
+          const eslintReport = fs.existsSync('eslint-types-report.txt')
+            ? fs.readFileSync('eslint-types-report.txt', 'utf8').trim()
+            : '';
+
+          const lines = [
+            '<!-- zyntheor-ci-summary -->',
+            '## TypeScript Definitions & Compilation Summary',
+            '',
+            `- **ESLint (`types/` test files)**: \`${eslintStatus}\` (${eslintFilesCount} file(s) scanned)`,
+            `- **Package Definitions Checked**: ${checkedPackages.length}`,
+            `- **Compilation Errors Found**: ${compilationErrors.length}`,
+            '',
+            '### Checked Package Definitions',
+            '',
+            '| Package / Target | Status |',
+            '|---|---|',
+            ...checkedPackages.map((p) => `| \`${p.name}\` | ${p.status} |`),
+            '',
+          ];
+
+          if (structureReport) {
+            lines.push('### Structure Verification (`tsconfig.json` & `index.d.ts`)', '', '```text', structureReport, '```', '');
+          }
+
+          if (compilationErrors.length > 0) {
+            lines.push('### Highlighted Compilation Errors', '');
+            for (const err of compilationErrors) {
+              lines.push(`#### \`${err.pkg}\``, '```text', err.output.slice(0, 6000), '```', '');
+            }
+          } else {
+            lines.push('> No TypeScript compilation errors detected.', '');
+          }
+
+          if (eslintStatus === 'failed' && eslintReport) {
+            lines.push('### ESLint Findings (`types/`)', '```text', eslintReport.slice(0, 4000), '```', '');
+          }
+
+          const markdown = lines.join('\n');
+          fs.writeFileSync('pr-ci-summary.md', markdown);
+
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown + '\n');
+          }
+
+          if (compilationErrors.length > 0 || structureFailed) {
+            if (process.env.GITHUB_OUTPUT) {
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'has_errors=true\n');
+            }
+          } else if (process.env.GITHUB_OUTPUT) {
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'has_errors=false\n');
+          }
+          NODE
+        env:
+          ESLINT_STATUS: ${{ needs.eslint-types.outputs.eslint_status }}
+          ESLINT_FILES_COUNT: ${{ needs.eslint-types.outputs.checked_files_count }}
+
+      - name: Post or update PR summary comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            if (!fs.existsSync('pr-ci-summary.md')) return;
+            const body = fs.readFileSync('pr-ci-summary.md', 'utf8');
+            const marker = '<!-- zyntheor-ci-summary -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
+
+      - name: Fail job if compilation errors were found
+        if: steps.compile-check.outputs.has_errors == 'true'
+        run: |
+          echo "Compilation or package structure errors detected. See summary above."
+          exit 1

@@ -1,0 +1,8 @@
+{"document_id": "smoke-train-001", "split": "train", "text": "ZYNTHEOR Checkpoint Continuation reloads verified float32 parameters and checks SHA-256 integrity before optimizer updates."}
+{"document_id": "smoke-train-002", "split": "train", "text": "PureAdamW optimizer preserves first and second moment tensors along with step counter t inside the resume sidecar bundle."}
+{"document_id": "smoke-train-003", "split": "train", "text": "Exponential learning rate scheduler restores completed_steps and base_lr cleanly so continuation matches uninterrupted runs."}
+{"document_id": "smoke-train-004", "split": "train", "text": "การต่อยอดการฝึกโมเดลต้องตรวจสอบสถานะ Checkpoint เดิม ค่า Optimizer Moment และ Random Seed ก่อนคำนวณ Gradient รอบใหม่เสมอ"}
+{"document_id": "smoke-val-005", "split": "validation", "text": "Disjoint train, validation, and held-out test splits enforce Zero Simulation integrity across every continuation checkpoint."}
+{"document_id": "smoke-val-006", "split": "validation", "text": "When switching curriculum phases, weights_only continuation retains prior_training_steps while recording cumulative_training_steps."}
+{"document_id": "smoke-test-007", "split": "test", "text": "Reloaded checkpoints undergo seeded greedy generation parity testing to confirm deterministic inference from learned weights."}
+{"document_id": "smoke-test-008", "split": "test", "text": "AuditLedger records checkpoint SHA-256, weight delta hashes, and optimizer provenance for every continuation run."}

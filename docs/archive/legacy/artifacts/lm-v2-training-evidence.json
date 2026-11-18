@@ -1,0 +1,173 @@
+{
+  "runs": [
+    {
+      "timestamp": 1794488897,
+      "resumed": false,
+      "decision": "ACCEPTED",
+      "val_loss_start": 6.232561393044313,
+      "val_loss_best": 1.5561222895696702,
+      "previous_val_loss": null,
+      "corpus_sha256": "6e6635f043a753a5d29311707aeb723c0af3db93ee12c3d51e5bb019977fb969",
+      "corpus_summary": {
+        "documents": 88,
+        "train_docs": 72,
+        "val_docs": 16,
+        "train_chars": 753280,
+        "val_chars": 237648,
+        "thai_chars": 9458,
+        "excluded": 13
+      },
+      "history": [
+        {
+          "step": 250,
+          "train_loss": 2.2598,
+          "val_loss": 2.6962,
+          "grad_norm": 1.131,
+          "lr": 0.001956
+        },
+        {
+          "step": 500,
+          "train_loss": 2.0174,
+          "val_loss": 2.2309,
+          "grad_norm": 1.48,
+          "lr": 0.001828
+        },
+        {
+          "step": 750,
+          "train_loss": 1.4211,
+          "val_loss": 1.9971,
+          "grad_norm": 1.658,
+          "lr": 0.001629
+        },
+        {
+          "step": 1000,
+          "train_loss": 1.4304,
+          "val_loss": 1.8614,
+          "grad_norm": 1.686,
+          "lr": 0.001378
+        },
+        {
+          "step": 1250,
+          "train_loss": 1.4651,
+          "val_loss": 1.7654,
+          "grad_norm": 1.912,
+          "lr": 0.0011
+        },
+        {
+          "step": 1500,
+          "train_loss": 1.3708,
+          "val_loss": 1.6918,
+          "grad_norm": 2.098,
+          "lr": 0.000822
+        },
+        {
+          "step": 1750,
+          "train_loss": 1.0331,
+          "val_loss": 1.6499,
+          "grad_norm": 1.661,
+          "lr": 0.000571
+        },
+        {
+          "step": 2000,
+          "train_loss": 1.0264,
+          "val_loss": 1.6088,
+          "grad_norm": 1.947,
+          "lr": 0.000372
+        },
+        {
+          "step": 2250,
+          "train_loss": 1.3926,
+          "val_loss": 1.5734,
+          "grad_norm": 2.397,
+          "lr": 0.000244
+        },
+        {
+          "step": 2500,
+          "train_loss": 1.2116,
+          "val_loss": 1.5561,
+          "grad_norm": 2.189,
+          "lr": 0.0002
+        }
+      ],
+      "saved": {
+        "path": "/home/claude/work/zyntheor_continuation/native_data/model_checkpoint_v2.pt",
+        "payload_sha256": "b9410f12e9e92036b1b1c80ab35ee2d3e6562f5eaa61356d740d20edbc35c387",
+        "total_params": 502912
+      }
+    },
+    {
+      "timestamp": 1794488970,
+      "resumed": true,
+      "decision": "REJECTED_REGRESSION",
+      "val_loss_start": 1.5561222896422815,
+      "val_loss_best": 1.5561222896422815,
+      "previous_val_loss": 1.5561222895696702,
+      "corpus_sha256": "6e6635f043a753a5d29311707aeb723c0af3db93ee12c3d51e5bb019977fb969",
+      "corpus_summary": {
+        "documents": 88,
+        "train_docs": 72,
+        "val_docs": 16,
+        "train_chars": 753280,
+        "val_chars": 237648,
+        "thai_chars": 9458,
+        "excluded": 13
+      },
+      "history": [
+        {
+          "step": 20,
+          "train_loss": 2.4744,
+          "val_loss": 2.7254,
+          "grad_norm": 1.319,
+          "lr": 0.00775
+        },
+        {
+          "step": 40,
+          "train_loss": 2.4185,
+          "val_loss": 2.4772,
+          "grad_norm": 1.226,
+          "lr": 0.00325
+        },
+        {
+          "step": 60,
+          "train_loss": 1.7718,
+          "val_loss": 2.2238,
+          "grad_norm": 1.206,
+          "lr": 0.001
+        }
+      ],
+      "saved": null
+    },
+    {
+      "timestamp": 1794563194,
+      "resumed": false,
+      "decision": "ACCEPTED",
+      "val_loss_start": 6.271811532517605,
+      "val_loss_best": 3.913779725133274,
+      "previous_val_loss": null,
+      "corpus_sha256": "456ef0d9baf8d92cd11289d602f123df4592adb36f31caf5f1a1286fbb2d2fec",
+      "corpus_summary": {
+        "documents": 98,
+        "train_docs": 76,
+        "val_docs": 22,
+        "train_chars": 939788,
+        "val_chars": 290865,
+        "thai_chars": 9492,
+        "excluded": 9
+      },
+      "history": [
+        {
+          "step": 60,
+          "train_loss": 3.9655,
+          "val_loss": 3.9138,
+          "grad_norm": 1.293,
+          "lr": 0.0002
+        }
+      ],
+      "saved": {
+        "path": "/app/applet/native_data/model_checkpoint_v2.pt",
+        "payload_sha256": "f85db005970c89d49af003f1e5999114502a2f25da9bf9b0c975d5f9cf87accd",
+        "total_params": 502912
+      }
+    }
+  ]
+}

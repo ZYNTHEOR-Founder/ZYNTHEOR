@@ -1,0 +1,81 @@
+{
+  "version": "ZYNTHEOR_PERF_V1",
+  "updatedAt": "2026-11-17T13:34:05.442Z",
+  "config": {
+    "retrievalLimit": 5,
+    "contextMaxChars": 1200,
+    "cacheEnabled": true,
+    "cacheTtlMs": 30000,
+    "batchSize": 8,
+    "multiPathMaxCandidates": 3,
+    "graphMaxHops": 2
+  },
+  "samples": [
+    {
+      "sampleId": "perf_1794922309064_87c8",
+      "timestamp": "2026-11-17T13:31:49.064Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "multi_path_synthesis",
+      "tenantId": "Sovereign Enterprise Prime",
+      "durationMs": 35.322,
+      "heapDeltaKb": 184.9,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.88
+    },
+    {
+      "sampleId": "perf_1794922318451_8210",
+      "timestamp": "2026-11-17T13:31:58.452Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "multi_path_synthesis",
+      "tenantId": "Sovereign Enterprise Prime",
+      "durationMs": 38.273,
+      "heapDeltaKb": 129.36,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.88
+    },
+    {
+      "sampleId": "perf_1794922353538_511e",
+      "timestamp": "2026-11-17T13:32:33.538Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "multi_path_synthesis",
+      "tenantId": "Sovereign Enterprise Prime",
+      "durationMs": 38.801,
+      "heapDeltaKb": -1449.65,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.88
+    },
+    {
+      "sampleId": "perf_1794922361585_48dc",
+      "timestamp": "2026-11-17T13:32:41.585Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "multi_path_synthesis",
+      "tenantId": "Sovereign Enterprise Prime",
+      "durationMs": 38.445,
+      "heapDeltaKb": 129.04,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.88
+    },
+    {
+      "sampleId": "perf_1794922445442_3ea0",
+      "timestamp": "2026-11-17T13:34:05.442Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "multi_path_synthesis",
+      "tenantId": "Sovereign Enterprise Prime",
+      "durationMs": 34.299,
+      "heapDeltaKb": 199.27,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.88
+    }
+  ],
+  "snapshots": [],
+  "cacheStats": {
+    "hits": 1,
+    "misses": 1,
+    "invalidations": 0
+  }
+}

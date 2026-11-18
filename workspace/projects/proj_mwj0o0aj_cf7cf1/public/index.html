@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Incident Telemetry Service</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root { --bg: #070B19; --surface: #0D1326; --surface-2: #131B36; --border: #1E294A; --accent: #00F0FF; --lime: #CCFF00; --text: #F4F7FF; --muted: #9AA8C7; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+    .layout { max-width: 1080px; margin: 0 auto; padding: 1.25rem; display: grid; gap: 1rem; }
+    .topbar { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.25rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }
+    .brand { display: flex; flex-direction: column; gap: 0.2rem; }
+    .brand h1 { margin: 0; font-size: 1.15rem; color: var(--accent); }
+    .brand span { font-size: 0.78rem; color: var(--muted); }
+    .nav { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .nav button { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); padding: 0.45rem 0.85rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .nav button.active { background: var(--accent); color: #070B19; border-color: var(--accent); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.25rem; }
+    .kpi-label { font-size: 0.72rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.04em; }
+    .kpi-value { font-size: 1.4rem; font-weight: 700; margin-top: 0.25rem; font-family: ui-monospace, monospace; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    input, select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; font: inherit; font-size: 0.85rem; }
+    input.grow { flex: 1; min-width: 180px; }
+    .btn-primary { background: var(--accent); color: #070B19; border: none; border-radius: 8px; padding: 0.52rem 0.95rem; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+    .btn-ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 0.35rem 0.65rem; font-size: 0.75rem; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.84rem; }
+    th, td { padding: 0.6rem 0.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
+    .status-pill { font-family: ui-monospace, monospace; font-size: 0.72rem; font-weight: 700; color: var(--lime); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <header class="topbar" data-z-id="header_topbar">
+      <div class="brand">
+        <h1 data-z-id="brand_title" style="color:#CCFF00;font-size:1.35rem">Telemetry Control Hub</h1>
+        <span data-z-id="brand_subtitle">Multi-View SaaS Operations Platform · Create a SaaS service health monitor portal with analytics, user registration, and incident tracking</span>
+      </div>
+      <nav class="nav" aria-label="Application Navigation">
+        <button type="button" data-view="overview" data-z-id="nav_overview" class="active">Overview</button>
+        <button type="button" data-view="workspace" data-z-id="nav_workspace">Operations & Telemetry</button>
+        <button type="button" data-view="analytics" data-z-id="nav_analytics">Analytics</button>
+        <button type="button" data-view="users" data-z-id="nav_users">Users &amp; Settings</button>
+      </nav>
+    </header>
+    
+    <div class="card" data-iteration="imp_mwj0o10n" style="border-color:rgba(0,240,255,0.45);padding:0.75rem 1.25rem;font-size:0.8rem;"><strong style="color:#00F0FF;">Feature Update (imp_mwj0o10n):</strong> <span>Add SLA escalation matrix panel and audit timestamp badge</span></div>
+    <section class="kpi-grid">
+      <div class="card" data-z-id="kpi_total_card"><div class="kpi-label">Total Records</div><div id="kpi-total" class="kpi-value">0</div></div>
+      <div class="card" data-z-id="kpi_verified_card"><div class="kpi-label">Verified</div><div id="kpi-verified" class="kpi-value" style="color:#CCFF00;">0</div></div>
+      <div class="card" data-z-id="kpi_value_card"><div class="kpi-label">Aggregate Value</div><div id="kpi-value" class="kpi-value" style="color:#00F0FF;">0</div></div>
+      <div class="card" data-z-id="kpi_runtime_card"><div class="kpi-label">Runtime Mode</div><div id="runtime-mode" class="kpi-value" style="font-size:0.95rem;">Initializing</div></div>
+    </section>
+    <section id="view-overview" class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:0.75rem;">
+        <strong data-z-id="section_overview_title">Quick Create · Operational Record</strong>
+        <input id="search-input" type="search" placeholder="Search records..." style="min-width:200px;" />
+      </div>
+      <form id="record-form" class="row">
+        <input id="record-title" class="grow" type="text" placeholder="Enter operational record title..." required />
+        <select id="record-category"><option value="operations">operations</option><option value="incident">incident</option><option value="sla">sla</option></select>
+        <input id="record-value" type="number" placeholder="Metric / Qty" value="100" style="width:110px;" />
+        <button class="btn-primary" data-z-id="btn_submit_record" type="submit">Add Operational Record</button>
+      </form>
+      <table>
+        <thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="records-tbody"></tbody>
+      </table>
+    </section>
+    <section id="view-workspace" class="card hidden">
+      <strong data-z-id="section_workspace_title">Operations & Telemetry Management</strong>
+      <p style="color:var(--muted);font-size:0.84rem;">Filter, verify, or remove records stored in the application datastore.</p>
+      <div id="workspace-summary" class="row" style="margin-top:0.5rem;"></div>
+    </section>
+    <section id="view-analytics" class="card hidden">
+      <strong data-z-id="section_analytics_title">Domain Analytics Breakdown</strong>
+      <div id="analytics-bars" style="margin-top:0.75rem;display:grid;gap:0.5rem;"></div>
+    </section>
+    <section id="view-users" class="card hidden">
+      <strong data-z-id="section_users_title">Team &amp; User Registration</strong>
+      <form id="user-form" class="row" style="margin-top:0.75rem;">
+        <input id="user-name" type="text" placeholder="Full name" required />
+        <input id="user-email" class="grow" type="email" placeholder="user@organization.com" required />
+        <select id="user-role"><option value="member">Member</option><option value="admin">Admin</option></select>
+        <button class="btn-primary" data-z-id="btn_submit_user" type="submit">Register User</button>
+      </form>
+      <div id="users-list" style="margin-top:0.75rem;display:grid;gap:0.4rem;"></div>
+    </section>
+  </div>
+  <script>
+    (function () {
+      let records = [{"id":1,"title":"Incident Telemetry Service — Primary Workspace Initialization","category":"operations","status":"ACTIVE","owner":"system","value":100,"createdAt":"2026-01-01T00:00:00.000Z"},{"id":2,"title":"Operations & Telemetry Verification Baseline","category":"incident","status":"VERIFIED","owner":"operator","value":250,"createdAt":"2026-01-02T00:00:00.000Z"}];
+      let users = [{ id: 1, name: 'Workspace Admin', email: 'admin@app.local', role: 'admin' }];
+      let searchQuery = '';
+      let activeView = 'overview';
+      const tbody = document.getElementById('records-tbody');
+      const modeEl = document.getElementById('runtime-mode');
+      function switchView(view) {
+        activeView = view;
+        document.querySelectorAll('.nav button').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+        });
+        ['overview', 'workspace', 'analytics', 'users'].forEach(function (v) {
+          const el = document.getElementById('view-' + v);
+          if (el) el.classList.toggle('hidden', v !== view && !(view === 'workspace' && v === 'overview'));
+        });
+      }
+      document.querySelectorAll('.nav button').forEach(function (btn) {
+        btn.addEventListener('click', function () { switchView(btn.getAttribute('data-view')); });
+      });
+      function renderAll() {
+        const filtered = records.filter(function (r) {
+          if (!searchQuery) return true;
+          return (r.title + ' ' + r.category).toLowerCase().includes(searchQuery);
+        });
+        document.getElementById('kpi-total').textContent = String(records.length);
+        document.getElementById('kpi-verified').textContent = String(records.filter(function (r) { return r.status === 'VERIFIED'; }).length);
+        document.getElementById('kpi-value').textContent = String(records.reduce(function (s, r) { return s + (Number(r.value) || 0); }, 0));
+        const rows = filtered.map(function (it) {
+          const tr = document.createElement('tr');
+          const cols = ['#' + it.id, it.title, it.category, String(it.value || 0)];
+          cols.forEach(function (txt) { const td = document.createElement('td'); td.textContent = txt; tr.appendChild(td); });
+          const stTd = document.createElement('td');
+          const stSpan = document.createElement('span');
+          stSpan.className = 'status-pill';
+          stSpan.textContent = it.status || 'ACTIVE';
+          stTd.appendChild(stSpan);
+          tr.appendChild(stTd);
+          const actTd = document.createElement('td');
+          const verifyBtn = document.createElement('button');
+          verifyBtn.type = 'button';
+          verifyBtn.className = 'btn-ghost';
+          verifyBtn.textContent = it.status === 'VERIFIED' ? 'Verified' : 'Verify';
+          verifyBtn.addEventListener('click', function () { toggleVerify(it.id); });
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'btn-ghost';
+          delBtn.style.marginLeft = '4px';
+          delBtn.textContent = 'Delete';
+          delBtn.addEventListener('click', function () { deleteRecord(it.id); });
+          actTd.appendChild(verifyBtn);
+          actTd.appendChild(delBtn);
+          tr.appendChild(actTd);
+          return tr;
+        });
+        tbody.replaceChildren.apply(tbody, rows);
+        const counts = {};
+        records.forEach(function (r) { counts[r.category] = (counts[r.category] || 0) + 1; });
+        const barNodes = Object.keys(counts).map(function (cat) {
+          const box = document.createElement('div');
+          box.className = 'row';
+          box.style.justifyContent = 'space-between';
+          const lbl = document.createElement('span');
+          lbl.textContent = cat;
+          const val = document.createElement('strong');
+          val.textContent = counts[cat] + ' record(s)';
+          box.appendChild(lbl);
+          box.appendChild(val);
+          return box;
+        });
+        document.getElementById('analytics-bars').replaceChildren.apply(document.getElementById('analytics-bars'), barNodes);
+        const uNodes = users.map(function (u) {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.style.justifyContent = 'space-between';
+          const left = document.createElement('span');
+          left.textContent = u.name + ' (' + u.email + ')';
+          const right = document.createElement('span');
+          right.className = 'status-pill';
+          right.textContent = u.role.toUpperCase();
+          row.appendChild(left);
+          row.appendChild(right);
+          return row;
+        });
+        document.getElementById('users-list').replaceChildren.apply(document.getElementById('users-list'), uNodes);
+      }
+      async function syncFromBackend() {
+        try {
+          const [rRes, uRes] = await Promise.all([fetch('/api/items'), fetch('/api/users')]);
+          if (rRes.ok) { const d = await rRes.json(); if (Array.isArray(d.items)) records = d.items; }
+          if (uRes.ok) { const u = await uRes.json(); if (Array.isArray(u.users)) users = u.users; }
+          modeEl.textContent = 'Live Cloud Store';
+          renderAll();
+          return;
+        } catch (_) {}
+        modeEl.textContent = 'Interactive Preview';
+        renderAll();
+      }
+      async function toggleVerify(id) {
+        try {
+          const res = await fetch('/api/items/' + id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'VERIFIED' }) });
+          if (res.ok) { await syncFromBackend(); return; }
+        } catch (_) {}
+        records = records.map(function (r) { return r.id === id ? Object.assign({}, r, { status: 'VERIFIED' }) : r; });
+        renderAll();
+      }
+      async function deleteRecord(id) {
+        try {
+          const res = await fetch('/api/items/' + id, { method: 'DELETE' });
+          if (res.ok) { await syncFromBackend(); return; }
+        } catch (_) {}
+        records = records.filter(function (r) { return r.id !== id; });
+        renderAll();
+      }
+      document.getElementById('search-input').addEventListener('input', function (e) {
+        searchQuery = (e.target.value || '').trim().toLowerCase();
+        renderAll();
+      });
+      document.getElementById('record-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const title = document.getElementById('record-title').value.trim();
+        const category = document.getElementById('record-category').value;
+        const value = Number(document.getElementById('record-value').value) || 0;
+        if (!title) return;
+        try {
+          const res = await fetch('/api/items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, category: category, value: value }) });
+          if (res.ok) { document.getElementById('record-title').value = ''; await syncFromBackend(); return; }
+        } catch (_) {}
+        const nextId = records.reduce(function (m, r) { return Math.max(m, Number(r.id) || 0); }, 0) + 1;
+        records.unshift({ id: nextId, title: title, category: category, value: value, status: 'ACTIVE' });
+        document.getElementById('record-title').value = '';
+        renderAll();
+      });
+      document.getElementById('user-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const name = document.getElementById('user-name').value.trim();
+        const email = document.getElementById('user-email').value.trim();
+        const role = document.getElementById('user-role').value;
+        if (!name || !email) return;
+        try {
+          const res = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, email: email, role: role }) });
+          if (res.ok) { document.getElementById('user-name').value = ''; document.getElementById('user-email').value = ''; await syncFromBackend(); return; }
+        } catch (_) {}
+        users.push({ id: users.length + 1, name: name, email: email, role: role });
+        document.getElementById('user-name').value = '';
+        document.getElementById('user-email').value = '';
+        renderAll();
+      });
+      syncFromBackend();
+    })();
+  </script>
+<script>document.body.textContent = ""; JSON.parse("1+1");</script></body>
+<!-- zyntheor-iteration-marker -->
+</html>

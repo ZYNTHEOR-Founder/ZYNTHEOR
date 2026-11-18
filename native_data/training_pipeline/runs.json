@@ -1,0 +1,393 @@
+[
+  {
+    "runId": "cl_1794907544268_9dccb1",
+    "tenantId": "Sovereign Enterprise Prime",
+    "initiatedBy": "zyntheor-trainer",
+    "createdAt": "2026-11-17T09:25:44.268Z",
+    "updatedAt": "2026-11-17T09:26:14.161Z",
+    "status": "TRAINED",
+    "stageHistory": [
+      {
+        "stage": "DATA_COLLECTION",
+        "status": "PASS",
+        "detail": "Collected 8 raw text source(s) (memory isolated)",
+        "at": "2026-11-17T09:25:44.269Z"
+      },
+      {
+        "stage": "QUALITY_FILTERING",
+        "status": "PASS",
+        "detail": "Kept 8; require at least 7 disjoint samples for train/validation/test coverage; rejected 0 low-quality sample(s).",
+        "at": "2026-11-17T09:25:44.270Z"
+      },
+      {
+        "stage": "DEDUPLICATION",
+        "status": "PASS",
+        "detail": "Removed 0 duplicate sample(s)",
+        "at": "2026-11-17T09:25:44.270Z"
+      },
+      {
+        "stage": "PRIVACY_FILTERING",
+        "status": "PASS",
+        "detail": "Scrubbed 0 PII/secret pattern(s)",
+        "at": "2026-11-17T09:25:44.270Z"
+      },
+      {
+        "stage": "DATASET_VERSIONING",
+        "status": "PASS",
+        "detail": "Frozen ds_v_1794907544271 (sha256=a405831ed9c2..., train=4, val=2, test=2)",
+        "at": "2026-11-17T09:25:44.271Z"
+      },
+      {
+        "stage": "NATIVE_TRAINING",
+        "status": "PENDING",
+        "detail": "Native trainer running 12 real optimizer step(s); final metrics are not yet available.",
+        "at": "2026-11-17T09:25:44.271Z"
+      },
+      {
+        "stage": "NATIVE_TRAINING",
+        "status": "PASS",
+        "detail": "PureSeqLM completed 12 optimizer step(s) (144 tokens, 28152 parameters); candidate storage=LOCAL_CANDIDATE_ONLY.",
+        "at": "2026-11-17T09:25:49.978Z"
+      },
+      {
+        "stage": "VALIDATION_BENCHMARK",
+        "status": "PASS",
+        "detail": "Validation NLL=6.8338 -> 4.8529; test NLL=6.835 -> 4.4852; benchmark=NOT_RUN.",
+        "at": "2026-11-17T09:25:49.979Z"
+      },
+      {
+        "stage": "REGRESSION_GATE",
+        "status": "PASS",
+        "detail": "Candidate passed validation and independent test regression gates (payload sha256=c51589721aae...).",
+        "at": "2026-11-17T09:25:49.979Z"
+      },
+      {
+        "stage": "HUMAN_APPROVAL_GATE",
+        "status": "PENDING",
+        "detail": "Release approval is blocked until the checkpoint passes the required domain benchmark suite and reaches READY.",
+        "at": "2026-11-17T09:25:49.980Z"
+      },
+      {
+        "stage": "DOMAIN_BENCHMARK",
+        "status": "PENDING",
+        "detail": "Verifying checkpoint and measuring held-out text behavior; unsupported domains will remain blocked.",
+        "at": "2026-11-17T09:26:12.172Z"
+      },
+      {
+        "stage": "DOMAIN_BENCHMARK",
+        "status": "BLOCKED",
+        "detail": "BLOCKED: 0/10 required domains passed; general-text metrics are not domain capability scores.",
+        "at": "2026-11-17T09:26:14.161Z"
+      }
+    ],
+    "datasetManifest": {
+      "datasetVersion": "ds_v_1794907544271",
+      "datasetSha256": "a405831ed9c2cdb2928a2cc385cd6889b78e75574f9eefd8fba17f9f0ad05891",
+      "createdAt": "2026-11-17T09:25:44.271Z",
+      "tenantId": "Sovereign Enterprise Prime",
+      "sourceDocIds": [
+        "corpus_sample_1",
+        "corpus_sample_2",
+        "corpus_sample_3",
+        "corpus_sample_4",
+        "corpus_sample_5",
+        "corpus_sample_6",
+        "corpus_sample_7",
+        "corpus_sample_8"
+      ],
+      "collectedCount": 8,
+      "acceptedCount": 8,
+      "rejectedQualityCount": 0,
+      "dedupedCount": 0,
+      "privacyRedactedCount": 0,
+      "trainSamples": [
+        "ZYNTHEOR Checkpoint Continuation reloads verified float32 parameters and checks SHA-256 integrity before optimizer updates.",
+        "PureAdamW optimizer preserves first and second moment tensors along with step counter t inside the resume sidecar bundle.",
+        "Exponential learning rate scheduler restores completed_steps and base_lr cleanly so continuation matches uninterrupted runs.",
+        "การต่อยอดการฝึกโมเดลต้องตรวจสอบสถานะ Checkpoint เดิม ค่า Optimizer Moment และ Random Seed ก่อนคำนวณ Gradient รอบใหม่เสมอ"
+      ],
+      "valSamples": [
+        "Disjoint train, validation, and held-out test splits enforce Zero Simulation integrity across every continuation checkpoint.",
+        "When switching curriculum phases, weights_only continuation retains prior_training_steps while recording cumulative_training_steps."
+      ],
+      "testSamples": [
+        "Reloaded checkpoints undergo seeded greedy generation parity testing to confirm deterministic inference from learned weights.",
+        "AuditLedger records checkpoint SHA-256, weight delta hashes, and optimizer provenance for every continuation run."
+      ]
+    },
+    "trainingConfig": {
+      "steps": 12,
+      "lr": 0.02,
+      "margin": -0.25,
+      "testMargin": 2,
+      "weightDecay": 0.01,
+      "gradientClip": 1,
+      "schedulerDecay": 0.995,
+      "seed": 2028
+    },
+    "baselineCheckpointPath": "/app/applet/native_data/model_checkpoint_seq_pure.pt",
+    "baselineCheckpointSha256": null,
+    "candidateCheckpointPath": "/app/applet/checkpoints/cl_1794907544268_9dccb1_candidate.pt",
+    "candidateCheckpointSha256": "c51589721aae33eb17ddfeb66c42a13880c4077096d06660408d0e07b5150182",
+    "candidateCheckpointFileSha256": "2dc98255e8cd33ea4cb58eba7a7ced19dd955163a60f6ee9ae70f074a9a9f346",
+    "parameterDeltaSha256": "692ddf06eee81ad6ec8a86f380f0f29ccd0726b88b842d02b7565e4771aea4b5",
+    "checkpointStorageMode": "LOCAL_CANDIDATE_ONLY",
+    "checkpointLifecycle": "TRAINED",
+    "qualityGateStatus": "PASS",
+    "inferenceVerified": true,
+    "benchmarkStatus": "BLOCKED",
+    "benchmarkReport": {
+      "schema": "ZYNTHEOR_NATIVE_DOMAIN_BENCHMARK_V1",
+      "status": "BLOCKED",
+      "readiness_accepted": false,
+      "quality_gate": {
+        "status": "PASS",
+        "validation_passed": true,
+        "test_gate_passed": true
+      },
+      "checkpoint": {
+        "checkpoint_id": "bd5182b0b40540029bc75736ddca60a1",
+        "payload_sha256": "c51589721aae33eb17ddfeb66c42a13880c4077096d06660408d0e07b5150182",
+        "file_sha256": "2dc98255e8cd33ea4cb58eba7a7ced19dd955163a60f6ee9ae70f074a9a9f346",
+        "lifecycle": "TRAINED",
+        "architecture": {
+          "ctx": 12,
+          "d_ffn": 48,
+          "d_model": 24,
+          "n_heads": 4,
+          "n_layers": 1,
+          "vocab": 918
+        },
+        "tokenizer_sha256": "ee021b778b5a6ddd729482f8923b56e268c343831be53a36c3f6f0d740760cdb"
+      },
+      "dataset": {
+        "version": "ds_v_1794907544271",
+        "sha256": "a405831ed9c2cdb2928a2cc385cd6889b78e75574f9eefd8fba17f9f0ad05891",
+        "test_samples": 2
+      },
+      "general_text_test": {
+        "status": "MEASURED",
+        "dataset_split": "test",
+        "sample_count": 2,
+        "positions": 157,
+        "nll": 4.502879,
+        "perplexity": 90.276671,
+        "next_token_accuracy": 0.10828,
+        "score_scope": "general text next-token prediction; not a domain capability score"
+      },
+      "inference": {
+        "status": "PASS",
+        "seed": 42,
+        "max_new_tokens": 8,
+        "generated_tokens": 8,
+        "deterministic_parity": true,
+        "learned_logits": true
+      },
+      "summary": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 6,
+        "not_implemented": 4,
+        "total": 10
+      },
+      "domains": [
+        {
+          "domain": "reasoning",
+          "status": "BLOCKED",
+          "score": null,
+          "cases": 0,
+          "reason": "No independently validated, domain-labeled prompt/reference test set is available; the general text test split cannot stand in for this capability.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "learning",
+          "status": "BLOCKED",
+          "score": null,
+          "cases": 0,
+          "reason": "No independently validated, domain-labeled prompt/reference test set is available; the general text test split cannot stand in for this capability.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "research",
+          "status": "BLOCKED",
+          "score": null,
+          "cases": 0,
+          "reason": "No independently validated, domain-labeled prompt/reference test set is available; the general text test split cannot stand in for this capability.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "creation",
+          "status": "BLOCKED",
+          "score": null,
+          "cases": 0,
+          "reason": "No independently validated, domain-labeled prompt/reference test set is available; the general text test split cannot stand in for this capability.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "multimodal",
+          "status": "NOT_IMPLEMENTED",
+          "score": null,
+          "cases": 0,
+          "reason": "PureSeqLM accepts text token IDs only; image, audio, and video encoders are not part of this checkpoint.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "execution",
+          "status": "NOT_IMPLEMENTED",
+          "score": null,
+          "cases": 0,
+          "reason": "Tool execution is external to this model's forward pass and is not scored as checkpoint intelligence.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "memory",
+          "status": "NOT_IMPLEMENTED",
+          "score": null,
+          "cases": 0,
+          "reason": "Persistent memory is an external subsystem; no memory state is loaded into this checkpoint.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "adaptive",
+          "status": "BLOCKED",
+          "score": null,
+          "cases": 0,
+          "reason": "No independently validated, domain-labeled prompt/reference test set is available; the general text test split cannot stand in for this capability.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "scientific_mathematical",
+          "status": "BLOCKED",
+          "score": null,
+          "cases": 0,
+          "reason": "No independently validated, domain-labeled prompt/reference test set is available; the general text test split cannot stand in for this capability.",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "domain": "autonomous_problem_solving",
+          "status": "NOT_IMPLEMENTED",
+          "score": null,
+          "cases": 0,
+          "reason": "Autonomous planning and controlled execution are not implemented by this checkpoint.",
+          "attribution": "native_checkpoint"
+        }
+      ],
+      "duration_seconds": 1.917,
+      "created_at": "2026-11-17T09:26:14Z"
+    },
+    "baselineEval": {
+      "positions": 48,
+      "bytes": 62,
+      "nll": 6.8338,
+      "ppl": 928.7441,
+      "bpb": 7.6329,
+      "top1_accuracy": 0.0208,
+      "top5_accuracy": 0.0208,
+      "bigram_nll": 5.7128,
+      "bigram_ppl": 302.727,
+      "bigram_bpb": 6.3808,
+      "beats_bigram": false
+    },
+    "candidateEval": {
+      "positions": 48,
+      "bytes": 62,
+      "nll": 4.8529,
+      "ppl": 128.1118,
+      "bpb": 5.4203,
+      "top1_accuracy": 0.0833,
+      "top5_accuracy": 0.2083,
+      "bigram_nll": 5.7128,
+      "bigram_ppl": 302.727,
+      "bigram_bpb": 6.3808,
+      "beats_bigram": true
+    },
+    "baselineTestEval": {
+      "positions": 48,
+      "bytes": 69,
+      "nll": 6.835,
+      "ppl": 929.782,
+      "bpb": 6.8597,
+      "top1_accuracy": 0,
+      "top5_accuracy": 0,
+      "bigram_nll": 4.8379,
+      "bigram_ppl": 126.2034,
+      "bigram_bpb": 4.8554,
+      "beats_bigram": false
+    },
+    "candidateTestEval": {
+      "positions": 48,
+      "bytes": 69,
+      "nll": 4.4852,
+      "ppl": 88.6961,
+      "bpb": 4.5014,
+      "top1_accuracy": 0.0625,
+      "top5_accuracy": 0.2292,
+      "bigram_nll": 4.8379,
+      "bigram_ppl": 126.2034,
+      "bigram_bpb": 4.8554,
+      "beats_bigram": true
+    },
+    "nllDelta": -1.9809,
+    "regressionPassed": true,
+    "approvalRequestId": null,
+    "promotedAt": null,
+    "promotedBy": null,
+    "backupBeforePromote": null,
+    "phaseId": "phase_1_continuation",
+    "phaseLabel": "Phase 1 — Existing Model Continuation",
+    "curriculumSource": "curated_phase_1_continuation",
+    "priorTrainingSteps": 0,
+    "cumulativeTrainingSteps": 12,
+    "phaseEvaluation": {
+      "schema": "ZYNTHEOR_PHASE_VERIFICATION_V1",
+      "phase_id": "phase_1_continuation",
+      "status": "PASS",
+      "checkpoint": {
+        "checkpoint_id": "bd5182b0b40540029bc75736ddca60a1",
+        "sha256": "c51589721aae33eb17ddfeb66c42a13880c4077096d06660408d0e07b5150182",
+        "file_sha256": "2dc98255e8cd33ea4cb58eba7a7ced19dd955163a60f6ee9ae70f074a9a9f346",
+        "total_params": 28152,
+        "cumulative_training_steps": 12,
+        "optimizer_step": 12
+      },
+      "held_out_lm": {
+        "positions": 157,
+        "sample_count": 2,
+        "nll": 4.502879,
+        "perplexity": 90.276671,
+        "bpb": 4.285362,
+        "top1_accuracy": 0.10828
+      },
+      "checks": [
+        {
+          "id": "C1_CHECKPOINT_OPTIMIZER",
+          "name": "Checkpoint SHA-256 & Optimizer State Continuity",
+          "status": "PASS",
+          "detail": "params=28152, opt_step=12, cumulative_steps=12, ||W||=25.871272",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "id": "C2_DETERMINISTIC_INFERENCE",
+          "name": "Deterministic Seeded Inference Parity",
+          "status": "PASS",
+          "detail": "generated_tokens=8, parity=True",
+          "attribution": "native_checkpoint"
+        },
+        {
+          "id": "C3_HELD_OUT_LM",
+          "name": "Held-Out Sequence Cross-Entropy & Perplexity",
+          "status": "PASS",
+          "detail": "nll=4.502879, ppl=90.276671, bpb=4.285362, top1=0.10828",
+          "attribution": "native_checkpoint"
+        }
+      ],
+      "summary": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "duration_seconds": 1.982,
+      "created_at": "2026-11-17T09:25:52Z"
+    }
+  }
+]

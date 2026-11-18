@@ -1,0 +1,530 @@
+{
+  "schema_version": "zyntheor.dataset-quality-report.v1",
+  "dataset_id": "zyntheor-native-41m-prepared-candidate-v1",
+  "preparation_only": true,
+  "training_started": false,
+  "training_plan_preserved": {
+    "warm_start_steps": 2800,
+    "continuation_steps": 3000,
+    "total_steps": 5800,
+    "target_params": 41527808
+  },
+  "split_files": {
+    "native_data/datasets/train.jsonl": {
+      "records": 116,
+      "chars": 1435771,
+      "thai_chars": 7686,
+      "bytes": 1571106,
+      "sha256": "83444b89c1f6908eafadc7c0f82842b6dc520238cb38a05fe9c462f346c886b8"
+    },
+    "native_data/datasets/validation.jsonl": {
+      "records": 27,
+      "chars": 354200,
+      "thai_chars": 2795,
+      "bytes": 387908,
+      "sha256": "def2477e9b730a51cf7b623040ce359a93b605656958ad9d025bc835d1ce5010"
+    },
+    "native_data/datasets/test.jsonl": {
+      "records": 27,
+      "chars": 290572,
+      "thai_chars": 3299,
+      "bytes": 322020,
+      "sha256": "fa2df12ab23b613e0e7a3edb78f5f2982f03339da3910eb1937c56f213d3a67c"
+    }
+  },
+  "record_counts": {
+    "total_valid_records": 170,
+    "invalid_or_rejected_records": 42,
+    "by_split": {
+      "train": 116,
+      "validation": 27,
+      "test": 27
+    },
+    "test_excluded_from_train_validation": true
+  },
+  "language_distribution": {
+    "en": {
+      "total": 152,
+      "train": 105,
+      "validation": 24,
+      "test": 23,
+      "chars": 2000693,
+      "thai_chars": 2252
+    },
+    "th-en": {
+      "total": 15,
+      "train": 10,
+      "validation": 2,
+      "test": 3,
+      "chars": 79067,
+      "thai_chars": 10944
+    },
+    "th": {
+      "total": 3,
+      "train": 1,
+      "validation": 1,
+      "test": 1,
+      "chars": 783,
+      "thai_chars": 584
+    }
+  },
+  "domain_distribution": {
+    "Thai Language": {
+      "primary_total": 3,
+      "train": 1,
+      "validation": 1,
+      "test": 1,
+      "tagged_occurrences": 3
+    },
+    "English Language": {
+      "primary_total": 20,
+      "train": 13,
+      "validation": 4,
+      "test": 3,
+      "tagged_occurrences": 20
+    },
+    "Thai-English Mixed Language": {
+      "primary_total": 15,
+      "train": 10,
+      "validation": 2,
+      "test": 3,
+      "tagged_occurrences": 15
+    },
+    "Reasoning and Problem Solving": {
+      "primary_total": 15,
+      "train": 11,
+      "validation": 2,
+      "test": 2,
+      "tagged_occurrences": 18
+    },
+    "Mathematics": {
+      "primary_total": 23,
+      "train": 17,
+      "validation": 3,
+      "test": 3,
+      "tagged_occurrences": 25
+    },
+    "Science": {
+      "primary_total": 0,
+      "train": 0,
+      "validation": 0,
+      "test": 0,
+      "tagged_occurrences": 0
+    },
+    "Research and Analysis": {
+      "primary_total": 15,
+      "train": 11,
+      "validation": 2,
+      "test": 2,
+      "tagged_occurrences": 40
+    },
+    "Programming and Software Engineering": {
+      "primary_total": 43,
+      "train": 31,
+      "validation": 6,
+      "test": 6,
+      "tagged_occurrences": 132
+    },
+    "Planning and Multi-step Execution": {
+      "primary_total": 18,
+      "train": 10,
+      "validation": 4,
+      "test": 4,
+      "tagged_occurrences": 20
+    },
+    "Error Detection and Correction": {
+      "primary_total": 13,
+      "train": 9,
+      "validation": 2,
+      "test": 2,
+      "tagged_occurrences": 18
+    },
+    "Context Understanding": {
+      "primary_total": 5,
+      "train": 3,
+      "validation": 1,
+      "test": 1,
+      "tagged_occurrences": 9
+    }
+  },
+  "missing_primary_domains": [
+    "Science"
+  ],
+  "quality_and_governance_checks": {
+    "jsonl_schema_valid": true,
+    "nfc_normalized": true,
+    "exact_duplicates_in_output": 0,
+    "cross_split_near_duplicates_in_output": 0,
+    "cluster_threshold_applied": 0.85,
+    "audit_splits_status": "READY_FOR_REVIEW",
+    "audit_splits_threshold": 0.9,
+    "secret_or_pii_contamination_detected_and_excluded": 14,
+    "provenance_coverage_pct": 100.0,
+    "trusted_hmac_approval_coverage_pct": 0.0,
+    "validate_manifest_gate_status": "BLOCKED",
+    "validate_manifest_sample_issues": [
+      "approval_key_id_missing",
+      "approval_signature_missing",
+      "approval_timestamp_missing",
+      "approver_missing",
+      "human_approval_not_approved",
+      "license_url_missing_or_not_https",
+      "source_url_missing_or_not_https"
+    ]
+  },
+  "near_duplicate_clusters_grouped_into_single_split": [],
+  "rejected_records": [
+    {
+      "document_id": "ds_1794922200466:item_ds_1794922200466_0",
+      "source": "native_data/datasets/ds_1794922200466.json",
+      "original_split": "train",
+      "reasons": [
+        "SYNTHETIC_ORIGIN",
+        "SYNTHETIC_ORIGIN_DATASET",
+        "synthetic_marker_in_text"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_0",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "train",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_1",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "eval",
+      "reasons": [
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_2",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "train",
+      "reasons": [
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_3",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "train",
+      "reasons": [
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_4",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "train",
+      "reasons": [
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_5",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "train",
+      "reasons": [
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922258067:item_ds_1794922258067_6",
+      "source": "native_data/datasets/ds_1794922258067.json",
+      "original_split": "eval",
+      "reasons": [
+        "RBAC_PROBE_AND_DUPLICATE_CHUNKS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922200463:item_ds_1794922200463_0",
+      "source": "native_data/datasets/ds_1794922200463.json",
+      "original_split": "eval",
+      "reasons": [
+        "CROSS_SPLIT_CHUNK_OVERLAP_SUPERSEDED_BY_WHOLE_DOCS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922200463:item_ds_1794922200463_1",
+      "source": "native_data/datasets/ds_1794922200463.json",
+      "original_split": "train",
+      "reasons": [
+        "CROSS_SPLIT_CHUNK_OVERLAP_SUPERSEDED_BY_WHOLE_DOCS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922200463:item_ds_1794922200463_2",
+      "source": "native_data/datasets/ds_1794922200463.json",
+      "original_split": "train",
+      "reasons": [
+        "CROSS_SPLIT_CHUNK_OVERLAP_SUPERSEDED_BY_WHOLE_DOCS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922200463:item_ds_1794922200463_3",
+      "source": "native_data/datasets/ds_1794922200463.json",
+      "original_split": "train",
+      "reasons": [
+        "CROSS_SPLIT_CHUNK_OVERLAP_SUPERSEDED_BY_WHOLE_DOCS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922200463:item_ds_1794922200463_4",
+      "source": "native_data/datasets/ds_1794922200463.json",
+      "original_split": "train",
+      "reasons": [
+        "CROSS_SPLIT_CHUNK_OVERLAP_SUPERSEDED_BY_WHOLE_DOCS"
+      ]
+    },
+    {
+      "document_id": "ds_1794922200463:item_ds_1794922200463_5",
+      "source": "native_data/datasets/ds_1794922200463.json",
+      "original_split": "eval",
+      "reasons": [
+        "CROSS_SPLIT_CHUNK_OVERLAP_SUPERSEDED_BY_WHOLE_DOCS"
+      ]
+    },
+    {
+      "document_id": "ds_v_1794907544271:trainSamples:0",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-train-001"
+      ],
+      "sha256": "3b865349faf3ef2592a6332f4d9aa6cd75312d19d675f75c6ae3adda9bf1a7dd"
+    },
+    {
+      "document_id": "ds_v_1794907544271:trainSamples:1",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-train-002"
+      ],
+      "sha256": "1a7ae5359d2b64740623a6b499efd26bc70f151deb41fb21027af770001c31fe"
+    },
+    {
+      "document_id": "ds_v_1794907544271:trainSamples:2",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-train-003"
+      ],
+      "sha256": "be127c22a8506014c978913fa2f7b44c399b40d1659e4a297d59e496b17380c7"
+    },
+    {
+      "document_id": "ds_v_1794907544271:trainSamples:3",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-train-004"
+      ],
+      "sha256": "e5b1d508320c3d13d4a3ad0844f9b8a37a1af518853c684415fc1de8271c491a"
+    },
+    {
+      "document_id": "ds_v_1794907544271:valSamples:0",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-val-005"
+      ],
+      "sha256": "b0ca57e840e346d1379daa2f70947b530e84b2f6742f5a6d3495f8ebcd9dd2c0"
+    },
+    {
+      "document_id": "ds_v_1794907544271:valSamples:1",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-val-006"
+      ],
+      "sha256": "0760bf1a03cbbac7d6cc68dd42515fa49ae746552858892df1f46dcbf81bcf35"
+    },
+    {
+      "document_id": "ds_v_1794907544271:testSamples:0",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-test-007"
+      ],
+      "sha256": "29a25b05ac8d0794a3942043d4b5f93d652da2e31b579b6388d9f5ce6bd7ff07"
+    },
+    {
+      "document_id": "ds_v_1794907544271:testSamples:1",
+      "source": "native_data/training_pipeline/datasets/ds_v_1794907544271.json",
+      "reasons": [
+        "exact_duplicate_of:pipeline:smoke-test-008"
+      ],
+      "sha256": "0f61619c89be038cc7a91a9e8e04d3e811b36df8def57facebae91c36231845c"
+    },
+    {
+      "document_id": "knowledge:doc_1795000805193_544eh",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795005916286_w28m9",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795006882320_a49cv",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795008179886_rhihv",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795008341911_onkqs",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795013791367_exhcj",
+      "source": "native_data/knowledge/documents.json#doc_1795013791367_exhcj",
+      "reasons": [
+        "synthetic_marker_in_text"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795013811222_9bhkn",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795015186019_oa2d5",
+      "source": "native_data/knowledge/documents.json#doc_1795015186019_oa2d5",
+      "reasons": [
+        "synthetic_marker_in_text"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795015199382_vjin2",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "knowledge:doc_1795015983802_0onpx",
+      "source": "native_data/knowledge/documents.json",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE",
+        "tenant_a_test_fixture"
+      ]
+    },
+    {
+      "document_id": "docs/reports/SOURCE-REVIEW-LEDGER-AND-REPAIR-HARDENING-2026-11-15.md",
+      "source": "docs/reports/SOURCE-REVIEW-LEDGER-AND-REPAIR-HARDENING-2026-11-15.md",
+      "reasons": [
+        "exact_duplicate_of:docs/SOURCE-REVIEW-LEDGER-AND-REPAIR-HARDENING-2026-11-15.md"
+      ],
+      "sha256": "79541406589d6faaaff79eb35bf773cb50acd8cc55cf11893e6acd93a6aca5d8"
+    },
+    {
+      "document_id": "qplus_native/corpus.py",
+      "source": "qplus_native/corpus.py",
+      "reasons": [
+        "RBAC_ISOLATION_PROBE"
+      ]
+    },
+    {
+      "document_id": "qplus_native/corpus_ingest.py",
+      "source": "qplus_native/corpus_ingest.py",
+      "reasons": [
+        "contains_unicode_replacement_char"
+      ]
+    },
+    {
+      "document_id": "qplus_native/execution_corpus.py",
+      "source": "qplus_native/execution_corpus.py",
+      "reasons": [
+        "SUPERSEDED_BY_INDIVIDUAL_EXECUTION_SEEDS"
+      ]
+    },
+    {
+      "document_id": "qplus_native/web_builder.py",
+      "source": "qplus_native/web_builder.py",
+      "reasons": [
+        "secret_like_literal",
+        "contains_email_pii"
+      ]
+    },
+    {
+      "document_id": "lib/ActionDrivenEngine.ts",
+      "source": "lib/ActionDrivenEngine.ts",
+      "reasons": [
+        "secret_like_literal"
+      ]
+    },
+    {
+      "document_id": "lib/KnowledgeWorkspace.ts",
+      "source": "lib/KnowledgeWorkspace.ts",
+      "reasons": [
+        "synthetic_marker_in_text"
+      ]
+    },
+    {
+      "document_id": "lib/SoftwareProjectManager.ts",
+      "source": "lib/SoftwareProjectManager.ts",
+      "reasons": [
+        "exceeds_max_chars",
+        "contains_email_pii"
+      ]
+    },
+    {
+      "document_id": "server.ts",
+      "source": "server.ts",
+      "reasons": [
+        "exceeds_max_chars"
+      ]
+    },
+    {
+      "document_id": "scripts/prepare_native_datasets.py",
+      "source": "scripts/prepare_native_datasets.py",
+      "reasons": [
+        "SELF_PREPARATION_SCRIPT_EXCLUDED"
+      ]
+    }
+  ],
+  "blocked_items": [
+    {
+      "id": "TRUSTED_HUMAN_APPROVAL_KEY",
+      "status": "BLOCKED",
+      "reason": "No external 0600 trusted HMAC approval key configured; approval records remain PENDING_ADMIN_REVIEW."
+    },
+    {
+      "id": "EXTERNAL_HTTPS_SOURCE_AND_LICENSE_CLEARANCE",
+      "status": "BLOCKED",
+      "reason": "Records derive from local first-party files under README.md AGPL-3.0 / private:true without https source/SPDX URL pins or formal third-party license clearance."
+    },
+    {
+      "id": "PRIMARY_SCIENCE_CORPUS_MISSING",
+      "status": "BLOCKED",
+      "reason": "No independent primary Science dataset/corpus exists in the repository; benchmark schemas only define the domain name."
+    },
+    {
+      "id": "TRAINING_SCALE_EXTERNAL_BILINGUAL_CORPUS",
+      "status": "PARTIAL",
+      "reason": "Prepared repository corpus contains 170 clean records (2,080,543 chars); approved external Thai/English/Math/Science corpora are needed for full 5,800-step 41.53M generalization."
+    }
+  ]
+}

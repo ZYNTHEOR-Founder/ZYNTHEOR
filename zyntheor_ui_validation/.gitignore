@@ -1,0 +1,27 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+native_data/
+*.pt
+*.pth
+
+# Model checkpoints
+native_data/
+*.pt
+*.pth
+*.bin
+
+# Large model files
+native_data/**/*.pt
+native_data/**/*.pth
+*.pt
+*.pth
+node_modules/
+.workspace/.zyntheor/snapshots/
+__pycache__/
+*.pyc

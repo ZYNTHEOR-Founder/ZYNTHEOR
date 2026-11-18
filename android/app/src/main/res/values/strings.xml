@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ZYNTHEOR</string>
+    <string name="title_activity_main">ZYNTHEOR</string>
+    <string name="package_name">ai.zyntheor.native</string>
+    <string name="custom_url_scheme">ai.zyntheor.native</string>
+</resources>

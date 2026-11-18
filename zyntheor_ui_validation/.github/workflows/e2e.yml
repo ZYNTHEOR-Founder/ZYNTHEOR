@@ -1,0 +1,106 @@
+name: ZYNTHEOR End-to-End Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Native Intelligence E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      ZYNTHEOR_ENV: test
+      ZYNTHEOR_E2E: "1"
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          pip install pytest
+
+      - name: Install frontend dependencies
+        if: hashFiles('package.json') != ''
+        run: npm ci
+
+      - name: Validate source syntax
+        run: python -m compileall -q qplus_native
+
+      - name: Test tokenizer
+        run: |
+          if [ -f tests/test_tokenizer.py ]; then
+            pytest -q tests/test_tokenizer.py
+          else
+            echo "BLOCKED: tokenizer tests not found"
+            exit 1
+          fi
+
+      - name: Test native model
+        run: |
+          if [ -d tests ]; then
+            pytest -q tests -k "model or inference or checkpoint"
+          else
+            exit 1
+          fi
+
+      - name: Run integration tests
+        run: |
+          if [ -d tests/e2e ]; then
+            pytest -q tests/e2e
+          elif [ -d tests/integration ]; then
+            pytest -q tests/integration
+          else
+            echo "BLOCKED: E2E/integration test suite not found"
+            exit 1
+          fi
+
+      - name: Build frontend
+        if: hashFiles('package.json') != ''
+        run: npm run build --if-present
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyntheor-e2e-results
+          path: |
+            test-results/
+            reports/
+            pytest.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Final result
+        if: success()
+        run: echo "PASS: E2E workflow completed"

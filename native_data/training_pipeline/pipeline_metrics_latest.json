@@ -1,0 +1,24 @@
+{
+  "updatedAt": "2026-11-18T19:21:16.945Z",
+  "initializedAt": "2026-11-18T19:21:16.945Z",
+  "pipelineId": "pipe5800_1795029676945",
+  "status": "BLOCKED",
+  "running": false,
+  "trainingCompletedVerified": false,
+  "currentStep": 0,
+  "targetSteps": 5800,
+  "warmStartSteps": 2800,
+  "continuationSteps": 3000,
+  "targetParams": 41527808,
+  "gatesPassed": 3,
+  "gatesTotal": 6,
+  "blockers": [
+    "missing_s3_credentials",
+    "human_approval_confirmation_missing",
+    "dataset_governance_blocked",
+    "s3_preflight_blocked:NOT_CONFIGURED"
+  ],
+  "evaluationsRecorded": 0,
+  "verifiedCheckpoints": [],
+  "error": null
+}

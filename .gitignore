@@ -1,0 +1,86 @@
+
+# ==========================================
+# ZYNTHEOR - Git Ignore Policy
+# ==========================================
+
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+coverage/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.bak
+
+# IDE / Workspace snapshots
+workspace/.zyntheor/snapshots/
+
+# Archives and patches
+*.zip
+*.patch
+
+# Credentials and signing keys
+*.key
+*.pem
+*approval*key*.json
+
+# ==========================================
+# Model Artifacts & Training Datasets
+# ==========================================
+
+# Large model checkpoints & resume bundles
+*.pt
+*.pth
+*.bin
+*.bundle
+
+# Training outputs & unpinned raw datasets
+native_data/checkpoints/
+native_data/training_runs/
+native_data/exports/
+native_data/real_dataset.jsonl
+native_data/tool_call_dataset.jsonl
+native_data/datasets/*.jsonl
+
+# ==========================================
+# Explicitly preserve important source data
+# ==========================================
+
+!native_data/
+!native_data/README.md
+!native_data/config/
+!native_data/config/**
+!native_data/manifests/
+!native_data/manifests/**
+
+# Local validation and temporary runtime state
+*.pyc
+*.log.*
+workspace/.zyntheor/snapshots/
+native_data/training_pipeline/approval.key

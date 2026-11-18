@@ -1,0 +1,9 @@
+{
+  "schema": "zyntheor.evidence.approval.v1",
+  "decision": "PENDING_ADMIN_REVIEW",
+  "approved": false,
+  "approver": null,
+  "key_id": null,
+  "signature": null,
+  "note": "No trusted external 0600 HMAC key configured. Training MUST NOT start without explicit Admin approval."
+}

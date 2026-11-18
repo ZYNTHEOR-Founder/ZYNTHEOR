@@ -1,0 +1,135 @@
+{
+  "runs": [
+    {
+      "timestamp": 1794584642,
+      "objective": "execution_not_chatbot",
+      "steps": 100,
+      "elapsed_s": 4.5,
+      "val_loss_start": 6.264651229614963,
+      "val_loss_best": 3.8145363274446122,
+      "params": 502912,
+      "corpus_sha256": "ee48b8444fdd57b87fb2c5b6f1b1557e315f0bc1888f82b29b1f1501312fb1aa",
+      "corpus_summary": {
+        "documents": 18,
+        "train_docs": 16,
+        "val_docs": 2,
+        "train_chars": 417204,
+        "val_chars": 26274,
+        "thai_chars": 1006,
+        "excluded": 1,
+        "objective": "execution_not_chatbot",
+        "kinds": [
+          "execution_seed",
+          "source_execution"
+        ]
+      },
+      "history": [
+        {
+          "step": 25,
+          "train_loss": 4.4256,
+          "val_loss": 4.2464,
+          "grad_norm": 1.362,
+          "lr": 0.000695
+        },
+        {
+          "step": 50,
+          "train_loss": 6.0708,
+          "val_loss": 3.9452,
+          "grad_norm": 2.663,
+          "lr": 0.00044
+        },
+        {
+          "step": 75,
+          "train_loss": 3.8593,
+          "val_loss": 3.8545,
+          "grad_norm": 1.35,
+          "lr": 0.000185
+        },
+        {
+          "step": 100,
+          "train_loss": 3.431,
+          "val_loss": 3.8145,
+          "grad_norm": 1.746,
+          "lr": 8e-05
+        }
+      ],
+      "checkpoint_path": "/home/workdir/artifacts/train_work/native_data/model_checkpoint_execution.pt",
+      "checkpoint_sha256": "8c93cd5c79fc7415fd647cb9c909fe19ea9ceead52c409c5a66bf2d190007591",
+      "saved": true,
+      "note": "Next-token training on execution traces/source only — not chatbot dialogue."
+    },
+    {
+      "timestamp": 1794585721,
+      "objective": "execution_not_chatbot",
+      "resumed": true,
+      "steps": 300,
+      "elapsed_s": 15.15,
+      "val_loss_start": 3.796465649771882,
+      "val_loss_best": 3.2033209082570724,
+      "params": 502912,
+      "corpus_sha256": "ceb81a46792663020f8561986e42c44b9bbf2be95efa4df5792564cdecef7541",
+      "corpus_summary": {
+        "documents": 22,
+        "train_docs": 19,
+        "val_docs": 3,
+        "train_chars": 418327,
+        "val_chars": 26572,
+        "thai_chars": 1006,
+        "excluded": 1,
+        "objective": "execution_not_chatbot",
+        "kinds": [
+          "execution_seed",
+          "source_execution"
+        ]
+      },
+      "history": [
+        {
+          "step": 50,
+          "train_loss": 3.8213,
+          "val_loss": 3.5585,
+          "grad_norm": 1.358,
+          "lr": 0.000564
+        },
+        {
+          "step": 100,
+          "train_loss": 3.4048,
+          "val_loss": 3.3627,
+          "grad_norm": 1.605,
+          "lr": 0.000465
+        },
+        {
+          "step": 150,
+          "train_loss": 3.4251,
+          "val_loss": 3.2828,
+          "grad_norm": 1.882,
+          "lr": 0.00033
+        },
+        {
+          "step": 200,
+          "train_loss": 3.2204,
+          "val_loss": 3.2404,
+          "grad_norm": 1.739,
+          "lr": 0.000195
+        },
+        {
+          "step": 250,
+          "train_loss": 3.0977,
+          "val_loss": 3.2122,
+          "grad_norm": 1.561,
+          "lr": 9.6e-05
+        },
+        {
+          "step": 300,
+          "train_loss": 2.9388,
+          "val_loss": 3.2033,
+          "grad_norm": 1.653,
+          "lr": 6e-05
+        }
+      ],
+      "checkpoint_path": "/home/workdir/artifacts/train_work/native_data/model_checkpoint_execution.pt",
+      "checkpoint_sha256": "0e2a78fbba173edb31f6547cdeb6aa13e7a6de8f979d2169faeeab8c234d0e11",
+      "saved": true,
+      "note": "Next-token training on execution traces/source only — not chatbot dialogue."
+    }
+  ]
+}

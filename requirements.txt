@@ -1,0 +1,3 @@
+# CI and container dependency entrypoint
+-r requirements-native.txt
+pytest>=8,<10

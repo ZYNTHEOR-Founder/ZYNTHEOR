@@ -1,0 +1,35 @@
+{
+  "datasetVersion": "ds_v_1794907544271",
+  "datasetSha256": "a405831ed9c2cdb2928a2cc385cd6889b78e75574f9eefd8fba17f9f0ad05891",
+  "createdAt": "2026-11-17T09:25:44.271Z",
+  "tenantId": "Sovereign Enterprise Prime",
+  "sourceDocIds": [
+    "corpus_sample_1",
+    "corpus_sample_2",
+    "corpus_sample_3",
+    "corpus_sample_4",
+    "corpus_sample_5",
+    "corpus_sample_6",
+    "corpus_sample_7",
+    "corpus_sample_8"
+  ],
+  "collectedCount": 8,
+  "acceptedCount": 8,
+  "rejectedQualityCount": 0,
+  "dedupedCount": 0,
+  "privacyRedactedCount": 0,
+  "trainSamples": [
+    "ZYNTHEOR Checkpoint Continuation reloads verified float32 parameters and checks SHA-256 integrity before optimizer updates.",
+    "PureAdamW optimizer preserves first and second moment tensors along with step counter t inside the resume sidecar bundle.",
+    "Exponential learning rate scheduler restores completed_steps and base_lr cleanly so continuation matches uninterrupted runs.",
+    "การต่อยอดการฝึกโมเดลต้องตรวจสอบสถานะ Checkpoint เดิม ค่า Optimizer Moment และ Random Seed ก่อนคำนวณ Gradient รอบใหม่เสมอ"
+  ],
+  "valSamples": [
+    "Disjoint train, validation, and held-out test splits enforce Zero Simulation integrity across every continuation checkpoint.",
+    "When switching curriculum phases, weights_only continuation retains prior_training_steps while recording cumulative_training_steps."
+  ],
+  "testSamples": [
+    "Reloaded checkpoints undergo seeded greedy generation parity testing to confirm deterministic inference from learned weights.",
+    "AuditLedger records checkpoint SHA-256, weight delta hashes, and optimizer provenance for every continuation run."
+  ]
+}

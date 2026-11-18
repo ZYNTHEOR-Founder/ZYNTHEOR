@@ -1,0 +1,35 @@
+{
+  "container_bytes": 2017656,
+  "container_sha256": "cccbf386c5861a00633cc08612d330b063c568e9dadb7189ba429878b44c810c",
+  "format": "ZYNTHEOR_QPLUS_PT",
+  "integrity_status": "STRUCTURAL_CHECKS_PASS",
+  "runtime_compatibility": "PARTIAL_STRUCTURAL_SUPPORT",
+  "quality_status": "NOT_EVALUATED",
+  "inference_executed": false,
+  "metadata": {
+    "architecture": "ZYNTHEOR-NativeLM-v2-TiedEmbedding-CausalAttention",
+    "storage_mode": "LEARNED_WEIGHTS_TRAINED_V2",
+    "config": {
+      "vocab": 532,
+      "d_model": 128,
+      "n_layers": 2,
+      "n_heads": 4,
+      "d_ffn": 384,
+      "ctx": 64
+    },
+    "total_params": 502912,
+    "trained_subgraph_params": 502912,
+    "target_total_params": 41527808,
+    "training_steps_total": 1800,
+    "validation_loss": 3.1719096076137987,
+    "validation_perplexity": 23.852990745666144,
+    "corpus_sha256": "c3a71c0356a5631b0754a9edbc566a4a93e0ff48dd4e54562b0e88832047313d",
+    "tokenizer_profile": "v2_base",
+    "tokenizer_fingerprint": "fb6922e31e33b65cc7850df2e6ecc8b61aef5dc92044d370ca20151dd10331d6"
+  },
+  "payload_bytes": 2011648,
+  "payload_sha256": "2509f4f2f34e9e647ef27d4f2568f2a5c5d7d3b2fe4b003a7a60bcfe72a28f83",
+  "tensor_count": 21,
+  "parameter_count_from_manifest": 502912,
+  "errors": []
+}

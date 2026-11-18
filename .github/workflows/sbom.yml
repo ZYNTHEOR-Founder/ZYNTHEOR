@@ -1,0 +1,107 @@
+
+name: ZYNTHEOR SBOM Generation
+
+on:
+  push:
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sbom-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-sbom:
+    name: Generate Software Bill of Materials
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install SBOM generator
+        run: |
+          python -m pip install --upgrade pip
+          pip install cyclonedx-bom
+
+      - name: Generate Python SBOM
+        run: |
+          if [ -f requirements.txt ]; then
+            cyclonedx-py requirements requirements.txt \
+              --output-format JSON \
+              --output-file sbom-python.cdx.json
+          else
+            echo "No requirements.txt found"
+          fi
+
+      - name: Generate Node.js SBOM
+        if: hashFiles('package-lock.json') != ''
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom-node.cdx.json
+          artifact-name: zyntheor-node-sbom
+
+      - name: Generate repository SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: zyntheor-repository-sbom
+
+      - name: Validate generated SBOM files
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = [
+              Path("sbom-python.cdx.json"),
+              Path("sbom.spdx.json"),
+          ]
+
+          for file in files:
+              if not file.exists():
+                  if file.name == "sbom-python.cdx.json":
+                      print("PARTIAL: Python SBOM not generated")
+                      continue
+                  raise SystemExit(f"BLOCKED: Missing {file}")
+
+              with file.open(encoding="utf-8") as f:
+                  data = json.load(f)
+
+              if not isinstance(data, dict):
+                  raise SystemExit(f"FAIL: Invalid SBOM structure: {file}")
+
+              print(f"VERIFIED: {file}")
+
+          PY
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyntheor-sbom-${{ github.sha }}
+          path: |
+            sbom-python.cdx.json
+            sbom.spdx.json
+            sbom-node.cdx.json
+          if-no-files-found: warn
+          retention-days: 90

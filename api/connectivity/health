@@ -1,0 +1,7 @@
+// อย่า return 503 ตอน cloud ยังไม่พร้อม
+return res.status(200).json({
+  success: true,
+  online: false,
+  cloudRuntime: "NOT_CONFIGURED",
+  message: "Backend online, cloud runtime not configured yet"
+});

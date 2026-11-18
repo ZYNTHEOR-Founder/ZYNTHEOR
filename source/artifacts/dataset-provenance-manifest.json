@@ -1,0 +1,6 @@
+{
+  "schema_version": "zyntheor.dataset-provenance.v1",
+  "dataset_id": "zyntheor-native-41m-pending-review",
+  "near_duplicate_threshold": 0.9,
+  "documents": []
+}
