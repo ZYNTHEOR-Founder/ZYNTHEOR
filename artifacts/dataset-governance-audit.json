@@ -4,13 +4,13 @@
   "training_admission_allowed": false,
   "approved_document_count": 0,
   "needs_review_document_count": 0,
-  "blocked_document_count": 262,
-  "total_inspected_documents": 262,
-  "excluded_by_corpus_filter_count": 15,
+  "blocked_document_count": 267,
+  "total_inspected_documents": 267,
+  "excluded_by_corpus_filter_count": 21,
   "bucket_counts": {
     "APPROVED": 0,
     "NEEDS_REVIEW": 0,
-    "BLOCKED": 262
+    "BLOCKED": 267
   },
   "buckets": {
     "APPROVED": [],
@@ -20,8 +20,8 @@
         "document_id": "README.md",
         "kind": "doc",
         "split": "train",
-        "chars": 10379,
-        "sha256": "34011212b662e9dec05dc2787434bd7b10ecad4c78c0b8c0906bd9577b38b2eb",
+        "chars": 10605,
+        "sha256": "1f4741c6b6e18b889c211b956ce679bafc3d96a561ad6658bc4862ecec367911",
         "source": {
           "url": null,
           "local_path": "README.md",
@@ -481,6 +481,35 @@
         ]
       },
       {
+        "document_id": "src/hooks/useSentimentTrendShortcut.ts",
+        "kind": "source",
+        "split": "train",
+        "chars": 3663,
+        "sha256": "71488a6ba340ef6b5b77431eaceaed0f24ecacc1698556e0ee7965b0f426ceb8",
+        "source": {
+          "url": null,
+          "local_path": "src/hooks/useSentimentTrendShortcut.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
         "document_id": "src/lib/apiClient.ts",
         "kind": "source",
         "split": "train",
@@ -800,35 +829,6 @@
         ]
       },
       {
-        "document_id": "src/tests/cloud-training-integration.test.ts",
-        "kind": "source",
-        "split": "train",
-        "chars": 19228,
-        "sha256": "92e99f7a94c7f23c1c47e943846756b96787ae954b33ee2cfcff044cda1b9600",
-        "source": {
-          "url": null,
-          "local_path": "src/tests/cloud-training-integration.test.ts",
-          "publisher": null
-        },
-        "license": {
-          "id": null,
-          "url": null
-        },
-        "rights": {
-          "basis": null,
-          "scope": []
-        },
-        "provenance_schema": null,
-        "admission_bucket": "BLOCKED",
-        "status": "BLOCKED",
-        "issues": [
-          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
-          "missing_external_https_source_license_rights_evidence",
-          "missing_trusted_human_approval_signature",
-          "missing_test_split_in_corpus_builder"
-        ]
-      },
-      {
         "document_id": "src/tests/ledger-cli.test.ts",
         "kind": "source",
         "split": "train",
@@ -1122,8 +1122,8 @@
         "document_id": "src/App.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 247456,
-        "sha256": "19759adc9f7c83d406cb0632b652b06d3252eaad766411d83d8f2fa6f104dfe1",
+        "chars": 265366,
+        "sha256": "188b81d151e6be7ce49f70bfeaf1a3474aee4a10c630f7ee70e3becc83438b88",
         "source": {
           "url": null,
           "local_path": "src/App.tsx",
@@ -1354,8 +1354,8 @@
         "document_id": "src/components/GlobalSearchModal.tsx",
         "kind": "source",
         "split": "validation",
-        "chars": 15880,
-        "sha256": "6475164e4715fed291900e7fc83c90f66cb531a0c85ebbbd4e4ac7c07330a5b8",
+        "chars": 16026,
+        "sha256": "a2ce744ca715ca76a076a2268f64ecdae872ac699d2193afdcd105db3b506ac3",
         "source": {
           "url": null,
           "local_path": "src/components/GlobalSearchModal.tsx",
@@ -1441,8 +1441,8 @@
         "document_id": "src/components/Header.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 12267,
-        "sha256": "05db1abea186d76cf4e197cc23ea498f6ee20a254a470f4a9145b40af1bba712",
+        "chars": 13168,
+        "sha256": "8a7649b6eaa42be9955c77d9844cbdeac2256c85d338e6a223c5985e85da1a56",
         "source": {
           "url": null,
           "local_path": "src/components/Header.tsx",
@@ -1557,8 +1557,8 @@
         "document_id": "src/components/MobileNav.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 2968,
-        "sha256": "e2fcd67e2ca4a9191170f8441ecee3dd47a71ac108ec1849595418e8109ce6de",
+        "chars": 3092,
+        "sha256": "301421c79136e964c88b45db611bd00d4792305b3b871a3f481facf21980857a",
         "source": {
           "url": null,
           "local_path": "src/components/MobileNav.tsx",
@@ -1615,8 +1615,8 @@
         "document_id": "src/components/PerformanceTrendsChart.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 16839,
-        "sha256": "d3233373a35f739b0f4fc8ccb7e837cb851422cf27a729de926ef5b84134a16b",
+        "chars": 17402,
+        "sha256": "409bcb562c9da68f3721a4adba633a82a445f9f7b008b5b2a9b3f3de5cb10d5a",
         "source": {
           "url": null,
           "local_path": "src/components/PerformanceTrendsChart.tsx",
@@ -1760,8 +1760,8 @@
         "document_id": "src/components/Sidebar.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 8096,
-        "sha256": "446b400455efff47d608e1f69b55415175b2db70e3417e48238f2fc0bb099a9b",
+        "chars": 10726,
+        "sha256": "739d8a8ee7b436120a6675ff8490328c12e7e4cb282d3a6ef70846ef1a734837",
         "source": {
           "url": null,
           "local_path": "src/components/Sidebar.tsx",
@@ -1794,6 +1794,35 @@
         "source": {
           "url": null,
           "local_path": "src/components/StreamingTokenDisplay.tsx",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
+        "document_id": "src/components/TaskExecutionProgressBar.tsx",
+        "kind": "source",
+        "split": "validation",
+        "chars": 14527,
+        "sha256": "341c83c875f0918ea2dd613575a58edfb56ba2d507a09d9454a6954fe159fd93",
+        "source": {
+          "url": null,
+          "local_path": "src/components/TaskExecutionProgressBar.tsx",
           "publisher": null
         },
         "license": {
@@ -1876,8 +1905,8 @@
         "document_id": "src/components/TrainingReadinessMonitor.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 16202,
-        "sha256": "6d82b627dd8393513088bca994a1f07b59858de80dcdc2102894514139706da0",
+        "chars": 16318,
+        "sha256": "3ad090661d14b12cb7bad1dbe74d29fab283c86ad7dc00f5817aaeb3f0954237",
         "source": {
           "url": null,
           "local_path": "src/components/TrainingReadinessMonitor.tsx",
@@ -2050,8 +2079,8 @@
         "document_id": "src/components/modules/AnalyticsBI.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 7152,
-        "sha256": "4d5a5e36b1e4aac7374b29721b12589cdc2d7bd4d8d6e2e790771da3498e2b9f",
+        "chars": 11321,
+        "sha256": "acffa89a750adb1acbed01c050a7a34a178931d2e5d66a3439295025006f6134",
         "source": {
           "url": null,
           "local_path": "src/components/modules/AnalyticsBI.tsx",
@@ -2137,8 +2166,8 @@
         "document_id": "src/components/modules/BenchmarkArena.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 18886,
-        "sha256": "6373f0bc427ad4aadbe8c9ada124dc66e49281fc3ca3f3526deb1024522caa0b",
+        "chars": 17584,
+        "sha256": "3cd3fe8c9f0b1d770b0d20d8bceb32215a4c098f1d4487a03e83785380da7a4c",
         "source": {
           "url": null,
           "local_path": "src/components/modules/BenchmarkArena.tsx",
@@ -2166,8 +2195,8 @@
         "document_id": "src/components/modules/CommandCenter.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 53712,
-        "sha256": "0d04e0877532b57301e4a29a0bd59daf04cb6afe5442db99f208068a903510e8",
+        "chars": 62530,
+        "sha256": "299a1a56c03473a0889cce82e05454137cd5c74ce6ad6f3cde085bf53ae56eb2",
         "source": {
           "url": null,
           "local_path": "src/components/modules/CommandCenter.tsx",
@@ -2195,8 +2224,8 @@
         "document_id": "src/components/modules/ConversationalIntelligence.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 30099,
-        "sha256": "5d89a7a946ec540280630d79fab2a37900c5474bc4f095de27333e80adc9a6af",
+        "chars": 42419,
+        "sha256": "b1f8dccbfa618bad14aab31556ed401eaf1f4cdd216901cc07a6cbe66c478b49",
         "source": {
           "url": null,
           "local_path": "src/components/modules/ConversationalIntelligence.tsx",
@@ -2224,8 +2253,8 @@
         "document_id": "src/components/modules/DevStudio.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 48509,
-        "sha256": "0586830ccd461463ace1a7c324a8c04390eeeda649c67b042e0d7b00e5afc4e1",
+        "chars": 51040,
+        "sha256": "212ba277ff43964ca89cd0ca9f2efb800368506c2a4dc5af890fcf49fc218adb",
         "source": {
           "url": null,
           "local_path": "src/components/modules/DevStudio.tsx",
@@ -2456,8 +2485,8 @@
         "document_id": "src/components/modules/ProofOfIntelligence.tsx",
         "kind": "source",
         "split": "validation",
-        "chars": 29071,
-        "sha256": "a0c10c09b21b2d2d7df4c47aa5810d4b3ee2a17d3c038a749ae4ea3ad56c71dd",
+        "chars": 29160,
+        "sha256": "5bd4deb6d3941f1718ae0119189220823bdd68d88f0aa6da8407ed2ffc1826e8",
         "source": {
           "url": null,
           "local_path": "src/components/modules/ProofOfIntelligence.tsx",
@@ -2485,8 +2514,8 @@
         "document_id": "src/components/modules/ResearchLab.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 71102,
-        "sha256": "6224b3824b47833526127f913a56a4323e24efdec75c19cbe7e5e9c3bc03438d",
+        "chars": 81243,
+        "sha256": "f8759770827d549c9dec2137659abee70615e8c86021521cb8f5b2e7ea0500bd",
         "source": {
           "url": null,
           "local_path": "src/components/modules/ResearchLab.tsx",
@@ -2514,8 +2543,8 @@
         "document_id": "src/components/modules/SubscriptionBilling.tsx",
         "kind": "source",
         "split": "validation",
-        "chars": 8259,
-        "sha256": "b9bde1a025caa5b20ee21441418d35392f163c4ecdd79b5d4164254dc6a199a9",
+        "chars": 11025,
+        "sha256": "403e34352c61b2f4267e0cf65db8600f742378f8946f296f122ac75423285272",
         "source": {
           "url": null,
           "local_path": "src/components/modules/SubscriptionBilling.tsx",
@@ -3268,8 +3297,8 @@
         "document_id": "lib/CloudCheckpointStorage.ts",
         "kind": "source",
         "split": "validation",
-        "chars": 31643,
-        "sha256": "abf7fcbd69c826d6e144ae35f6f39468e7ba3d5214912718ad7b51fdc6d2e879",
+        "chars": 32266,
+        "sha256": "dfa878d52510206718b3f95972dd5e55b9f64efec5cd4d55a48a824a47c7ab28",
         "source": {
           "url": null,
           "local_path": "lib/CloudCheckpointStorage.ts",
@@ -3297,8 +3326,8 @@
         "document_id": "lib/CloudObjectStorageService.ts",
         "kind": "source",
         "split": "train",
-        "chars": 40058,
-        "sha256": "75d3f15f97d335d1e74267857f1085b0c198c38baaaabfa8af1c10782deb7573",
+        "chars": 42013,
+        "sha256": "fbf9fc5f44f2bfaae28731b0aa2d28f3d176d7980723e15ccaac23ceb815d2c3",
         "source": {
           "url": null,
           "local_path": "lib/CloudObjectStorageService.ts",
@@ -3732,8 +3761,8 @@
         "document_id": "lib/NativeNumpyTrainingService.ts",
         "kind": "source",
         "split": "train",
-        "chars": 64492,
-        "sha256": "e17dbfe9b4255e98cc91e795ab85d6795bb1af062a51b438b71d348f934c1474",
+        "chars": 75295,
+        "sha256": "9753427a9f02e52ab95113b2d68df609f8b5b51683c544406fad059ebe6b4b80",
         "source": {
           "url": null,
           "local_path": "lib/NativeNumpyTrainingService.ts",
@@ -4167,8 +4196,8 @@
         "document_id": "lib/providers.ts",
         "kind": "source",
         "split": "train",
-        "chars": 24038,
-        "sha256": "ffcf2ff84908f574cf46801139a497a56caa40ed9a2e8eab010ec7b6b18bbf1d",
+        "chars": 22487,
+        "sha256": "7cf7d72576dfa080435baf0da31154334dddfa296787dd45d44ecab28392b3fc",
         "source": {
           "url": null,
           "local_path": "lib/providers.ts",
@@ -4196,8 +4225,8 @@
         "document_id": "server.ts",
         "kind": "source",
         "split": "train",
-        "chars": 185298,
-        "sha256": "51740aca5e0717cb83645a66ec5fa3634a3896a891174527b00a6b692a35a532",
+        "chars": 193733,
+        "sha256": "f7e828ee27f1a6e707cf8da48cb5232b30ee04b3832f1498febfcf06f92a6ad3",
         "source": {
           "url": null,
           "local_path": "server.ts",
@@ -5066,8 +5095,8 @@
         "document_id": "qplus_native/cloud_storage.py",
         "kind": "source",
         "split": "validation",
-        "chars": 30051,
-        "sha256": "bf67b4f33719c30f661d398bb7a91801968a0b11ed3e399006f34759479f5b6a",
+        "chars": 30772,
+        "sha256": "d4732303bfeca6f255e37b8ce619fc114568889c7d1f296e71cd1ace9a109c52",
         "source": {
           "url": null,
           "local_path": "qplus_native/cloud_storage.py",
@@ -5994,8 +6023,8 @@
         "document_id": "qplus_native/stage_bench.py",
         "kind": "source",
         "split": "train",
-        "chars": 16604,
-        "sha256": "ff906ec22256dc966113b01e336870971124808d520c26464eaad0aedde29454",
+        "chars": 15564,
+        "sha256": "3bd82decd1d41f664b5ada9b96671fee704e73f81d4579f0654481d7469eb960",
         "source": {
           "url": null,
           "local_path": "qplus_native/stage_bench.py",
@@ -6197,8 +6226,8 @@
         "document_id": "qplus_native/train_target.py",
         "kind": "source",
         "split": "train",
-        "chars": 50094,
-        "sha256": "da35f6b70526b2c823fcfb82ae5d508981217e5399defc2637941d53dcf49323",
+        "chars": 51284,
+        "sha256": "09d19ec7ffc740580e39b42098f57290322f7d3ebf26c6ae95bd5d5883a0636e",
         "source": {
           "url": null,
           "local_path": "qplus_native/train_target.py",
@@ -6629,6 +6658,35 @@
         ]
       },
       {
+        "document_id": "tests/log-warnings-and-sentiment-shortcut.test.ts",
+        "kind": "source",
+        "split": "validation",
+        "chars": 5956,
+        "sha256": "d7b38530e38a5cd690c44ae83cd755936f468aceea94addb7218ed807d17a4cf",
+        "source": {
+          "url": null,
+          "local_path": "tests/log-warnings-and-sentiment-shortcut.test.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
         "document_id": "tests/memory_integrity.test.ts",
         "kind": "source",
         "split": "validation",
@@ -6687,6 +6745,35 @@
         ]
       },
       {
+        "document_id": "tests/task-execution-progress-bar.test.ts",
+        "kind": "source",
+        "split": "train",
+        "chars": 4232,
+        "sha256": "c358a59df174c8890148057efdd34310fe5810e337cd798bd2e6aa23efcfcf22",
+        "source": {
+          "url": null,
+          "local_path": "tests/task-execution-progress-bar.test.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
         "document_id": "tests/task-prioritization.test.ts",
         "kind": "source",
         "split": "validation",
@@ -6719,11 +6806,40 @@
         "document_id": "tests/ui-repair-regression.test.ts",
         "kind": "source",
         "split": "train",
-        "chars": 12875,
-        "sha256": "bba9cdc46d880ad911a13965533c9ffb51f966c4a6d24662056dd52c142d63fe",
+        "chars": 13054,
+        "sha256": "aa9ca1e393e350a724b0493a5df6be61b1563601125b9d5a9b7c7029ae991c8a",
         "source": {
           "url": null,
           "local_path": "tests/ui-repair-regression.test.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
+        "document_id": "tests/ui-warnings-and-sentiment-shortcut.test.ts",
+        "kind": "source",
+        "split": "train",
+        "chars": 5384,
+        "sha256": "aaa9fb8b6254d1d09a97aa2dc349ceb4c82dc980b13bfaa43cc60e56764c1eb3",
+        "source": {
+          "url": null,
+          "local_path": "tests/ui-warnings-and-sentiment-shortcut.test.ts",
           "publisher": null
         },
         "license": {
@@ -7043,6 +7159,35 @@
         "source": {
           "url": null,
           "local_path": "tests/live-training-e2e.mjs",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
+        "document_id": "tests/native-only-ui-integrity.test.mjs",
+        "kind": "source",
+        "split": "validation",
+        "chars": 3004,
+        "sha256": "31bc385f3c852a25c7eb8803586629c68206867ba5011ad9f8c90d054ff523ba",
+        "source": {
+          "url": null,
+          "local_path": "tests/native-only-ui-integrity.test.mjs",
           "publisher": null
         },
         "license": {
@@ -7619,7 +7764,7 @@
   "approved_documents": [],
   "manifest_audit": {
     "exists": true,
-    "path": "/app/applet/source/artifacts/dataset-provenance-manifest.json",
+    "path": "/workspaces/ZYNTHEOR/source/artifacts/dataset-provenance-manifest.json",
     "sha256": "b2d96d1f25b5e1e5ed30e6f007dd304f089745a7728b119e9bb0b86cd29c2910",
     "schema_version": "zyntheor.dataset-provenance.v1",
     "required_schema_version": "zyntheor.dataset-provenance.v1",
@@ -7632,7 +7777,7 @@
       "documents": []
     },
     "approval_artifact": {
-      "path": "/app/applet/source/artifacts/dataset-provenance-evidence/approval/approval.json",
+      "path": "/workspaces/ZYNTHEOR/source/artifacts/dataset-provenance-evidence/approval/approval.json",
       "exists": true,
       "sha256": "d80217b33cb66e0bfb4ab3eb76332a533d4df3711c4d74f6728bb66eb70fab2a",
       "signed_by": "ZYNTHEOR_FOUNDER",
@@ -7646,17 +7791,21 @@
   },
   "workspace_corpus_audit": {
     "source": "qplus_native.corpus.build_corpus",
-    "corpus_sha256": "2c7c7cff157179e955d5f431671f4bdd666cd390ac34c7afcdc78b613bf6f612",
+    "corpus_sha256": "c2221facdabcd4001e278e2f4cbfc65c55567504c0fde602db243b45cb60180d",
     "summary": {
-      "documents": 262,
-      "train_docs": 211,
-      "val_docs": 51,
-      "train_chars": 3667690,
-      "val_chars": 742340,
-      "thai_chars": 22737,
-      "excluded": 15
+      "documents": 267,
+      "train_docs": 213,
+      "val_docs": 54,
+      "train_chars": 3740859,
+      "val_chars": 770172,
+      "thai_chars": 26001,
+      "excluded": 21
     },
     "excluded_by_corpus_filter": [
+      {
+        "id": "src/tests/cloud-training-integration.test.ts",
+        "reason": "secret_like_literal"
+      },
       {
         "id": "src/context/AuthContext.tsx",
         "reason": "secret_like_literal"
@@ -7716,14 +7865,34 @@
       {
         "id": "knowledge:doc_1795008341911_onkqs",
         "reason": "not_curatedForTraining"
+      },
+      {
+        "id": "knowledge:doc_1795013791367_exhcj",
+        "reason": "not_curatedForTraining"
+      },
+      {
+        "id": "knowledge:doc_1795013811222_9bhkn",
+        "reason": "not_curatedForTraining"
+      },
+      {
+        "id": "knowledge:doc_1795015186019_oa2d5",
+        "reason": "not_curatedForTraining"
+      },
+      {
+        "id": "knowledge:doc_1795015199382_vjin2",
+        "reason": "not_curatedForTraining"
+      },
+      {
+        "id": "knowledge:doc_1795015983802_0onpx",
+        "reason": "not_curatedForTraining"
       }
     ],
     "split_leakage_audit": {
       "status": "BLOCKED",
       "split_counts": {
         "test": 0,
-        "train": 211,
-        "validation": 51
+        "train": 213,
+        "validation": 54
       },
       "missing_splits": [
         "test"
@@ -7735,18 +7904,18 @@
     },
     "approved_count": 0,
     "needs_review_count": 0,
-    "blocked_count": 262,
+    "blocked_count": 267,
     "blocked_summary_by_kind": {
       "doc": 1,
-      "source": 261
+      "source": 266
     },
     "blocked_documents": [
       {
         "document_id": "README.md",
         "kind": "doc",
         "split": "train",
-        "chars": 10379,
-        "sha256": "34011212b662e9dec05dc2787434bd7b10ecad4c78c0b8c0906bd9577b38b2eb",
+        "chars": 10605,
+        "sha256": "1f4741c6b6e18b889c211b956ce679bafc3d96a561ad6658bc4862ecec367911",
         "source": {
           "url": null,
           "local_path": "README.md",
@@ -8206,6 +8375,35 @@
         ]
       },
       {
+        "document_id": "src/hooks/useSentimentTrendShortcut.ts",
+        "kind": "source",
+        "split": "train",
+        "chars": 3663,
+        "sha256": "71488a6ba340ef6b5b77431eaceaed0f24ecacc1698556e0ee7965b0f426ceb8",
+        "source": {
+          "url": null,
+          "local_path": "src/hooks/useSentimentTrendShortcut.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
         "document_id": "src/lib/apiClient.ts",
         "kind": "source",
         "split": "train",
@@ -8525,35 +8723,6 @@
         ]
       },
       {
-        "document_id": "src/tests/cloud-training-integration.test.ts",
-        "kind": "source",
-        "split": "train",
-        "chars": 19228,
-        "sha256": "92e99f7a94c7f23c1c47e943846756b96787ae954b33ee2cfcff044cda1b9600",
-        "source": {
-          "url": null,
-          "local_path": "src/tests/cloud-training-integration.test.ts",
-          "publisher": null
-        },
-        "license": {
-          "id": null,
-          "url": null
-        },
-        "rights": {
-          "basis": null,
-          "scope": []
-        },
-        "provenance_schema": null,
-        "admission_bucket": "BLOCKED",
-        "status": "BLOCKED",
-        "issues": [
-          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
-          "missing_external_https_source_license_rights_evidence",
-          "missing_trusted_human_approval_signature",
-          "missing_test_split_in_corpus_builder"
-        ]
-      },
-      {
         "document_id": "src/tests/ledger-cli.test.ts",
         "kind": "source",
         "split": "train",
@@ -8847,8 +9016,8 @@
         "document_id": "src/App.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 247456,
-        "sha256": "19759adc9f7c83d406cb0632b652b06d3252eaad766411d83d8f2fa6f104dfe1",
+        "chars": 265366,
+        "sha256": "188b81d151e6be7ce49f70bfeaf1a3474aee4a10c630f7ee70e3becc83438b88",
         "source": {
           "url": null,
           "local_path": "src/App.tsx",
@@ -9079,8 +9248,8 @@
         "document_id": "src/components/GlobalSearchModal.tsx",
         "kind": "source",
         "split": "validation",
-        "chars": 15880,
-        "sha256": "6475164e4715fed291900e7fc83c90f66cb531a0c85ebbbd4e4ac7c07330a5b8",
+        "chars": 16026,
+        "sha256": "a2ce744ca715ca76a076a2268f64ecdae872ac699d2193afdcd105db3b506ac3",
         "source": {
           "url": null,
           "local_path": "src/components/GlobalSearchModal.tsx",
@@ -9166,8 +9335,8 @@
         "document_id": "src/components/Header.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 12267,
-        "sha256": "05db1abea186d76cf4e197cc23ea498f6ee20a254a470f4a9145b40af1bba712",
+        "chars": 13168,
+        "sha256": "8a7649b6eaa42be9955c77d9844cbdeac2256c85d338e6a223c5985e85da1a56",
         "source": {
           "url": null,
           "local_path": "src/components/Header.tsx",
@@ -9282,8 +9451,8 @@
         "document_id": "src/components/MobileNav.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 2968,
-        "sha256": "e2fcd67e2ca4a9191170f8441ecee3dd47a71ac108ec1849595418e8109ce6de",
+        "chars": 3092,
+        "sha256": "301421c79136e964c88b45db611bd00d4792305b3b871a3f481facf21980857a",
         "source": {
           "url": null,
           "local_path": "src/components/MobileNav.tsx",
@@ -9340,8 +9509,8 @@
         "document_id": "src/components/PerformanceTrendsChart.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 16839,
-        "sha256": "d3233373a35f739b0f4fc8ccb7e837cb851422cf27a729de926ef5b84134a16b",
+        "chars": 17402,
+        "sha256": "409bcb562c9da68f3721a4adba633a82a445f9f7b008b5b2a9b3f3de5cb10d5a",
         "source": {
           "url": null,
           "local_path": "src/components/PerformanceTrendsChart.tsx",
@@ -9485,8 +9654,8 @@
         "document_id": "src/components/Sidebar.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 8096,
-        "sha256": "446b400455efff47d608e1f69b55415175b2db70e3417e48238f2fc0bb099a9b",
+        "chars": 10726,
+        "sha256": "739d8a8ee7b436120a6675ff8490328c12e7e4cb282d3a6ef70846ef1a734837",
         "source": {
           "url": null,
           "local_path": "src/components/Sidebar.tsx",
@@ -9519,6 +9688,35 @@
         "source": {
           "url": null,
           "local_path": "src/components/StreamingTokenDisplay.tsx",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
+        "document_id": "src/components/TaskExecutionProgressBar.tsx",
+        "kind": "source",
+        "split": "validation",
+        "chars": 14527,
+        "sha256": "341c83c875f0918ea2dd613575a58edfb56ba2d507a09d9454a6954fe159fd93",
+        "source": {
+          "url": null,
+          "local_path": "src/components/TaskExecutionProgressBar.tsx",
           "publisher": null
         },
         "license": {
@@ -9601,8 +9799,8 @@
         "document_id": "src/components/TrainingReadinessMonitor.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 16202,
-        "sha256": "6d82b627dd8393513088bca994a1f07b59858de80dcdc2102894514139706da0",
+        "chars": 16318,
+        "sha256": "3ad090661d14b12cb7bad1dbe74d29fab283c86ad7dc00f5817aaeb3f0954237",
         "source": {
           "url": null,
           "local_path": "src/components/TrainingReadinessMonitor.tsx",
@@ -9775,8 +9973,8 @@
         "document_id": "src/components/modules/AnalyticsBI.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 7152,
-        "sha256": "4d5a5e36b1e4aac7374b29721b12589cdc2d7bd4d8d6e2e790771da3498e2b9f",
+        "chars": 11321,
+        "sha256": "acffa89a750adb1acbed01c050a7a34a178931d2e5d66a3439295025006f6134",
         "source": {
           "url": null,
           "local_path": "src/components/modules/AnalyticsBI.tsx",
@@ -9862,8 +10060,8 @@
         "document_id": "src/components/modules/BenchmarkArena.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 18886,
-        "sha256": "6373f0bc427ad4aadbe8c9ada124dc66e49281fc3ca3f3526deb1024522caa0b",
+        "chars": 17584,
+        "sha256": "3cd3fe8c9f0b1d770b0d20d8bceb32215a4c098f1d4487a03e83785380da7a4c",
         "source": {
           "url": null,
           "local_path": "src/components/modules/BenchmarkArena.tsx",
@@ -9891,8 +10089,8 @@
         "document_id": "src/components/modules/CommandCenter.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 53712,
-        "sha256": "0d04e0877532b57301e4a29a0bd59daf04cb6afe5442db99f208068a903510e8",
+        "chars": 62530,
+        "sha256": "299a1a56c03473a0889cce82e05454137cd5c74ce6ad6f3cde085bf53ae56eb2",
         "source": {
           "url": null,
           "local_path": "src/components/modules/CommandCenter.tsx",
@@ -9920,8 +10118,8 @@
         "document_id": "src/components/modules/ConversationalIntelligence.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 30099,
-        "sha256": "5d89a7a946ec540280630d79fab2a37900c5474bc4f095de27333e80adc9a6af",
+        "chars": 42419,
+        "sha256": "b1f8dccbfa618bad14aab31556ed401eaf1f4cdd216901cc07a6cbe66c478b49",
         "source": {
           "url": null,
           "local_path": "src/components/modules/ConversationalIntelligence.tsx",
@@ -9949,8 +10147,8 @@
         "document_id": "src/components/modules/DevStudio.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 48509,
-        "sha256": "0586830ccd461463ace1a7c324a8c04390eeeda649c67b042e0d7b00e5afc4e1",
+        "chars": 51040,
+        "sha256": "212ba277ff43964ca89cd0ca9f2efb800368506c2a4dc5af890fcf49fc218adb",
         "source": {
           "url": null,
           "local_path": "src/components/modules/DevStudio.tsx",
@@ -10181,8 +10379,8 @@
         "document_id": "src/components/modules/ProofOfIntelligence.tsx",
         "kind": "source",
         "split": "validation",
-        "chars": 29071,
-        "sha256": "a0c10c09b21b2d2d7df4c47aa5810d4b3ee2a17d3c038a749ae4ea3ad56c71dd",
+        "chars": 29160,
+        "sha256": "5bd4deb6d3941f1718ae0119189220823bdd68d88f0aa6da8407ed2ffc1826e8",
         "source": {
           "url": null,
           "local_path": "src/components/modules/ProofOfIntelligence.tsx",
@@ -10210,8 +10408,8 @@
         "document_id": "src/components/modules/ResearchLab.tsx",
         "kind": "source",
         "split": "train",
-        "chars": 71102,
-        "sha256": "6224b3824b47833526127f913a56a4323e24efdec75c19cbe7e5e9c3bc03438d",
+        "chars": 81243,
+        "sha256": "f8759770827d549c9dec2137659abee70615e8c86021521cb8f5b2e7ea0500bd",
         "source": {
           "url": null,
           "local_path": "src/components/modules/ResearchLab.tsx",
@@ -10239,8 +10437,8 @@
         "document_id": "src/components/modules/SubscriptionBilling.tsx",
         "kind": "source",
         "split": "validation",
-        "chars": 8259,
-        "sha256": "b9bde1a025caa5b20ee21441418d35392f163c4ecdd79b5d4164254dc6a199a9",
+        "chars": 11025,
+        "sha256": "403e34352c61b2f4267e0cf65db8600f742378f8946f296f122ac75423285272",
         "source": {
           "url": null,
           "local_path": "src/components/modules/SubscriptionBilling.tsx",
@@ -10993,8 +11191,8 @@
         "document_id": "lib/CloudCheckpointStorage.ts",
         "kind": "source",
         "split": "validation",
-        "chars": 31643,
-        "sha256": "abf7fcbd69c826d6e144ae35f6f39468e7ba3d5214912718ad7b51fdc6d2e879",
+        "chars": 32266,
+        "sha256": "dfa878d52510206718b3f95972dd5e55b9f64efec5cd4d55a48a824a47c7ab28",
         "source": {
           "url": null,
           "local_path": "lib/CloudCheckpointStorage.ts",
@@ -11022,8 +11220,8 @@
         "document_id": "lib/CloudObjectStorageService.ts",
         "kind": "source",
         "split": "train",
-        "chars": 40058,
-        "sha256": "75d3f15f97d335d1e74267857f1085b0c198c38baaaabfa8af1c10782deb7573",
+        "chars": 42013,
+        "sha256": "fbf9fc5f44f2bfaae28731b0aa2d28f3d176d7980723e15ccaac23ceb815d2c3",
         "source": {
           "url": null,
           "local_path": "lib/CloudObjectStorageService.ts",
@@ -11457,8 +11655,8 @@
         "document_id": "lib/NativeNumpyTrainingService.ts",
         "kind": "source",
         "split": "train",
-        "chars": 64492,
-        "sha256": "e17dbfe9b4255e98cc91e795ab85d6795bb1af062a51b438b71d348f934c1474",
+        "chars": 75295,
+        "sha256": "9753427a9f02e52ab95113b2d68df609f8b5b51683c544406fad059ebe6b4b80",
         "source": {
           "url": null,
           "local_path": "lib/NativeNumpyTrainingService.ts",
@@ -11892,8 +12090,8 @@
         "document_id": "lib/providers.ts",
         "kind": "source",
         "split": "train",
-        "chars": 24038,
-        "sha256": "ffcf2ff84908f574cf46801139a497a56caa40ed9a2e8eab010ec7b6b18bbf1d",
+        "chars": 22487,
+        "sha256": "7cf7d72576dfa080435baf0da31154334dddfa296787dd45d44ecab28392b3fc",
         "source": {
           "url": null,
           "local_path": "lib/providers.ts",
@@ -11921,8 +12119,8 @@
         "document_id": "server.ts",
         "kind": "source",
         "split": "train",
-        "chars": 185298,
-        "sha256": "51740aca5e0717cb83645a66ec5fa3634a3896a891174527b00a6b692a35a532",
+        "chars": 193733,
+        "sha256": "f7e828ee27f1a6e707cf8da48cb5232b30ee04b3832f1498febfcf06f92a6ad3",
         "source": {
           "url": null,
           "local_path": "server.ts",
@@ -12791,8 +12989,8 @@
         "document_id": "qplus_native/cloud_storage.py",
         "kind": "source",
         "split": "validation",
-        "chars": 30051,
-        "sha256": "bf67b4f33719c30f661d398bb7a91801968a0b11ed3e399006f34759479f5b6a",
+        "chars": 30772,
+        "sha256": "d4732303bfeca6f255e37b8ce619fc114568889c7d1f296e71cd1ace9a109c52",
         "source": {
           "url": null,
           "local_path": "qplus_native/cloud_storage.py",
@@ -13719,8 +13917,8 @@
         "document_id": "qplus_native/stage_bench.py",
         "kind": "source",
         "split": "train",
-        "chars": 16604,
-        "sha256": "ff906ec22256dc966113b01e336870971124808d520c26464eaad0aedde29454",
+        "chars": 15564,
+        "sha256": "3bd82decd1d41f664b5ada9b96671fee704e73f81d4579f0654481d7469eb960",
         "source": {
           "url": null,
           "local_path": "qplus_native/stage_bench.py",
@@ -13922,8 +14120,8 @@
         "document_id": "qplus_native/train_target.py",
         "kind": "source",
         "split": "train",
-        "chars": 50094,
-        "sha256": "da35f6b70526b2c823fcfb82ae5d508981217e5399defc2637941d53dcf49323",
+        "chars": 51284,
+        "sha256": "09d19ec7ffc740580e39b42098f57290322f7d3ebf26c6ae95bd5d5883a0636e",
         "source": {
           "url": null,
           "local_path": "qplus_native/train_target.py",
@@ -14354,6 +14552,35 @@
         ]
       },
       {
+        "document_id": "tests/log-warnings-and-sentiment-shortcut.test.ts",
+        "kind": "source",
+        "split": "validation",
+        "chars": 5956,
+        "sha256": "d7b38530e38a5cd690c44ae83cd755936f468aceea94addb7218ed807d17a4cf",
+        "source": {
+          "url": null,
+          "local_path": "tests/log-warnings-and-sentiment-shortcut.test.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
         "document_id": "tests/memory_integrity.test.ts",
         "kind": "source",
         "split": "validation",
@@ -14412,6 +14639,35 @@
         ]
       },
       {
+        "document_id": "tests/task-execution-progress-bar.test.ts",
+        "kind": "source",
+        "split": "train",
+        "chars": 4232,
+        "sha256": "c358a59df174c8890148057efdd34310fe5810e337cd798bd2e6aa23efcfcf22",
+        "source": {
+          "url": null,
+          "local_path": "tests/task-execution-progress-bar.test.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
         "document_id": "tests/task-prioritization.test.ts",
         "kind": "source",
         "split": "validation",
@@ -14444,11 +14700,40 @@
         "document_id": "tests/ui-repair-regression.test.ts",
         "kind": "source",
         "split": "train",
-        "chars": 12875,
-        "sha256": "bba9cdc46d880ad911a13965533c9ffb51f966c4a6d24662056dd52c142d63fe",
+        "chars": 13054,
+        "sha256": "aa9ca1e393e350a724b0493a5df6be61b1563601125b9d5a9b7c7029ae991c8a",
         "source": {
           "url": null,
           "local_path": "tests/ui-repair-regression.test.ts",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
+        "document_id": "tests/ui-warnings-and-sentiment-shortcut.test.ts",
+        "kind": "source",
+        "split": "train",
+        "chars": 5384,
+        "sha256": "aaa9fb8b6254d1d09a97aa2dc349ceb4c82dc980b13bfaa43cc60e56764c1eb3",
+        "source": {
+          "url": null,
+          "local_path": "tests/ui-warnings-and-sentiment-shortcut.test.ts",
           "publisher": null
         },
         "license": {
@@ -14768,6 +15053,35 @@
         "source": {
           "url": null,
           "local_path": "tests/live-training-e2e.mjs",
+          "publisher": null
+        },
+        "license": {
+          "id": null,
+          "url": null
+        },
+        "rights": {
+          "basis": null,
+          "scope": []
+        },
+        "provenance_schema": null,
+        "admission_bucket": "BLOCKED",
+        "status": "BLOCKED",
+        "issues": [
+          "not_enrolled_in_zyntheor.dataset-provenance.v1_manifest",
+          "missing_external_https_source_license_rights_evidence",
+          "missing_trusted_human_approval_signature",
+          "missing_test_split_in_corpus_builder"
+        ]
+      },
+      {
+        "document_id": "tests/native-only-ui-integrity.test.mjs",
+        "kind": "source",
+        "split": "validation",
+        "chars": 3004,
+        "sha256": "31bc385f3c852a25c7eb8803586629c68206867ba5011ad9f8c90d054ff523ba",
+        "source": {
+          "url": null,
+          "local_path": "tests/native-only-ui-integrity.test.mjs",
           "publisher": null
         },
         "license": {
@@ -15373,8 +15687,8 @@
     {
       "path": "native_data/knowledge/documents.json",
       "exists": true,
-      "bytes": 10313,
-      "sha256": "9e44f30a1d7c8fdeef1e3df5877f620cd38917eafa2ca2f944d927b395bd6802",
+      "bytes": 13963,
+      "sha256": "343e324bd1adb12464fdf12ae8a00d198d9dbc526f04d060b774d970a473fcb8",
       "approved_for_training": false,
       "reason": "unprovenanced_local_file_no_signed_manifest"
     },
@@ -15403,15 +15717,71 @@
       "reason": "unprovenanced_local_file_no_signed_manifest"
     },
     {
+      "path": "native_data/datasets/ds_1795013791361.json",
+      "exists": true,
+      "bytes": 7488,
+      "sha256": "d1895800d5cac6407d8a1d4bcdeaf64710a9297ae0adc595e338cd51351d5330",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
+      "path": "native_data/datasets/ds_1795013791372.json",
+      "exists": true,
+      "bytes": 982,
+      "sha256": "356834b237c82e164a5f58ad4b77a1152f4cd4370dc82498693360f6844ef7e5",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
+      "path": "native_data/datasets/ds_1795015186007.json",
+      "exists": true,
+      "bytes": 7825,
+      "sha256": "6612bf10ae75ff4b060d32910affb0fa02bbfb73b9f6127c3aff86cc29d0e060",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
+      "path": "native_data/datasets/ds_1795015186025.json",
+      "exists": true,
+      "bytes": 982,
+      "sha256": "27ef5b2101c92047e710c52bd02adc8e77bc0591d2c297771808253eae50ea7e",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
       "path": "native_data/datasets/manifest.json",
       "exists": true,
-      "bytes": 1987,
-      "sha256": "4e9cbdda1877552d13e2d2dc754f54e56dc5d6eb079443c8da97d1128828cf84",
+      "bytes": 4916,
+      "sha256": "462318931d5334c4d02c9694928184d2b17f2d9eb0de8cb37522aab36c1daf52",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
+      "path": "native_data/datasets/test.jsonl",
+      "exists": true,
+      "bytes": 322020,
+      "sha256": "fa2df12ab23b613e0e7a3edb78f5f2982f03339da3910eb1937c56f213d3a67c",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
+      "path": "native_data/datasets/train.jsonl",
+      "exists": true,
+      "bytes": 1571106,
+      "sha256": "83444b89c1f6908eafadc7c0f82842b6dc520238cb38a05fe9c462f346c886b8",
+      "approved_for_training": false,
+      "reason": "unprovenanced_local_file_no_signed_manifest"
+    },
+    {
+      "path": "native_data/datasets/validation.jsonl",
+      "exists": true,
+      "bytes": 387908,
+      "sha256": "def2477e9b730a51cf7b623040ce359a93b605656958ad9d025bc835d1ce5010",
       "approved_for_training": false,
       "reason": "unprovenanced_local_file_no_signed_manifest"
     }
   ],
-  "pending_manifest_template_path": "/app/applet/artifacts/dataset-provenance-manifest.pending.json",
+  "pending_manifest_template_path": "/workspaces/ZYNTHEOR/artifacts/dataset-provenance-manifest.pending.json",
   "blocking_reasons": [
     "trusted_approval_key_missing",
     "workspace_corpus_unapproved_and_missing_test_split"
