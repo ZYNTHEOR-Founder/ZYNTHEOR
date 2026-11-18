@@ -1,35 +1,9 @@
-# ZYNTHEOR HYBRID (ก) — วางแพตช์ยังไง
+# Legacy Hybrid Brain Experiment — Not Part of Production Runtime
 
-ป้าย: HYBRID / EXTERNAL-BRAIN — ไม่ใช่ Native (ข) ยังแยกอยู่
+This directory contains historical experiment code retained for regression and security-boundary tests.
 
-## ไฟล์ในแพตช์นี้ (วางเพิ่มอย่างเดียว ห้ามทับของเดิม)
-- qplus_native/hybrid_brain.py  <- ไฟล์ hybrid_brain.py
-- qplus_native/stage_bench.py   <- ไฟล์ stage_bench.py
-- qplus_native/test_hybrid.py   <- ไฟล์ test_hybrid.py (รันในเครื่องก่อน push)
+**Native-only production policy:** ZYNTHEOR does not connect an external AI brain, does not accept provider API keys, and does not delegate system control or reasoning to an external model. The production server does not import or invoke `HybridBrain`, `external_brain`, or the legacy HTTP adapter.
 
-## รันทดสอบก่อนวาง
-python3 qplus_native/test_hybrid.py
-# ต้องได้: ALL 5 HYBRID TESTS PASSED (FIXTURE — not real brain)
-# อันนี้พิสูจน์ logic adapter/bench ไม่ใช่พิสูจน์สมองจริง
+`qplus_native/stage_bench.py` now lists task specifications only. It does not execute tasks or produce benchmark scores. The legacy `run_bench` function is retained only for isolated tests and must not be connected to production routes.
 
-## ต่อสมองจริง (ออนไลน์เท่านั้น)
-# ในโค้ดที่เรียกใช้ ห้าม hardcode key:
-#   import os
-#   from qplus_native.hybrid_brain import HybridBrain
-#   from qplus_native.brain import make_http_complete  # ถ้ามีในไฟล์ตัวเต็ม brain.py
-#   complete = make_http_complete(provider=os.environ["ZYNTHEOR_BRAIN_PROVIDER"], api_key=os.environ["ZYNTHEOR_BRAIN_API_KEY"])
-#   brain = HybridBrain(complete, planner, orchestrator, repair, sandbox)
-# ถ้าไม่มี key / offline -> HybridBrain ต้อง raise BrainError ทันที ห้าม fallback Template
-
-## วัดแยกขั้นของจริง
-# from qplus_native.stage_bench import run_bench
-# out = run_bench(brain)
-# ดู out["tasks"][i] แยก understand/plan/build/test/repair/deliver + delivered/hidden_ok/false_success
-# ห้ามรวมเป็น 100/100
-
-## ข้อจำกัดที่ต้องเช็กก่อน merge
-- แพตช์นี้อ้างอิง API ที่เห็นจริงแค่ brain.py 1-81 + agent_bench.py 1-72 เท่านั้น
-- ยังไม่เห็นไฟล์ตัวเต็ม planner.py / orchestrator.py / repair.py / safe_exec.py
-- จึงใช้ DI (ฉีด planner/orchestrator/repair/sandbox เข้าทาง constructor) ไม่ import ตรง
-- ก่อน merge ให้เทียบชื่อฟังก์ชัน: validate_plan, plan_project, package_deliverable, Sandbox.run_tests, SelfRepairEngine.repair กับไฟล์ตัวเต็ม
-- ถ้าชื่อไม่ตรง ให้แก้เฉพาะจุดฉีด ไม่ต้องแก้ logic ใน hybrid_brain.py
+Do not add provider environment variables or re-enable the former `--real` execution path. Native model work must use the first-party NativeLM runtime and its verified checkpoint/inference interfaces.

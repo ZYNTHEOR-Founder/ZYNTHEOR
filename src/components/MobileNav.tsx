@@ -1,6 +1,6 @@
 import React from 'react';
 import { ModuleId } from '../types';
-import { LayoutDashboard, Sparkles, FlaskConical, Award, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Sparkles, FlaskConical, MoreHorizontal } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 interface MobileNavProps {
@@ -17,47 +17,39 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   hidden = false,
 }) => {
   const { lang } = useLanguage();
-
-  if (hidden) {
-    return null;
-  }
+  if (hidden) return null;
 
   const quickItems: Array<{
     id: ModuleId;
     label: string;
     icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   }> = [
-    { id: 'command_center', label: lang === 'th' ? 'ศูนย์บัญชาการ' : 'Center', icon: LayoutDashboard },
-    { id: 'conversational_intelligence', label: lang === 'th' ? 'แชท' : 'Chat', icon: Sparkles },
-    { id: 'research_lab', label: lang === 'th' ? 'ห้องแล็บ' : 'Lab', icon: FlaskConical },
-    { id: 'proof_of_intelligence', label: lang === 'th' ? 'หลักฐาน' : 'Evidence', icon: Award },
+    { id: 'command_center', label: lang === 'th' ? 'บัญชาการ' : 'Command', icon: LayoutDashboard },
+    { id: 'intelligence_core', label: lang === 'th' ? 'ปัญญา' : 'Intelligence', icon: Sparkles },
+    { id: 'research_lab', label: lang === 'th' ? 'วิจัย' : 'Research', icon: FlaskConical },
   ];
+
+  const isMoreActive = !quickItems.some((item) => item.id === activeModule);
 
   return (
     <nav
-      aria-label={lang === 'th' ? 'เมนูนำทางหลักบนมือถือ' : 'Mobile bottom navigation'}
-      className="fixed bottom-0 left-0 right-0 z-30 backdrop-blur-md px-1.5 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] flex items-center justify-around lg:hidden transition-colors"
-      style={{
-        backgroundColor: 'var(--app-surface)',
-        borderTop: '1px solid var(--app-card-border)',
-        color: 'var(--app-text-primary)',
-      }}
+      aria-label={lang === 'th' ? 'เมนูนำทางหลักบนมือถือ' : 'Mobile primary navigation'}
+      className="fixed bottom-0 left-0 right-0 z-30 backdrop-blur-xl px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] flex items-center justify-around lg:hidden"
+      style={{ backgroundColor: 'color-mix(in srgb, var(--app-surface) 94%, transparent)', borderTop: '1px solid var(--app-card-border)', color: 'var(--app-text-primary)' }}
     >
       {quickItems.map((item) => {
         const Icon = item.icon;
-        const isActive = activeModule === item.id;
+        const isActive = activeModule === item.id || (item.id === 'intelligence_core' && activeModule === 'conversational_intelligence');
         return (
           <button
             key={item.id}
             type="button"
             onClick={() => onSelectModule(item.id)}
-            className="min-h-[44px] min-w-[44px] flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors cursor-pointer"
-            style={{
-              color: isActive ? 'var(--app-accent)' : 'var(--app-text-secondary)',
-              fontWeight: isActive ? 700 : 500,
-            }}
+            aria-current={isActive ? 'page' : undefined}
+            className="min-h-12 min-w-12 flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors cursor-pointer"
+            style={{ color: isActive ? 'var(--app-accent)' : 'var(--app-text-secondary)', fontWeight: isActive ? 700 : 500 }}
           >
-            <Icon className="w-4 h-4 shrink-0" style={{ color: isActive ? 'var(--app-accent)' : 'inherit' }} />
+            <Icon className="w-[18px] h-[18px] shrink-0" />
             <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
           </button>
         );
@@ -65,12 +57,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({
       <button
         type="button"
         onClick={onOpenMore}
-        aria-label={lang === 'th' ? 'เปิดเมนูเพิ่มเติม' : 'Open more menu'}
-        className="min-h-[44px] min-w-[44px] flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors cursor-pointer"
-        style={{ color: 'var(--app-text-secondary)' }}
+        aria-label={lang === 'th' ? 'เปิดเมนูระบบทั้งหมด' : 'Open all system modules'}
+        aria-current={isMoreActive ? 'page' : undefined}
+        className="min-h-12 min-w-12 flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors cursor-pointer"
+        style={{ color: isMoreActive ? 'var(--app-accent)' : 'var(--app-text-secondary)' }}
       >
-        <MoreHorizontal className="w-4 h-4 shrink-0" />
-        <span className="text-[10px] mt-0.5 leading-tight">{lang === 'th' ? 'เพิ่มเติม' : 'More'}</span>
+        <MoreHorizontal className="w-[18px] h-[18px] shrink-0" />
+        <span className="text-[10px] mt-0.5 leading-tight">{lang === 'th' ? 'ระบบทั้งหมด' : 'All modules'}</span>
       </button>
     </nav>
   );

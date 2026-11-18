@@ -89,9 +89,7 @@ export const BenchmarkArena: React.FC = () => {
   const [error, setError] = useState('');
 
   // 20-Task Per-Stage Evaluation (Path ก)
-  const [stageMode, setStageMode] = useState<'specification' | 'external'>('specification');
   const [stageReport, setStageReport] = useState<StageBenchReport | null>(null);
-  const [externalBrainStatus, setExternalBrainStatus] = useState<any>(null);
   const [runningStageBench, setRunningStageBench] = useState(false);
   const [stageError, setStageError] = useState('');
 
@@ -115,7 +113,6 @@ export const BenchmarkArena: React.FC = () => {
 
       if (stageRes.ok) {
         const sData = await stageRes.json();
-        if (sData.externalBrain) setExternalBrainStatus(sData.externalBrain);
         if (sData.latest) setStageReport(sData.latest);
       }
     } catch (e: any) {
@@ -157,7 +154,7 @@ export const BenchmarkArena: React.FC = () => {
       const response = await fetch('/api/benchmarks/stages/run', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ mode: stageMode }),
+        body: JSON.stringify({ mode: 'specification' }),
       });
       const data = await response.json();
       if (data.report) setStageReport(data.report);
@@ -183,23 +180,15 @@ export const BenchmarkArena: React.FC = () => {
             <Cpu className="w-5 h-5 text-[var(--app-accent)]" />
             <div>
               <h3 className="text-sm font-bold text-[var(--app-text-primary)]">
-                20-Task Per-Stage Capability Benchmark (Hybrid Brain + Real Scaffold)
+                20-Task Capability Specification Review
               </h3>
               <p className="text-[11px] text-[var(--app-text-secondary)]">
-                Measures Understand · Plan · Build · Test · Repair · Deliver separately across 20 deterministic software engineering tasks
+                Reviews the task and acceptance criteria structure. This action does not execute tasks or generate benchmark scores.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={stageMode}
-              onChange={(e) => setStageMode(e.target.value as 'specification' | 'external')}
-              className="rounded-lg border border-[var(--app-card-border)] bg-[var(--app-bg)] px-2.5 py-1.5 text-xs text-[var(--app-text-primary)]"
-            >
-              <option value="specification">Inspect 20-Task Spec (Fail-Closed)</option>
-              <option value="external">External Brain Provider (Live Endpoint)</option>
-            </select>
             <button
               type="button"
               onClick={() => void runStageBench()}
@@ -207,29 +196,15 @@ export const BenchmarkArena: React.FC = () => {
               className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--app-accent)] px-3.5 py-1.5 text-xs font-bold text-[var(--app-bg)] hover:opacity-95 cursor-pointer disabled:opacity-40"
             >
               <Play className="w-3.5 h-3.5" />
-              {runningStageBench ? 'Running 20 Tasks…' : 'Run 20-Task Stage Bench'}
+              {runningStageBench ? 'Inspecting specification…' : 'Inspect task specification'}
             </button>
           </div>
         </div>
 
-        {externalBrainStatus && (
+        {stageReport && (
           <div className="text-[11px] font-mono text-[var(--app-text-secondary)] flex flex-wrap gap-x-4 gap-y-1">
-            <span>
-              External Brain:{' '}
-              <strong className={externalBrainStatus.configured ? 'text-[var(--z-ok)]' : 'text-[var(--app-amber)]'}>
-                {externalBrainStatus.configured ? `CONFIGURED (${externalBrainStatus.provider})` : 'NOT_CONFIGURED (FAIL-CLOSED)'}
-              </strong>
-            </span>
-            {stageReport && (
-              <>
-                <span>
-                  Attribution: <strong className="text-[var(--app-text-primary)]">{stageReport.attribution}</strong>
-                </span>
-                <span className="tabular-nums">
-                  Tasks Evaluated: <strong className="text-[var(--app-text-primary)]">{stageReport.total_tasks}</strong>
-                </span>
-              </>
-            )}
+            <span>Review type: <strong className="text-[var(--app-text-primary)]">Specification only · no task execution</strong></span>
+            <span>Tasks listed: <strong className="text-[var(--app-text-primary)]">{stageReport.total_tasks}</strong></span>
           </div>
         )}
 
@@ -289,7 +264,7 @@ export const BenchmarkArena: React.FC = () => {
         ) : (
           <div className="rounded-xl border border-dashed border-[var(--app-card-border)] p-4 text-xs text-[var(--app-text-secondary)]">
             {isAuthenticated
-              ? 'No stage benchmark report recorded yet. Click "Run 20-Task Stage Bench" to inspect the 20-task specification or evaluate a live external brain.'
+              ? 'No specification review recorded yet. Click "Inspect task specification" to review the task definitions. No tasks are executed by this action.'
               : 'Sign in as Developer or Admin to run and inspect the 20-task per-stage benchmark.'}
           </div>
         )}

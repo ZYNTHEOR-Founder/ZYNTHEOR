@@ -1,0 +1,67 @@
+{
+  "benchmark_version": "ZYNTHEOR_CAPABILITY_BENCHMARK_V1",
+  "recorded_at": "2026-11-13T19:28:02Z",
+  "duration_s": 8.326,
+  "parameter_accounting": {
+    "pure_seq_py_params": 51296,
+    "legacy_v1_subgraph_params": 231168,
+    "v2_2m_params": 502912,
+    "target_41m_params": 41527808,
+    "target_constant": 41527808,
+    "anti_conflation_verified": true,
+    "pure_seq_actual_params": 50784
+  },
+  "tokenizer_benchmark": {
+    "profile": "bilingual_bpe",
+    "real_vocab_size": 926,
+    "bpe_merges_learned": 32,
+    "bpe_compression_gain_pct": 18.71,
+    "roundtrip_exact": 3,
+    "roundtrip_total": 3,
+    "thai_combining_intact": true
+  },
+  "gradient_verification": {
+    "passed": true,
+    "checked_elements": 84,
+    "max_rel_error": 3.6e-08
+  },
+  "training_benchmark": {
+    "steps": 16,
+    "lr": 0.008,
+    "seed": 42,
+    "uniform_baseline_nll": 6.8309,
+    "train_loss_first": 6.8371,
+    "train_loss_last": 4.7254,
+    "val_before": {
+      "positions": 128,
+      "bytes": 202,
+      "nll": 6.8276,
+      "ppl": 922.9687,
+      "bpb": 6.2417,
+      "top1_accuracy": 0.0156,
+      "top5_accuracy": 0.0234,
+      "bigram_nll": 3.5732,
+      "bigram_ppl": 35.6296,
+      "bigram_bpb": 3.2665,
+      "beats_bigram": false
+    },
+    "val_after": {
+      "positions": 128,
+      "bytes": 202,
+      "nll": 5.0926,
+      "ppl": 162.8085,
+      "bpb": 4.6555,
+      "top1_accuracy": 0.1484,
+      "top5_accuracy": 0.2344,
+      "bigram_nll": 3.5732,
+      "bigram_ppl": 35.6296,
+      "bigram_bpb": 3.2665,
+      "beats_bigram": false
+    },
+    "val_nll_delta": -1.735,
+    "val_ppl_delta": -760.1602,
+    "beats_uniform_baseline": true,
+    "improved_over_initial": true
+  },
+  "all_checks_passed": true
+}

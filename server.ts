@@ -14,7 +14,7 @@ import os from 'os';
 import crypto from 'crypto';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { NativeNeuralLMProvider, ExternalBrainProvider } from './lib/providers';
+import { NativeNeuralLMProvider } from './lib/providers';
 import {
   ConnectivityMonitor,
   ConnectivityRequiredError,
@@ -849,7 +849,6 @@ app.get('/api/system/status', async (_req: Request, res: Response) => {
         inferenceReady: connectivity.online && connectivity.executionVerified,
         runtimeState: connectivity.runtimeState,
         readinessReason: connectivity.reason,
-        externalBrain: ExternalBrainProvider.getStatus(),
       },
       audit: {
         totalRecords: integrity.totalRecords,
@@ -3245,7 +3244,6 @@ app.get('/api/observability/operations', requireAuth('developer'), async (req: A
     res.json({
       success: true,
       connectivity: conn,
-      externalBrain: ExternalBrainProvider.getStatus(),
       tools: ToolRegistry.getInstance().getTelemetry(),
       plans: AutonomousPlanner.getInstance().listPlans({ tenantId: req.sovereignTenantId!, ownerUserId: req.sovereignUserId! }),
       metrics: TaskOrchestrator.getInstance().getExecutionMetrics(),
@@ -4113,18 +4111,21 @@ app.get('/api/benchmarks/stages', requireAuth('developer'), (_req: Authenticated
   }
   res.json({
     success: true,
-    externalBrain: ExternalBrainProvider.getStatus(),
     latest,
   });
 });
 
 app.post('/api/benchmarks/stages/run', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const mode = req.body?.mode === 'external' ? 'external' : 'specification';
-    const args = ['-m', 'qplus_native.stage_bench', '--json'];
-    if (mode === 'external') {
-      args.push('--real');
+    if (req.body?.mode === 'external') {
+      return res.status(403).json({
+        success: false,
+        code: 'NATIVE_ONLY_POLICY',
+        error: 'External AI brain execution is disabled. ZYNTHEOR uses its Native Intelligence architecture as the only intelligence controller.',
+      });
     }
+    const mode = 'specification';
+    const args = ['-m', 'qplus_native.stage_bench', '--json'];
 
     let stdout = '';
     try {
@@ -4143,7 +4144,7 @@ app.post('/api/benchmarks/stages/run', requireAuth('developer'), async (req: Aut
           code: failPayload.status || 'FAIL_CLOSED',
           error: failPayload.error || execErr.message,
           report: {
-            mode: mode === 'external' ? 'REAL_EXTERNAL_BRAIN_SANDBOX' : 'FAIL_CLOSED_SPECIFICATION',
+            mode: 'FAIL_CLOSED_SPECIFICATION',
             attribution: failPayload.status || 'FAIL_CLOSED',
             total_tasks: 0,
             error: failPayload.error || execErr.message,
@@ -4248,7 +4249,6 @@ app.post('/api/research/investigate', requireAuth('developer'), async (req: Auth
       internetCheck,
       webResearch,
       reasoning,
-      externalBrain: ExternalBrainProvider.getStatus(),
     });
   } catch (err: any) {
     if (err instanceof ConnectivityRequiredError) {

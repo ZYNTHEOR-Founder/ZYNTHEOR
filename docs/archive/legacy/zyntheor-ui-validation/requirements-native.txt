@@ -1,0 +1,9 @@
+
+# NativeLM v2 dependencies
+# Required by:
+# - qplus_native/lm_v2.py
+# - train_lm.py
+# - eval_lm.py
+
+# Numerical computation
+numpy>=1.26

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-ZYNTHEOR — HYBRID (ก) Stage Bench: วัดแยกขั้น (20 โจทย์มาตรฐาน ไม่รวมเป็นคะแนนเดียว)
+ZYNTHEOR — Legacy Stage Benchmark Task Catalogue (20 standard tasks)
 
 รายงานอัตราผ่านแยกตามขั้น:
   understand (เข้าใจ) | plan (วางแผน) | build (สร้าง) | test (ทดสอบ) | repair (แก้ไข) | deliver (ส่งมอบ)
 พร้อม hidden_ok (ตรวจจริงแบบอิสระ) และ false_success (กันระบบอ้างสำเร็จเท็จ)
 
 สำคัญ:
-  - ถ้าต่อสมองภายนอกจริง -> ป้าย mode_label="REAL_EXTERNAL_BRAIN"
-  - ถ้าใช้ test fixture -> ป้าย mode_label="FIXTURE_NOT_REAL_BRAIN" ห้ามสลับกัน
-  - ถ้าระบบสมองภายนอกไม่พร้อม (ไม่มี key/offline) -> fail-closed
+  - Production execution through an external AI brain is disabled by Native-only policy.
+  - The CLI lists task specifications only; it does not execute tasks or generate scores.
+  - run_bench remains solely for isolated legacy tests and is not wired to the production server.
 """
 import argparse
 import json
@@ -175,7 +175,7 @@ def run_bench(
     brain: HybridBrain,
     task_ids: Optional[List[str]] = None,
     *,
-    mode_label: str = "HYBRID_EXTERNAL_BRAIN",
+    mode_label: str = "LEGACY_TEST_ONLY",
     limit: Optional[int] = None,
 ) -> Dict[str, Any]:
     rows: List[Dict[str, Any]] = []
@@ -211,54 +211,26 @@ def run_bench(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="ZYNTHEOR 20-Task Per-Stage Benchmark (Hybrid External Brain)")
+    parser = argparse.ArgumentParser(description="ZYNTHEOR 20-Task Task-Specification Review (Native-only policy)")
     parser.add_argument("--tasks", default="", help="Comma-separated task IDs (default: all 20)")
     parser.add_argument("--limit", type=int, default=0, help="Limit number of tasks")
-    parser.add_argument("--real", action="store_true", help="Invoke configured real online external brain via env vars")
     parser.add_argument("--json", action="store_true", help="Output compact JSON report")
     args = parser.parse_args()
 
     task_ids = [s.strip() for s in args.tasks.split(",") if s.strip()] if args.tasks else None
-    if not args.real:
-        print(json.dumps({
-            "status": "FAIL_CLOSED_SPECIFICATION",
-            "message": "Pass --real with ZYNTHEOR_BRAIN_PROVIDER and ZYNTHEOR_BRAIN_API_KEY configured to evaluate a live external brain. Refusing to fabricate scores.",
-            "availableTasks": [{"id": t["id"], "category": t["category"]} for t in TASKS],
-            "totalTasks": len(TASKS),
-        }, ensure_ascii=False, indent=2))
-        return 0
-
-    try:
-        try:
-            from .external_brain import RealScaffoldAdapter, make_http_complete
-        except ImportError:
-            from external_brain import RealScaffoldAdapter, make_http_complete
-
-        complete = make_http_complete()
-        scaffold = RealScaffoldAdapter()
-        try:
-            brain = HybridBrain(
-                complete=complete,
-                planner=scaffold,
-                orchestrator=scaffold,
-                repair=scaffold,
-                sandbox=scaffold,
-                validate_plan_fn=scaffold.validate_plan,
-            )
-            report = run_bench(
-                brain,
-                task_ids=task_ids,
-                mode_label="REAL_EXTERNAL_BRAIN_SANDBOX",
-                limit=args.limit if args.limit > 0 else None,
-            )
-            print(json.dumps(report, ensure_ascii=False, indent=None if args.json else 2))
-            return 0
-        finally:
-            scaffold.cleanup()
-    except BrainError as exc:
-        print(json.dumps({"status": "FAIL_CLOSED", "error": str(exc)}, ensure_ascii=False, indent=2))
-        return 2
-
+    print(json.dumps({
+        "status": "SPECIFICATION_ONLY",
+        "message": "Task definitions are listed for review only. Execution and scoring require the Native Intelligence runtime; external AI brain execution is disabled by policy.",
+        "availableTasks": [
+            {"id": task["id"], "category": task["category"]}
+            for task in TASKS
+            if task_ids is None or task["id"] in task_ids
+        ][:args.limit or None],
+        "totalTasks": len(TASKS),
+        "executionPerformed": False,
+        "scoresGenerated": False,
+    }, ensure_ascii=False, indent=2))
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())

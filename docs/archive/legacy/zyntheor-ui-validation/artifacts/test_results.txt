@@ -1,0 +1,17 @@
+test_all_seven_domains_are_declared_but_empty_benchmark_is_blocked (test_candidate_remediation.BenchmarkFrameworkTests.test_all_seven_domains_are_declared_but_empty_benchmark_is_blocked) ... ok
+test_scoring_is_deterministic_and_no_baseline_is_invented (test_candidate_remediation.BenchmarkFrameworkTests.test_scoring_is_deterministic_and_no_baseline_is_invented) ... ok
+test_test_split_and_training_hash_overlap_are_rejected (test_candidate_remediation.BenchmarkFrameworkTests.test_test_split_and_training_hash_overlap_are_rejected) ... ok
+test_candidate_raw_structure_and_runtime_mode_without_inference (test_candidate_remediation.CandidateAuditTests.test_candidate_raw_structure_and_runtime_mode_without_inference) ... ok
+test_document_hash_and_evidence_hash_mismatch_block (test_candidate_remediation.DatasetGovernanceTests.test_document_hash_and_evidence_hash_mismatch_block) ... ok
+test_empty_manifest_template_is_draft_and_cannot_pass_training_gate (test_candidate_remediation.DatasetGovernanceTests.test_empty_manifest_template_is_draft_and_cannot_pass_training_gate) ... ok
+test_exact_and_near_duplicate_cross_split_are_blocking (test_candidate_remediation.DatasetGovernanceTests.test_exact_and_near_duplicate_cross_split_are_blocking) ... ok
+test_near_duplicate_cross_split_is_reported (test_candidate_remediation.DatasetGovernanceTests.test_near_duplicate_cross_split_is_reported) ... ok
+test_no_trusted_verifier_never_marks_document_verified (test_candidate_remediation.DatasetGovernanceTests.test_no_trusted_verifier_never_marks_document_verified) ... ok
+test_signed_approval_trust_key_is_external_and_permission_checked (test_candidate_remediation.DatasetGovernanceTests.test_signed_approval_trust_key_is_external_and_permission_checked) ... ok
+test_resume_refuses_configuration_or_corpus_drift (test_candidate_remediation.TrainingStateTests.test_resume_refuses_configuration_or_corpus_drift) ... ok
+test_save_load_resume_roundtrip_preserves_all_state_without_optimizer_step (test_candidate_remediation.TrainingStateTests.test_save_load_resume_roundtrip_preserves_all_state_without_optimizer_step) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.171s
+
+OK

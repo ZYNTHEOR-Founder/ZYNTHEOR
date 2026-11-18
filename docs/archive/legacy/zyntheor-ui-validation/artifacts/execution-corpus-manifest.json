@@ -1,0 +1,180 @@
+{
+  "corpus_sha256": "ceb81a46792663020f8561986e42c44b9bbf2be95efa4df5792564cdecef7541",
+  "summary": {
+    "documents": 22,
+    "train_docs": 19,
+    "val_docs": 3,
+    "train_chars": 418327,
+    "val_chars": 26572,
+    "thai_chars": 1006,
+    "excluded": 1,
+    "objective": "execution_not_chatbot",
+    "kinds": [
+      "execution_seed",
+      "source_execution"
+    ]
+  },
+  "excluded": [
+    {
+      "id": "qplus_native/web_builder.py",
+      "reason": "secret_like_literal"
+    }
+  ],
+  "docs": [
+    {
+      "id": "seed/lru_cache_goal_plan",
+      "kind": "execution_seed",
+      "sha256": "9856445c2ae3f74c68a550baa2f39cd1a573be7939ef1d091cc268f34c2710cf",
+      "split": "train",
+      "chars": 562
+    },
+    {
+      "id": "seed/hmac_validator_goal_plan",
+      "kind": "execution_seed",
+      "sha256": "5967060955cecbc9690c1104b7f1a1fb40c5aecedd53ce386b3ae5447b00d1ce",
+      "split": "train",
+      "chars": 380
+    },
+    {
+      "id": "seed/repair_loop_exemplar",
+      "kind": "execution_seed",
+      "sha256": "39d42681c8556d001d3c8ab756f5a1f03ea8bb9a149e00dcd5b4ee8cc622141f",
+      "split": "val",
+      "chars": 352
+    },
+    {
+      "id": "seed/eight_stage_trace",
+      "kind": "execution_seed",
+      "sha256": "07a7b05a56036ff439ed0f56158695fc539942c2cb25e84f6d675544bcbe95f5",
+      "split": "train",
+      "chars": 439
+    },
+    {
+      "id": "seed/task_manager_build",
+      "kind": "execution_seed",
+      "sha256": "51bb8ed46839b43356bcea4ef22cd794ea962b651d823bda27272b3ea930ebfa",
+      "split": "train",
+      "chars": 316
+    },
+    {
+      "id": "seed/fail_closed_delivery",
+      "kind": "execution_seed",
+      "sha256": "28c2aba2ca7597bbfeac8d8ddfff0df006490d0def04a4d9e14bb634b3c74c3a",
+      "split": "train",
+      "chars": 296
+    },
+    {
+      "id": "seed/thai_engineering_goal",
+      "kind": "execution_seed",
+      "sha256": "02f998bdf7d2f19120c302a34c6b97b8b441f0d6e1f4d623f46236870f6b6452",
+      "split": "train",
+      "chars": 234
+    },
+    {
+      "id": "seed/matrix_multiplier",
+      "kind": "execution_seed",
+      "sha256": "e463888084f788ed88d77ebe184081c23e300bca84af994f31548f51950dd577",
+      "split": "train",
+      "chars": 338
+    },
+    {
+      "id": "seed/expense_ledger",
+      "kind": "execution_seed",
+      "sha256": "22002059f494186850aa4366573408b5522cd9ae891fe055cfe6cfe8420f02eb",
+      "split": "val",
+      "chars": 298
+    },
+    {
+      "id": "seed/sandbox_rules",
+      "kind": "execution_seed",
+      "sha256": "3060a458f9fcbcf685e3606a92636eb82895c01ff55bbbafc29cfe882d40f896",
+      "split": "train",
+      "chars": 314
+    },
+    {
+      "id": "seed/code_shape_lru",
+      "kind": "execution_seed",
+      "sha256": "048981ee99ca20037e3f746964b943568d56e3070869753efc0336a5fcb904b8",
+      "split": "train",
+      "chars": 471
+    },
+    {
+      "id": "qplus_native/planner.py",
+      "kind": "source_execution",
+      "sha256": "ea4c97643e82a112a41a2ac0175e7ab29ff7c631bdbe34c6dcf585f9824e15b8",
+      "split": "val",
+      "chars": 25922
+    },
+    {
+      "id": "qplus_native/repair.py",
+      "kind": "source_execution",
+      "sha256": "1cbacee535595f75cc913e5daba0397ee2b298b3d23c8b85128321bb28a3b25a",
+      "split": "train",
+      "chars": 20537
+    },
+    {
+      "id": "qplus_native/orchestrator.py",
+      "kind": "source_execution",
+      "sha256": "ddfaf39a4951c4cb3970610d53781ac751a1b324c77881743df85ac4853e5537",
+      "split": "train",
+      "chars": 6632
+    },
+    {
+      "id": "qplus_native/safe_exec.py",
+      "kind": "source_execution",
+      "sha256": "4523d082dcab21880bf2cc3b867889357474498f444ff24b3da2ebf7377b0d28",
+      "split": "train",
+      "chars": 11160
+    },
+    {
+      "id": "lib/TaskOrchestrator.ts",
+      "kind": "source_execution",
+      "sha256": "10d62133ab666b5d61e7f420cf9f0376e065b4092b21f4f210a7e0cf0d8b2ef4",
+      "split": "train",
+      "chars": 58208
+    },
+    {
+      "id": "lib/ToolGateway.ts",
+      "kind": "source_execution",
+      "sha256": "1cc309da34609949b4a33e00bbae537d2d73d5a92113a64bd895e9318ab44913",
+      "split": "train",
+      "chars": 18111
+    },
+    {
+      "id": "lib/ToolRegistry.ts",
+      "kind": "source_execution",
+      "sha256": "eb68ae4d511ff8359dfc3f0f7f295247aaa0c69938289a57e10e1c7903a37e2b",
+      "split": "train",
+      "chars": 33084
+    },
+    {
+      "id": "server.ts",
+      "kind": "source_execution",
+      "sha256": "aaa25863bc2fdc860b7865f865ebecea0b63415045d14ccadc1ab7808f8c770e",
+      "split": "train",
+      "chars": 120027
+    },
+    {
+      "id": "src/components/modules/DevStudio.tsx",
+      "kind": "source_execution",
+      "sha256": "3d643e4ccd8e3c10b4d88b1264d78d22b883ac0b6c2696e9da7c7cfa849896a1",
+      "split": "train",
+      "chars": 90751
+    },
+    {
+      "id": "src/components/modules/AutomationCenter.tsx",
+      "kind": "source_execution",
+      "sha256": "96cce1b20a21d1da7c44603f097d8cc8e0591a6b632690ad4b746e58b6cdc787",
+      "split": "train",
+      "chars": 21417
+    },
+    {
+      "id": "src/components/modules/AutonomousExecutionDashboard.tsx",
+      "kind": "source_execution",
+      "sha256": "e9954920bf43fbe5e9178414a961d81f1b3b960d40a8bd37fc248f0ae757a62c",
+      "split": "train",
+      "chars": 35050
+    }
+  ],
+  "objective": "execution_not_chatbot"
+}

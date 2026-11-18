@@ -1,0 +1,17 @@
+{
+  "schema_version": "zyntheor.benchmark.v1",
+  "benchmark_id": "TODO-SET-BENCHMARK-ID",
+  "near_duplicate_threshold": 0.9,
+  "tasks": [],
+  "status": "DRAFT",
+  "required_domains": [
+    "thai_english_understanding",
+    "mathematics",
+    "science",
+    "coding",
+    "multi_step_reasoning",
+    "planning",
+    "self_correction"
+  ],
+  "notes": "Blank schema template only. Add externally sourced, licensed, hash-pinned, human-approved test tasks; do not place test tasks in training data."
+}

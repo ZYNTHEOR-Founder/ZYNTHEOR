@@ -198,14 +198,20 @@ export const DevStudio: React.FC = () => {
         headers: authHeaders(),
         body: JSON.stringify({ command: sandboxCmd, args: argsArray })
       });
-      const data = await res.json();
-      if (data.success) {
-        setSandboxResult(data.result);
+      const responseText = await res.text();
+      let data: any;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(`Command service returned an unreadable response (HTTP ${res.status}). Check the API service and server logs.`);
+      }
+      if (!res.ok || !data.success) {
+        setSandboxResult({ error: data.error || data.message || `Command rejected (HTTP ${res.status})`, exitCode: 1 });
       } else {
-        setSandboxResult({ error: data.error, exitCode: 1 });
+        setSandboxResult(data.result);
       }
     } catch (err: any) {
-      setSandboxResult({ error: err.message, exitCode: 1 });
+      setSandboxResult({ error: err.message || 'Command execution failed. Check the server connection.', exitCode: 1 });
     } finally {
       setIsExecutingSandbox(false);
     }
@@ -634,7 +640,7 @@ export const DevStudio: React.FC = () => {
                   }`}
                 >
                   <Terminal className="w-3.5 h-3.5" />
-                  <span>Agent Stream ({events.length})</span>
+                  <span>Execution Trace ({events.length})</span>
                 </button>
 
                 <button
@@ -727,74 +733,76 @@ export const DevStudio: React.FC = () => {
               </div>
             )}
 
-            {/* TAB 2: LIVE AGENT STREAM */}
+            {/* TAB 2: EXECUTION TRACE — streamed orchestration evidence, not an interactive OS shell */}
             {activeTab === 'terminal' && (
-              <div className="p-4 bg-[var(--app-bg)] text-[var(--app-text-primary)] font-mono text-xs overflow-y-auto max-h-[480px] min-h-[460px] space-y-3">
-                <div className="flex flex-wrap items-center justify-between pb-2 border-b border-[var(--app-card-border)] gap-2">
-                  <span className="text-[var(--app-text-secondary)] text-[11px] font-bold">
-                    === 4-AGENT ORCHESTRATION EVENT STREAM ===
-                  </span>
-                  {/* Role filter pills */}
-                  <div className="flex items-center gap-1 text-[10px]">
-                    {(['ALL', 'PLANNER', 'CODER', 'REVIEWER', 'TESTER'] as const).map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => setTerminalRoleFilter(r)}
-                        className={`px-2 py-0.5 rounded cursor-pointer ${
-                          terminalRoleFilter === r
-                            ? 'bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] font-bold border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
-                            : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
-                        }`}
+              <section className="bg-[var(--app-bg)] text-[var(--app-text-primary)] font-mono text-xs min-h-[420px] flex flex-col" aria-label="Execution trace">
+                <div className="px-3 sm:px-4 py-3 border-b border-[var(--app-card-border)] bg-[var(--app-surface)] space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`h-2 w-2 rounded-full shrink-0 ${isRunning ? 'bg-[var(--app-accent)] animate-pulse' : 'bg-[var(--app-text-secondary)]'}`} />
+                      <span className="font-semibold text-[var(--app-text-primary)]">Execution Trace</span>
+                      <span className="text-[var(--app-text-secondary)]">{events.length} events</span>
+                      {isRunning && <span className="text-[var(--app-accent)]">Streaming</span>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="sr-only" htmlFor="terminal-role-filter">Filter execution role</label>
+                      <select
+                        id="terminal-role-filter"
+                        value={terminalRoleFilter}
+                        onChange={(e) => setTerminalRoleFilter(e.target.value as typeof terminalRoleFilter)}
+                        className="max-w-[145px] px-2.5 py-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] text-[11px]"
                       >
-                        {r}
-                      </button>
-                    ))}
+                        <option value="ALL">All events</option>
+                        <option value="PLANNER">Planner</option>
+                        <option value="CODER">Coder</option>
+                        <option value="REVIEWER">Reviewer</option>
+                        <option value="TESTER">Tester</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard?.writeText(filteredEvents.map((ev) => `[${ev.timestamp || ''}] ${ev.role || ev.type}: ${ev.message}${ev.data?.stdout ? `\n${ev.data.stdout}` : ''}${ev.data?.stderr ? `\n${ev.data.stderr}` : ''}`).join('\n\n'))}
+                        disabled={filteredEvents.length === 0}
+                        className="px-2.5 py-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] disabled:opacity-40"
+                        title="Copy visible trace"
+                      >Copy</button>
+                      <button
+                        type="button"
+                        onClick={() => setEvents([])}
+                        disabled={isRunning || events.length === 0}
+                        className="px-2.5 py-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] disabled:opacity-40"
+                        title="Clear displayed events"
+                      >Clear</button>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-[var(--app-text-secondary)]">
+                    <span>PLANNER → CODER → REVIEWER → TESTER</span>
+                    <span>{filteredEvents.length} visible</span>
+                    <span>{events.filter((ev) => ev.type === 'error').length} errors</span>
                   </div>
                 </div>
 
-                {filteredEvents.length === 0 ? (
-                  <div className="text-[color-mix(in_srgb,var(--app-text-secondary)_60%,transparent)] text-center py-16 italic">
-                    Ready to stream. Click "Execute Sovereign Multi-Agent" above to initiate.
-                  </div>
-                ) : (
-                  filteredEvents.map((ev, idx) => (
-                    <div key={idx} className="space-y-1">
-                      <div className="flex items-center gap-2 text-[11px]">
-                        <span className="text-[color-mix(in_srgb,var(--app-text-secondary)_80%,transparent)] font-mono">[{ev.timestamp.slice(11, 19)}]</span>
-                        {ev.role && (
-                          <span
-                            className={`font-bold px-1.5 py-0.2 rounded text-[10px] ${
-                              ev.role === 'PLANNER'
-                                ? 'bg-[color-mix(in_srgb,var(--z-ok)_16%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]'
-                                : ev.role === 'CODER'
-                                ? 'bg-[color-mix(in_srgb,var(--app-amber)_16%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_45%,transparent)]'
-                                : ev.role === 'REVIEWER'
-                                ? 'bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]'
-                                : 'bg-[color-mix(in_srgb,var(--z-ok)_16%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]'
-                            }`}
-                          >
-                            {ev.role}
-                          </span>
-                        )}
-                        <span className={ev.type === 'error' ? 'text-[var(--z-danger)] font-bold' : 'text-[var(--app-text-primary)]'}>
-                          {ev.message}
-                        </span>
-                      </div>
-                      {ev.data?.stdout && (
-                        <div className="ml-4 p-2 bg-[var(--app-surface)] rounded border border-[var(--app-card-border)] text-[11px] text-[var(--app-accent)] whitespace-pre-wrap">
-                          {ev.data.stdout}
-                        </div>
-                      )}
-                      {ev.data?.stderr && (
-                        <div className="ml-4 p-2 bg-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] rounded border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[11px] text-[var(--z-danger)] whitespace-pre-wrap">
-                          {ev.data.stderr}
-                        </div>
-                      )}
+                <div className="px-3 sm:px-4 py-3 overflow-y-auto max-h-[560px] min-h-[340px] space-y-2" aria-live="polite" aria-relevant="additions">
+                  {filteredEvents.length === 0 ? (
+                    <div className="text-[var(--app-text-secondary)] text-center py-16 space-y-2">
+                      <Terminal className="w-6 h-6 mx-auto opacity-50" />
+                      <p>{events.length ? 'No events match this filter.' : 'Execution trace is empty.'}</p>
+                      <p className="text-[11px] opacity-75">Start an execution to stream real orchestration events here.</p>
                     </div>
-                  ))
-                )}
-                <div ref={terminalEndRef} />
-              </div>
+                  ) : filteredEvents.map((ev, idx) => (
+                    <article key={`${ev.timestamp}-${idx}`} className={`rounded-lg border px-3 py-2 space-y-1.5 ${ev.type === 'error' ? 'border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_7%,transparent)]' : 'border-[var(--app-card-border)] bg-[var(--app-surface)]'}`}>
+                      <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
+                        <time className="text-[10px] text-[var(--app-text-secondary)] shrink-0">{ev.timestamp && !Number.isNaN(Date.parse(ev.timestamp)) ? new Date(ev.timestamp).toLocaleTimeString() : '--:--:--'}</time>
+                        <span className="text-[10px] uppercase tracking-wide text-[var(--app-accent)] shrink-0">{ev.role || ev.type}</span>
+                        <p className={`min-w-0 flex-1 whitespace-pre-wrap break-words ${ev.type === 'error' ? 'text-[var(--z-danger)] font-semibold' : 'text-[var(--app-text-primary)]'}`}>{ev.message}</p>
+                      </div>
+                      {ev.data?.stdout && <pre className="max-h-48 overflow-auto rounded-md bg-[var(--app-bg-secondary)] border border-[var(--app-card-border)] p-2 text-[11px] leading-relaxed text-[var(--app-accent)] whitespace-pre-wrap break-words">{ev.data.stdout}</pre>}
+                      {ev.data?.stderr && <pre className="max-h-48 overflow-auto rounded-md bg-[color-mix(in_srgb,var(--z-danger)_7%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] p-2 text-[11px] leading-relaxed text-[var(--z-danger)] whitespace-pre-wrap break-words">{ev.data.stderr}</pre>}
+                      {ev.data?.exitCode !== undefined && <p className="text-[10px] text-[var(--app-text-secondary)]">Exit code: {String(ev.data.exitCode)}</p>}
+                    </article>
+                  ))}
+                  <div ref={terminalEndRef} />
+                </div>
+              </section>
             )}
 
             {/* TAB 3: SANDBOX RUNNER */}
@@ -803,7 +811,7 @@ export const DevStudio: React.FC = () => {
                 <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
                   <div className="text-xs font-bold text-[var(--app-text-primary)] flex items-center gap-2">
                     <Terminal className="w-4 h-4 text-[var(--app-amber)]" />
-                    <span>Execute Sandbox Command via ToolGateway</span>
+                    <span>Restricted Command Runner</span>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <select
@@ -823,7 +831,7 @@ export const DevStudio: React.FC = () => {
                       type="text"
                       value={sandboxArgs}
                       onChange={(e) => setSandboxArgs(e.target.value)}
-                      placeholder="e.g. solution.js or -la"
+                      placeholder="Arguments, e.g. solution.js or -la"
                       className="flex-1 px-3 py-2 bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] rounded-xl text-xs text-[var(--app-text-primary)] font-mono focus:outline-none focus:border-[var(--app-accent)]"
                     />
 
@@ -833,9 +841,12 @@ export const DevStudio: React.FC = () => {
                       className="px-5 py-2 text-xs font-bold text-white bg-[var(--app-amber)] hover:bg-[var(--app-amber)] rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
                       <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>{isExecutingSandbox ? 'Executing...' : 'Run in Sandbox'}</span>
+                      <span>{isExecutingSandbox ? 'Running...' : 'Run command'}</span>
                     </button>
                   </div>
+                  <p className="text-[10px] leading-relaxed text-[var(--app-text-secondary)]">
+                    Allowlisted commands only. Arguments are passed directly to the command runner; shell operators, pipes and interactive shell sessions are not supported.
+                  </p>
                 </div>
 
                 {/* Sandbox Output Console */}

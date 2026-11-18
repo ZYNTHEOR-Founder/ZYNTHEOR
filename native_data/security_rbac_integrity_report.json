@@ -1,9 +1,9 @@
 {
   "suite": "security-rbac-integrity",
-  "timestamp": "2026-11-18T15:33:03.910Z",
-  "passed": 39,
+  "timestamp": "2026-11-18T21:12:16.665Z",
+  "passed": 22,
   "failed": 0,
-  "blocked": 0,
+  "blocked": 1,
   "evidence": [
     "PASS:protected /api/workspace/files|requireAuth",
     "PASS:protected /api/workspace/file|requireAuth",
@@ -27,22 +27,6 @@
     "PASS:restore requires confirmTampered",
     "PASS:restore has replay protection marker",
     "PASS:restore backs up client logs",
-    "PASS:forged role header denied|status=401",
-    "PASS:unauth denied /api/workspace/files|status=401",
-    "PASS:unauth denied /api/memory|status=401",
-    "PASS:unauth denied /api/agent/execute|status=401",
-    "PASS:unauth denied /api/audit|status=401",
-    "PASS:unauth denied /api/model/train|status=401",
-    "PASS:User denied /api/audit|status=403",
-    "PASS:Developer allowed /api/audit",
-    "PASS:create doc tenant A|doc_1795015983802_0onpx",
-    "PASS:cross-tenant list isolation",
-    "PASS:seal logs|215a1852ac75",
-    "PASS:restore without confirm denied|400",
-    "PASS:restore without tamper evidence denied|409",
-    "PASS:restore with tamper evidence|backup_before_restore_user_rbac_1795015983872.json",
-    "PASS:restore replay blocked|409",
-    "PASS:logout revokes token",
-    "PASS:revoked token rejected"
+    "BLOCKED:server reachable|fetch failed"
   ]
 }

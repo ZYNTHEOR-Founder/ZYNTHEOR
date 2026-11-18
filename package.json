@@ -14,7 +14,7 @@
     "lint": "tsc --noEmit",
     "test": "tsx tests/sovereignty.test.ts",
     "test:identity": "node tests/identity-trust.run.mjs",
-    "test:all": "node --test tests/command-center-dispatch.test.mjs && node tests/identity-trust.run.mjs && node tests/knowledge-intelligence.run.mjs && node tests/security-rbac-integrity.run.mjs && node --experimental-strip-types tests/knowledge_e2e.test.ts",
+    "test:all": "node --test tests/command-center-dispatch.test.mjs tests/native-only-ui-integrity.test.mjs && node tests/identity-trust.run.mjs && node tests/knowledge-intelligence.run.mjs && node tests/security-rbac-integrity.run.mjs && node --experimental-strip-types tests/knowledge_e2e.test.ts",
     "test:knowledge": "node tests/knowledge-intelligence.run.mjs",
     "test:live": "node tests/knowledge-live-http.run.mjs",
     "test:knowledge-e2e": "node --experimental-strip-types tests/knowledge_e2e.test.ts",

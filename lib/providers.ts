@@ -1,6 +1,6 @@
 /**
  * ZYNTHEOR Sovereign Neural Providers
- * 100% First-Party Native Neural LM Provider + Bridge Lifecycle & Pluggable External Brain Slot.
+ * First-party Native Neural LM Provider and bridge lifecycle.
  * Zero external AI SDK packages. Communicates with `python3 -m qplus_native.bridge` via NDJSON stdio.
  */
 
@@ -698,42 +698,5 @@ export class NativeNeuralLMProvider {
 
   public async inspectCheckpoint(): Promise<any> {
     return this.sendCommand<any>('inspect_checkpoint');
-  }
-}
-
-export interface ExternalBrainStatus {
-  configured: boolean;
-  provider: string | null;
-  model: string | null;
-  hasBaseUrlOverride: boolean;
-  hasApiKey: boolean;
-  mode: 'HYBRID_EXTERNAL_BRAIN' | 'UNCONFIGURED';
-  reason: string;
-}
-
-/**
- * Pluggable External Brain Slot (Hybrid Path A).
- * Connects via standard HTTPS fetch only when ZYNTHEOR_BRAIN_PROVIDER + ZYNTHEOR_NATIVE_CHECKPOINT
- * (or local local) are explicitly configured in environment variables. Fails closed otherwise.
- */
-export class ExternalBrainProvider {
-  public static getStatus(): ExternalBrainStatus {
-    const provider = (process.env.ZYNTHEOR_BRAIN_PROVIDER || '').trim().toLowerCase();
-    const model = (process.env.ZYNTHEOR_BRAIN_MODEL || '').trim();
-    const baseUrl = (process.env.ZYNTHEOR_BRAIN_BASE_URL || '').trim();
-    const hasKey = false; // External brain removed
-    const configured = Boolean(provider && (hasKey || provider === 'local'));
-
-    return {
-      configured,
-      provider: provider || null,
-      model: model || null,
-      hasBaseUrlOverride: Boolean(baseUrl),
-      hasApiKey: hasKey,
-      mode: configured ? 'HYBRID_EXTERNAL_BRAIN' : 'UNCONFIGURED',
-      reason: configured
-        ? `External reasoning slot configured (${provider}${model ? `:${model}` : ''}); deterministic sandbox still gates every execution.`
-        : 'FAIL_CLOSED: ZYNTHEOR_BRAIN_PROVIDER / ZYNTHEOR_NATIVE_CHECKPOINT not configured (Zero-Simulation active; deterministic scaffold handles verified blueprints).',
-    };
   }
 }

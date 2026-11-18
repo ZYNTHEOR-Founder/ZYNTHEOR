@@ -1,6 +1,6 @@
 import React from 'react';
 import { ModuleId, SystemStatusData } from '../types';
-import { Menu, ShieldCheck, Terminal, RefreshCw, Clock, Keyboard, Sparkles, Search, Cloud, Settings2 } from 'lucide-react';
+import { Menu, Terminal, RefreshCw, Clock, Keyboard, Sparkles, Search } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -74,15 +74,12 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const auditChainValid = statusData?.audit?.chainValid === true;
-  const isCloudRuntimeConnected = Boolean(statusData?.model?.weightsLoaded && statusData?.model?.inferenceReady);
-  const phase = statusData?.commercial?.currentPhase || 'COMMERCIAL_LAUNCH';
-  const phaseLabel =
-    phase === 'COMMERCIAL_LAUNCH'
-      ? t('badge.commercial_launch')
-      : phase === 'PUBLIC_BETA'
-      ? t('badge.public_beta')
-      : t('badge.private_beta');
+  const isNativeRuntimeReady = Boolean(statusData?.model?.weightsLoaded && statusData?.model?.inferenceReady);
+  const runtimeStatusLabel = statusData === null
+    ? (lang === 'th' ? 'Native Runtime: กำลังรอข้อมูลสถานะ' : 'Native Runtime: Awaiting status data')
+    : isNativeRuntimeReady
+      ? (lang === 'th' ? 'Native Runtime: โหลดโมเดลและ Inference พร้อมแล้ว' : 'Native Runtime: Model loaded and inference ready')
+      : (lang === 'th' ? 'Native Runtime: ยังไม่พร้อมใช้งาน Inference' : 'Native Runtime: Inference is not ready');
 
   return (
     <header className="bg-[color-mix(in_srgb,var(--app-surface)_85%,transparent)] backdrop-blur-md border-b border-[var(--app-card-border)] sticky top-0 z-50 transition-colors duration-200">
@@ -155,39 +152,6 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Dedicated Language Switcher Component */}
         <LanguageSwitcher variant="compact" />
 
-        {/* Live Audit Chain Indicator */}
-        <div
-          className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap"
-          style={{
-            backgroundColor: auditChainValid
-              ? 'color-mix(in srgb, var(--z-ok) 12%, transparent)'
-              : 'color-mix(in srgb, var(--app-amber) 12%, transparent)',
-            color: auditChainValid ? 'var(--status-verified)' : 'var(--app-amber)',
-            border: auditChainValid
-              ? '1px solid color-mix(in srgb, var(--z-ok) 30%, transparent)'
-              : '1px solid color-mix(in srgb, var(--app-amber) 30%, transparent)',
-          }}
-        >
-          <ShieldCheck className="w-4 h-4 shrink-0" />
-          <span>{t('badge.sovereign')}</span>
-          <span className="opacity-50 font-normal">·</span>
-          <span className="font-mono text-[11px] font-bold">
-            {auditChainValid ? 'Audit Chain SHA-256' : 'Awaiting Telemetry'}
-          </span>
-        </div>
-
-        {/* Phase Indicator */}
-        <div
-          className="hidden 2xl:flex items-center px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap"
-          style={{
-            backgroundColor: 'var(--app-card)',
-            color: 'var(--app-text-primary)',
-            border: '1px solid var(--app-card-border)',
-          }}
-        >
-          {phaseLabel}
-        </div>
-
         {/* Keyboard Shortcuts Trigger Button */}
         {onOpenShortcuts && (
           <button
@@ -257,44 +221,33 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Immediate Cloud Runtime Connectivity Bar (shown immediately without waiting to load) */}
+      {/* Compact runtime truth indicator; readiness is derived only from loaded weights + inference readiness. */}
       <div
         role="status"
         data-testid="header-cloud-status"
-        className={`px-2.5 sm:px-4 md:px-8 py-1.5 border-t flex flex-wrap items-center justify-between gap-2 text-xs ${
-          isCloudRuntimeConnected
-            ? 'border-[color-mix(in_srgb,var(--z-ok)_25%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_10%,var(--app-surface))] text-[var(--z-ok)]'
-            : 'border-[color-mix(in_srgb,var(--app-amber)_45%,transparent)] bg-[color-mix(in_srgb,var(--app-amber)_14%,var(--app-surface))] text-[var(--app-amber)]'
-        }`}
+        aria-label={runtimeStatusLabel}
+        className="min-h-8 px-3 sm:px-5 md:px-8 flex items-center justify-between gap-3 border-t text-[10px] sm:text-[11px]"
+        style={{ borderColor: 'var(--app-card-border)', color: 'var(--app-text-secondary)' }}
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <span className="flex min-w-0 items-center gap-2">
           <span
-            className={`w-2 h-2 rounded-full shrink-0 ${
-              isCloudRuntimeConnected ? 'bg-[var(--z-ok)]' : 'bg-[var(--app-amber)]'
-            }`}
+            className="h-1.5 w-1.5 rounded-full shrink-0"
+            style={{
+              background: isNativeRuntimeReady ? 'var(--status-verified)' : 'var(--app-amber)',
+              boxShadow: isNativeRuntimeReady ? '0 0 9px var(--app-accent-glow)' : 'none',
+            }}
             aria-hidden="true"
           />
-          <Cloud className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-          <span className="font-semibold truncate">
-            {isCloudRuntimeConnected
-              ? (lang === 'th'
-                  ? 'Cloud Runtime: เชื่อมต่อแล้ว · พร้อมประมวลผลโมเดล'
-                  : 'Cloud Runtime: Connected · Model inference ready')
-              : (lang === 'th'
-                  ? 'Cloud Runtime: ยังไม่เชื่อมต่อ (ไม่พบ Checkpoint หรือ Cloud Endpoint)'
-                  : 'Cloud Runtime: Disconnected (Checkpoint or Cloud Endpoint not configured)')}
-          </span>
-        </div>
-
-        {!isCloudRuntimeConnected && (
+          <span className="truncate">{runtimeStatusLabel}</span>
+        </span>
+        {!isNativeRuntimeReady && (
           <button
             type="button"
             data-testid="header-configure-connection-btn"
             onClick={onOpenCloudSettings || onOpenSettings}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold bg-[var(--app-amber)] text-slate-950 hover:opacity-90 transition-opacity cursor-pointer whitespace-nowrap shrink-0"
+            className="shrink-0 font-semibold transition-colors hover:text-[var(--app-accent)] cursor-pointer"
           >
-            <Settings2 className="w-3.5 h-3.5 shrink-0" />
-            <span>{lang === 'th' ? 'ตั้งค่าการเชื่อมต่อ' : 'Configure Connection'}</span>
+            {lang === 'th' ? 'ตรวจสอบการตั้งค่า' : 'Check configuration'}
           </button>
         )}
       </div>

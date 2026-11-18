@@ -915,7 +915,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
       {investigation && (
         <VividCard
           title="Live Research Investigation Findings"
-          subtitle={`Verifier: ${investigation.reasoning?.verifierAttribution || 'adaptive_reasoning'} · External Brain: ${investigation.externalBrain?.configured ? investigation.externalBrain.provider : 'NOT_CONFIGURED'}`}
+          subtitle={`Verifier: ${investigation.reasoning?.verifierAttribution || 'adaptive_reasoning'} · Native reasoning pipeline`}
           gradientAccent="cyan"
         >
           <div className="space-y-4 text-xs">
