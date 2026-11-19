@@ -357,5 +357,55 @@
     "parsedMetadata": {
       "headingCount": 0
     }
+  },
+  {
+    "id": "doc_1795084511019_kpwqb",
+    "title": "TenantA Secret 1795084511013",
+    "content": "cross-tenant isolation probe content unique 0a7668ff",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-19T10:35:11.020Z",
+    "updatedAt": "2026-11-19T10:35:11.020Z",
+    "contentHash": "bb162c6aa97c415b423e6fb6cb274667f6dbbda65adb4ca7610a7549f93de6f8",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1795085210248_wql6e",
+    "title": "TenantA Secret 1795085210244",
+    "content": "cross-tenant isolation probe content unique 4d779aae",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-19T10:46:50.248Z",
+    "updatedAt": "2026-11-19T10:46:50.248Z",
+    "contentHash": "cd68f6e04b3f9830a8836ad73d3ac3f600b6b0f1d6b4f053eb0410183070abe8",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
   }
 ]

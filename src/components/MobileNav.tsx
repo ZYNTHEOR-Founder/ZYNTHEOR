@@ -25,7 +25,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
     icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   }> = [
     { id: 'command_center', label: lang === 'th' ? 'บัญชาการ' : 'Command', icon: LayoutDashboard },
-    { id: 'intelligence_core', label: lang === 'th' ? 'ปัญญา' : 'Intelligence', icon: Sparkles },
+    { id: 'intelligence_core', label: lang === 'th' ? 'อัจฉริยะ' : 'Intelligence', icon: Sparkles },
     { id: 'research_lab', label: lang === 'th' ? 'วิจัย' : 'Research', icon: FlaskConical },
   ];
 
@@ -34,8 +34,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   return (
     <nav
       aria-label={lang === 'th' ? 'เมนูนำทางหลักบนมือถือ' : 'Mobile primary navigation'}
-      className="fixed bottom-0 left-0 right-0 z-30 backdrop-blur-xl px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] flex items-center justify-around lg:hidden"
-      style={{ backgroundColor: 'color-mix(in srgb, var(--app-surface) 94%, transparent)', borderTop: '1px solid var(--app-card-border)', color: 'var(--app-text-primary)' }}
+      className="fixed bottom-0 left-0 right-0 z-30 px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] flex items-center justify-around lg:hidden"
+      style={{ backgroundColor: 'var(--app-surface)', borderTop: '1px solid var(--app-card-border)', color: 'var(--app-text-primary)' }}
     >
       {quickItems.map((item) => {
         const Icon = item.icon;
@@ -46,11 +46,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             type="button"
             onClick={() => onSelectModule(item.id)}
             aria-current={isActive ? 'page' : undefined}
-            className="min-h-12 min-w-12 flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors cursor-pointer"
-            style={{ color: isActive ? 'var(--app-accent)' : 'var(--app-text-secondary)', fontWeight: isActive ? 700 : 500 }}
+            className="min-h-12 min-w-12 flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-lg transition-colors cursor-pointer"
+            style={{ color: isActive ? 'var(--app-accent)' : 'var(--app-text-secondary)', fontWeight: isActive ? 600 : 500 }}
           >
             <Icon className="w-[18px] h-[18px] shrink-0" />
-            <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
+            <span className="text-[11px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
           </button>
         );
       })}
@@ -59,11 +59,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         onClick={onOpenMore}
         aria-label={lang === 'th' ? 'เปิดเมนูระบบทั้งหมด' : 'Open all system modules'}
         aria-current={isMoreActive ? 'page' : undefined}
-        className="min-h-12 min-w-12 flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors cursor-pointer"
+        className="min-h-12 min-w-12 flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-lg transition-colors cursor-pointer"
         style={{ color: isMoreActive ? 'var(--app-accent)' : 'var(--app-text-secondary)' }}
       >
         <MoreHorizontal className="w-[18px] h-[18px] shrink-0" />
-        <span className="text-[10px] mt-0.5 leading-tight">{lang === 'th' ? 'ระบบทั้งหมด' : 'All modules'}</span>
+        <span className="text-[11px] mt-0.5 leading-tight">{lang === 'th' ? 'เมนูทั้งหมด' : 'All modules'}</span>
       </button>
     </nav>
   );

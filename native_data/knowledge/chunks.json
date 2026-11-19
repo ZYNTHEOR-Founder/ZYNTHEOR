@@ -158,5 +158,25 @@
     "text": "cross-tenant isolation probe content unique 31462acd",
     "language": "en",
     "hash": "f5ba80970f182ef4e9dcbd36083237a65d113c365d243bb5d02feeaf2bd25fbc"
+  },
+  {
+    "id": "chk_doc_1795084511019_kpwqb_0",
+    "documentId": "doc_1795084511019_kpwqb",
+    "documentTitle": "TenantA Secret 1795084511013",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 0a7668ff",
+    "language": "en",
+    "hash": "bb162c6aa97c415b423e6fb6cb274667f6dbbda65adb4ca7610a7549f93de6f8"
+  },
+  {
+    "id": "chk_doc_1795085210248_wql6e_0",
+    "documentId": "doc_1795085210248_wql6e",
+    "documentTitle": "TenantA Secret 1795085210244",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 4d779aae",
+    "language": "en",
+    "hash": "cd68f6e04b3f9830a8836ad73d3ac3f600b6b0f1d6b4f053eb0410183070abe8"
   }
 ]

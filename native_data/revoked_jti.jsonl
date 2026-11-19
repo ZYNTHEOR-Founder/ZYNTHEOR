@@ -7,3 +7,5 @@
 {"jti":"04c95f15-81a3-4ceb-86d6-8e1efd0f76bc","revokedAt":"2026-11-18T14:56:51.319Z","sub":"user_rbac","reason":"logout"}
 {"jti":"580daa7d-7baa-48bc-b1ad-aaa7dc1d54cc","revokedAt":"2026-11-18T15:19:59.476Z","sub":"user_rbac","reason":"logout"}
 {"jti":"f9ac9d65-ebc0-4edc-b4bf-4001e734b5e8","revokedAt":"2026-11-18T15:33:03.897Z","sub":"user_rbac","reason":"logout"}
+{"jti":"08e06a65-419c-4030-8dc5-f447db489871","revokedAt":"2026-11-19T10:35:11.066Z","sub":"user_rbac","reason":"logout"}
+{"jti":"2bee5c27-fc19-41c3-8190-ca8861b4c3fa","revokedAt":"2026-11-19T10:46:50.288Z","sub":"user_rbac","reason":"logout"}

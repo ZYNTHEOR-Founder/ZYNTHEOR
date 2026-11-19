@@ -11,92 +11,92 @@ export interface Translations {
 
 export const DICTIONARY: Translations = {
   // Navigation & Ecosystem
-  'nav.ecosystem': { th: 'ระบบนิเวศ', en: 'Ecosystem' },
-  'nav.command_center': { th: 'ศูนย์บัญชาการระบบ', en: 'Command Center' },
-  'nav.conversational_intelligence': { th: 'ระบบสนทนาอัจฉริยะ', en: 'Conversational AI' },
-  'nav.intelligence_core': { th: 'แกนสมองประสาทเทียม', en: 'Intelligence Core' },
+  'nav.ecosystem': { th: 'ระบบหลัก', en: 'System' },
+  'nav.command_center': { th: 'ศูนย์บัญชาการ', en: 'Command Center' },
+  'nav.conversational_intelligence': { th: 'สนทนาอัจฉริยะ', en: 'Conversational AI' },
+  'nav.intelligence_core': { th: 'แกนประมวลผลหลัก', en: 'Intelligence Core' },
   'nav.model_laboratory': { th: 'ห้องปฏิบัติการโมเดล', en: 'Model Laboratory' },
   'nav.dev_studio': { th: 'สตูดิโอนักพัฒนา', en: 'Dev Studio' },
-  'nav.automation_center': { th: 'ศูนย์ควบคุมระบบอัตโนมัติ', en: 'Automation Center' },
-  'nav.api_platform': { th: 'แพลตฟอร์ม API & นักพัฒนา', en: 'API Platform' },
-  'nav.research_lab': { th: 'ห้องวิจัยการเรียนรู้', en: 'Research Lab' },
-  'nav.knowledge_hub': { th: 'คลังปัญญาความรู้', en: 'Knowledge Hub' },
-  'nav.experiment_center': { th: 'ศูนย์ทดลอง & จำลองผล', en: 'Experiment Center' },
-  'nav.marketplace': { th: 'ตลาดทักษะ & มาร์เก็ตเพลส', en: 'Marketplace' },
-  'nav.subscription_billing': { th: 'การเงิน & แผนบริการ', en: 'Billing & Plans' },
-  'nav.analytics_bi': { th: 'การวิเคราะห์ & ผลลัพธ์งาน', en: 'Execution Insights' },
-  'nav.proof_of_intelligence': { th: 'ศูนย์พิสูจน์อัจฉริยภาพ (Proof)', en: 'Proof of Intelligence' },
-  'nav.infrastructure_cloud': { th: 'โครงสร้างพื้นฐาน & คลาวด์', en: 'Infrastructure & Cloud' },
-  'nav.governance_security': { th: 'ธรรมาภิบาล & บัญชีหลักฐาน', en: 'Governance & Evidence' },
-  'nav.admin_console': { th: 'คอนโซลผู้ดูแลระบบ', en: 'Admin Console' },
-  'nav.user_settings': { th: 'บัญชี & การตั้งค่าระบบ', en: 'Account & Settings' },
+  'nav.automation_center': { th: 'ระบบอัตโนมัติ', en: 'Automation Center' },
+  'nav.api_platform': { th: 'แพลตฟอร์ม API', en: 'API Platform' },
+  'nav.research_lab': { th: 'ห้องวิจัยและทดสอบ', en: 'Research Lab' },
+  'nav.knowledge_hub': { th: 'คลังความรู้', en: 'Knowledge Hub' },
+  'nav.experiment_center': { th: 'ศูนย์ทดลองโมเดล', en: 'Experiment Center' },
+  'nav.marketplace': { th: 'คลังส่วนเสริม', en: 'Marketplace' },
+  'nav.subscription_billing': { th: 'แพ็กเกจและการเงิน', en: 'Billing & Plans' },
+  'nav.analytics_bi': { th: 'วิเคราะห์ผลลัพธ์งาน', en: 'Execution Insights' },
+  'nav.proof_of_intelligence': { th: 'หลักฐานความสามารถ (Proof)', en: 'Proof of Intelligence' },
+  'nav.infrastructure_cloud': { th: 'โครงสร้างพื้นฐาน & Cloud', en: 'Infrastructure & Cloud' },
+  'nav.governance_security': { th: 'ความปลอดภัย & Audit', en: 'Governance & Evidence' },
+  'nav.admin_console': { th: 'จัดการระบบ (Admin)', en: 'Admin Console' },
+  'nav.user_settings': { th: 'บัญชีและการตั้งค่า', en: 'Account & Settings' },
 
   // Group headers
-  'group.operations': { th: 'การปฏิบัติการ & แกนสมอง', en: 'OPERATIONS & CORE' },
-  'group.engineering': { th: 'วิศวกรรม & การพัฒนาโค้ด', en: 'ENGINEERING & CODE' },
-  'group.reasoning': { th: 'การให้เหตุผล & วิจัย', en: 'REASONING & LAB' },
-  'group.business': { th: 'ธุรกิจ & พาณิชย์', en: 'BUSINESS & SAAS' },
-  'group.trust': { th: 'ความปลอดภัย & ธรรมาภิบาล', en: 'TRUST & SYSTEM' },
+  'group.operations': { th: 'ศูนย์ปฏิบัติการ', en: 'OPERATIONS & CORE' },
+  'group.engineering': { th: 'พัฒนาและโค้ด', en: 'ENGINEERING & CODE' },
+  'group.reasoning': { th: 'วิจัยและวิเคราะห์', en: 'REASONING & LAB' },
+  'group.business': { th: 'บริการและแผนงาน', en: 'BUSINESS & SAAS' },
+  'group.trust': { th: 'ความปลอดภัยและระบบ', en: 'TRUST & SYSTEM' },
 
   // Common UI actions
-  'btn.run_agent': { th: 'สั่งงาน Sovereign Agent', en: 'Run Sovereign Agent' },
+  'btn.run_agent': { th: 'สั่งงานด่วน', en: 'Quick Run' },
   'btn.run': { th: 'สั่งงาน', en: 'Run' },
   'btn.send': { th: 'ส่งคำสั่ง', en: 'Send' },
   'btn.verify': { th: 'ตรวจสอบ', en: 'Verify' },
-  'btn.refresh': { th: 'รีเฟรช', en: 'Refresh' },
+  'btn.refresh': { th: 'อัปเดต', en: 'Refresh' },
   'btn.copy': { th: 'คัดลอก', en: 'Copy' },
   'btn.copied': { th: 'คัดลอกแล้ว', en: 'Copied' },
   'btn.clear': { th: 'ล้างข้อมูล', en: 'Clear' },
   'btn.download': { th: 'ดาวน์โหลด', en: 'Download' },
-  'btn.inspect': { th: 'ตรวจสอบเชิงลึก', en: 'Inspect' },
+  'btn.inspect': { th: 'ตรวจสอบ', en: 'Inspect' },
   'btn.filter': { th: 'ตัวกรอง', en: 'Filter' },
-  'btn.export': { th: 'ส่งออกข้อมูล', en: 'Export' },
+  'btn.export': { th: 'ส่งออก', en: 'Export' },
   'btn.search': { th: 'ค้นหา', en: 'Search' },
 
   // Header badges & status
   'badge.sovereign': { th: 'Native Intelligence · Cloud Runtime', en: 'Native Intelligence · Cloud Runtime' },
-  'badge.verified': { th: 'ผ่านการพิสูจน์แล้ว', en: 'Verified' },
-  'badge.private_beta': { th: 'ทดสอบเบต้าส่วนตัว (Private Beta)', en: 'Private Beta' },
-  'badge.public_beta': { th: 'ทดสอบเบต้าสาธารณะ (Public Beta)', en: 'Public Beta' },
-  'badge.commercial_launch': { th: 'เปิดตัวเชิงพาณิชย์ (Commercial)', en: 'Commercial Launch' },
+  'badge.verified': { th: 'ผ่านการตรวจสอบแล้ว', en: 'Verified' },
+  'badge.private_beta': { th: 'เบต้าส่วนตัว', en: 'Private Beta' },
+  'badge.public_beta': { th: 'เบต้าสาธารณะ', en: 'Public Beta' },
+  'badge.commercial_launch': { th: 'เวอร์ชันเต็ม', en: 'Commercial Launch' },
   'footer.sovereign_desc': { th: 'Native Core · Online Cloud Runtime · Fail-Closed Governance', en: 'Native Core · Online Cloud Runtime · Fail-Closed Governance' },
 
   // Conversational Intelligence
-  'chat.title': { th: 'ระบบสนทนาและให้เหตุผลสองภาษา', en: 'Bilingual Conversational & Reasoning Core' },
-  'chat.subtitle': { th: 'ใช้ Native Cloud Runtime เมื่อ checkpoint ผ่านการตรวจสอบ และแสดงสถานะจากระบบจริง', en: 'Uses the Native Cloud Runtime after checkpoint verification; status is reported from live system evidence.' },
-  'chat.input_placeholder': { th: 'พิมพ์คำถามหรือคำสั่งภาษาไทย หรือ English... (เช่น สร้างฟังก์ชันตรวจสอบสิทธิ์, อธิบายขั้นตอน)', en: 'Type prompt in Thai or English... (e.g. Write an auth validator, explain architecture)' },
-  'chat.thinking': { th: 'โมเดลกำลังวิเคราะห์และประมวลผล...', en: 'Model is analyzing and generating tokens...' },
-  'chat.thought_process': { th: 'ขั้นตอนการให้เหตุผลที่ตรวจสอบได้ (Verifiable Reasoning)', en: 'Verifiable Reasoning Process' },
-  'chat.thought_hide': { th: 'ซ่อนขั้นตอนการคิด', en: 'Hide reasoning steps' },
-  'chat.thought_show': { th: 'แสดงขั้นตอนการคิด', en: 'Show reasoning steps' },
-  'chat.throughput': { th: 'ความเร็วประมวลผล', en: 'Throughput' },
-  'chat.tokens': { th: 'จำนวนโทเค็น', en: 'Total Tokens' },
+  'chat.title': { th: 'สนทนาอัจฉริยะ (ไทย / English)', en: 'Bilingual Conversational Core' },
+  'chat.subtitle': { th: 'ทำงานบน Cloud Runtime จริงเมื่อ Checkpoint พร้อมใช้งาน และแสดงสถานะตามข้อมูลระบบ', en: 'Uses the Native Cloud Runtime after checkpoint verification; status is reported from live system evidence.' },
+  'chat.input_placeholder': { th: 'พิมพ์คำสั่งหรือคำถามเป็นภาษาไทย หรือ English... (เช่น สร้างฟังก์ชัน auth, อธิบายโค้ด)', en: 'Type prompt in Thai or English... (e.g. Write an auth validator, explain architecture)' },
+  'chat.thinking': { th: 'กำลังวิเคราะห์และประมวลผล...', en: 'Analyzing and generating tokens...' },
+  'chat.thought_process': { th: 'ขั้นตอนการให้เหตุผล', en: 'Reasoning Process' },
+  'chat.thought_hide': { th: 'ซ่อนขั้นตอน', en: 'Hide steps' },
+  'chat.thought_show': { th: 'ดูขั้นตอน', en: 'Show steps' },
+  'chat.throughput': { th: 'ความเร็ว', en: 'Throughput' },
+  'chat.tokens': { th: 'โทเค็นทั้งหมด', en: 'Total Tokens' },
   'chat.latency': { th: 'เวลาตอบสนองแรก', en: 'Time to First Token' },
   'chat.dual_lang_pill1': { th: 'สร้าง Token Validator พร้อม HMAC-SHA256', en: 'Build Token Validator with HMAC-SHA256' },
-  'chat.dual_lang_pill2': { th: 'วิเคราะห์โครงสร้าง Sovereign Sandbox', en: 'Analyze Sovereign Sandbox Architecture' },
-  'chat.dual_lang_pill3': { th: 'เขียนโมดูลความจำระยะยาว Episodic Memory', en: 'Write Episodic Memory Storage Module' },
-  'chat.dual_lang_pill4': { th: 'ตรวจสอบสถานะความปลอดภัย Runtime Tamper Check', en: 'Check Runtime Sandbox Tamper Verification' },
+  'chat.dual_lang_pill2': { th: 'วิเคราะห์โครงสร้าง /workspace Sandbox', en: 'Analyze Sovereign Sandbox Architecture' },
+  'chat.dual_lang_pill3': { th: 'เขียนโมดูลความจำ Episodic Memory', en: 'Write Episodic Memory Storage Module' },
+  'chat.dual_lang_pill4': { th: 'ตรวจสถานะความปลอดภัย Runtime Tamper Check', en: 'Check Runtime Sandbox Tamper Verification' },
 
   // Governance & Security
-  'gov.title': { th: 'ระบบธรรมาภิบาล ความปลอดภัย และการตรวจสอบความถูกต้อง', en: 'Governance, Security & Integrity Verification' },
-  'gov.tamper_title': { th: 'เครื่องมือตรวจสอบความสมบูรณ์ของ Sandbox (Runtime Tamper Verification)', en: 'Sandbox Runtime Tamper Verification Tool' },
-  'gov.tamper_desc': { th: 'รัน No-Op Probe ภายใน /workspace sandbox เพื่อตรวจสอบลายเซ็น SHA-256 เทียบกับ Genesis State และป้องกัน Path Traversal หรือ Symlink Escape', en: 'Executes isolated no-op script inside /workspace sandbox, comparing SHA-256 against Genesis State to prevent path traversal or symlink escapes.' },
-  'gov.btn_run_tamper': { th: 'รันการตรวจสอบสภาพแวดล้อม (Execute Tamper Check)', en: 'Execute Sandbox Tamper Verification' },
-  'gov.tamper_free': { th: 'สภาพแวดล้อมปลอดภัย ปราศจากการดัดแปลง (TAMPER-FREE)', en: 'Environment Verified Untampered (TAMPER-FREE)' },
-  'gov.tamper_detected': { th: 'ตรวจพบความผิดปกติใน Sandbox (TAMPER DETECTED)', en: 'Sandbox Anomaly Detected (TAMPER DETECTED)' },
-  'gov.genesis_hash': { th: 'ลายเซ็นตั้งต้น Genesis Hash', en: 'Genesis State Hash' },
-  'gov.exec_hash': { th: 'ลายเซ็นการประมวลผล Execution Hash', en: 'Probe Execution Hash' },
-  'gov.files_audited': { th: 'ไฟล์ใน Sandbox ที่ตรวจสอบ', en: 'Audited Sandbox Files' },
-  'gov.boundary_intact': { th: 'ขอบเขต Sandbox ไม่ถูกเจาะทะลุ', en: 'Sandbox Boundary Intact' },
+  'gov.title': { th: 'ความปลอดภัยและการตรวจสอบความถูกต้อง', en: 'Governance, Security & Integrity' },
+  'gov.tamper_title': { th: 'ตรวจสอบความสมบูรณ์ของ Sandbox', en: 'Sandbox Runtime Tamper Verification' },
+  'gov.tamper_desc': { th: 'รันการตรวจสอบภายใน /workspace sandbox เพื่อเทียบแฮช SHA-256 กับค่าตั้งต้น ป้องกัน Path Traversal', en: 'Executes isolated no-op script inside /workspace sandbox, comparing SHA-256 against Genesis State.' },
+  'gov.btn_run_tamper': { th: 'รันการตรวจสอบ Sandbox', en: 'Run Sandbox Tamper Check' },
+  'gov.tamper_free': { th: 'สภาพแวดล้อมปลอดภัย ไม่พบการดัดแปลง', en: 'Environment Verified Untampered' },
+  'gov.tamper_detected': { th: 'ตรวจพบความผิดปกติใน Sandbox', en: 'Sandbox Anomaly Detected' },
+  'gov.genesis_hash': { th: 'Genesis State Hash', en: 'Genesis State Hash' },
+  'gov.exec_hash': { th: 'Execution Hash', en: 'Execution Hash' },
+  'gov.files_audited': { th: 'ไฟล์ใน Sandbox ที่ตรวจแล้ว', en: 'Audited Sandbox Files' },
+  'gov.boundary_intact': { th: 'ขอบเขต Sandbox ปกติ', en: 'Sandbox Boundary Intact' },
 
   // Native Memory Controller
   'mem.title': { th: 'ระบบความจำระยะยาว (Native Episodic Memory)', en: 'Native Episodic Memory Controller' },
-  'mem.desc': { th: 'จัดเก็บความจำข้ามเซสชัน ทุกการอ่านและเขียนจะถูกบันทึกลง AuditLedger พร้อม SHA-256 Chain', en: 'Persists memories across sessions. All read/write operations cryptographically audited in SHA-256 ledger.' },
+  'mem.desc': { th: 'จัดเก็บความจำข้ามเซสชัน และบันทึกการเปลี่ยนแปลงลง AuditLedger พร้อม SHA-256 Chain', en: 'Persists memories across sessions. All operations are audited in SHA-256 ledger.' },
   'mem.store_key': { th: 'คีย์ความจำ (Key)', en: 'Memory Key' },
   'mem.store_value': { th: 'ข้อมูลความจำ (Value)', en: 'Memory Content' },
   'mem.category': { th: 'หมวดหมู่', en: 'Category' },
-  'mem.save_btn': { th: 'บันทึกลงความจำ Sovereign', en: 'Store In Sovereign Memory' },
-  'mem.total_items': { th: 'ความจำที่บันทึกไว้', en: 'Total Memory Items' },
+  'mem.save_btn': { th: 'บันทึกลงความจำถาวร', en: 'Store In Memory' },
+  'mem.total_items': { th: 'จำนวนความจำที่บันทึก', en: 'Total Memory Items' },
   'mem.last_persisted': { th: 'บันทึกล่าสุด', en: 'Last Persisted' }
 };
 
@@ -120,8 +120,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch {
       // ignore
     }
-    return 'th'; // Default to Thai per core requirement
+    return 'th';
   });
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
+  }, [lang]);
 
   const setLang = (newLang: Language) => {
     setLangState(newLang);

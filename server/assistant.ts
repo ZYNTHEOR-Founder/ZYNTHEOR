@@ -653,15 +653,28 @@ export function clearAssistantSessionMemory(rawSessionId: string): boolean {
   return sessionMemoryStore.delete(safeId);
 }
 
+export function resolveAssistantResponseLanguage(
+  message: string,
+  fallbackLang: 'th' | 'en' = 'th'
+): 'th' | 'en' {
+  const trimmed = (message || '').trim();
+  if (!trimmed) return fallbackLang;
+  if (/[\u0E00-\u0E7F]/.test(trimmed)) return 'th';
+  if (/[A-Za-z]{2,}/.test(trimmed)) return 'en';
+  return fallbackLang;
+}
+
 function buildSystemInstruction(
   ctx: AssistantContextInfo,
   sessionBuffer?: SessionMemoryBuffer,
-  brainPacket?: BrainCorePacket
+  brainPacket?: BrainCorePacket,
+  responseLang?: 'th' | 'en'
 ): string {
+  const resolvedLang = responseLang || (ctx.lang === 'en' ? 'en' : 'th');
   const langNote =
-    ctx.lang === 'th'
-      ? 'Respond primarily in clear, structured Thai (keep technical identifiers/code in English as appropriate) unless the user writes in another language.'
-      : 'Respond in the same language as the user (Thai or English).';
+    resolvedLang === 'th'
+      ? 'Respond in clear, structured Thai matching the user language, keeping file names, API paths, variable names, and technical commands in English (supports Thai mixed with English technical terms).'
+      : 'Respond in clear, structured English matching the user language, preserving exact file names, API paths, variable names, and technical commands.';
 
   const moduleState = ctx.moduleState || sessionBuffer?.moduleState;
   const workspaceMetadata = ctx.workspaceMetadata || sessionBuffer?.workspaceMetadata;
@@ -1131,7 +1144,8 @@ export async function runUpgradedAssistant(params: {
   webGrounding?: boolean;
   onEvent: (event: AssistantStreamEvent) => void;
 }): Promise<string> {
-  const initialLang = params.context?.lang === 'th' ? 'th' : 'en';
+  const fallbackLang: 'th' | 'en' = params.context?.lang === 'en' ? 'en' : 'th';
+  const initialLang = resolveAssistantResponseLanguage(params.message || '', fallbackLang);
   const monitor = ConnectivityMonitor.getInstance();
   const conn = await monitor.checkNow();
   const provider = NativeNeuralLMProvider.getInstance();
@@ -1206,7 +1220,10 @@ export async function runUpgradedAssistant(params: {
 
   const effectiveHistory = sessionBuffer.turns.slice(-MAX_SHORT_TERM_MESSAGES);
 
-  const lang = mergedContext.lang === 'th' ? 'th' : 'en';
+  const lang = resolveAssistantResponseLanguage(
+    params.message || '',
+    mergedContext.lang === 'en' ? 'en' : 'th'
+  );
   const startedAtMs = Date.now();
   const tenantId = mergedWorkspaceMeta?.tenantId || 'zyntheor-default';
 
@@ -1233,7 +1250,7 @@ export async function runUpgradedAssistant(params: {
     packet: brainPacket,
   });
 
-  const systemInstruction = buildSystemInstruction(mergedContext, sessionBuffer, brainPacket);
+  const systemInstruction = buildSystemInstruction(mergedContext, sessionBuffer, brainPacket, lang);
   const thinkingLevel = resolveThinkingLevel(params.thinkingMode);
 
   const contents: Content[] = effectiveHistory.map((h) => ({

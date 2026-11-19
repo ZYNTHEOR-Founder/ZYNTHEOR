@@ -30,92 +30,90 @@ export const ThemeSwitcher: React.FC = () => {
   }> = [
     {
       id: 'emerald-amber',
-      labelTh: 'Ink Indigo (น้ำเงินหมึก · ค่าเริ่มต้น)',
-      labelEn: 'Ink Indigo (default)',
-      subTh: 'หมึกคราม เน้นสัญญาณฟ้าคราม',
-      subEn: 'Ink surfaces, periwinkle signal',
-      icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0C1020',
-      borderPreview: '#2A3558',
-      accentPreview: '#8FA4FF'
+      labelTh: 'Obsidian (ค่าเริ่มต้น)',
+      labelEn: 'Obsidian (Default)',
+      subTh: 'พื้นมืดเรียบ อ่านง่าย สบายตา',
+      subEn: 'Calm dark neutral with slate-indigo accent',
+      icon: <Moon className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#0B0E14',
+      borderPreview: '#232A38',
+      accentPreview: '#6E8BFF'
     },
     {
       id: 'light',
-      labelTh: 'Paper (กระดาษสว่าง)',
-      labelEn: 'Paper (light)',
-      subTh: 'พื้นสว่าง ตัวหนังสือหมึกเข้ม',
-      subEn: 'Bright paper, ink text',
+      labelTh: 'Paper (โหมดสว่าง)',
+      labelEn: 'Paper (Light)',
+      subTh: 'พื้นสว่างสะอาดตา ตัวหนังสือคมชัด',
+      subEn: 'Clean paper light mode',
       icon: <Sun className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#EFF2F8',
-      borderPreview: '#CDD5E4',
-      accentPreview: '#2B46D9'
+      bgPreview: '#F7F8FA',
+      borderPreview: '#E2E6EE',
+      accentPreview: '#2563EB'
     },
     {
       id: 'dark',
-      labelTh: 'Ink Indigo (มืด)',
-      labelEn: 'Ink Indigo (dark)',
+      labelTh: 'Obsidian Dark',
+      labelEn: 'Obsidian Dark',
       subTh: 'โทนเดียวกับค่าเริ่มต้น',
       subEn: 'Same as default',
       icon: <Moon className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0C1020',
-      borderPreview: '#2A3558',
-      accentPreview: '#8FA4FF'
+      bgPreview: '#0B0E14',
+      borderPreview: '#232A38',
+      accentPreview: '#6E8BFF'
     },
     {
       id: 'midnight-navy',
-      labelTh: 'Graphite (เทากราไฟต์)',
-      labelEn: 'Graphite',
-      subTh: 'เทาเข้มเป็นกลาง ลดสี',
-      subEn: 'Neutral, low-chroma',
+      labelTh: 'Slate Neutral',
+      labelEn: 'Slate Neutral',
+      subTh: 'เทาเข้มเป็นกลาง ลดความจัดจ้าน',
+      subEn: 'Neutral slate surfaces',
       icon: <Palette className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0E0F12',
-      borderPreview: '#2F323B',
-      accentPreview: '#C7CCD8'
+      bgPreview: '#0B0E14',
+      borderPreview: '#232A38',
+      accentPreview: '#6E8BFF'
     },
     {
       id: 'vivid-cyan',
-      labelTh: 'Teal Signal (เขียวน้ำทะเล)',
-      labelEn: 'Teal Signal',
-      subTh: 'เขียวน้ำทะเลลึก',
-      subEn: 'Deep sea teal',
+      labelTh: 'Ocean Slate',
+      labelEn: 'Ocean Slate',
+      subTh: 'โทนฟ้าน้ำทะเลสุขุม',
+      subEn: 'Restrained sea slate',
       icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#08171A',
-      borderPreview: '#244A52',
-      accentPreview: '#4FD1C5'
+      bgPreview: '#0B1416',
+      borderPreview: '#23373D',
+      accentPreview: '#38BDF8'
     },
     {
       id: 'royal-purple',
-      labelTh: 'Saffron Dark (หญ้าฝรั่นมืด)',
-      labelEn: 'Saffron Dark',
-      subTh: 'น้ำตาลเข้ม เน้นเหลืองหญ้าฝรั่น',
-      subEn: 'Warm dark, saffron signal',
+      labelTh: 'Warm Graphite',
+      labelEn: 'Warm Graphite',
+      subTh: 'โทนมืดอุ่นสบายตา',
+      subEn: 'Warm obsidian dark',
       icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#16120A',
-      borderPreview: '#463C26',
-      accentPreview: '#F2B544'
+      bgPreview: '#14120E',
+      borderPreview: '#383124',
+      accentPreview: '#E0A94F'
     },
     {
       id: 'system',
       labelTh: 'ตามระบบ (System)',
       labelEn: 'System',
-      subTh: 'ตามโหมดมืด/สว่างของเครื่อง',
+      subTh: 'สลับมืด/สว่างตามการตั้งค่าเครื่อง',
       subEn: 'Follows OS dark/light',
       icon: <Laptop className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: 'linear-gradient(135deg, #EFF2F8 50%, #0C1020 50%)',
+      bgPreview: 'linear-gradient(135deg, #F7F8FA 50%, #0B0E14 50%)',
       borderPreview: '#94A3B8',
-      accentPreview: '#4A60DD'
+      accentPreview: '#3B5BDB'
     },
   ];
 
   const presetAccents = [
-    { label: 'Periwinkle', hex: '#8FA4FF' },
-    { label: 'Cobalt', hex: '#2B46D9' },
-    { label: 'Saffron', hex: '#F2B544' },
-    { label: 'Teal', hex: '#4FD1C5' },
-    { label: 'Jade', hex: '#5FD6A0' },
-    { label: 'Coral', hex: '#F08A4B' },
-    { label: 'Rose', hex: '#F0657A' },
-    { label: 'Graphite', hex: '#C7CCD8' }
+    { label: 'Indigo', hex: '#6E8BFF' },
+    { label: 'Cobalt', hex: '#2563EB' },
+    { label: 'Amber', hex: '#E0A94F' },
+    { label: 'Sky', hex: '#38BDF8' },
+    { label: 'Emerald', hex: '#34D399' },
+    { label: 'Slate', hex: '#94A3B8' }
   ];
 
   return (
@@ -257,7 +255,7 @@ export const ThemeSwitcher: React.FC = () => {
           <div className="flex justify-between text-[10px] text-[var(--app-text-secondary)] mt-0.5">
             <span>60% (Subtle)</span>
             <span>100% (Standard)</span>
-            <span>140% (Vibrant Neon)</span>
+            <span>140% (High Contrast)</span>
           </div>
         </div>
 

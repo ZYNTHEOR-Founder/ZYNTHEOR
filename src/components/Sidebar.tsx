@@ -66,14 +66,13 @@ const HOME_ITEM: NavItem = {
   icon: LayoutDashboard,
 };
 
-// Every existing module remains reachable; groups describe the work, not implementation details.
 const NAV_GROUPS: NavGroup[] = [
   {
     id: 'intelligence',
     labelTh: 'ปัญญาประดิษฐ์',
     labelEn: 'Intelligence',
     items: [
-      { id: 'conversational_intelligence', labelKey: 'nav.conversational_intelligence', shortTh: 'พื้นที่สนทนา', shortEn: 'Intelligence Workspace', icon: Sparkles },
+      { id: 'conversational_intelligence', labelKey: 'nav.conversational_intelligence', shortTh: 'สนทนาอัจฉริยะ', shortEn: 'Intelligence Workspace', icon: Sparkles },
       { id: 'intelligence_core', labelKey: 'nav.intelligence_core', icon: Cpu },
       { id: 'proof_of_intelligence', labelKey: 'nav.proof_of_intelligence', icon: Award },
     ],
@@ -186,17 +185,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         data-testid={`sidebar-nav-${item.id}`}
         aria-current={isActive ? 'page' : undefined}
         onClick={() => handleItemClick(item.id)}
-        className={`w-full flex items-center gap-2.5 rounded-xl text-left transition-colors duration-150 cursor-pointer ${compact ? 'px-3 py-2 text-[12px]' : 'px-3 py-2.5 text-[13px]'}`}
+        className={`w-full flex items-center gap-2.5 rounded-lg text-left transition-colors duration-150 cursor-pointer ${compact ? 'px-2.5 py-2 text-[12px]' : 'px-3 py-2 text-[13px]'}`}
         style={{
-          backgroundColor: isActive ? 'color-mix(in srgb, var(--app-accent) 13%, transparent)' : 'transparent',
-          boxShadow: isActive ? 'inset 2px 0 0 var(--app-accent)' : 'none',
+          backgroundColor: isActive ? 'color-mix(in srgb, var(--app-accent) 11%, transparent)' : 'transparent',
           color: isActive ? 'var(--app-text-primary)' : 'var(--app-text-secondary)',
-          fontWeight: isActive ? 650 : 500,
+          fontWeight: isActive ? 600 : 500,
         }}
       >
         <Icon className="w-4 h-4 shrink-0" style={{ color: isActive ? 'var(--app-accent)' : 'var(--app-text-secondary)' }} />
         <span className="truncate">{label}</span>
-        {isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full shrink-0" style={{ background: 'var(--app-accent)', boxShadow: '0 0 10px var(--app-accent-glow)' }} />}
       </button>
     );
   };
@@ -214,19 +211,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <aside
         id="zyntheor-primary-navigation"
-        className={`fixed inset-y-0 left-0 lg:static lg:shrink-0 z-[60] lg:z-40 w-[min(19rem,88vw)] lg:w-64 flex flex-col transform transition-transform duration-200 ease-out ${isMobileOpen ? 'translate-x-0 pointer-events-auto visible' : '-translate-x-full pointer-events-none invisible lg:translate-x-0 lg:pointer-events-auto lg:visible'}`}
+        className={`fixed inset-y-0 left-0 lg:static lg:shrink-0 z-[60] lg:z-40 w-[min(18.5rem,86vw)] lg:w-60 flex flex-col transform transition-transform duration-200 ease-out ${isMobileOpen ? 'translate-x-0 pointer-events-auto visible' : '-translate-x-full pointer-events-none invisible lg:translate-x-0 lg:pointer-events-auto lg:visible'}`}
         style={{ backgroundColor: 'var(--app-sidebar)', borderRight: '1px solid var(--app-card-border)' }}
       >
         <div className="sidebar-brand">
-          <div className="sidebar-brand-mark"><img src="/assets/zyntheor-icon.svg" alt="" aria-hidden="true" className="pointer-events-none select-none" /></div>
-          <div><strong>ZYNTHEOR</strong><small>VIVID INTELLIGENCE</small></div>
+          <div className="sidebar-brand-mark">
+            <img src="/assets/zyntheor-icon.svg" alt="" aria-hidden="true" className="pointer-events-none select-none" />
+          </div>
+          <div className="min-w-0">
+            <strong>ZYNTHEOR</strong>
+            <small>{lang === 'th' ? 'ระบบปฏิบัติการอัจฉริยะ' : 'Minimal Intelligence'}</small>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-3">
           <section aria-label={lang === 'th' ? 'หน้าหลัก' : 'Home'}>
-            <div className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-[.16em]" style={{ color: 'var(--app-text-secondary)' }}>
-              {lang === 'th' ? 'พื้นที่ทำงาน' : 'WORKSPACE'}
-            </div>
             {renderItem(HOME_ITEM)}
           </section>
 
@@ -237,7 +236,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               const isOpen = openGroups.has(group.id);
               const containsActive = group.items.some((item) => item.id === activeModule);
               return (
-                <section key={group.id} data-testid={`sidebar-group-${group.id}`} className="rounded-xl">
+                <section key={group.id} data-testid={`sidebar-group-${group.id}`} className="rounded-lg">
                   <button
                     type="button"
                     data-testid={`sidebar-group-toggle-${group.id}`}
@@ -248,34 +247,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       else next.add(group.id);
                       return next;
                     })}
-                    className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-left text-[12px] font-semibold transition-colors cursor-pointer"
-                    style={{ color: containsActive ? 'var(--app-text-primary)' : 'var(--app-text-secondary)', background: containsActive ? 'color-mix(in srgb, var(--app-accent) 5%, transparent)' : 'transparent' }}
+                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-left text-[12px] font-medium transition-colors cursor-pointer hover:text-[var(--app-text-primary)]"
+                    style={{ color: containsActive ? 'var(--app-text-primary)' : 'var(--app-text-secondary)' }}
                   >
                     <span>{lang === 'th' ? group.labelTh : group.labelEn}</span>
-                    <span className="flex items-center gap-2">
-                      {containsActive && <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--app-accent)' }} />}
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform opacity-70 ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
-                  {isOpen && <div className="mt-0.5 ml-2 pl-2 space-y-0.5" style={{ borderLeft: '1px solid var(--app-card-border)' }}>
-                    {group.items.map((item) => renderItem(item, true))}
-                  </div>}
+                  {isOpen && (
+                    <div className="mt-0.5 ml-2 pl-2 space-y-0.5" style={{ borderLeft: '1px solid var(--app-card-border)' }}>
+                      {group.items.map((item) => renderItem(item, true))}
+                    </div>
+                  )}
                 </section>
               );
             })}
           </nav>
         </div>
 
-        <div className="px-4 py-3" style={{ borderTop: '1px solid var(--app-card-border)', backgroundColor: 'var(--app-card)' }}>
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold" style={{ color: 'var(--app-text-primary)' }}>
-              {lang === 'th' ? `บทบาท: ${role}` : `Role: ${role}`}
-            </span>
-            <span className="text-[10px] font-mono font-bold tracking-wider" style={{ color: 'var(--app-accent)' }}>SYSTEM WORKSPACE</span>
-          </div>
-          <div className="text-[10px] mt-1 truncate" style={{ color: 'var(--app-text-secondary)' }}>
-            {lang === 'th' ? 'การควบคุมและสิทธิ์ตามบทบาท' : 'Role-based access and system navigation'}
-          </div>
+        <div className="px-4 py-3 text-xs flex items-center justify-between" style={{ borderTop: '1px solid var(--app-card-border)' }}>
+          <span className="font-medium" style={{ color: 'var(--app-text-secondary)' }}>
+            {lang === 'th' ? 'สิทธิ์การใช้งาน' : 'Role'}
+          </span>
+          <span className="font-mono text-[11px] font-semibold" style={{ color: 'var(--app-text-primary)' }}>
+            {role}
+          </span>
         </div>
       </aside>
     </>

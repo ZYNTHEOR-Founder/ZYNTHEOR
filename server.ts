@@ -4556,7 +4556,7 @@ app.post('/api/assistant/context', (req: Request, res: Response) => {
   const context = {
     sessionId,
     activeModule: typeof rawContext.activeModule === 'string' ? rawContext.activeModule : moduleState?.moduleId,
-    lang: rawContext.lang === 'th' ? ('th' as const) : ('en' as const),
+    lang: rawContext.lang === 'en' ? ('en' as const) : ('th' as const),
     role: typeof rawContext.role === 'string' ? rawContext.role : undefined,
     runtimeReady: typeof rawContext.runtimeReady === 'boolean' ? rawContext.runtimeReady : undefined,
     recentLogs: Array.isArray(rawContext.recentLogs)
@@ -4636,7 +4636,7 @@ app.post('/api/assistant/chat', async (req: Request, res: Response) => {
   const context = {
     sessionId,
     activeModule: typeof rawContext.activeModule === 'string' ? rawContext.activeModule : moduleState?.moduleId,
-    lang: rawContext.lang === 'th' ? ('th' as const) : ('en' as const),
+    lang: rawContext.lang === 'en' ? ('en' as const) : ('th' as const),
     role: typeof rawContext.role === 'string' ? rawContext.role : undefined,
     runtimeReady: typeof rawContext.runtimeReady === 'boolean' ? rawContext.runtimeReady : undefined,
     recentLogs: Array.isArray(rawContext.recentLogs)
@@ -4654,7 +4654,11 @@ app.post('/api/assistant/chat', async (req: Request, res: Response) => {
   try {
     await runUpgradedAssistant({
       sessionId,
-      message: message || 'Please analyze the attached file(s).',
+      message:
+        message ||
+        (context.lang === 'en'
+          ? 'Please analyze the attached file(s).'
+          : 'กรุณาวิเคราะห์ไฟล์ที่แนบมา'),
       history,
       attachments,
       context,

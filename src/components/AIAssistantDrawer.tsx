@@ -783,25 +783,35 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl vivid-gradient-brand flex items-center justify-center text-white shrink-0 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_28%,transparent)] flex items-center justify-center text-[var(--app-accent)] shrink-0">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h2 className="text-sm font-bold tracking-tight truncate">
+                  <h2 className="text-sm font-semibold tracking-tight truncate">
                     {lang === 'th' ? 'ผู้ช่วย AI อัจฉริยะ' : 'System AI Assistant'}
                   </h2>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[color-mix(in_srgb,var(--app-accent)_18%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]">
-                    {assistantOnline ? 'ONLINE' : 'CHECK'}
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-[color-mix(in_srgb,var(--app-accent)_12%,transparent)] text-[var(--app-accent)]">
+                    {assistantOnline
+                      ? lang === 'th'
+                        ? 'พร้อมรับคำสั่ง'
+                        : 'ONLINE'
+                      : lang === 'th'
+                      ? 'รอตรวจสอบ'
+                      : 'CHECK'}
                   </span>
                 </div>
                 <p
                   data-testid="assistant-context-summary"
-                  className="text-[10px] font-mono text-[var(--app-text-secondary)] truncate"
+                  className="text-[11px] font-mono text-[var(--app-text-secondary)] truncate"
                 >
-                  {activeModule} · Memory {displayedExchanges}/{MAX_SHORT_TERM_EXCHANGES} ·{' '}
-                  {workspaceFileCount !== null ? `Workspace ${workspaceFileCount} files` : 'Workspace Live'} ·{' '}
-                  {runtimeReady ? 'Runtime READY' : 'Tools Live'}
+                  {lang === 'th'
+                    ? `${activeModule} · ความจำ ${displayedExchanges}/${MAX_SHORT_TERM_EXCHANGES} · ${
+                        workspaceFileCount !== null ? `/workspace ${workspaceFileCount} ไฟล์` : '/workspace พร้อม'
+                      } · ${runtimeReady ? 'Runtime พร้อม' : 'โหมดเครื่องมือ'}`
+                    : `${activeModule} · Memory ${displayedExchanges}/${MAX_SHORT_TERM_EXCHANGES} · ${
+                        workspaceFileCount !== null ? `Workspace ${workspaceFileCount} files` : 'Workspace Live'
+                      } · ${runtimeReady ? 'Runtime READY' : 'Tools Live'}`}
                 </p>
               </div>
             </div>

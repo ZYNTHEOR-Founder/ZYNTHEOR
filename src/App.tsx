@@ -532,8 +532,8 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isContextOpen, setIsContextOpen] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.localStorage.getItem('zyntheor_context_panel') !== 'closed';
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('zyntheor_context_panel') === 'open';
   });
   const [isQuickTaskOpen, setIsQuickTaskOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
@@ -560,7 +560,7 @@ export default function App() {
   }, [returnToModule]);
 
   // Quick Modal Execution State
-  const [quickGoal, setQuickGoal] = useState('Build In-Memory LRU Cache with TTL');
+  const [quickGoal, setQuickGoal] = useState('');
   const [isQuickRunning, setIsQuickRunning] = useState(false);
   const [quickLogs, setQuickLogs] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
@@ -2333,50 +2333,63 @@ export default function App() {
     }
   };
 
-  const AuroraMark = () => (
-    <svg className="aurora-mark" viewBox="0 0 96 96" role="img" aria-label="ZYNTHEOR Aurora">
-      <defs>
-        <linearGradient id="zyntheor-aurora-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="var(--app-accent)" /><stop offset="45%" stopColor="var(--z-warn)" /><stop offset="100%" stopColor="var(--z-danger)" />
-        </linearGradient>
-        <filter id="zyntheor-aurora-blur"><feGaussianBlur stdDeviation="2.2" /></filter>
-      </defs>
-      <circle cx="48" cy="48" r="34" fill="none" stroke="url(#zyntheor-aurora-gradient)" strokeWidth="7" opacity=".22" filter="url(#zyntheor-aurora-blur)" />
-      <path className="aurora-orbit" d="M17 52c4-22 28-36 48-27 15 7 20 25 11 39-9 15-31 20-47 10-9-5-14-13-12-22Z" fill="none" stroke="url(#zyntheor-aurora-gradient)" strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M29 59c8-7 14-21 29-25 6-2 11-1 16 2-6 1-13 5-17 11-6 9-16 16-28 12Z" fill="url(#zyntheor-aurora-gradient)" opacity=".92" />
-      <circle cx="68" cy="31" r="3" fill="var(--z-warn)" />
-    </svg>
-  );
-
   const ContextRail = () => {
     const model = statusData?.model;
     const audit = statusData?.audit;
     const resources = statusData?.resources?.current;
+    const th = lang === 'th';
     return (
-      <aside className={`context-rail ${isContextOpen ? 'context-rail-open' : 'context-rail-closed'}`} aria-label="Native context panel">
+      <aside className={`context-rail ${isContextOpen ? 'context-rail-open' : 'context-rail-closed'}`} aria-label={th ? 'แผงบริบทระบบ' : 'Native context panel'}>
         <div className="context-rail-header">
-          {isContextOpen && <span className="eyebrow">LIVE CONTEXT</span>}
-          <button className="icon-button" onClick={() => setIsContextOpen((value) => {
-            const next = !value;
-            window.localStorage.setItem('zyntheor_context_panel', next ? 'open' : 'closed');
-            return next;
-          })} aria-label={isContextOpen ? 'Collapse context panel' : 'Open context panel'}>
+          {isContextOpen && <span className="eyebrow">{th ? 'บริบทระบบ' : 'LIVE CONTEXT'}</span>}
+          <button
+            className="icon-button"
+            onClick={() => setIsContextOpen((value) => {
+              const next = !value;
+              window.localStorage.setItem('zyntheor_context_panel', next ? 'open' : 'closed');
+              return next;
+            })}
+            aria-label={isContextOpen ? (th ? 'ย่อแผงบริบท' : 'Collapse context panel') : (th ? 'เปิดแผงบริบท' : 'Open context panel')}
+          >
             {isContextOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
           </button>
         </div>
         {isContextOpen && (
           <div className="context-rail-body">
-            <div className="context-identity"><AuroraMark /><div><strong>Q+ Sovereign</strong><span>Native runtime · local first</span></div></div>
-            <div className="context-status-line"><span><Activity className="w-3.5 h-3.5" />Runtime</span><b className={model?.weightsLoaded ? 'status-live' : 'status-muted'}>{model?.weightsLoaded ? 'WEIGHTS LOADED' : statusData ? (model?.runtimeState || 'BLOCKED') : 'CHECKING'}</b></div>
-            <div className="context-stat-grid">
-              <div><span>Parameters</span><strong>{model ? `${(model.totalParams / 1000000).toFixed(1)}M` : '—'}</strong></div>
-              <div><span>Throughput</span><strong>{resources?.tokensPerSec ? `${resources.tokensPerSec}/s` : '—'}</strong></div>
-              <div><span>Audit chain</span><strong>{audit ? (audit.chainValid ? 'VALID' : 'CHECK') : '—'}</strong></div>
-              <div><span>Memory</span><strong>{resources?.processRssMb ? `${resources.processRssMb} MB` : '—'}</strong></div>
+            <div className="context-identity">
+              <div>
+                <strong>ZYNTHEOR Native</strong>
+                <span>{th ? 'ประมวลผลจริงบน Cloud Runtime' : 'Native runtime · local first'}</span>
+              </div>
             </div>
-            <div className="context-section"><span className="eyebrow">KNOWLEDGE SCOPE</span><div className="context-chip"><Database className="w-3.5 h-3.5" />Documents & datasets <b>{statusData?.sandbox.fileCount ?? '—'}</b></div><div className="context-chip"><Network className="w-3.5 h-3.5" />Memory graph <b>{statusData ? 'runtime-backed' : '—'}</b></div></div>
-            <div className="context-section"><span className="eyebrow">TOOL ACCESS</span><button className="context-action" onClick={() => setActiveModule('knowledge_hub')}><Sparkles className="w-3.5 h-3.5" />Knowledge workspace <span>→</span></button><button className={`context-action ${role === 'User' ? 'context-action-disabled' : ''}`} onClick={() => role !== 'User' && setActiveModule('governance_security')} disabled={role === 'User'} title={role === 'User' ? 'Developer role required' : undefined}><LockKeyhole className="w-3.5 h-3.5" />Governance & audit <span>{role === 'User' ? 'Developer' : '→'}</span></button><button type="button" className="context-action" data-testid="export-workspace-context-btn" onClick={handleExportWorkspaceContext} title={lang === 'th' ? 'ดาวน์โหลดไฟล์ JSON บริบทพื้นที่ทำงานสำหรับตรวจสอบ' : 'Download workspace context JSON (model architecture, sandbox file count, connectivity status)'}><FileJson className="w-3.5 h-3.5" />Export Workspace Context <span>{workspaceContextExported ? '✓' : '↓'}</span></button></div>
-            <div className="context-note">{statusData ? `Telemetry refreshed ${new Date(statusData.serverTime).toLocaleTimeString()}` : 'Awaiting native runtime telemetry. No mock values are shown.'}</div>
+            <div className="context-status-line">
+              <span><Activity className="w-3.5 h-3.5" />Runtime</span>
+              <b className={model?.weightsLoaded ? 'status-live' : 'status-muted'}>
+                {model?.weightsLoaded ? (th ? 'โหลดโมเดลแล้ว' : 'WEIGHTS LOADED') : statusData ? (model?.runtimeState || 'BLOCKED') : 'CHECKING'}
+              </b>
+            </div>
+            <div className="context-stat-grid">
+              <div><span>{th ? 'พารามิเตอร์' : 'Parameters'}</span><strong>{model ? `${(model.totalParams / 1000000).toFixed(1)}M` : '—'}</strong></div>
+              <div><span>{th ? 'ความเร็ว' : 'Throughput'}</span><strong>{resources?.tokensPerSec ? `${resources.tokensPerSec}/s` : '—'}</strong></div>
+              <div><span>Audit Chain</span><strong>{audit ? (audit.chainValid ? 'VALID' : 'CHECK') : '—'}</strong></div>
+              <div><span>{th ? 'หน่วยความจำ' : 'Memory'}</span><strong>{resources?.processRssMb ? `${resources.processRssMb} MB` : '—'}</strong></div>
+            </div>
+            <div className="context-section">
+              <span className="eyebrow">{th ? 'ขอบเขตข้อมูล' : 'KNOWLEDGE SCOPE'}</span>
+              <div className="context-chip"><Database className="w-3.5 h-3.5" />{th ? 'เอกสารและชุดข้อมูล' : 'Documents & datasets'} <b>{statusData?.sandbox.fileCount ?? '—'}</b></div>
+              <div className="context-chip"><Network className="w-3.5 h-3.5" />Memory Graph <b>{statusData ? 'runtime-backed' : '—'}</b></div>
+            </div>
+            <div className="context-section">
+              <span className="eyebrow">{th ? 'เครื่องมือด่วน' : 'TOOL ACCESS'}</span>
+              <button className="context-action" onClick={() => setActiveModule('knowledge_hub')}><Sparkles className="w-3.5 h-3.5" />{th ? 'คลังความรู้' : 'Knowledge workspace'} <span>→</span></button>
+              <button className={`context-action ${role === 'User' ? 'context-action-disabled' : ''}`} onClick={() => role !== 'User' && setActiveModule('governance_security')} disabled={role === 'User'} title={role === 'User' ? (th ? 'ต้องใช้สิทธิ์ Developer' : 'Developer role required') : undefined}><LockKeyhole className="w-3.5 h-3.5" />{th ? 'หลักฐานและ Audit' : 'Governance & audit'} <span>{role === 'User' ? 'Developer' : '→'}</span></button>
+              <button type="button" className="context-action" data-testid="export-workspace-context-btn" onClick={handleExportWorkspaceContext} title={th ? 'ดาวน์โหลดไฟล์ JSON บริบทพื้นที่ทำงานสำหรับตรวจสอบ' : 'Download workspace context JSON'}><FileJson className="w-3.5 h-3.5" />{th ? 'ส่งออกบริบท JSON' : 'Export Workspace Context'} <span>{workspaceContextExported ? '✓' : '↓'}</span></button>
+            </div>
+            <div className="context-note">
+              {statusData
+                ? `${th ? 'อัปเดตล่าสุด' : 'Refreshed'} ${new Date(statusData.serverTime).toLocaleTimeString()}`
+                : (th ? 'กำลังรอข้อมูล Telemetry จริงจากระบบ' : 'Awaiting native runtime telemetry.')}
+            </div>
           </div>
         )}
       </aside>
@@ -2424,29 +2437,23 @@ export default function App() {
         />
 
         <div className="app-workspace">
-          <main className="flex-1 p-4 md:p-8 w-full mx-auto pb-24 lg:pb-12 min-w-0">
-            <div className="aurora-backdrop" aria-hidden="true"><AuroraMark /></div>
+          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8 w-full max-w-5xl mx-auto pb-24 lg:pb-12 min-w-0">
             {!isAuthenticated && activeModule !== 'user_settings' && (
               <div
                 role="status"
                 data-testid="signin-banner"
-                className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)] bg-[var(--app-surface)] px-4 py-3"
+                className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] px-4 py-3"
               >
-                <div className="space-y-0.5">
-                  <div className="text-sm font-bold text-[var(--app-text-primary)]">
+                <div className="space-y-0.5 min-w-0">
+                  <div className="text-xs sm:text-sm font-medium text-[var(--app-text-primary)]">
                     {sessionExpired
                       ? (lang === 'th'
-                          ? 'เซสชันหมดอายุ — เข้าสู่ระบบเพื่อเริ่มสั่งงาน'
-                          : 'Session expired — Sign in to start giving tasks')
+                          ? 'เซสชันหมดอายุ — กรุณาเข้าสู่ระบบเพื่อเริ่มสั่งงาน'
+                          : 'Session expired — Sign in to dispatch tasks')
                       : (lang === 'th'
-                          ? 'เข้าสู่ระบบเพื่อเริ่มสั่งงาน'
-                          : 'Sign in to start giving tasks')}
+                          ? 'เข้าสู่ระบบเพื่อเริ่มสั่งงานและบันทึกประวัติการทำงาน'
+                          : 'Sign in to dispatch tasks and save session logs')}
                   </div>
-                  <p className="text-xs text-[var(--app-text-secondary)]">
-                    {lang === 'th'
-                      ? 'หากยังไม่เข้าสู่ระบบ คำสั่งรันงานและการประมวลผลจะถูกปฏิเสธอัตโนมัติ'
-                      : 'Task execution requests remain blocked until you sign in.'}
-                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <button
@@ -2461,59 +2468,60 @@ export default function App() {
                         if (!ok) openAuthSettings('account');
                       }
                     }}
-                    className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 hover:opacity-95 transition-opacity cursor-pointer whitespace-nowrap"
+                    className="min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--app-accent-deep)] text-white hover:brightness-110 transition-all cursor-pointer whitespace-nowrap"
                   >
-                    {lang === 'th' ? 'เข้าสู่ระบบทันที' : 'Login Now'}
+                    {lang === 'th' ? 'เข้าสู่ระบบ' : 'Sign in'}
                   </button>
                   <button
                     type="button"
                     data-testid="signin-banner-options-btn"
                     onClick={() => openAuthSettings('account')}
-                    className="min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] transition-colors cursor-pointer whitespace-nowrap"
+                    className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--app-card)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] transition-colors cursor-pointer whitespace-nowrap"
                   >
-                    {lang === 'th' ? 'เลือกบัญชี / สิทธิ์' : 'Account / Role'}
+                    {lang === 'th' ? 'จัดการบัญชี' : 'Account'}
                   </button>
                 </div>
               </div>
             )}
-            {activeModule === 'conversational_intelligence' && <div className="workspace-kicker"><span className="eyebrow">INTELLIGENCE FIRST</span><span className="live-dot" /> Native inference surface</div>}
             {activeModule === 'command_center' && (
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--app-card-border)]">
+                <div className="flex items-center gap-5">
                   <button
                     type="button"
                     data-testid="dashboard-tab-overview"
                     onClick={() => setDashboardView('overview')}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 pb-2.5 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
                       dashboardView === 'overview'
-                        ? 'bg-[color-mix(in_srgb,var(--app-accent)_18%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]'
-                        : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
+                        ? 'border-[var(--app-accent)] text-[var(--app-text-primary)]'
+                        : 'border-transparent text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                     }`}
                   >
                     <Activity className="w-3.5 h-3.5" />
-                    <span>{lang === 'th' ? 'ภาพรวมศูนย์บัญชาการ' : 'Command Overview'}</span>
+                    <span>{lang === 'th' ? 'ภาพรวม' : 'Overview'}</span>
                   </button>
                   <button
                     type="button"
                     data-testid="dashboard-tab-performance-trends"
                     onClick={() => setDashboardView('performance_trends')}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 pb-2.5 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
                       dashboardView === 'performance_trends'
-                        ? 'bg-[color-mix(in_srgb,var(--app-accent)_18%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]'
-                        : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
+                        ? 'border-[var(--app-accent)] text-[var(--app-text-primary)]'
+                        : 'border-transparent text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                     }`}
                   >
                     <TrendingUp className="w-3.5 h-3.5" />
-                    <span>{lang === 'th' ? 'แนวโน้มประสิทธิภาพ' : 'Performance Trends'}</span>
-                    <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--app-bg)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)]">
-                      {performanceTrendPoints.length}
-                    </span>
+                    <span>{lang === 'th' ? 'แนวโน้มความเร็ว' : 'Performance Trends'}</span>
+                    {performanceTrendPoints.length > 0 && (
+                      <span className="font-mono text-[11px] text-[var(--app-text-secondary)]">
+                        ({performanceTrendPoints.length})
+                      </span>
+                    )}
                   </button>
                 </div>
                 {isQuickRunning && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]">
-                    <span className="w-2 h-2 rounded-full bg-[var(--z-ok)] animate-pulse" />
-                    {lang === 'th' ? 'กำลังสตรีมความหน่วงแบบเรียลไทม์' : 'Streaming real-time latency'}
+                  <span className="inline-flex items-center gap-1.5 pb-2 text-[11px] font-mono text-[var(--z-ok)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--z-ok)]" />
+                    {lang === 'th' ? 'กำลังประมวลผลแบบเรียลไทม์' : 'Streaming execution'}
                   </span>
                 )}
               </div>
@@ -2599,8 +2607,8 @@ export default function App() {
                   }
                 >
                   {renderActiveModule()}
-                  {activeModule === 'command_center' && (
-                    <div className="mt-6 rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] p-5 shadow-sm space-y-3">
+                  {activeModule === 'command_center' && (performanceTrendPoints.length > 0 || isQuickRunning) && (
+                    <div className="mt-6 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-card)] p-5 space-y-3">
                       <PerformanceTrendsChart
                         points={performanceTrendPoints}
                         isRunning={isQuickRunning}
@@ -2621,7 +2629,7 @@ export default function App() {
                         >
                           <TrendingUp className="w-3.5 h-3.5" />
                           <span>
-                            {lang === 'th' ? 'เปิดมุมมองแนวโน้มประสิทธิภาพแบบเต็ม' : 'Open full Performance Trends view'}
+                            {lang === 'th' ? 'เปิดมุมมองแนวโน้มความเร็วแบบเต็ม' : 'Open full Performance Trends view'}
                           </span>
                         </button>
                       </div>
@@ -5086,18 +5094,18 @@ export default function App() {
         );
       })()}
 
-      {/* Floating AI Assistant Quick Launcher */}
+      {/* Clean Floating AI Assistant Quick Launcher */}
       {!hasBlockingOverlay && (
         <button
           type="button"
           onClick={() => setIsAssistantOpen(true)}
           aria-label={lang === 'th' ? 'เปิดผู้ช่วย AI ในระบบ' : 'Open System AI Assistant'}
           title={lang === 'th' ? 'ผู้ช่วย AI ในระบบ (Alt+A)' : 'System AI Assistant (Alt+A)'}
-          className={`fixed bottom-20 lg:bottom-6 right-5 z-40 items-center gap-2 px-4 py-2.5 rounded-2xl vivid-gradient-brand text-white text-xs font-bold shadow-xl hover:opacity-95 transition-all cursor-pointer border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] ${
+          className={`fixed bottom-20 lg:bottom-6 right-5 z-40 items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-primary)] hover:border-[var(--app-accent)] text-xs font-medium shadow-md transition-colors cursor-pointer ${
             activeModule === 'conversational_intelligence' ? 'hidden lg:inline-flex' : 'inline-flex'
           }`}
         >
-          <Sparkles className="w-4 h-4 shrink-0" />
+          <Sparkles className="w-3.5 h-3.5 text-[var(--app-accent)] shrink-0" />
           <span>{lang === 'th' ? 'ผู้ช่วย AI' : 'AI Assistant'}</span>
         </button>
       )}
