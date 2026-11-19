@@ -1,0 +1,33 @@
+{
+  "project": "ZYNTHEOR",
+  "training": {
+    "total_steps": 5800,
+    "warm_start": 2800,
+    "continuation": 3000,
+    "target_params": 41527808,
+    "best_val_step": 5750,
+    "best_val_loss": 2.224140115082264,
+    "final_val_loss": 2.2322001826167104,
+    "final_perplexity": 9.318
+  },
+  "checkpoint": {
+    "file": "native_data/model_checkpoint_target_41m_step5800.pt",
+    "bytes": 166133048,
+    "sha256": "6e7f6beca66b7572ff11358305a82a48a7acb694bf183ec73103e8b194f9d984",
+    "baseline_copy": "backups/baseline-5800/model_checkpoint_target_41m_step5800.pt",
+    "do_not_overwrite": true
+  },
+  "runtime": {
+    "load": "SMOKE_OK",
+    "num_params": 41527808,
+    "tokenizer_profile": "v2_base",
+    "integrity": "STRUCTURAL_CHECKS_PASS",
+    "errors": []
+  },
+  "capability": {
+    "thai_qa": "NOT_READY",
+    "english_qa": "NOT_READY",
+    "claim": "ฝึกครบ + โหลดได้ + inference path ทำงาน เท่านั้น ห้ามเคลมว่าตอบได้ดีแล้ว"
+  },
+  "timestamp": 1795076459
+}
