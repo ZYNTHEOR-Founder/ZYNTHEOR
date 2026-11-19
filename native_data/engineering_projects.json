@@ -1,0 +1,2211 @@
+{
+  "updatedAt": "2026-11-19T11:39:21.491Z",
+  "projects": [
+    {
+      "projectId": "proj_mwnh9fv3_1978f4",
+      "tenantId": "Sovereign Enterprise Prime",
+      "ownerUserId": "usr_sovereign_01",
+      "name": "Live HTTP smoke test dashboard",
+      "slug": "live-http-smoke-test-dashboard",
+      "description": "Live HTTP smoke test dashboard app",
+      "stack": "node_fullstack",
+      "attribution": "deterministic_engineering_engine",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "workspaceDir": "projects/proj_mwnh9fv3_1978f4",
+      "currentRevision": "rev_1",
+      "createdAt": "2026-11-19T11:39:20.846Z",
+      "updatedAt": "2026-11-19T11:39:21.491Z",
+      "requirementsSpec": {
+        "rawPrompt": "Live HTTP smoke test dashboard app",
+        "objectives": [
+          "Implement primary user objective: Live HTTP smoke test dashboard app",
+          "Expose deterministic health & inspection APIs without exposed credentials",
+          "Verify syntax build, automated unit tests, and static security rules before deployment"
+        ],
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/health",
+            "purpose": "Service liveness & version check"
+          },
+          {
+            "method": "GET",
+            "path": "/api/items",
+            "purpose": "List domain records"
+          },
+          {
+            "method": "POST",
+            "path": "/api/items",
+            "purpose": "Create validated domain record"
+          },
+          {
+            "method": "GET",
+            "path": "/",
+            "purpose": "Responsive HTML application view"
+          }
+        ],
+        "dependencies": [
+          "node >= 20 (stdlib http, crypto, node:test, assert/strict)"
+        ],
+        "risks": [
+          "Missing remote cloud deploy target until configured by operator",
+          "Verify input validation on all mutation handlers"
+        ],
+        "architectureSummary": "Stack=node_fullstack; Planner=plan_eng_task_proj_mwnh9fv3_1978f4; KG nodes=60; Intent=coding; NeuralState=NOT_CONFIGURED"
+      },
+      "stages": [
+        {
+          "stage": "USER_REQUIREMENTS",
+          "order": 1,
+          "label": "User Requirements",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.038Z",
+          "summary": "Captured 34-char specification",
+          "artifactReference": null,
+          "evidenceHash": "91294c7f97a6e665900fb84d23f119ff4b4830743580dcf8ce4fe8841471b854"
+        },
+        {
+          "stage": "REQUIREMENT_ANALYSIS",
+          "order": 2,
+          "label": "Requirement Analysis",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.038Z",
+          "summary": "Analyzed intent=coding; 3 objectives, 2 risk(s)",
+          "artifactReference": null,
+          "evidenceHash": "935450eab0be7ffcc251b9d7598dadff11ec3efe45e9b2f3eea2acf240f02556"
+        },
+        {
+          "stage": "ARCHITECTURE_DESIGN",
+          "order": 3,
+          "label": "Architecture Design",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.038Z",
+          "summary": "node_fullstack architecture designed (4 endpoint(s)); reasoning=csp_dependency_solver",
+          "artifactReference": null,
+          "evidenceHash": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        },
+        {
+          "stage": "IMPLEMENTATION_PLANNING",
+          "order": 4,
+          "label": "Implementation Planning",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.038Z",
+          "summary": "DAG Plan plan_eng_task_proj_mwnh9fv3_1978f4 validated (7 ordered stages)",
+          "artifactReference": "plan_eng_task_proj_mwnh9fv3_1978f4",
+          "evidenceHash": "8d71e802a05d2fcb45bcd1f7505437ee2b3b495fb9ade26c8c40c82456ddbf72"
+        },
+        {
+          "stage": "SOURCE_CODE_CREATION",
+          "order": 5,
+          "label": "Source Code Creation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.081Z",
+          "summary": "Created 8 source & test file(s) in /projects/proj_mwnh9fv3_1978f4",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4/README.md",
+          "evidenceHash": "6309a35307fc12aa91fbc5ea24de7c9b0d77727214ce24782cc3e15556af1f15"
+        },
+        {
+          "stage": "DEPENDENCY_RESOLUTION",
+          "order": 6,
+          "label": "Dependency Resolution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.081Z",
+          "summary": "Node runtime package.json & config/runtime.template manifest resolved cleanly",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4/package.json",
+          "evidenceHash": "a9d8b5d28c50742c9bc73a2f0385ec670cd6d7edd70005dd04fc3232f2c3a3e1"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "label": "Build Execution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.271Z",
+          "summary": "Verified syntax & manifests across 5 file(s) in 185ms",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "46590b2873b13774b1cc37b0f13ef41908c5dd4ccada7601018351a0b0b6bb66"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "label": "Automated Testing",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.349Z",
+          "summary": "1/1 test file(s) passed in 76ms",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4/tests/app.test.mjs",
+          "evidenceHash": "2ed54eee8e8831c6df569584244b9ea36c2a80c33d2addf564911a6415050196"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "label": "Security Validation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:39:21.360Z",
+          "summary": "Security scan passed across 8 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "8a0155d116d817e2dc199bada2195a229cae027b36561a345495332028a857f0"
+        },
+        {
+          "stage": "DEPLOYMENT_APPROVAL",
+          "order": 10,
+          "label": "Deployment Approval",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "CLOUD_DEPLOYMENT",
+          "order": 11,
+          "label": "Cloud Deployment",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "RUNTIME_VERIFICATION",
+          "order": 12,
+          "label": "Runtime Verification",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "label": "Maintenance & Improvement",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        }
+      ],
+      "stageExecutions": [
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh9g9c_abc0",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:39:21.360Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Security scan passed across 8 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "8a0155d116d817e2dc199bada2195a229cae027b36561a345495332028a857f0"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh9g91_c086",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:39:21.349Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "1/1 test file(s) passed in 76ms",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4/tests/app.test.mjs",
+          "evidenceHash": "2ed54eee8e8831c6df569584244b9ea36c2a80c33d2addf564911a6415050196"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh9g6v_e305",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:39:21.271Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Verified syntax & manifests across 5 file(s) in 185ms",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "46590b2873b13774b1cc37b0f13ef41908c5dd4ccada7601018351a0b0b6bb66"
+        },
+        {
+          "stage": "DEPENDENCY_RESOLUTION",
+          "order": 6,
+          "executionId": "exec_stg_6_mwnh9g1l_5183",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:39:21.081Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Node runtime package.json & config/runtime.template manifest resolved cleanly",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4/package.json",
+          "evidenceHash": "a9d8b5d28c50742c9bc73a2f0385ec670cd6d7edd70005dd04fc3232f2c3a3e1"
+        },
+        {
+          "stage": "SOURCE_CODE_CREATION",
+          "order": 5,
+          "executionId": "exec_stg_5_mwnh9g1l_41dc",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:39:21.081Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Created 8 source & test file(s) in /projects/proj_mwnh9fv3_1978f4",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4/README.md",
+          "evidenceHash": "6309a35307fc12aa91fbc5ea24de7c9b0d77727214ce24782cc3e15556af1f15"
+        },
+        {
+          "stage": "IMPLEMENTATION_PLANNING",
+          "order": 4,
+          "executionId": "exec_stg_4_mwnh9g0e_6527",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:39:21.038Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "DAG Plan plan_eng_task_proj_mwnh9fv3_1978f4 validated (7 ordered stages)",
+          "artifactReference": "plan_eng_task_proj_mwnh9fv3_1978f4",
+          "evidenceHash": "8d71e802a05d2fcb45bcd1f7505437ee2b3b495fb9ade26c8c40c82456ddbf72"
+        },
+        {
+          "stage": "ARCHITECTURE_DESIGN",
+          "order": 3,
+          "executionId": "exec_stg_3_mwnh9g0e_2162",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:39:21.038Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "node_fullstack architecture designed (4 endpoint(s)); reasoning=csp_dependency_solver",
+          "artifactReference": null,
+          "evidenceHash": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        },
+        {
+          "stage": "REQUIREMENT_ANALYSIS",
+          "order": 2,
+          "executionId": "exec_stg_2_mwnh9g0e_6b32",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:39:21.038Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Analyzed intent=coding; 3 objectives, 2 risk(s)",
+          "artifactReference": null,
+          "evidenceHash": "935450eab0be7ffcc251b9d7598dadff11ec3efe45e9b2f3eea2acf240f02556"
+        },
+        {
+          "stage": "USER_REQUIREMENTS",
+          "order": 1,
+          "executionId": "exec_stg_1_mwnh9g0e_5f52",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:39:21.038Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Captured 34-char specification",
+          "artifactReference": null,
+          "evidenceHash": "91294c7f97a6e665900fb84d23f119ff4b4830743580dcf8ce4fe8841471b854"
+        }
+      ],
+      "revisions": [
+        {
+          "revisionId": "rev_1",
+          "revisionNumber": 1,
+          "createdAt": "2026-11-19T11:39:21.081Z",
+          "createdBy": "usr_sovereign_01",
+          "message": "Initial node_fullstack scaffold",
+          "treeSha256": "6309a35307fc12aa91fbc5ea24de7c9b0d77727214ce24782cc3e15556af1f15",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 438,
+              "sha256": "911b8414fa8a3c408a6125677037aba88dd877a2fa49a3bbb956c1e803dfec63",
+              "snapshotId": "snap_1795088361066_bdef24e5"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088361068_ef6666ac"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088361071_c8765c11"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 895,
+              "sha256": "b161e19587bbeee1b74f6096d2fc180d3b7c330991c54e1f0c3d32386b2bd8ba",
+              "snapshotId": "snap_1795088361073_d8a3f2c0"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15361,
+              "sha256": "397bd2c6e8d612779b1c48d921449ec118cfc5583d1659b6183b4ef71d9e77cb",
+              "snapshotId": "snap_1795088361075_28e05fa0"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5847,
+              "sha256": "1a922c2eb5d324af236d22b2160b0335ccc6ffef298cdf70bbb7f2652be71923",
+              "snapshotId": "snap_1795088361076_deac954d"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1896,
+              "sha256": "5f5a2603c1c248857e09fb6ab8d80e81ac5a6f927340603abce04ac261a077f7",
+              "snapshotId": "snap_1795088361078_e0d405be"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088361080_80a6277f"
+            }
+          ]
+        }
+      ],
+      "evidenceHistory": [
+        {
+          "projectId": "proj_mwnh9fv3_1978f4",
+          "taskId": "sec_proj_mwnh9fv3_1978f4",
+          "executionId": "exec_sec_mwnh9g9c",
+          "sourceRevision": "rev_1",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-19T11:39:21.353Z",
+          "completionTimestamp": "2026-11-19T11:39:21.360Z",
+          "actualDurationMs": 7,
+          "buildOrTestResult": "Security scan passed across 8 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "8a0155d116d817e2dc199bada2195a229cae027b36561a345495332028a857f0",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwnh9fv3_1978f4",
+          "taskId": "test_proj_mwnh9fv3_1978f4",
+          "executionId": "exec_test_mwnh9g91",
+          "sourceRevision": "rev_1",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-19T11:39:21.273Z",
+          "completionTimestamp": "2026-11-19T11:39:21.349Z",
+          "actualDurationMs": 76,
+          "buildOrTestResult": "1/1 test file(s) passed in 76ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "2ed54eee8e8831c6df569584244b9ea36c2a80c33d2addf564911a6415050196",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (72ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh9fv3_1978f4",
+          "taskId": "build_proj_mwnh9fv3_1978f4",
+          "executionId": "exec_build_mwnh9g6v",
+          "sourceRevision": "rev_1",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-19T11:39:21.086Z",
+          "completionTimestamp": "2026-11-19T11:39:21.271Z",
+          "actualDurationMs": 185,
+          "buildOrTestResult": "Verified syntax & manifests across 5 file(s) in 185ms",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "46590b2873b13774b1cc37b0f13ef41908c5dd4ccada7601018351a0b0b6bb66",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh9fv3_1978f4",
+          "taskId": "eng_task_proj_mwnh9fv3_1978f4",
+          "executionId": "exec_scaffold_mwnh9g1l",
+          "sourceRevision": "rev_1",
+          "operationType": "SCAFFOLD",
+          "startTimestamp": "2026-11-19T11:39:20.846Z",
+          "completionTimestamp": "2026-11-19T11:39:21.081Z",
+          "actualDurationMs": 235,
+          "buildOrTestResult": "Scaffolded 8 files (rev_1)",
+          "artifactReference": "projects/proj_mwnh9fv3_1978f4",
+          "evidenceHash": "58bf09abb1341987694b288758982bb8e49aeec4ee9ee0177c6bbfa7b49a2a62",
+          "verificationStatus": "VERIFIED"
+        }
+      ],
+      "lastBuild": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-19T11:39:21.271Z",
+        "durationMs": 185,
+        "checkedFiles": 5,
+        "summary": "Verified syntax & manifests across 5 file(s) in 185ms",
+        "output": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 "
+      },
+      "lastTests": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-19T11:39:21.349Z",
+        "durationMs": 76,
+        "passed": 1,
+        "total": 1,
+        "summary": "1/1 test file(s) passed in 76ms",
+        "output": "[node tests/app.test.mjs] exit=0 (72ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified"
+      },
+      "lastSecurityScan": {
+        "status": "VERIFIED",
+        "scannedAt": "2026-11-19T11:39:21.360Z",
+        "findings": [],
+        "summary": "Security scan passed across 8 file(s) (0 low/med advisory)"
+      },
+      "deployment": {
+        "status": "NOT_CONFIGURED",
+        "approvalRequestId": null,
+        "targetProvider": null,
+        "targetEndpoint": null,
+        "artifactZip": "live-http-smoke-test-dashboard-rev_1.zip",
+        "artifactSha256": "5d1c14053ad89b16a6d386327a7a7f9c7e9c99a76165aeead190fb2e91647b6a",
+        "deployedAt": null,
+        "runtimeVerifiedAt": null,
+        "runtimeHttpStatus": null,
+        "runtimeResponseSha256": null,
+        "latencyMs": null,
+        "lastDeploymentId": null,
+        "lastExecutionId": null,
+        "reason": "Deployment requires security validation, admin ApprovalGate sign-off, and configured cloud target."
+      },
+      "deploymentHistory": [],
+      "runtimeLogs": [
+        {
+          "logId": "log_mwnh9gcz_6c39ae",
+          "timestamp": "2026-11-19T11:39:21.491Z",
+          "level": "INFO",
+          "source": "DeliverablePackager",
+          "message": "Packaged live-http-smoke-test-dashboard-rev_1.zip (9820B, sha256=5d1c14053ad8)"
+        },
+        {
+          "logId": "log_mwnh9g9c_3a1290",
+          "timestamp": "2026-11-19T11:39:21.360Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 8 file(s) (0 low/med advisory)"
+        },
+        {
+          "logId": "log_mwnh9g92_06f811",
+          "timestamp": "2026-11-19T11:39:21.350Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 76ms"
+        },
+        {
+          "logId": "log_mwnh9g6v_76533a",
+          "timestamp": "2026-11-19T11:39:21.271Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 5 file(s) in 185ms"
+        },
+        {
+          "logId": "log_mwnh9g1m_762a68",
+          "timestamp": "2026-11-19T11:39:21.082Z",
+          "level": "INFO",
+          "source": "Planner",
+          "message": "Created project Live HTTP smoke test dashboard (proj_mwnh9fv3_1978f4) at rev_1"
+        }
+      ]
+    },
+    {
+      "projectId": "proj_mwnh8l2n_d920d5",
+      "tenantId": "test-tenant-sec10",
+      "ownerUserId": "dev-user-1",
+      "name": "Incident Telemetry Service",
+      "slug": "incident-telemetry-service",
+      "description": "Create a SaaS service health monitor portal with analytics, user registration, and incident tracking",
+      "stack": "node_fullstack",
+      "attribution": "deterministic_engineering_engine",
+      "nativeNeuralState": "NOT_CONFIGURED",
+      "workspaceDir": "projects/proj_mwnh8l2n_d920d5",
+      "currentRevision": "rev_8",
+      "createdAt": "2026-11-19T11:38:40.943Z",
+      "updatedAt": "2026-11-19T11:38:43.398Z",
+      "requirementsSpec": {
+        "rawPrompt": "Create a SaaS service health monitor portal with analytics, user registration, and incident tracking",
+        "objectives": [
+          "Implement primary user objective: Create a SaaS service health monitor portal with analytics, user registration, and incident tracking",
+          "Expose deterministic health & inspection APIs without exposed credentials",
+          "Verify syntax build, automated unit tests, and static security rules before deployment",
+          "Iteration (imp_mwnh8lq1): Add SLA escalation matrix panel and audit timestamp badge"
+        ],
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/api/health",
+            "purpose": "Service liveness & version check"
+          },
+          {
+            "method": "GET",
+            "path": "/api/items",
+            "purpose": "List domain records"
+          },
+          {
+            "method": "POST",
+            "path": "/api/items",
+            "purpose": "Create validated domain record"
+          },
+          {
+            "method": "GET",
+            "path": "/",
+            "purpose": "Responsive HTML application view"
+          }
+        ],
+        "dependencies": [
+          "node >= 20 (stdlib http, crypto, node:test, assert/strict)"
+        ],
+        "risks": [
+          "Missing remote cloud deploy target until configured by operator",
+          "Verify input validation on all mutation handlers"
+        ],
+        "architectureSummary": "Stack=node_fullstack; Planner=plan_eng_task_proj_mwnh8l2n_d920d5; KG nodes=60; Intent=coding; NeuralState=NOT_CONFIGURED"
+      },
+      "stages": [
+        {
+          "stage": "USER_REQUIREMENTS",
+          "order": 1,
+          "label": "User Requirements",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:41.513Z",
+          "summary": "Captured 100-char specification",
+          "artifactReference": null,
+          "evidenceHash": "8aac2b6347ca9c73a025f8a9b231e3c6cc11e31806e86089d4da026f509c859b"
+        },
+        {
+          "stage": "REQUIREMENT_ANALYSIS",
+          "order": 2,
+          "label": "Requirement Analysis",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:41.513Z",
+          "summary": "Analyzed intent=coding; 3 objectives, 2 risk(s)",
+          "artifactReference": null,
+          "evidenceHash": "b89e1d17420aad31fedd1d7b145b7804076b30223ed3bd83f18f7dc296ecdd1b"
+        },
+        {
+          "stage": "ARCHITECTURE_DESIGN",
+          "order": 3,
+          "label": "Architecture Design",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:41.513Z",
+          "summary": "node_fullstack architecture designed (4 endpoint(s)); reasoning=csp_dependency_solver",
+          "artifactReference": null,
+          "evidenceHash": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        },
+        {
+          "stage": "IMPLEMENTATION_PLANNING",
+          "order": 4,
+          "label": "Implementation Planning",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:41.513Z",
+          "summary": "DAG Plan plan_eng_task_proj_mwnh8l2n_d920d5 validated (7 ordered stages)",
+          "artifactReference": "plan_eng_task_proj_mwnh8l2n_d920d5",
+          "evidenceHash": "8d71e802a05d2fcb45bcd1f7505437ee2b3b495fb9ade26c8c40c82456ddbf72"
+        },
+        {
+          "stage": "SOURCE_CODE_CREATION",
+          "order": 5,
+          "label": "Source Code Creation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:41.536Z",
+          "summary": "Created 8 source & test file(s) in /projects/proj_mwnh8l2n_d920d5",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/README.md",
+          "evidenceHash": "ef66f6a58f68ad4cd6fde8d720662d2afcd4c4158af18efc0bd666cbb215abda"
+        },
+        {
+          "stage": "DEPENDENCY_RESOLUTION",
+          "order": 6,
+          "label": "Dependency Resolution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:41.536Z",
+          "summary": "Node runtime package.json & config/runtime.template manifest resolved cleanly",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/package.json",
+          "evidenceHash": "a9d8b5d28c50742c9bc73a2f0385ec670cd6d7edd70005dd04fc3232f2c3a3e1"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "label": "Build Execution",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:43.293Z",
+          "summary": "Verified syntax & manifests across 6 file(s) in 268ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "ee86099e3ecb91d0234585dcdb3fad33f0d0451c1fe4a167bcf60f404c4015a7"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "label": "Automated Testing",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:43.384Z",
+          "summary": "1/1 test file(s) passed in 90ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/tests/app.test.mjs",
+          "evidenceHash": "907fc54cd023feaca86b106fbfe7ca0c8292079ca770efe39b55c0bcb9c1441c"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "label": "Security Validation",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:43.393Z",
+          "summary": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "07a84c30a3ab77933c06c5dfed404dccaf5d67e4de45fd0cd4d547866c8c12d1"
+        },
+        {
+          "stage": "DEPLOYMENT_APPROVAL",
+          "order": 10,
+          "label": "Deployment Approval",
+          "status": "BLOCKED",
+          "completedAt": "2026-11-19T11:38:43.399Z",
+          "summary": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1795088323397_3b0150)",
+          "artifactReference": "apr_1795088323397_3b0150",
+          "evidenceHash": "40bb520d8646f345f262b7755614e1e5090ddcfc89931f31ad16065e99ed3691"
+        },
+        {
+          "stage": "CLOUD_DEPLOYMENT",
+          "order": 11,
+          "label": "Cloud Deployment",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "RUNTIME_VERIFICATION",
+          "order": 12,
+          "label": "Runtime Verification",
+          "status": "UNVERIFIED",
+          "completedAt": null,
+          "summary": "Pending execution",
+          "artifactReference": null,
+          "evidenceHash": null
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "label": "Maintenance & Improvement",
+          "status": "VERIFIED",
+          "completedAt": "2026-11-19T11:38:43.023Z",
+          "summary": "Auto-repaired public/index.html, data/schema.json -> rev_8",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "9fe27ec90adc00edb302abb51e6402f81066d40d462fc4cdb3fae83580ac51cc"
+        }
+      ],
+      "stageExecutions": [
+        {
+          "stage": "DEPLOYMENT_APPROVAL",
+          "order": 10,
+          "executionId": "exec_deploy_gate_mwnh8myu",
+          "revisionId": "rev_8",
+          "timestamp": "2026-11-19T11:38:43.399Z",
+          "durationMs": 2,
+          "status": "BLOCKED",
+          "summary": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1795088323397_3b0150)",
+          "artifactReference": "apr_1795088323397_3b0150",
+          "evidenceHash": "40bb520d8646f345f262b7755614e1e5090ddcfc89931f31ad16065e99ed3691"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8myp_a0a5",
+          "revisionId": "rev_8",
+          "timestamp": "2026-11-19T11:38:43.393Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "07a84c30a3ab77933c06c5dfed404dccaf5d67e4de45fd0cd4d547866c8c12d1"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8myg_34d7",
+          "revisionId": "rev_8",
+          "timestamp": "2026-11-19T11:38:43.384Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "1/1 test file(s) passed in 90ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/tests/app.test.mjs",
+          "evidenceHash": "907fc54cd023feaca86b106fbfe7ca0c8292079ca770efe39b55c0bcb9c1441c"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8mvx_f6ae",
+          "revisionId": "rev_8",
+          "timestamp": "2026-11-19T11:38:43.293Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Verified syntax & manifests across 6 file(s) in 268ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "ee86099e3ecb91d0234585dcdb3fad33f0d0451c1fe4a167bcf60f404c4015a7"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8mof_3f8f",
+          "revisionId": "rev_8",
+          "timestamp": "2026-11-19T11:38:43.023Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Auto-repaired public/index.html, data/schema.json -> rev_8",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "9fe27ec90adc00edb302abb51e6402f81066d40d462fc4cdb3fae83580ac51cc"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8mgi_6e84",
+          "revisionId": "rev_7",
+          "timestamp": "2026-11-19T11:38:42.738Z",
+          "durationMs": 1,
+          "status": "BLOCKED",
+          "summary": "BLOCKED: 1 HIGH-severity security issue(s) found",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "f754b22fec7c477a237b5218244560210d23bd99a07d267832934a57a7f9750c"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8mge_afb7",
+          "revisionId": "rev_7",
+          "timestamp": "2026-11-19T11:38:42.734Z",
+          "durationMs": 1,
+          "status": "BLOCKED",
+          "summary": "Build syntax check failed across 5 file(s)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "dcf6e7469e838c36e1236e4cc9c2e63c60989ffd6bb580212c669d8c17a9bc98"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8ma5_2f45",
+          "revisionId": "rev_7",
+          "timestamp": "2026-11-19T11:38:42.509Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Source updated (data/schema.json) -> rev_7",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/data/schema.json",
+          "evidenceHash": "1e2ce5d74ae5454cf536a247e7ce8d0f99d7651797b4bfd04a9fb9faaf9bb087"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8ma5_1317",
+          "revisionId": "rev_7",
+          "timestamp": "2026-11-19T11:38:42.509Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; re-scan required",
+          "artifactReference": null,
+          "evidenceHash": "74be64705d0969807f925b8996fbb6a129e5c3ceab41bf08f428bfb9c11542ac"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8ma5_885d",
+          "revisionId": "rev_7",
+          "timestamp": "2026-11-19T11:38:42.509Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; re-test required",
+          "artifactReference": null,
+          "evidenceHash": "683ee28bb05aed9271cdbcd06546a143b6c5d03bdc8b475d1e7a93804c4247c3"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8ma4_66e3",
+          "revisionId": "rev_7",
+          "timestamp": "2026-11-19T11:38:42.508Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; rebuild required",
+          "artifactReference": null,
+          "evidenceHash": "31742482d668e58eda984b49f14320327841309af482573d34bfaa9730cc6ae2"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8m9r_e2b4",
+          "revisionId": "rev_6",
+          "timestamp": "2026-11-19T11:38:42.495Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Source updated (public/index.html) -> rev_6",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/public/index.html",
+          "evidenceHash": "e278fe00fcf41224b2837b0bc6c3c2546fdaae93582d516cf3b88640c6660d20"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8m9r_02c0",
+          "revisionId": "rev_6",
+          "timestamp": "2026-11-19T11:38:42.495Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; re-scan required",
+          "artifactReference": null,
+          "evidenceHash": "7c14dacb437be7acf232b11b5eeb7ee856dd07e25174020ee2c11c4a073e29ca"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8m9r_2fe0",
+          "revisionId": "rev_6",
+          "timestamp": "2026-11-19T11:38:42.495Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; re-test required",
+          "artifactReference": null,
+          "evidenceHash": "81689ffb0c5cc47696df50dc891675818f0c20e745c069468ee01cc1081ae453"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8m9r_832a",
+          "revisionId": "rev_6",
+          "timestamp": "2026-11-19T11:38:42.495Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; rebuild required",
+          "artifactReference": null,
+          "evidenceHash": "db804e95138067d5b13057cf7ce8593e6b996fc366b49f22b1e0c6403933e83b"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8m8z_7815",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.467Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "84cc989de8cfeff0a36339d9b5a65b27b4a7392f56c75c7fb462b06325aaf5de"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8m8u_de6b",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.462Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "1/1 test file(s) passed in 70ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/tests/app.test.mjs",
+          "evidenceHash": "efb9f921c0d301f487b03d86940d0e6d85eff13ab0607199b95483cff03b8a4a"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8m6u_b28f",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.390Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Verified syntax & manifests across 6 file(s) in 232ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "e825a39e6aea959acebf7891961dbab0d34fb7bc34cc4ea8ae9363725a178ef0"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8m0d_9565",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.157Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Visual property patch applied to brand_title -> rev_5",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/public/index.html",
+          "evidenceHash": "00d8dc6a4f506e6be9d311bc0fc1a3203cd75d7b385542e05b67f988e420dd36"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8m0d_ada4",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.157Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Visual edit applied; re-scan required",
+          "artifactReference": null,
+          "evidenceHash": "828a18855c23f5f97a70b8de35abf968175ef2d8a8e1397c9935bc7f6229b734"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8m0d_ea67",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.157Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Visual edit applied; re-test required",
+          "artifactReference": null,
+          "evidenceHash": "5d47467a74ff81ed6a642f671ff97dbadb4fefc4d2b8b1a2701b784bf01d493f"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8m0d_713c",
+          "revisionId": "rev_5",
+          "timestamp": "2026-11-19T11:38:42.157Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Visual edit applied; rebuild required",
+          "artifactReference": null,
+          "evidenceHash": "d230e2743db64dfa1f84ee7d8ed293314d4ce3297b7183ea736dedbada0cce44"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8lzs_a3b8",
+          "revisionId": "rev_4",
+          "timestamp": "2026-11-19T11:38:42.136Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Rolled back 9 file(s) to rev_2",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "ad4b726420f6f67586f72eb5f753d9ce0dc19d0d89d5920598270476036d2148"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8lz3_0a8f",
+          "revisionId": "rev_3",
+          "timestamp": "2026-11-19T11:38:42.111Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Source updated (src/notes.js) -> rev_3",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/src/notes.js",
+          "evidenceHash": "a6619378fa7e8e8f99bf3263e02926734479737ca4763bab0665c15fd27ca6a6"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8lz3_8980",
+          "revisionId": "rev_3",
+          "timestamp": "2026-11-19T11:38:42.111Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; re-scan required",
+          "artifactReference": null,
+          "evidenceHash": "081330b13f65d9514750f099289f80eb7022d5cd50d3a964fa7cb608eceefce0"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8lz3_e4fe",
+          "revisionId": "rev_3",
+          "timestamp": "2026-11-19T11:38:42.111Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; re-test required",
+          "artifactReference": null,
+          "evidenceHash": "c5e1b7c68fd3abf711d355c207199ca30061073b9fb685c4e05c90539bdfb8e3"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8lz3_ede1",
+          "revisionId": "rev_3",
+          "timestamp": "2026-11-19T11:38:42.111Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source modified; rebuild required",
+          "artifactReference": null,
+          "evidenceHash": "58a33d46a486de9cfbe41ddaed90d472b22c51914b36373c060335d28b75138d"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8lyl_f83b",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:42.093Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "e9f88f66ebb90e4a3d9dea5a2ba8b851503283ee73375be0f51e657e6f80a0d4"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8lyg_db5e",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:42.088Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "1/1 test file(s) passed in 78ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/tests/app.test.mjs",
+          "evidenceHash": "3a18dd6ee23cb64801cd5e55c287adbc94eb5c3aae4e4b006f4dc9ed723d612f"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8lw8_2e5a",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:42.008Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Verified syntax & manifests across 6 file(s) in 207ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "f66d2a59c94bc71f84777da4f2518e82c6f2ec1be58be2a37c0635c892b82d39"
+        },
+        {
+          "stage": "MAINTENANCE_IMPROVEMENT",
+          "order": 13,
+          "executionId": "exec_stg_13_mwnh8lqg_673c",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:41.800Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Applied iteration 'Add SLA escalation matrix panel and audit timestamp badge' -> rev_2",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "ad4b726420f6f67586f72eb5f753d9ce0dc19d0d89d5920598270476036d2148"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8lqg_034e",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:41.800Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source refined; re-scan required",
+          "artifactReference": null,
+          "evidenceHash": "c3baa3790d3dbf7e3b3d2f4626bb062e313e92073043a196c44b2b96dcc1eb75"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8lqg_dd17",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:41.800Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source refined; re-test required",
+          "artifactReference": null,
+          "evidenceHash": "8091bab63e66312036c9a44291c76224be3b14301ad32645c79cdb28b4ce00d3"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8lqf_70ea",
+          "revisionId": "rev_2",
+          "timestamp": "2026-11-19T11:38:41.799Z",
+          "durationMs": 1,
+          "status": "UNVERIFIED",
+          "summary": "Source refined; rebuild required",
+          "artifactReference": null,
+          "evidenceHash": "67e032d358b7f31aed45ff373e99d1d83f4b8d2d73d77241fb297434a18c8067"
+        },
+        {
+          "stage": "SECURITY_VALIDATION",
+          "order": 9,
+          "executionId": "exec_stg_9_mwnh8lpx_f540",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:38:41.781Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Security scan passed across 8 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "5a41cd2db3d86245df936d8194c291f64a1fa6d0b4943165f641f4235c190029"
+        },
+        {
+          "stage": "AUTOMATED_TESTING",
+          "order": 8,
+          "executionId": "exec_stg_8_mwnh8lps_68e5",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:38:41.776Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "1/1 test file(s) passed in 84ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/tests/app.test.mjs",
+          "evidenceHash": "3b9e1b97d7d51b8f39ce2b0aa095fed3fb25a1ef9de9731f71b8ebf4a976ecbd"
+        },
+        {
+          "stage": "BUILD_EXECUTION",
+          "order": 7,
+          "executionId": "exec_stg_7_mwnh8lnf_a463",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:38:41.691Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Verified syntax & manifests across 5 file(s) in 152ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "3196fa3028aa18b5be255d10f11cd34e3544c21f79073d0c6cc1eb2fcde580e6"
+        },
+        {
+          "stage": "DEPENDENCY_RESOLUTION",
+          "order": 6,
+          "executionId": "exec_stg_6_mwnh8lj4_23cf",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:38:41.536Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Node runtime package.json & config/runtime.template manifest resolved cleanly",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/package.json",
+          "evidenceHash": "a9d8b5d28c50742c9bc73a2f0385ec670cd6d7edd70005dd04fc3232f2c3a3e1"
+        },
+        {
+          "stage": "SOURCE_CODE_CREATION",
+          "order": 5,
+          "executionId": "exec_stg_5_mwnh8lj4_b58e",
+          "revisionId": "rev_1",
+          "timestamp": "2026-11-19T11:38:41.536Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Created 8 source & test file(s) in /projects/proj_mwnh8l2n_d920d5",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5/README.md",
+          "evidenceHash": "ef66f6a58f68ad4cd6fde8d720662d2afcd4c4158af18efc0bd666cbb215abda"
+        },
+        {
+          "stage": "IMPLEMENTATION_PLANNING",
+          "order": 4,
+          "executionId": "exec_stg_4_mwnh8lih_5f46",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:38:41.513Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "DAG Plan plan_eng_task_proj_mwnh8l2n_d920d5 validated (7 ordered stages)",
+          "artifactReference": "plan_eng_task_proj_mwnh8l2n_d920d5",
+          "evidenceHash": "8d71e802a05d2fcb45bcd1f7505437ee2b3b495fb9ade26c8c40c82456ddbf72"
+        },
+        {
+          "stage": "ARCHITECTURE_DESIGN",
+          "order": 3,
+          "executionId": "exec_stg_3_mwnh8lih_d796",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:38:41.513Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "node_fullstack architecture designed (4 endpoint(s)); reasoning=csp_dependency_solver",
+          "artifactReference": null,
+          "evidenceHash": "163e727817555d5354e44f96d884cd29a391db896d08d849e44692d8635d16c8"
+        },
+        {
+          "stage": "REQUIREMENT_ANALYSIS",
+          "order": 2,
+          "executionId": "exec_stg_2_mwnh8lih_18a4",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:38:41.513Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Analyzed intent=coding; 3 objectives, 2 risk(s)",
+          "artifactReference": null,
+          "evidenceHash": "b89e1d17420aad31fedd1d7b145b7804076b30223ed3bd83f18f7dc296ecdd1b"
+        },
+        {
+          "stage": "USER_REQUIREMENTS",
+          "order": 1,
+          "executionId": "exec_stg_1_mwnh8lih_a0fc",
+          "revisionId": "rev_0",
+          "timestamp": "2026-11-19T11:38:41.513Z",
+          "durationMs": 1,
+          "status": "VERIFIED",
+          "summary": "Captured 100-char specification",
+          "artifactReference": null,
+          "evidenceHash": "8aac2b6347ca9c73a025f8a9b231e3c6cc11e31806e86089d4da026f509c859b"
+        }
+      ],
+      "revisions": [
+        {
+          "revisionId": "rev_8",
+          "revisionNumber": 8,
+          "createdAt": "2026-11-19T11:38:43.023Z",
+          "createdBy": "dev-user-1",
+          "message": "Auto-Repair: public/index.html, data/schema.json",
+          "treeSha256": "9fe27ec90adc00edb302abb51e6402f81066d40d462fc4cdb3fae83580ac51cc",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088322999_be859cfb"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088323004_f827f504"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 34,
+              "sha256": "56bddab783988e314bc6638403fa66650e755eb40dd3d8e3b0523ab763f0f672",
+              "snapshotId": "snap_1795088323007_ee680987"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088323010_17bbfeef"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15841,
+              "sha256": "e73965345c3c64a5091d8f6ba085e2b936e36a86358ab7a4c4577ea9cb90d2e4",
+              "snapshotId": "snap_1795088323015_1aadaac3"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088323017_1a0505f7"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088323019_469961b4"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088323021_8530fba5"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088323022_3fb62256"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_7",
+          "revisionNumber": 7,
+          "createdAt": "2026-11-19T11:38:42.508Z",
+          "createdBy": "dev-user-1",
+          "message": "Inject JSON trailing comma",
+          "treeSha256": "1e2ce5d74ae5454cf536a247e7ce8d0f99d7651797b4bfd04a9fb9faaf9bb087",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088322498_6c1f7d26"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088322499_4c9557d7"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 35,
+              "sha256": "d23da4b137cd2cd4a2a34de6c5193d4348195bc0e72e9c32e0f16fcd2d05450f",
+              "snapshotId": "snap_1795088322501_aabb3199"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088322502_b9c0a406"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15833,
+              "sha256": "2707b11ae865f3312753a4ff9e04eda6a4711cecfa2c8261cd82b7f70ab9f00c",
+              "snapshotId": "snap_1795088322503_ddafe283"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088322505_49b4e54b"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088322506_46f67889"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088322507_33c4e5a7"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088322508_9d295e30"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_6",
+          "revisionNumber": 6,
+          "createdAt": "2026-11-19T11:38:42.495Z",
+          "createdBy": "dev-user-1",
+          "message": "Inject test defect",
+          "treeSha256": "e278fe00fcf41224b2837b0bc6c3c2546fdaae93582d516cf3b88640c6660d20",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088322472_ecc8ed66"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088322473_86daf8a5"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088322476_8ea3767e"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088322477_d5455021"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15833,
+              "sha256": "2707b11ae865f3312753a4ff9e04eda6a4711cecfa2c8261cd82b7f70ab9f00c",
+              "snapshotId": "snap_1795088322479_b0f46669"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088322480_4f53bf72"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088322481_713c78fc"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088322493_240643ee"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088322494_17b7b7cf"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_5",
+          "revisionNumber": 5,
+          "createdAt": "2026-11-19T11:38:42.157Z",
+          "createdBy": "dev-user-1",
+          "message": "Visual Edit: brand_title",
+          "treeSha256": "00d8dc6a4f506e6be9d311bc0fc1a3203cd75d7b385542e05b67f988e420dd36",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088322147_60eacce1"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088322148_59515763"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088322149_46e99b8f"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088322150_37e59caf"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15774,
+              "sha256": "8a4b62644032896332b7fc3ef565dcab6f10161491d28d94f6b3741bfe86d1d6",
+              "snapshotId": "snap_1795088322152_8eaf071f"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088322153_49c89b31"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088322154_4496ca36"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088322155_89dbc9be"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088322156_5475f9cb"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_4",
+          "revisionNumber": 4,
+          "createdAt": "2026-11-19T11:38:42.136Z",
+          "createdBy": "dev-user-1",
+          "message": "Rollback to rev_2",
+          "treeSha256": "ad4b726420f6f67586f72eb5f753d9ce0dc19d0d89d5920598270476036d2148",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088322125_de595c17"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088322126_a2d781ed"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088322127_368c2900"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088322128_ed81f23f"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15739,
+              "sha256": "8811235f7720283cb20876f87e1dd061dee8ac6c6773f399efdd2999deccb3bb",
+              "snapshotId": "snap_1795088322129_9911482f"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088322131_f5587200"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088322133_25cb75c2"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088322134_fcb501c1"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088322135_08ba5693"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_3",
+          "revisionNumber": 3,
+          "createdAt": "2026-11-19T11:38:42.110Z",
+          "createdBy": "dev-user-1",
+          "message": "Add notes module",
+          "treeSha256": "a6619378fa7e8e8f99bf3263e02926734479737ca4763bab0665c15fd27ca6a6",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088322096_04023188"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088322097_7bd7d51c"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088322098_ef4378eb"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088322099_f84ff613"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15739,
+              "sha256": "8811235f7720283cb20876f87e1dd061dee8ac6c6773f399efdd2999deccb3bb",
+              "snapshotId": "snap_1795088322103_3b875c4f"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088322105_13d3eeb4"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088322107_0dbfec92"
+            },
+            {
+              "relativePath": "src/notes.js",
+              "bytes": 50,
+              "sha256": "58d5b6795735a4e77a0022bd02e3b40dd11c5a88e6893e7b8a9309176ff539fb",
+              "snapshotId": "snap_1795088322108_6a24fd28"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088322109_18555cb5"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088322110_48b10c5c"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_2",
+          "revisionNumber": 2,
+          "createdAt": "2026-11-19T11:38:41.799Z",
+          "createdBy": "dev-user-1",
+          "message": "Iterate: Add SLA escalation matrix panel and audit timestamp badge",
+          "treeSha256": "ad4b726420f6f67586f72eb5f753d9ce0dc19d0d89d5920598270476036d2148",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 602,
+              "sha256": "72337c9f5205cd8d69e6b7204443ab663549549c4c560ec434a26b1141e70823",
+              "snapshotId": "snap_1795088321790_46e185bb"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088321791_c56fb204"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088321792_b5821aaa"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088321793_0115dbb6"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15739,
+              "sha256": "8811235f7720283cb20876f87e1dd061dee8ac6c6773f399efdd2999deccb3bb",
+              "snapshotId": "snap_1795088321794_fd589fda"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088321795_74d5b5ea"
+            },
+            {
+              "relativePath": "src/extensions.mjs",
+              "bytes": 200,
+              "sha256": "d22c00d93fb14fd849d0496ee448c32a9677a44569fc43b78ce3bb852a9b3d2a",
+              "snapshotId": "snap_1795088321797_6df71d78"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088321798_52ed1e6a"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088321799_9081e57e"
+            }
+          ]
+        },
+        {
+          "revisionId": "rev_1",
+          "revisionNumber": 1,
+          "createdAt": "2026-11-19T11:38:41.536Z",
+          "createdBy": "dev-user-1",
+          "message": "Initial node_fullstack scaffold",
+          "treeSha256": "ef66f6a58f68ad4cd6fde8d720662d2afcd4c4158af18efc0bd666cbb215abda",
+          "files": [
+            {
+              "relativePath": "README.md",
+              "bytes": 500,
+              "sha256": "a5e611601a563a6fa132ad28fb614c35ec25e24bacbec15e8f89bd92aeb00d97",
+              "snapshotId": "snap_1795088321525_b60812a8"
+            },
+            {
+              "relativePath": "config/runtime.template",
+              "bytes": 58,
+              "sha256": "aeaf57f6e480820e8d1b24402f9778c33f836d4f028c9bdcebee063922562acf",
+              "snapshotId": "snap_1795088321526_2bce14d0"
+            },
+            {
+              "relativePath": "data/schema.json",
+              "bytes": 300,
+              "sha256": "7870eca21c5290b851e3ffc198b7b96d7eec99edf83423085d8ebd48d085ef6b",
+              "snapshotId": "snap_1795088321527_32aa8d2f"
+            },
+            {
+              "relativePath": "package.json",
+              "bytes": 891,
+              "sha256": "850c1a1b7d8211849258e2734c1f3471d60a23782e0c0b940b0571a8e52a761c",
+              "snapshotId": "snap_1795088321529_b49a9eef"
+            },
+            {
+              "relativePath": "public/index.html",
+              "bytes": 15415,
+              "sha256": "2c5a15975308e804aa27d57cf3ae2d061c4dcc3980af6dc022bfef8a58ef5599",
+              "snapshotId": "snap_1795088321530_ba0664f7"
+            },
+            {
+              "relativePath": "src/app.mjs",
+              "bytes": 5839,
+              "sha256": "7dd31ed3559106ce3fab7a9be95e837cc1176f40bd067e63934f2cc6654cccfa",
+              "snapshotId": "snap_1795088321531_f4d75b45"
+            },
+            {
+              "relativePath": "src/server.mjs",
+              "bytes": 1892,
+              "sha256": "439023e6d9314aab81d58d0fc59bf560468b8defe0e0f91d398201f87efe0bad",
+              "snapshotId": "snap_1795088321532_fe821c21"
+            },
+            {
+              "relativePath": "tests/app.test.mjs",
+              "bytes": 1748,
+              "sha256": "3806f59847eb1f9357edc69338595376d55693dd7c26f529e1f108eb6951ab8c",
+              "snapshotId": "snap_1795088321536_6d3cf27e"
+            }
+          ]
+        }
+      ],
+      "evidenceHistory": [
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "deploy_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_deploy_gate_mwnh8myu",
+          "sourceRevision": "rev_8",
+          "operationType": "DEPLOY_PREP",
+          "startTimestamp": "2026-11-19T11:38:43.396Z",
+          "completionTimestamp": "2026-11-19T11:38:43.398Z",
+          "actualDurationMs": 2,
+          "buildOrTestResult": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1795088323397_3b0150)",
+          "artifactReference": "apr_1795088323397_3b0150",
+          "evidenceHash": "40bb520d8646f345f262b7755614e1e5090ddcfc89931f31ad16065e99ed3691",
+          "verificationStatus": "BLOCKED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "sec_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_sec_mwnh8myp",
+          "sourceRevision": "rev_8",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-19T11:38:43.385Z",
+          "completionTimestamp": "2026-11-19T11:38:43.393Z",
+          "actualDurationMs": 8,
+          "buildOrTestResult": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "07a84c30a3ab77933c06c5dfed404dccaf5d67e4de45fd0cd4d547866c8c12d1",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "test_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_test_mwnh8myg",
+          "sourceRevision": "rev_8",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-19T11:38:43.294Z",
+          "completionTimestamp": "2026-11-19T11:38:43.384Z",
+          "actualDurationMs": 90,
+          "buildOrTestResult": "1/1 test file(s) passed in 90ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "907fc54cd023feaca86b106fbfe7ca0c8292079ca770efe39b55c0bcb9c1441c",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (86ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "build_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_build_mwnh8mvx",
+          "sourceRevision": "rev_8",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-19T11:38:43.025Z",
+          "completionTimestamp": "2026-11-19T11:38:43.293Z",
+          "actualDurationMs": 268,
+          "buildOrTestResult": "Verified syntax & manifests across 6 file(s) in 268ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "ee86099e3ecb91d0234585dcdb3fad33f0d0451c1fe4a167bcf60f404c4015a7",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/extensions.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "sec_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_sec_mwnh8mgi",
+          "sourceRevision": "rev_7",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-19T11:38:42.735Z",
+          "completionTimestamp": "2026-11-19T11:38:42.738Z",
+          "actualDurationMs": 3,
+          "buildOrTestResult": "BLOCKED: 1 HIGH-severity security issue(s) found",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "f754b22fec7c477a237b5218244560210d23bd99a07d267832934a57a7f9750c",
+          "verificationStatus": "BLOCKED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "build_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_build_mwnh8mge",
+          "sourceRevision": "rev_7",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-19T11:38:42.509Z",
+          "completionTimestamp": "2026-11-19T11:38:42.734Z",
+          "actualDurationMs": 225,
+          "buildOrTestResult": "Build syntax check failed across 5 file(s)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "dcf6e7469e838c36e1236e4cc9c2e63c60989ffd6bb580212c669d8c17a9bc98",
+          "verificationStatus": "FAILED",
+          "stdoutSnippet": "[json.parse data/schema.json] ERROR: Expected double-quoted property name in JSON at position 33 (line 3 column 1)\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/extensions.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 1
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "sec_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_sec_mwnh8m8z",
+          "sourceRevision": "rev_5",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-19T11:38:42.464Z",
+          "completionTimestamp": "2026-11-19T11:38:42.467Z",
+          "actualDurationMs": 3,
+          "buildOrTestResult": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "84cc989de8cfeff0a36339d9b5a65b27b4a7392f56c75c7fb462b06325aaf5de",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "test_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_test_mwnh8m8u",
+          "sourceRevision": "rev_5",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-19T11:38:42.392Z",
+          "completionTimestamp": "2026-11-19T11:38:42.462Z",
+          "actualDurationMs": 70,
+          "buildOrTestResult": "1/1 test file(s) passed in 70ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "efb9f921c0d301f487b03d86940d0e6d85eff13ab0607199b95483cff03b8a4a",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (67ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "build_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_build_mwnh8m6u",
+          "sourceRevision": "rev_5",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-19T11:38:42.158Z",
+          "completionTimestamp": "2026-11-19T11:38:42.390Z",
+          "actualDurationMs": 232,
+          "buildOrTestResult": "Verified syntax & manifests across 6 file(s) in 232ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "e825a39e6aea959acebf7891961dbab0d34fb7bc34cc4ea8ae9363725a178ef0",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/extensions.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "rollback_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_rollback_mwnh8lzs",
+          "sourceRevision": "rev_4",
+          "operationType": "ROLLBACK",
+          "startTimestamp": "2026-11-19T11:38:42.112Z",
+          "completionTimestamp": "2026-11-19T11:38:42.136Z",
+          "actualDurationMs": 1,
+          "buildOrTestResult": "Restored 9 files from rev_2",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "625ee8939c20bd0db0c1e39deafc663233562d011daea4672fd52818d0be669e",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "sec_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_sec_mwnh8lyk",
+          "sourceRevision": "rev_2",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-19T11:38:42.089Z",
+          "completionTimestamp": "2026-11-19T11:38:42.092Z",
+          "actualDurationMs": 3,
+          "buildOrTestResult": "Security scan passed across 9 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "e9f88f66ebb90e4a3d9dea5a2ba8b851503283ee73375be0f51e657e6f80a0d4",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "test_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_test_mwnh8lyg",
+          "sourceRevision": "rev_2",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-19T11:38:42.010Z",
+          "completionTimestamp": "2026-11-19T11:38:42.088Z",
+          "actualDurationMs": 78,
+          "buildOrTestResult": "1/1 test file(s) passed in 78ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "3a18dd6ee23cb64801cd5e55c287adbc94eb5c3aae4e4b006f4dc9ed723d612f",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (75ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "build_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_build_mwnh8lw8",
+          "sourceRevision": "rev_2",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-19T11:38:41.801Z",
+          "completionTimestamp": "2026-11-19T11:38:42.008Z",
+          "actualDurationMs": 207,
+          "buildOrTestResult": "Verified syntax & manifests across 6 file(s) in 207ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "f66d2a59c94bc71f84777da4f2518e82c6f2ec1be58be2a37c0635c892b82d39",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/extensions.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "sec_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_sec_mwnh8lpx",
+          "sourceRevision": "rev_1",
+          "operationType": "SECURITY_SCAN",
+          "startTimestamp": "2026-11-19T11:38:41.777Z",
+          "completionTimestamp": "2026-11-19T11:38:41.781Z",
+          "actualDurationMs": 4,
+          "buildOrTestResult": "Security scan passed across 8 file(s) (0 low/med advisory)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "5a41cd2db3d86245df936d8194c291f64a1fa6d0b4943165f641f4235c190029",
+          "verificationStatus": "VERIFIED"
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "test_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_test_mwnh8lps",
+          "sourceRevision": "rev_1",
+          "operationType": "TEST",
+          "startTimestamp": "2026-11-19T11:38:41.692Z",
+          "completionTimestamp": "2026-11-19T11:38:41.776Z",
+          "actualDurationMs": 84,
+          "buildOrTestResult": "1/1 test file(s) passed in 84ms",
+          "artifactReference": "tests/app.test.mjs",
+          "evidenceHash": "3b9e1b97d7d51b8f39ce2b0aa095fed3fb25a1ef9de9731f71b8ebf4a976ecbd",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[node tests/app.test.mjs] exit=0 (82ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "build_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_build_mwnh8lnf",
+          "sourceRevision": "rev_1",
+          "operationType": "BUILD",
+          "startTimestamp": "2026-11-19T11:38:41.539Z",
+          "completionTimestamp": "2026-11-19T11:38:41.691Z",
+          "actualDurationMs": 152,
+          "buildOrTestResult": "Verified syntax & manifests across 5 file(s) in 152ms",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "3196fa3028aa18b5be255d10f11cd34e3544c21f79073d0c6cc1eb2fcde580e6",
+          "verificationStatus": "VERIFIED",
+          "stdoutSnippet": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 ",
+          "exitCode": 0
+        },
+        {
+          "projectId": "proj_mwnh8l2n_d920d5",
+          "taskId": "eng_task_proj_mwnh8l2n_d920d5",
+          "executionId": "exec_scaffold_mwnh8lj4",
+          "sourceRevision": "rev_1",
+          "operationType": "SCAFFOLD",
+          "startTimestamp": "2026-11-19T11:38:40.943Z",
+          "completionTimestamp": "2026-11-19T11:38:41.536Z",
+          "actualDurationMs": 593,
+          "buildOrTestResult": "Scaffolded 8 files (rev_1)",
+          "artifactReference": "projects/proj_mwnh8l2n_d920d5",
+          "evidenceHash": "844aa61cb1d6070ef4f17e54485d4e5b062d7909487ccaea9b70e7ba288fe121",
+          "verificationStatus": "VERIFIED"
+        }
+      ],
+      "lastBuild": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-19T11:38:43.293Z",
+        "durationMs": 268,
+        "checkedFiles": 6,
+        "summary": "Verified syntax & manifests across 6 file(s) in 268ms",
+        "output": "[json.parse data/schema.json] ok\n[json.parse package.json] ok\n[node --check src/app.mjs] exit=0 \n[node --check src/extensions.mjs] exit=0 \n[node --check src/server.mjs] exit=0 \n[node --check tests/app.test.mjs] exit=0 "
+      },
+      "lastTests": {
+        "status": "VERIFIED",
+        "executedAt": "2026-11-19T11:38:43.384Z",
+        "durationMs": 90,
+        "passed": 1,
+        "total": 1,
+        "summary": "1/1 test file(s) passed in 90ms",
+        "output": "[node tests/app.test.mjs] exit=0 (86ms)\nALL_TESTS_PASSED: 7/7 application, persistence & UI contract assertions verified"
+      },
+      "lastSecurityScan": {
+        "status": "VERIFIED",
+        "scannedAt": "2026-11-19T11:38:43.393Z",
+        "findings": [],
+        "summary": "Security scan passed across 9 file(s) (0 low/med advisory)"
+      },
+      "deployment": {
+        "status": "PENDING_APPROVAL",
+        "approvalRequestId": "apr_1795088323397_3b0150",
+        "targetProvider": null,
+        "targetEndpoint": null,
+        "artifactZip": null,
+        "artifactSha256": null,
+        "deployedAt": null,
+        "runtimeVerifiedAt": null,
+        "runtimeHttpStatus": null,
+        "runtimeResponseSha256": null,
+        "latencyMs": null,
+        "lastDeploymentId": "dep_mwnh8mys_2c40",
+        "lastExecutionId": "exec_deploy_gate_mwnh8myu",
+        "reason": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1795088323397_3b0150)"
+      },
+      "deploymentHistory": [
+        {
+          "deploymentId": "dep_mwnh8mys_2c40",
+          "revisionId": "rev_8",
+          "executionId": "exec_deploy_gate_mwnh8myu",
+          "timestamp": "2026-11-19T11:38:43.398Z",
+          "status": "PENDING_APPROVAL",
+          "targetProvider": null,
+          "targetEndpoint": null,
+          "approvalRequestId": "apr_1795088323397_3b0150",
+          "artifactZip": null,
+          "artifactSha256": null,
+          "runtimeHttpStatus": null,
+          "runtimeResponseSha256": null,
+          "latencyMs": 2,
+          "reason": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1795088323397_3b0150)",
+          "evidenceHash": "40bb520d8646f345f262b7755614e1e5090ddcfc89931f31ad16065e99ed3691",
+          "linkedLogIds": [
+            "log_mwnh8myv_6836cf"
+          ],
+          "testsSnapshot": {
+            "status": "VERIFIED",
+            "passed": 1,
+            "total": 1,
+            "summary": "1/1 test file(s) passed in 90ms",
+            "executedAt": "2026-11-19T11:38:43.384Z"
+          }
+        }
+      ],
+      "runtimeLogs": [
+        {
+          "logId": "log_mwnh8myv_6836cf",
+          "timestamp": "2026-11-19T11:38:43.399Z",
+          "level": "WARN",
+          "source": "ApprovalGate",
+          "message": "APPROVAL_REQUIRED: Admin ApprovalGate review needed (requestId=apr_1795088323397_3b0150)",
+          "deploymentId": "dep_mwnh8mys_2c40",
+          "executionId": "exec_deploy_gate_mwnh8myu",
+          "stage": "DEPLOYMENT_APPROVAL"
+        },
+        {
+          "logId": "log_mwnh8myp_c9b76c",
+          "timestamp": "2026-11-19T11:38:43.393Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 9 file(s) (0 low/med advisory)"
+        },
+        {
+          "logId": "log_mwnh8myg_525119",
+          "timestamp": "2026-11-19T11:38:43.384Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 90ms"
+        },
+        {
+          "logId": "log_mwnh8mvx_4cf0d2",
+          "timestamp": "2026-11-19T11:38:43.293Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 6 file(s) in 268ms"
+        },
+        {
+          "logId": "log_mwnh8mof_f74427",
+          "timestamp": "2026-11-19T11:38:43.023Z",
+          "level": "INFO",
+          "source": "AutoRepair",
+          "message": "Applied deterministic repair to public/index.html, data/schema.json (rev_8); re-running verification suite."
+        },
+        {
+          "logId": "log_mwnh8mgi_e9c599",
+          "timestamp": "2026-11-19T11:38:42.738Z",
+          "level": "ERROR",
+          "source": "SecurityValidator",
+          "message": "BLOCKED: 1 HIGH-severity security issue(s) found"
+        },
+        {
+          "logId": "log_mwnh8mge_4b755a",
+          "timestamp": "2026-11-19T11:38:42.734Z",
+          "level": "ERROR",
+          "source": "Build",
+          "message": "Build syntax check failed across 5 file(s)"
+        },
+        {
+          "logId": "log_mwnh8ma5_efd602",
+          "timestamp": "2026-11-19T11:38:42.509Z",
+          "level": "INFO",
+          "source": "Editor",
+          "message": "Updated data/schema.json (35 bytes) -> rev_7"
+        },
+        {
+          "logId": "log_mwnh8m9r_b9978f",
+          "timestamp": "2026-11-19T11:38:42.495Z",
+          "level": "INFO",
+          "source": "Editor",
+          "message": "Updated public/index.html (15833 bytes) -> rev_6"
+        },
+        {
+          "logId": "log_mwnh8m8z_9ab03d",
+          "timestamp": "2026-11-19T11:38:42.467Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 9 file(s) (0 low/med advisory)"
+        },
+        {
+          "logId": "log_mwnh8m8u_87a666",
+          "timestamp": "2026-11-19T11:38:42.462Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 70ms"
+        },
+        {
+          "logId": "log_mwnh8m6u_36c306",
+          "timestamp": "2026-11-19T11:38:42.390Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 6 file(s) in 232ms"
+        },
+        {
+          "logId": "log_mwnh8m0d_4cce5e",
+          "timestamp": "2026-11-19T11:38:42.157Z",
+          "level": "INFO",
+          "source": "VisualInspector",
+          "message": "Patched element [brand_title] in public/index.html -> rev_5"
+        },
+        {
+          "logId": "log_mwnh8lzs_31d81d",
+          "timestamp": "2026-11-19T11:38:42.136Z",
+          "level": "WARN",
+          "source": "Rollback",
+          "message": "Rolled back 9 file(s) to rev_2"
+        },
+        {
+          "logId": "log_mwnh8lz3_0cdbff",
+          "timestamp": "2026-11-19T11:38:42.111Z",
+          "level": "INFO",
+          "source": "Editor",
+          "message": "Updated src/notes.js (50 bytes) -> rev_3"
+        },
+        {
+          "logId": "log_mwnh8lyl_ff4c82",
+          "timestamp": "2026-11-19T11:38:42.093Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 9 file(s) (0 low/med advisory)"
+        },
+        {
+          "logId": "log_mwnh8lyg_220f81",
+          "timestamp": "2026-11-19T11:38:42.088Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 78ms"
+        },
+        {
+          "logId": "log_mwnh8lw8_2b218a",
+          "timestamp": "2026-11-19T11:38:42.008Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 6 file(s) in 207ms"
+        },
+        {
+          "logId": "log_mwnh8lqg_d7ccab",
+          "timestamp": "2026-11-19T11:38:41.800Z",
+          "level": "INFO",
+          "source": "AppEvolution",
+          "message": "Applied natural-language iteration (rev_2): Add SLA escalation matrix panel and audit timestamp badge [files: README.md, public/index.html, src/extensions.mjs]"
+        },
+        {
+          "logId": "log_mwnh8lpx_2e9194",
+          "timestamp": "2026-11-19T11:38:41.781Z",
+          "level": "INFO",
+          "source": "SecurityValidator",
+          "message": "Security scan passed across 8 file(s) (0 low/med advisory)"
+        },
+        {
+          "logId": "log_mwnh8lps_4d52ee",
+          "timestamp": "2026-11-19T11:38:41.776Z",
+          "level": "INFO",
+          "source": "TestRunner",
+          "message": "1/1 test file(s) passed in 84ms"
+        },
+        {
+          "logId": "log_mwnh8lnf_605876",
+          "timestamp": "2026-11-19T11:38:41.691Z",
+          "level": "INFO",
+          "source": "Build",
+          "message": "Verified syntax & manifests across 5 file(s) in 152ms"
+        },
+        {
+          "logId": "log_mwnh8lj5_46fb21",
+          "timestamp": "2026-11-19T11:38:41.537Z",
+          "level": "INFO",
+          "source": "Planner",
+          "message": "Created project Incident Telemetry Service (proj_mwnh8l2n_d920d5) at rev_1"
+        }
+      ],
+      "integrations": [],
+      "researchNotes": []
+    }
+  ]
+}

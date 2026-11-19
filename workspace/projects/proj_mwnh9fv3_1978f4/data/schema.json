@@ -1,0 +1,22 @@
+{
+  "engine": "json_file_store",
+  "domain": "saas",
+  "tables": {
+    "records": [
+      "id",
+      "title",
+      "category",
+      "status",
+      "owner",
+      "value",
+      "createdAt"
+    ],
+    "users": [
+      "id",
+      "name",
+      "email",
+      "role",
+      "createdAt"
+    ]
+  }
+}

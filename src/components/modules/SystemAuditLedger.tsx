@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
-import { StatusBadge } from '../ui/StatusBadge';
 import { AuditRecord } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   ShieldCheck,
   Search,
@@ -11,10 +11,8 @@ import {
   RefreshCw,
   Download,
   CheckCircle2,
-  AlertTriangle,
   ChevronDown,
   ChevronUp,
-  FileCode2,
   Lock,
   Layers,
   Activity
@@ -26,6 +24,9 @@ interface SystemAuditLedgerProps {
 
 export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className = '' }) => {
   const { authHeaders, authReady, isAuthenticated } = useAuth();
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   const [records, setRecords] = useState<AuditRecord[]>([]);
   const [integrity, setIntegrity] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -56,11 +57,9 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
 
   const filteredRecords = useMemo(() => {
     return records.filter((rec) => {
-      // Role filter
       if (roleFilter !== 'ALL' && rec.role !== roleFilter) {
         return false;
       }
-      // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesAction = rec.action.toLowerCase().includes(query);
@@ -77,18 +76,16 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
-      case 'PLANNER':
-        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]';
-      case 'CODER':
-        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]';
-      case 'REVIEWER':
-        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)]';
       case 'TESTER':
-        return 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]';
       case 'COMMERCIAL':
-        return 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_45%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]';
       case 'EVOLVER':
-        return 'bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)]';
+        return 'bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]';
+      case 'PLANNER':
+      case 'CODER':
+      case 'REVIEWER':
+        return 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)]';
       default:
         return 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)]';
     }
@@ -106,116 +103,121 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Integrity & Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          title="Chained Audit Blocks"
+          title={th ? 'บล็อก Audit แบบโซ่แฮช' : 'Chained Audit Blocks'}
           value={records.length}
-          subtitle="SHA-256 Immutable Entries"
-          icon={<Layers className="w-5 h-5" />}
-          accentColor="purple"
+          subtitle={th ? 'บันทึก SHA-256 แบบแก้ไขย้อนหลังไม่ได้' : 'SHA-256 Immutable Entries'}
+          icon={<Layers className="w-4 h-4" />}
+          accentColor="emerald"
         />
         <MetricCard
-          title="Chain Integrity Status"
-          value={integrity?.valid ? '100% INTACT' : 'VERIFYING'}
-          subtitle="Zero Hash Collisions or Breaks"
-          icon={<ShieldCheck className="w-5 h-5" />}
-          accentColor="lime"
-          trend={{ value: 'Tamper-Free', isPositive: true }}
+          title={th ? 'สถานะความต่อเนื่องของโซ่' : 'Chain Integrity Status'}
+          value={integrity?.valid ? (th ? 'สมบูรณ์ 100%' : '100% INTACT') : (th ? 'กำลังตรวจ' : 'VERIFYING')}
+          subtitle={th ? 'ไม่มีจุดขาดหรือ Hash ชนกัน' : 'Zero Hash Collisions or Breaks'}
+          icon={<ShieldCheck className="w-4 h-4" />}
+          accentColor="emerald"
+          trend={{ value: th ? 'ปลอดการปลอมแปลง' : 'Tamper-Free', isPositive: true }}
         />
         <MetricCard
-          title="Active Roles Logged"
+          title={th ? 'บทบาทที่บันทึกแล้ว' : 'Active Roles Logged'}
           value={new Set(records.map((r) => r.role)).size}
-          subtitle="Full 4-Agent Workflow Coverage"
-          icon={<Activity className="w-5 h-5" />}
-          accentColor="cyan"
+          subtitle={th ? 'ครอบคลุมเอเจนต์ทั้ง 4 บทบาท' : 'Full 4-Agent Workflow Coverage'}
+          icon={<Activity className="w-4 h-4" />}
+          accentColor="emerald"
         />
         <MetricCard
-          title="Chain Head Digest"
+          title={th ? 'แฮชส่วนหัวล่าสุด' : 'Chain Head Digest'}
           value={integrity?.headHash ? `${integrity.headHash.slice(0, 8)}...` : '00000000...'}
-          subtitle="Genesis-to-Tip Validated"
-          icon={<Lock className="w-5 h-5" />}
-          accentColor="blue"
+          subtitle={th ? 'ตรวจเชื่อมโยงตั้งแต่บล็อกแรก' : 'Genesis-to-Tip Validated'}
+          icon={<Lock className="w-4 h-4" />}
+          accentColor="amber"
         />
       </div>
 
-      {/* Main Filterable Ledger View */}
       <VividCard
-        title="Sovereign System Audit Ledger"
-        subtitle="Cryptographically verified SHA-256 event trail in native_data/audit_log.jsonl"
+        title={th ? 'สมุดบันทึกการตรวจสอบระบบ (Audit Ledger)' : 'System Audit Ledger'}
+        subtitle={
+          th
+            ? 'บันทึกเหตุการณ์ที่ลงนาม SHA-256 ในไฟล์ native_data/audit_log.jsonl'
+            : 'Cryptographically verified SHA-256 event trail in native_data/audit_log.jsonl'
+        }
         gradientAccent="cyan"
         headerAction={
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleExportJson}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--app-surface-elevated)] hover:bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] rounded-xl transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] rounded-lg transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export JSON</span>
+              <span>{th ? 'ส่งออก JSON' : 'Export JSON'}</span>
             </button>
             <button
+              type="button"
               onClick={fetchLedger}
               disabled={loading}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[var(--app-accent-deep)] rounded-lg hover:opacity-95 transition-opacity cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>{loading ? 'Auditing...' : 'Verify Chain'}</span>
+              <span>{loading ? (th ? 'กำลังตรวจ...' : 'Auditing...') : (th ? 'ตรวจสอบโซ่แฮช' : 'Verify Chain')}</span>
             </button>
           </div>
         }
       >
         <div className="space-y-4">
-          {/* Filter Bar */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-1">
-            {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-[var(--app-text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Filter by action name, task ID, command, or SHA-256 hash..."
-                className="w-full pl-9 pr-4 py-2 text-xs bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-medium text-[var(--app-text-primary)]"
+                placeholder={
+                  th
+                    ? 'กรองตามชื่อ Action, Task ID, คำสั่ง หรือค่า SHA-256...'
+                    : 'Filter by action name, task ID, command, or SHA-256 hash...'
+                }
+                className="w-full pl-9 pr-4 py-2 text-xs bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] rounded-lg focus:outline-none focus:border-[var(--app-accent)] font-medium text-[var(--app-text-primary)]"
               />
             </div>
 
-            {/* Role Filter Chips */}
             <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
               <Filter className="w-3.5 h-3.5 text-[var(--app-text-secondary)] mr-1 shrink-0" />
               {roles.map((r) => (
                 <button
                   key={r}
+                  type="button"
                   onClick={() => setRoleFilter(r)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                     roleFilter === r
-                      ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] shadow-sm'
-                      : 'text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)]'
+                      ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)]'
+                      : 'text-[var(--app-text-secondary)] hover:bg-[var(--app-surface-elevated)] hover:text-[var(--app-text-primary)]'
                   }`}
                 >
-                  {r}
+                  {r === 'ALL' && th ? 'ทั้งหมด' : r}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto rounded-xl border border-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)]">
+          <div className="overflow-x-auto rounded-xl border border-[var(--app-card-border)]">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[color-mix(in_srgb,var(--app-surface-elevated)_80%,transparent)] border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-semibold text-[11px] ">
+              <thead className="bg-[color-mix(in_srgb,var(--app-surface-elevated)_80%,transparent)] border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-semibold text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Block #</th>
-                  <th className="py-3 px-4">Timestamp</th>
-                  <th className="py-3 px-4">Agent Role</th>
-                  <th className="py-3 px-4">Action</th>
+                  <th className="py-3 px-4">{th ? 'บล็อก #' : 'Block #'}</th>
+                  <th className="py-3 px-4">{th ? 'เวลา' : 'Timestamp'}</th>
+                  <th className="py-3 px-4">{th ? 'บทบาทเอเจนต์' : 'Agent Role'}</th>
+                  <th className="py-3 px-4">{th ? 'การกระทำ' : 'Action'}</th>
                   <th className="py-3 px-4">SHA-256 Entry Hash</th>
-                  <th className="py-3 px-4 text-right">Details</th>
+                  <th className="py-3 px-4 text-right">{th ? 'รายละเอียด' : 'Details'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--app-card-border)] font-sans">
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-[var(--app-text-secondary)] italic text-xs">
-                      No audit records found matching your filter.
+                    <td colSpan={6} className="py-8 text-center text-[var(--app-text-secondary)] text-xs">
+                      {th ? 'ไม่พบบันทึกที่ตรงกับตัวกรอง' : 'No audit records found matching your filter.'}
                     </td>
                   </tr>
                 ) : (
@@ -226,10 +228,10 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
                         <tr
                           onClick={() => setExpandedIndex(isExpanded ? null : rec.index)}
                           className={`hover:bg-[color-mix(in_srgb,var(--app-surface-elevated)_80%,transparent)] transition-colors cursor-pointer ${
-                            isExpanded ? 'bg-[color-mix(in_srgb,var(--app-accent)_30%,transparent)]' : ''
+                            isExpanded ? 'bg-[color-mix(in_srgb,var(--app-accent)_12%,transparent)]' : ''
                           }`}
                         >
-                          <td className="py-3 px-4 font-mono font-bold text-[var(--app-text-primary)]">
+                          <td className="py-3 px-4 font-mono font-semibold text-[var(--app-text-primary)]">
                             #{rec.index}
                           </td>
                           <td className="py-3 px-4 text-[var(--app-text-secondary)] font-mono text-[11px] whitespace-nowrap">
@@ -244,7 +246,7 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
                               {rec.role}
                             </span>
                           </td>
-                          <td className="py-3 px-4 font-semibold text-[var(--app-text-primary)]">
+                          <td className="py-3 px-4 font-medium text-[var(--app-text-primary)]">
                             <div>{rec.action}</div>
                             {rec.payload?.taskId && (
                               <div className="text-[10px] font-mono text-[var(--app-text-secondary)]">
@@ -264,45 +266,53 @@ export const SystemAuditLedger: React.FC<SystemAuditLedgerProps> = ({ className 
                           </td>
                         </tr>
 
-                        {/* Expanded Cryptographic Detail Panel */}
                         {isExpanded && (
                           <tr className="bg-[color-mix(in_srgb,var(--app-surface-elevated)_90%,transparent)]">
                             <td colSpan={6} className="p-4 border-b border-[var(--app-card-border)]">
                               <div className="bg-[var(--app-surface)] rounded-xl p-4 text-[var(--app-text-secondary)] font-mono text-xs space-y-3">
                                 <div className="flex items-center justify-between text-[var(--app-text-secondary)] border-b border-[var(--app-card-border)] pb-2">
-                                  <span className="flex items-center gap-1.5 text-[var(--z-ok)] font-bold">
-                                    <CheckCircle2 className="w-4 h-4" /> Cryptographic Linkage Verified
+                                  <span className="flex items-center gap-1.5 text-[var(--z-ok)] font-semibold">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    {th ? 'ยืนยันความเชื่อมโยงแฮชแล้ว' : 'Cryptographic Linkage Verified'}
                                   </span>
                                   <span className="text-[10px] text-[var(--app-text-secondary)]">
-                                    Block Index: #{rec.index}
+                                    {th ? 'ดัชนีบล็อก:' : 'Block Index:'} #{rec.index}
                                   </span>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
                                   <div>
-                                    <span className="text-[var(--app-text-secondary)]">Previous Block Hash:</span>
+                                    <span className="text-[var(--app-text-secondary)]">
+                                      {th ? 'แฮชบล็อกก่อนหน้า (prev_hash):' : 'Previous Block Hash:'}
+                                    </span>
                                     <div className="text-[var(--app-text-primary)] break-all select-all mt-0.5">
                                       {rec.prev_hash}
                                     </div>
                                   </div>
                                   <div>
-                                    <span className="text-[var(--app-text-secondary)]">Current Entry Hash:</span>
-                                    <div className="text-[var(--app-accent)] break-all select-all mt-0.5 font-bold">
+                                    <span className="text-[var(--app-text-secondary)]">
+                                      {th ? 'แฮชบล็อกปัจจุบัน (entry_hash):' : 'Current Entry Hash:'}
+                                    </span>
+                                    <div className="text-[var(--app-accent)] break-all select-all mt-0.5 font-semibold">
                                       {rec.entry_hash}
                                     </div>
                                   </div>
                                 </div>
 
                                 <div className="text-[11px]">
-                                  <span className="text-[var(--app-text-secondary)]">SHA-256 Preimage Formula:</span>
-                                  <div className="text-[var(--app-text-secondary)] break-all bg-black/40 p-2 rounded border border-[var(--app-card-border)] mt-1">
+                                  <span className="text-[var(--app-text-secondary)]">
+                                    {th ? 'สูตรคำนวณ SHA-256 Preimage:' : 'SHA-256 Preimage Formula:'}
+                                  </span>
+                                  <div className="text-[var(--app-text-secondary)] break-all bg-[var(--app-bg)] p-2 rounded border border-[var(--app-card-border)] mt-1">
                                     SHA-256({rec.index} | {rec.timestamp} | {rec.prev_hash.slice(0, 16)}... | {rec.role} | {rec.action} | {rec.payload_digest.slice(0, 16)}...)
                                   </div>
                                 </div>
 
                                 <div>
-                                  <span className="text-[var(--app-text-secondary)] text-[11px]">Verified Block Payload:</span>
-                                  <pre className="mt-1 p-2 bg-black/50 rounded border border-[var(--app-card-border)] text-[11px] text-[var(--z-ok)] overflow-x-auto max-h-48">
+                                  <span className="text-[var(--app-text-secondary)] text-[11px]">
+                                    {th ? 'ข้อมูล Payload ที่ยืนยันแล้ว:' : 'Verified Block Payload:'}
+                                  </span>
+                                  <pre className="mt-1 p-2 bg-[var(--app-bg)] rounded border border-[var(--app-card-border)] text-[11px] text-[var(--z-ok)] overflow-x-auto max-h-48">
                                     {JSON.stringify(rec.payload, null, 2)}
                                   </pre>
                                 </div>

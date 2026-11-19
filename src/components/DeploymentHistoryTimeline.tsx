@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DeploymentHistoryTimelineItem } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { apiUrl } from '../lib/apiClient';
 import { StatusDot, MinimalIndicatorState } from './ui/StatusBadge';
 import {
@@ -48,6 +49,8 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
   onViewProjectLogs,
 }) => {
   const { authHeaders, authReady, isAuthenticated } = useAuth();
+  const { lang } = useLanguage();
+  const th = lang === 'th';
   const [items, setItems] = useState<DeploymentHistoryTimelineItem[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [filter, setFilter] = useState<VerificationFilter>('ALL');
@@ -72,11 +75,18 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Failed to load deployment history');
+        throw new Error(
+          json.error || (th ? 'โหลดประวัติการ Deploy ไม่สำเร็จ' : 'Failed to load deployment history')
+        );
       }
       setItems(Array.isArray(json.history) ? json.history : []);
     } catch (err: any) {
-      setError(err?.message || 'Unable to retrieve /api/deployment/history');
+      setError(
+        err?.message ||
+          (th
+            ? 'ไม่สามารถดึงข้อมูลจาก /api/deployment/history ได้'
+            : 'Unable to retrieve /api/deployment/history')
+      );
     } finally {
       setLoading(false);
     }
@@ -127,10 +137,13 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
           <Clock className="w-4 h-4 text-[var(--app-accent)]" />
           <div>
             <div className="text-xs font-bold text-[var(--app-text-primary)]">
-              Deployment History Timeline &amp; Verification Evidence
+              {th
+                ? 'ไทม์ไลน์ประวัติการ Deploy และหลักฐานการตรวจสอบ'
+                : 'Deployment History Timeline & Verification Evidence'}
             </div>
             <div className="text-[10px] font-mono text-[var(--app-text-secondary)] tabular-nums">
-              Source: GET /api/deployment/history · {items.length} event(s) ·{' '}
+              {th ? 'แหล่งข้อมูล' : 'Source'}: GET /api/deployment/history · {items.length}{' '}
+              {th ? 'เหตุการณ์' : 'event(s)'} ·{' '}
               <span className="text-[var(--z-ok)]">{verifiedCount} VERIFIED</span> ·{' '}
               <span className="text-[var(--z-warn)]">{unverifiedCount} UNVERIFIED</span> ·{' '}
               <span className="text-[var(--z-danger)]">{blockedCount} BLOCKED</span>
@@ -150,24 +163,32 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                   : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
               }`}
             >
-              {f}
+              {f === 'ALL' ? (th ? 'ทั้งหมด' : 'ALL') : f}
             </button>
           ))}
           <button
             type="button"
             onClick={() => setOrder((o) => (o === 'desc' ? 'asc' : 'desc'))}
             className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] flex items-center gap-1 cursor-pointer"
-            title="Toggle chronological sort direction"
+            title={th ? 'สลับทิศทางการเรียงลำดับเวลา' : 'Toggle chronological sort direction'}
           >
             <ArrowDownUp className="w-3 h-3 text-[var(--app-accent)]" />
-            <span>{order === 'desc' ? 'Newest First' : 'Chronological'}</span>
+            <span>
+              {order === 'desc'
+                ? th
+                  ? 'ใหม่ล่าสุดก่อน'
+                  : 'Newest First'
+                : th
+                  ? 'เรียงตามลำดับเวลา'
+                  : 'Chronological'}
+            </span>
           </button>
           <button
             type="button"
             onClick={() => void fetchHistory()}
             disabled={loading}
             className="p-1.5 rounded-lg bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] hover:text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
-            title="Refresh deployment timeline"
+            title={th ? 'รีเฟรชไทม์ไลน์การ Deploy' : 'Refresh deployment timeline'}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -183,8 +204,12 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
       {!loading && filteredItems.length === 0 ? (
         <div className="p-5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-xs font-mono text-[var(--app-text-secondary)]">
           {items.length === 0
-            ? 'No deployment events recorded yet. Trigger a cloud deployment workflow to record chronological verification evidence.'
-            : `No deployment events match filter '${filter}'.`}
+            ? th
+              ? 'ยังไม่มีเหตุการณ์การ Deploy ที่บันทึกไว้ สั่งรันเวิร์กโฟลว์ Cloud Deployment เพื่อบันทึกหลักฐานตามลำดับเวลา'
+              : 'No deployment events recorded yet. Trigger a cloud deployment workflow to record chronological verification evidence.'
+            : th
+              ? `ไม่พบเหตุการณ์การ Deploy ที่ตรงกับตัวกรอง '${filter}'`
+              : `No deployment events match filter '${filter}'.`}
         </div>
       ) : (
         <div className="rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] p-4">
@@ -253,14 +278,16 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         }`}
                       >
                         <Terminal className="w-3 h-3" />
-                        <span>Cloud Runtime Logs ({logs.length})</span>
+                        <span>
+                          {th ? `บันทึก Cloud Runtime (${logs.length})` : `Cloud Runtime Logs (${logs.length})`}
+                        </span>
                       </button>
                       {onViewProjectLogs && (
                         <a
                           href="#project-runtime-logs"
                           onClick={() => onViewProjectLogs(item)}
                           className="p-1.5 rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-secondary)] hover:text-[var(--app-accent)]"
-                          title="Jump to project runtime logs panel"
+                          title={th ? 'ข้ามไปยังแผงบันทึก Runtime ของโปรเจกต์' : 'Jump to project runtime logs panel'}
                         >
                           <ExternalLink className="w-3 h-3" />
                         </a>
@@ -277,7 +304,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         ) : (
                           <ShieldAlert className="w-3.5 h-3.5 text-[var(--z-warn)]" />
                         )}
-                        Verification Evidence
+                        {th ? 'หลักฐานการตรวจสอบ (Verification Evidence)' : 'Verification Evidence'}
                       </span>
                       <span
                         className={`font-bold ${
@@ -298,7 +325,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         <div className="flex items-center justify-between gap-1">
                           <span className="text-[var(--app-text-secondary)] font-sans font-semibold flex items-center gap-1">
                             <Hash className="w-3 h-3 text-[var(--app-accent)]" />
-                            Deployment Hash
+                            {th ? 'Hash การ Deploy' : 'Deployment Hash'}
                           </span>
                           <StatusDot
                             status={evidence.deploymentHash.hashVerified ? 'VERIFIED' : 'UNVERIFIED'}
@@ -310,12 +337,12 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         </div>
                         <div
                           className="text-[10px] text-[var(--app-accent)] truncate"
-                          title={evidence.deploymentHash.artifactSha256 || 'No bundle artifact hash'}
+                          title={evidence.deploymentHash.artifactSha256 || (th ? 'ไม่มี Hash ของแพ็กเกจ' : 'No bundle artifact hash')}
                         >
                           zip-sha256: {evidence.deploymentHash.artifactSha256 || 'NONE (UNVERIFIED)'}
                         </div>
                         <div className="text-[10px] text-[var(--app-text-secondary)] truncate">
-                          bundle: {evidence.deploymentHash.artifactZip || 'Not bundled'} · {evidence.deploymentHash.revisionId}
+                          bundle: {evidence.deploymentHash.artifactZip || (th ? 'ยังไม่ได้รวมแพ็กเกจ' : 'Not bundled')} · {evidence.deploymentHash.revisionId}
                         </div>
                       </div>
 
@@ -324,7 +351,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         <div className="flex items-center justify-between gap-1">
                           <span className="text-[var(--app-text-secondary)] font-sans font-semibold flex items-center gap-1">
                             <Server className="w-3 h-3 text-[var(--app-accent)]" />
-                            Cloud Runtime Response
+                            {th ? 'การตอบสนอง Cloud Runtime' : 'Cloud Runtime Response'}
                           </span>
                           <StatusDot
                             status={evidence.cloudRuntimeResponse.state}
@@ -338,7 +365,9 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                                   ? ` · ${evidence.cloudRuntimeResponse.latencyMs}ms`
                                   : ''
                               }`
-                            : 'No live HTTP response'}
+                            : th
+                              ? 'ไม่มีการตอบสนอง HTTP จริง'
+                              : 'No live HTTP response'}
                         </div>
                         <div
                           className="text-[10px] text-[var(--app-text-secondary)] truncate"
@@ -359,7 +388,7 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         <div className="flex items-center justify-between gap-1">
                           <span className="text-[var(--app-text-secondary)] font-sans font-semibold flex items-center gap-1">
                             <Activity className="w-3 h-3 text-[var(--z-ok)]" />
-                            Automated Test Results
+                            {th ? 'ผลทดสอบอัตโนมัติ' : 'Automated Test Results'}
                           </span>
                           <StatusDot
                             status={evidence.automatedTestResults.state}
@@ -371,13 +400,15 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                           />
                         </div>
                         <div className="text-[10px] text-[var(--app-text-primary)] tabular-nums">
-                          Status: {evidence.automatedTestResults.status} ({evidence.automatedTestResults.passed}/
+                          {th ? 'สถานะ' : 'Status'}: {evidence.automatedTestResults.status} ({evidence.automatedTestResults.passed}/
                           {evidence.automatedTestResults.total})
                         </div>
                         <div className="text-[10px] text-[var(--app-text-secondary)] truncate">
                           {evidence.automatedTestResults.executedAt
-                            ? `Executed ${evidence.automatedTestResults.executedAt}`
-                            : 'Not executed before deployment'}
+                            ? `${th ? 'รันเมื่อ' : 'Executed'} ${evidence.automatedTestResults.executedAt}`
+                            : th
+                              ? 'ยังไม่ได้รันทดสอบก่อน Deploy'
+                              : 'Not executed before deployment'}
                         </div>
                         <div className="text-[10px] text-[var(--app-text-secondary)] line-clamp-2 font-sans">
                           {evidence.automatedTestResults.summary}
@@ -391,13 +422,15 @@ export const DeploymentHistoryTimeline: React.FC<DeploymentHistoryTimelineProps>
                         <div className="flex items-center justify-between text-[10px] font-mono text-[var(--app-accent)]">
                           <span className="flex items-center gap-1">
                             <FileText className="w-3 h-3" />
-                            Cloud Runtime Logs ({item.logsUrl})
+                            {th ? 'บันทึก Cloud Runtime' : 'Cloud Runtime Logs'} ({item.logsUrl})
                           </span>
-                          {loadingLogsId === itemKey && <span>Fetching logs…</span>}
+                          {loadingLogsId === itemKey && <span>{th ? 'กำลังดึงบันทึก…' : 'Fetching logs…'}</span>}
                         </div>
                         {logs.length === 0 ? (
                           <div className="text-[10px] font-mono text-[var(--app-text-secondary)] py-1">
-                            No cloud runtime log entries linked directly to {item.deploymentId}.
+                            {th
+                              ? `ไม่มีบันทึก Cloud Runtime ที่เชื่อมโยงกับ ${item.deploymentId}`
+                              : `No cloud runtime log entries linked directly to ${item.deploymentId}.`}
                           </div>
                         ) : (
                           <div className="max-h-40 overflow-y-auto divide-y divide-[var(--app-card-border)] rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-[10px]">

@@ -30,7 +30,11 @@ import {
   parseCheckpointBuffer,
 } from './lib/CloudCheckpointStorage';
 import { CloudObjectStorageService } from './lib/CloudObjectStorageService';
-import { fetchVerifyAndLoad41MCheckpoint, TARGET_41M_PARAM_COUNT } from './lib/Cloud41MCheckpointVerifier';
+import {
+  fetchVerifyAndLoad41MCheckpoint,
+  verifyCheckpointBufferFor41M,
+  TARGET_41M_PARAM_COUNT,
+} from './lib/Cloud41MCheckpointVerifier';
 import {
   probeNativeNumpyEnvironment,
   establishNativeNumpyEnvironment,
@@ -88,6 +92,10 @@ import { SovereignIdentity, SovereignRole } from './lib/SovereignIdentity';
 import { TokenRevocation } from './lib/TokenRevocation';
 import { requireFirebaseAuth, type AuthRequest } from './src/middleware/auth';
 import { BenchmarkRunner } from './server/benchmarks/runner';
+import {
+  SoftwareProjectManager,
+  type EngineeringScope,
+} from './lib/SoftwareProjectManager';
 import {
   runUpgradedAssistant,
   isAssistantConfigured,
@@ -1663,6 +1671,312 @@ app.post('/api/workspace/run', requireRole(['Administrator']), async (req: Reque
   }
 });
 
+// 6.1 GitHub-First Sync Inspection & Push (DevStudio)
+const GIT_SENSITIVE_PATH_RE = /(?:^|\/)(?:\.env(?:\.(?!example$).*)?|.*\.pt|.*\.pth|.*\.pem|.*\.key|id_rsa.*|node_modules(?:\/|$)|dist(?:\/|$)|\.git(?:\/|$)|backups(?:\/|$)|native_data\/audit_log\.jsonl)$/i;
+
+function sanitizeGitText(input: string): string {
+  return String(input || '')
+    .replace(/https?:\/\/([^:@\s]+):([^@\s]+)@/gi, 'https://$1:***@')
+    .replace(/x-access-token:[^@\s]+@/gi, 'x-access-token:***@')
+    .trim();
+}
+
+function isSafeGitStagePath(relPath: string): boolean {
+  const normalized = relPath.replace(/\\/g, '/').trim();
+  if (!normalized || normalized.startsWith('/') || normalized.includes('..')) return false;
+  if (GIT_SENSITIVE_PATH_RE.test(normalized)) return false;
+  return true;
+}
+
+async function inspectGitRepositoryState(requestedBranch?: string) {
+  const cwd = process.cwd();
+  const checkedAt = new Date().toISOString();
+  const targetBranch =
+    requestedBranch && !/^-/.test(requestedBranch) && /^[a-zA-Z0-9._/-]{1,80}$/.test(requestedBranch)
+      ? requestedBranch
+      : 'tidy-root';
+
+  try {
+    const { stdout: insideOut } = await execFileAsync('git', ['rev-parse', '--is-inside-work-tree'], {
+      cwd,
+      timeout: 8_000,
+    });
+    if (insideOut.trim() !== 'true') {
+      throw new Error('Not inside a Git work tree');
+    }
+  } catch {
+    return {
+      gitAvailable: false,
+      connected: false,
+      status: 'BLOCKED' as const,
+      code: 'GIT_REPO_NOT_FOUND',
+      branch: null,
+      targetBranch,
+      headSha: null,
+      remoteName: 'origin',
+      remoteUrl: null,
+      aheadCount: 0,
+      behindCount: 0,
+      clean: false,
+      changedFiles: [] as Array<{ path: string; code: string; safeToStage: boolean }>,
+      safeStageableCount: 0,
+      reason: 'No .git repository exists in this workspace runtime. Connect or run inside the ZYNTHEOR Git repository to sync changes.',
+      checkedAt,
+    };
+  }
+
+  let branch: string | null = null;
+  try {
+    const { stdout } = await execFileAsync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd, timeout: 8_000 });
+    branch = stdout.trim() || null;
+  } catch {
+    branch = null;
+  }
+
+  let headSha: string | null = null;
+  try {
+    const { stdout } = await execFileAsync('git', ['rev-parse', '--short', 'HEAD'], { cwd, timeout: 8_000 });
+    headSha = stdout.trim() || null;
+  } catch {
+    headSha = null;
+  }
+
+  let remoteUrl: string | null = null;
+  try {
+    const { stdout } = await execFileAsync('git', ['remote', 'get-url', 'origin'], { cwd, timeout: 8_000 });
+    remoteUrl = sanitizeGitText(stdout.trim()) || null;
+  } catch {
+    remoteUrl = null;
+  }
+
+  let changedFiles: Array<{ path: string; code: string; safeToStage: boolean }> = [];
+  try {
+    const { stdout } = await execFileAsync('git', ['status', '--porcelain=v1', '-uall'], {
+      cwd,
+      timeout: 10_000,
+      maxBuffer: 2 * 1024 * 1024,
+    });
+    changedFiles = stdout
+      .split(/\r?\n/)
+      .filter((line) => line.length >= 4)
+      .slice(0, 150)
+      .map((line) => {
+        const code = line.slice(0, 2);
+        const rawPath = line.slice(3).trim();
+        const filePath = rawPath.includes(' -> ') ? rawPath.split(' -> ').pop()!.trim() : rawPath;
+        const cleanPath = filePath.replace(/^"+|"+$/g, '');
+        return {
+          path: cleanPath,
+          code,
+          safeToStage: isSafeGitStagePath(cleanPath),
+        };
+      });
+  } catch {
+    changedFiles = [];
+  }
+
+  let aheadCount = 0;
+  let behindCount = 0;
+  if (remoteUrl) {
+    try {
+      const { stdout } = await execFileAsync(
+        'git',
+        ['rev-list', '--left-right', '--count', `origin/${targetBranch}...HEAD`],
+        { cwd, timeout: 8_000 }
+      );
+      const parts = stdout.trim().split(/\s+/).map(Number);
+      if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
+        behindCount = parts[0];
+        aheadCount = parts[1];
+      }
+    } catch {
+      // Remote branch ref may not exist locally yet; leave 0/0.
+    }
+  }
+
+  const safeStageableCount = changedFiles.filter((f) => f.safeToStage).length;
+  const connected = Boolean(remoteUrl);
+  const status = connected ? 'READY' : 'BLOCKED';
+  const code = connected ? null : 'GIT_REMOTE_MISSING';
+  const reason = connected
+    ? changedFiles.length === 0 && aheadCount === 0
+      ? `Working tree is clean on '${branch || 'HEAD'}' and synchronized with origin/${targetBranch}.`
+      : `${changedFiles.length} local change(s) (${safeStageableCount} safe to stage), ${aheadCount} commit(s) ahead of origin/${targetBranch}.`
+    : 'Git remote "origin" is not configured in this repository.';
+
+  return {
+    gitAvailable: true,
+    connected,
+    status,
+    code,
+    branch,
+    targetBranch,
+    headSha,
+    remoteName: 'origin',
+    remoteUrl,
+    aheadCount,
+    behindCount,
+    clean: changedFiles.length === 0,
+    changedFiles,
+    safeStageableCount,
+    reason,
+    checkedAt,
+  };
+}
+
+app.get('/api/github/status', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const branchParam = typeof req.query.branch === 'string' ? req.query.branch.trim() : undefined;
+    const state = await inspectGitRepositoryState(branchParam);
+    return res.json({ success: true, ...state });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, status: 'BLOCKED', error: sanitizeGitText(err?.message || String(err)) });
+  }
+});
+
+app.post('/api/github/sync', requireRole(['Developer', 'Administrator']), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const requestedBranch = typeof body.branch === 'string' ? body.branch.trim() : 'tidy-root';
+    if (!requestedBranch || /^-/.test(requestedBranch) || !/^[a-zA-Z0-9._/-]{1,80}$/.test(requestedBranch)) {
+      return res.status(400).json({
+        success: false,
+        status: 'BLOCKED',
+        pushStatus: 'BLOCKED',
+        code: 'INVALID_BRANCH_NAME',
+        error: 'Target branch name is invalid.',
+      });
+    }
+
+    const commitMessageRaw =
+      typeof body.commitMessage === 'string' && body.commitMessage.trim()
+        ? body.commitMessage.trim()
+        : 'chore(zyntheor): sync workspace changes from DevStudio';
+    const commitMessage = commitMessageRaw.replace(/[\r\n\0]+/g, ' ').slice(0, 200);
+    const scope = body.scope === 'workspace_only' ? 'workspace_only' : 'all_safe';
+
+    const state = await inspectGitRepositoryState(requestedBranch);
+    if (!state.gitAvailable || !state.connected || !state.remoteUrl) {
+      AuditLedger.append('SYSTEM', 'GITHUB_SYNC_BLOCKED', {
+        userId: req.sovereignUserId || 'unknown',
+        role: req.sovereignRole || 'unknown',
+        code: state.code || 'GIT_NOT_CONNECTED',
+        targetBranch: requestedBranch,
+      });
+      return res.status(409).json({
+        success: false,
+        status: 'BLOCKED',
+        pushStatus: 'BLOCKED',
+        code: state.code || 'GIT_NOT_CONNECTED',
+        branch: requestedBranch,
+        remoteUrl: state.remoteUrl,
+        error: state.reason,
+        state,
+      });
+    }
+
+    const cwd = process.cwd();
+    const filesToStage = state.changedFiles
+      .filter((f) => f.safeToStage && (scope === 'workspace_only' ? f.path.startsWith('workspace/') : true))
+      .map((f) => f.path);
+
+    if (filesToStage.length > 0) {
+      await execFileAsync('git', ['add', '--', ...filesToStage], { cwd, timeout: 15_000 });
+    }
+
+    let stagedFiles: string[] = [];
+    try {
+      const { stdout: cachedOut } = await execFileAsync('git', ['diff', '--cached', '--name-only'], {
+        cwd,
+        timeout: 10_000,
+      });
+      stagedFiles = cachedOut.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    } catch {
+      stagedFiles = [];
+    }
+
+    let didCommit = false;
+    if (stagedFiles.length > 0) {
+      await execFileAsync('git', ['commit', '-m', commitMessage], { cwd, timeout: 15_000 });
+      didCommit = true;
+    }
+
+    let commitSha = state.headSha;
+    try {
+      const { stdout: shaOut } = await execFileAsync('git', ['rev-parse', '--short', 'HEAD'], { cwd, timeout: 8_000 });
+      commitSha = shaOut.trim() || commitSha;
+    } catch {
+      // Keep prior headSha if unavailable
+    }
+
+    const refspec = state.branch === requestedBranch ? requestedBranch : `HEAD:refs/heads/${requestedBranch}`;
+    try {
+      const { stdout: pushOut, stderr: pushErr } = await execFileAsync(
+        'git',
+        ['push', 'origin', refspec],
+        { cwd, timeout: 25_000 }
+      );
+      const refreshedState = await inspectGitRepositoryState(requestedBranch);
+      const pushSummary = sanitizeGitText([pushOut, pushErr].filter(Boolean).join('\n'));
+      const pushStatus = didCommit || state.aheadCount > 0 ? 'PUSHED' : 'UP_TO_DATE';
+
+      AuditLedger.append('SYSTEM', 'GITHUB_SYNC_PUSHED', {
+        userId: req.sovereignUserId || 'unknown',
+        role: req.sovereignRole || 'unknown',
+        branch: requestedBranch,
+        commitSha,
+        stagedCount: stagedFiles.length,
+        pushStatus,
+      });
+
+      return res.json({
+        success: true,
+        status: 'VERIFIED',
+        pushStatus,
+        branch: requestedBranch,
+        sourceBranch: state.branch,
+        commitSha,
+        remoteUrl: state.remoteUrl,
+        stagedFiles,
+        didCommit,
+        pushSummary: pushSummary || `Synchronized with origin/${requestedBranch}`,
+        state: refreshedState,
+      });
+    } catch (pushErr: any) {
+      const errDetail = sanitizeGitText(pushErr?.stderr || pushErr?.message || String(pushErr));
+      const refreshedState = await inspectGitRepositoryState(requestedBranch);
+      AuditLedger.append('SYSTEM', 'GITHUB_SYNC_PUSH_FAILED', {
+        userId: req.sovereignUserId || 'unknown',
+        role: req.sovereignRole || 'unknown',
+        branch: requestedBranch,
+        commitSha,
+        error: errDetail.slice(0, 240),
+      });
+      return res.status(409).json({
+        success: false,
+        status: 'BLOCKED',
+        pushStatus: 'BLOCKED',
+        code: 'GIT_PUSH_FAILED',
+        branch: requestedBranch,
+        sourceBranch: state.branch,
+        commitSha,
+        remoteUrl: state.remoteUrl,
+        stagedFiles,
+        didCommit,
+        error: `git push to origin/${requestedBranch} failed: ${errDetail || 'Authentication or remote branch protection rejected push.'}`,
+        state: refreshedState,
+      });
+    }
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      status: 'BLOCKED',
+      pushStatus: 'BLOCKED',
+      error: sanitizeGitText(err?.message || String(err)),
+    });
+  }
+});
+
 // 6a. Evidence-gated competitive software benchmarks (L1-L4)
 app.get('/api/benchmarks', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -3081,6 +3395,261 @@ app.get('/api/model/verify-checkpoint-baseline', requireRole(['Developer', 'Admi
       checkpointPath: TARGET_REL_PATH,
       error: err?.message || 'Checkpoint baseline SHA-256 verification failed.',
       checkedAt,
+    });
+  }
+});
+
+// 12a. R0 Checkpoint (model_checkpoint_target_41m_step5800.pt) Native Runtime Status & Initialization
+const R0_CHECKPOINT_FILENAME = 'model_checkpoint_target_41m_step5800.pt';
+const R0_PRIMARY_REL_PATH = path.join('native_data', R0_CHECKPOINT_FILENAME);
+const R0_FALLBACK_REL_PATH = path.join('native_data', 'model_checkpoint_target_41m.pt');
+const R0_EXPECTED_STEPS = 5800;
+
+async function inspectR0NativeRuntimeState() {
+  const checkedAt = new Date().toISOString();
+  const monitor = ConnectivityMonitor.getInstance();
+  const provider = NativeNeuralLMProvider.getInstance();
+  const [connectivity, pingRes] = await Promise.all([
+    monitor.checkNow().catch(() => null),
+    provider.ping().catch(() => null),
+  ]);
+  const storageCfg = CloudObjectStorageService.getConfigurationStatus();
+
+  const primaryAbs = path.resolve(process.cwd(), R0_PRIMARY_REL_PATH);
+  const fallbackAbs = path.resolve(process.cwd(), R0_FALLBACK_REL_PATH);
+  const primaryExists = fs.existsSync(primaryAbs);
+  const fallbackExists = fs.existsSync(fallbackAbs);
+
+  const primarySizeBytes = primaryExists ? fs.statSync(primaryAbs).size : null;
+  const fallbackSizeBytes = fallbackExists ? fs.statSync(fallbackAbs).size : null;
+
+  const weightsLoaded = Boolean(connectivity?.weightsLoaded && pingRes?.weights_loaded);
+  const executionVerified = Boolean(connectivity?.executionVerified && pingRes?.execution_verified);
+  const inferenceReady = Boolean(weightsLoaded && executionVerified && connectivity?.runtimeState === 'READY');
+  const activeParams = inferenceReady ? Number(pingRes?.active_params || 0) : null;
+  const runtimeSha256 = connectivity?.checkpointSha256 || pingRes?.checkpoint_sha256 || null;
+  const runtimePath = connectivity?.checkpointPath || pingRes?.checkpoint_path || null;
+  const activeRuntimeId = connectivity?.activeRuntimeId || pingRes?.active_runtime_id || null;
+  const loadedSteps = typeof (pingRes as any)?.training_steps === 'number' ? (pingRes as any).training_steps : null;
+
+  const matchesR0Identity = Boolean(
+    inferenceReady &&
+      activeParams === TARGET_41M_PARAM_COUNT &&
+      ((runtimePath && runtimePath.includes('step5800')) ||
+        (runtimeSha256 && runtimeSha256.toLowerCase().startsWith('6e7f')) ||
+        loadedSteps === R0_EXPECTED_STEPS)
+  );
+
+  let loadingStatus:
+    | 'LOADED_READY'
+    | 'DISK_AVAILABLE_UNLOADED'
+    | 'CLOUD_READY_UNLOADED'
+    | 'NOT_CONFIGURED'
+    | 'BLOCKED';
+  let statusReason: string;
+
+  if (inferenceReady) {
+    loadingStatus = 'LOADED_READY';
+    statusReason = matchesR0Identity
+      ? `R0 checkpoint (${R0_CHECKPOINT_FILENAME}) is loaded, SHA-256 verified, and ready for native inference (${TARGET_41M_PARAM_COUNT.toLocaleString()} params).`
+      : `Native Runtime has verified weights loaded (${activeParams?.toLocaleString() || 0} params · ${runtimeSha256?.slice(0, 12) || 'unknown'}).`;
+  } else if (primaryExists) {
+    loadingStatus = 'DISK_AVAILABLE_UNLOADED';
+    statusReason = `R0 artifact detected on disk at ${R0_PRIMARY_REL_PATH} (${((primarySizeBytes || 0) / (1024 * 1024)).toFixed(2)} MB) and ready to initialize into Native Runtime.`;
+  } else if (storageCfg.configValid) {
+    loadingStatus = 'CLOUD_READY_UNLOADED';
+    statusReason = `Local ${R0_CHECKPOINT_FILENAME} is absent on disk; Cloud Storage (${storageCfg.provider}) is configured to stream and initialize weights.`;
+  } else if (connectivity && !connectivity.pythonBridgeReachable) {
+    loadingStatus = 'BLOCKED';
+    statusReason = 'Python Native Bridge is unreachable; cannot initialize runtime.';
+  } else {
+    loadingStatus = 'NOT_CONFIGURED';
+    statusReason = `${R0_CHECKPOINT_FILENAME} is not present in native_data/ and Cloud Object Storage / CHECKPOINT_PRESIGNED_URL is not configured.`;
+  }
+
+  return {
+    checkpointFilename: R0_CHECKPOINT_FILENAME,
+    expectedParams: TARGET_41M_PARAM_COUNT,
+    expectedSteps: R0_EXPECTED_STEPS,
+    readOnlyBaseline: true,
+    loadingStatus,
+    runtimeState: connectivity?.runtimeState || (loadingStatus === 'NOT_CONFIGURED' ? 'NOT_CONFIGURED' : 'BLOCKED'),
+    bridgeReachable: Boolean(connectivity?.pythonBridgeReachable),
+    weightsLoaded,
+    executionVerified,
+    inferenceReady,
+    matchesR0Identity,
+    activeParams,
+    checkpointPath: runtimePath,
+    checkpointSha256: runtimeSha256,
+    activeRuntimeId,
+    loadedSteps,
+    diskArtifact: {
+      primaryPath: R0_PRIMARY_REL_PATH,
+      primaryExists,
+      primarySizeBytes,
+      fallbackPath: R0_FALLBACK_REL_PATH,
+      fallbackExists,
+      fallbackSizeBytes,
+    },
+    cloudConfig: {
+      configValid: storageCfg.configValid,
+      s3Configured: storageCfg.s3Configured,
+      provider: storageCfg.provider,
+      checkpointKey: storageCfg.checkpointKey,
+      missingKeys: storageCfg.missingKeys,
+    },
+    reason: statusReason,
+    checkedAt,
+  };
+}
+
+app.get('/api/model/r0-runtime', requireRole(['Developer', 'Administrator']), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const status = await inspectR0NativeRuntimeState();
+    return res.json({ success: true, ...status });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      loadingStatus: 'BLOCKED',
+      error: err?.message || 'Failed to inspect R0 Native Runtime status.',
+    });
+  }
+});
+
+app.post('/api/model/r0-initialize', requireRole(['Developer', 'Administrator']), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const presignedUrl = typeof body.presignedUrl === 'string' && body.presignedUrl.trim() ? body.presignedUrl.trim() : undefined;
+    const objectKey = typeof body.objectKey === 'string' && body.objectKey.trim() ? body.objectKey.trim() : undefined;
+    const expectedSha256 = typeof body.expectedSha256 === 'string' && body.expectedSha256.trim() ? body.expectedSha256.trim() : undefined;
+
+    if (presignedUrl) {
+      const urlCheck = validateCloudUrl(presignedUrl);
+      if (!urlCheck.ok) {
+        return res.status(400).json({
+          success: false,
+          status: 'BLOCKED',
+          code: 'INVALID_PRESIGNED_URL',
+          error: urlCheck.reason || 'Invalid presignedUrl',
+        });
+      }
+    }
+
+    const storageCfg = CloudObjectStorageService.getConfigurationStatus();
+    if (presignedUrl || objectKey || storageCfg.configValid) {
+      const outcome = await fetchVerifyAndLoad41MCheckpoint({
+        objectKey: objectKey || (storageCfg.s3Configured ? R0_CHECKPOINT_FILENAME : undefined),
+        presignedUrl,
+        expectedSha256,
+        verifyOnly: false,
+      });
+      const state = await inspectR0NativeRuntimeState();
+      AuditLedger.append('SYSTEM', outcome.success ? 'R0_RUNTIME_INITIALIZED_CLOUD' : 'R0_RUNTIME_INIT_BLOCKED', {
+        userId: req.sovereignUserId || 'unknown',
+        success: outcome.success,
+        stage: outcome.stage,
+        runtimeLoaded: outcome.runtimeLoaded,
+        error: outcome.error,
+      });
+      return res.status(outcome.success ? 200 : outcome.stage === 'FETCH' ? 503 : 409).json({
+        success: outcome.success,
+        status: outcome.success ? 'VERIFIED' : 'BLOCKED',
+        source: 'cloud',
+        outcome,
+        state,
+        error: outcome.error,
+      });
+    }
+
+    const primaryAbs = path.resolve(process.cwd(), R0_PRIMARY_REL_PATH);
+    const workspaceRoot = path.resolve(process.cwd());
+    if (!primaryAbs.startsWith(workspaceRoot + path.sep)) {
+      return res.status(403).json({ success: false, status: 'BLOCKED', error: 'Invalid checkpoint path.' });
+    }
+
+    if (fs.existsSync(primaryAbs)) {
+      const buffer = fs.readFileSync(primaryAbs);
+      const verification = verifyCheckpointBufferFor41M(buffer, {
+        sourceUri: `file://${R0_PRIMARY_REL_PATH}`,
+        provider: 'buffer',
+        expectedSha256,
+        expectedParams: TARGET_41M_PARAM_COUNT,
+      });
+
+      if (!verification.verified) {
+        const state = await inspectR0NativeRuntimeState();
+        AuditLedger.append('SYSTEM', 'R0_RUNTIME_INIT_REJECTED', {
+          userId: req.sovereignUserId || 'unknown',
+          gateStatus: verification.gateStatus,
+          reason: verification.reason,
+        });
+        return res.status(409).json({
+          success: false,
+          status: 'BLOCKED',
+          code: verification.gateStatus,
+          source: 'disk',
+          verification,
+          state,
+          error: `FAIL_CLOSED: ${verification.reason}`,
+        });
+      }
+
+      const provider = NativeNeuralLMProvider.getInstance();
+      const loadRes = await provider.loadVerifiedCloudBytes(buffer, {
+        sourceUri: `file://${R0_PRIMARY_REL_PATH}`,
+      });
+      await ConnectivityMonitor.getInstance().checkNow().catch(() => null);
+      const state = await inspectR0NativeRuntimeState();
+
+      if (!state.inferenceReady) {
+        return res.status(409).json({
+          success: false,
+          status: 'BLOCKED',
+          code: 'RUNTIME_PARITY_FAILED',
+          source: 'disk',
+          verification,
+          loadRes,
+          state,
+          error: state.reason || 'Native Runtime did not reach READY state after loading R0 bytes.',
+        });
+      }
+
+      AuditLedger.append('SYSTEM', 'R0_RUNTIME_INITIALIZED_DISK', {
+        userId: req.sovereignUserId || 'unknown',
+        checkpointPath: R0_PRIMARY_REL_PATH,
+        activeParams: state.activeParams,
+        checkpointSha256: state.checkpointSha256,
+        activeRuntimeId: state.activeRuntimeId,
+      });
+
+      return res.json({
+        success: true,
+        status: 'VERIFIED',
+        source: 'disk',
+        verification,
+        state,
+      });
+    }
+
+    const state = await inspectR0NativeRuntimeState();
+    AuditLedger.append('SYSTEM', 'R0_RUNTIME_INIT_BLOCKED', {
+      userId: req.sovereignUserId || 'unknown',
+      code: 'R0_CHECKPOINT_NOT_FOUND',
+      primaryPath: R0_PRIMARY_REL_PATH,
+    });
+    return res.status(409).json({
+      success: false,
+      status: 'BLOCKED',
+      code: 'R0_CHECKPOINT_NOT_FOUND',
+      state,
+      error: `BLOCKED: ${R0_CHECKPOINT_FILENAME} was not found at ${R0_PRIMARY_REL_PATH} and no Cloud Object Storage / CHECKPOINT_PRESIGNED_URL is configured.`,
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      status: 'BLOCKED',
+      error: err?.message || 'R0 Native Runtime initialization failed.',
     });
   }
 });
@@ -4681,6 +5250,313 @@ app.post('/api/assistant/chat', async (req: Request, res: Response) => {
       const status = typeof err?.status === 'number' ? err.status : 500;
       res.status(status).json({ success: false, error: errMsg });
     }
+  }
+});
+
+function toEngineeringScope(req: AuthenticatedRequest): EngineeringScope {
+  return {
+    tenantId: req.sovereignTenantId || 'tenant_default',
+    userId: req.sovereignUserId || 'anonymous',
+    role: req.sovereignRole || 'developer',
+  };
+}
+
+function mapEngineeringErrorStatus(err: unknown): number {
+  const msg = err instanceof Error ? err.message : String(err || '');
+  if (/PROJECT_NOT_FOUND|FILE_NOT_FOUND|REVISION_NOT_FOUND|INTEGRATION_NOT_FOUND/.test(msg)) return 404;
+  if (/INVALID_|UNSUPPORTED_|PROJECT_EMPTY/.test(msg)) return 400;
+  if (/DEPLOYMENT_BLOCKED/.test(msg)) return 409;
+  if (/SECURITY_VIOLATION/.test(msg)) return 403;
+  return 500;
+}
+
+// Software Engineering & App Builder API (backed by SoftwareProjectManager)
+app.get('/api/engineering/capabilities', requireAuth('guest'), async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const mgr = SoftwareProjectManager.getInstance();
+    const snapshot = await mgr.getSoftwareCapabilitiesSnapshot();
+    const deliveryTargets = mgr.getPlatformDeliveryTargets();
+    res.json({
+      success: true,
+      ...snapshot,
+      deliveryTargets,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || 'Unable to inspect engineering capabilities.' });
+  }
+});
+
+app.get('/api/engineering/projects', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const mgr = SoftwareProjectManager.getInstance();
+    const projects = mgr.listProjects(toEngineeringScope(req));
+    res.json({ success: true, projects });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to list projects.' });
+  }
+});
+
+app.post('/api/engineering/projects', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim() : undefined;
+    const rawStack = req.body?.stack;
+    const stack: 'node_fullstack' | 'node_api' | 'python_service' | 'static_web' =
+      rawStack === 'node_api' || rawStack === 'python_service' || rawStack === 'static_web'
+        ? rawStack
+        : 'node_fullstack';
+    const runChecks = req.body?.runChecks !== false;
+    const project = await mgr.createAndScaffoldProject({ name, prompt, stack, runChecks }, scope);
+    const files = mgr.getProjectFilesList(project.projectId, scope);
+    res.status(201).json({ success: true, project, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to create project.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const project = mgr.getProject(req.params.projectId, scope);
+    if (!project) {
+      return res.status(404).json({ success: false, error: `Project '${req.params.projectId}' not found.` });
+    }
+    const files = mgr.getProjectFilesList(project.projectId, scope);
+    res.json({ success: true, project, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to load project.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/files', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const files = SoftwareProjectManager.getInstance().getProjectFilesList(req.params.projectId, toEngineeringScope(req));
+    res.json({ success: true, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to list files.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/file', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const relPath = typeof req.query.path === 'string' ? req.query.path : '';
+    if (!relPath.trim()) {
+      return res.status(400).json({ success: false, error: 'Query parameter path is required.' });
+    }
+    const content = SoftwareProjectManager.getInstance().readProjectFile(req.params.projectId, relPath, toEngineeringScope(req));
+    res.json({ success: true, path: relPath, content });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to read project file.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/file', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const relPath = typeof req.body?.path === 'string' ? req.body.path.trim() : '';
+    const content = typeof req.body?.content === 'string' ? req.body.content : '';
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    if (!relPath) {
+      return res.status(400).json({ success: false, error: 'File path is required.' });
+    }
+    const mgr = SoftwareProjectManager.getInstance();
+    const result = mgr.writeProjectFile(req.params.projectId, relPath, content, message, scope);
+    const files = mgr.getProjectFilesList(req.params.projectId, scope);
+    res.json({ success: true, ...result, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to save project file.' });
+  }
+});
+
+app.delete('/api/engineering/projects/:projectId/file', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const relPath = typeof req.query.path === 'string' ? req.query.path : '';
+    if (!relPath.trim()) {
+      return res.status(400).json({ success: false, error: 'Query parameter path is required.' });
+    }
+    const mgr = SoftwareProjectManager.getInstance();
+    const project = mgr.deleteProjectFile(req.params.projectId, relPath, scope);
+    const files = mgr.getProjectFilesList(req.params.projectId, scope);
+    res.json({ success: true, project, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to delete project file.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/build', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const evidence = await mgr.runBuild(req.params.projectId, scope);
+    const project = mgr.getProject(req.params.projectId, scope);
+    res.json({ success: true, project, evidence });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Build execution failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/test', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const evidence = await mgr.runTests(req.params.projectId, scope);
+    const project = mgr.getProject(req.params.projectId, scope);
+    res.json({ success: true, project, evidence });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Automated test execution failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/security-scan', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const evidence = await mgr.runSecurityValidation(req.params.projectId, scope);
+    const project = mgr.getProject(req.params.projectId, scope);
+    res.json({ success: true, project, evidence });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Security validation failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/repair', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const mgr = SoftwareProjectManager.getInstance();
+    const result = await mgr.diagnoseAndRepairProject(req.params.projectId, scope);
+    const files = mgr.getProjectFilesList(req.params.projectId, scope);
+    res.json({ success: true, ...result, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Project repair failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/iterate', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const instruction = typeof req.body?.instruction === 'string' ? req.body.instruction : '';
+    const runChecks = req.body?.runChecks !== false;
+    const mgr = SoftwareProjectManager.getInstance();
+    const result = await mgr.iterateProjectWithRequest(req.params.projectId, { instruction, runChecks }, scope);
+    const files = mgr.getProjectFilesList(req.params.projectId, scope);
+    res.json({ success: true, ...result, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Project iteration failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/rollback', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const revisionId = typeof req.body?.revisionId === 'string' ? req.body.revisionId.trim() : '';
+    if (!revisionId) {
+      return res.status(400).json({ success: false, error: 'revisionId is required.' });
+    }
+    const mgr = SoftwareProjectManager.getInstance();
+    const project = mgr.rollbackToRevision(req.params.projectId, revisionId, scope);
+    const files = mgr.getProjectFilesList(req.params.projectId, scope);
+    res.json({ success: true, project, files });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Rollback failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/deploy', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const approvalRequestId = typeof req.body?.approvalRequestId === 'string' ? req.body.approvalRequestId : undefined;
+    const targetUrl = typeof req.body?.targetUrl === 'string' ? req.body.targetUrl : undefined;
+    const result = await SoftwareProjectManager.getInstance().requestOrExecuteDeploy(
+      req.params.projectId,
+      { approvalRequestId, targetUrl },
+      scope
+    );
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Deploy failed.' });
+  }
+});
+
+app.post('/api/engineering/projects/:projectId/verify-runtime', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const scope = toEngineeringScope(req);
+    const targetUrl = typeof req.body?.targetUrl === 'string' ? req.body.targetUrl : undefined;
+    const result = await SoftwareProjectManager.getInstance().verifyDeployedRuntime(req.params.projectId, { targetUrl }, scope);
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Runtime verification failed.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/preview', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const preview = SoftwareProjectManager.getInstance().getPreviewPayload(req.params.projectId, toEngineeringScope(req));
+    res.json({ success: true, ...preview });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to generate preview.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/database', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const database = SoftwareProjectManager.getInstance().inspectProjectDatabase(req.params.projectId, toEngineeringScope(req));
+    res.json({ success: true, database });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to inspect database schema.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/deliverable', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const bundle = await SoftwareProjectManager.getInstance().packageProjectZip(req.params.projectId, toEngineeringScope(req));
+    if (req.query.meta === '1') {
+      return res.json({ success: true, ...bundle });
+    }
+    return res.download(bundle.zipPath, bundle.zipFilename);
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to package deliverable ZIP.' });
+  }
+});
+
+app.get('/api/engineering/projects/:projectId/deployment/:deploymentId/logs', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const data = SoftwareProjectManager.getInstance().getDeploymentLogs(
+      req.params.projectId,
+      req.params.deploymentId,
+      toEngineeringScope(req)
+    );
+    res.json({ success: true, ...data });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to fetch deployment logs.' });
+  }
+});
+
+app.get('/api/engineering/deployments', requireAuth('developer'), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const projectId = typeof req.query.projectId === 'string' ? req.query.projectId : undefined;
+    const order = req.query.order === 'asc' ? 'asc' : 'desc';
+    const deployments = SoftwareProjectManager.getInstance().listDeploymentHistory(toEngineeringScope(req), { projectId, order });
+    res.json({ success: true, deployments });
+  } catch (err: any) {
+    res.status(mapEngineeringErrorStatus(err)).json({ success: false, error: err?.message || 'Unable to list deployment history.' });
+  }
+});
+
+app.get('/api/engineering/benchmark', requireAuth('developer'), (_req: AuthenticatedRequest, res: Response) => {
+  const report = SoftwareProjectManager.getInstance().getLatestBenchmarkReport();
+  res.json({ success: true, report });
+});
+
+app.post('/api/engineering/benchmark', requireAuth('developer'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const report = await SoftwareProjectManager.getInstance().runSoftwareBenchmarkSuite(toEngineeringScope(req));
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || 'Engineering benchmark execution failed.' });
   }
 });
 

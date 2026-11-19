@@ -24,6 +24,8 @@ import {
   ShieldCheck,
   Sparkles,
   Wrench,
+  Cpu,
+  Power
 } from 'lucide-react';
 
 const TARGET_PARAMS = 41_527_808;
@@ -85,6 +87,14 @@ export const ModelLaboratory: React.FC = () => {
   const [cloudKeyInput, setCloudKeyInput] = useState('');
   const [reconnectBusy, setReconnectBusy] = useState(false);
 
+  // R0 Native Runtime State (model_checkpoint_target_41m_step5800.pt)
+  const [r0Status, setR0Status] = useState<any>(null);
+  const [r0InitBusy, setR0InitBusy] = useState(false);
+  const [r0InitMessage, setR0InitMessage] = useState('');
+  const [r0InitError, setR0InitError] = useState('');
+  const [r0PresignedInput, setR0PresignedInput] = useState('');
+  const [r0ShowOverride, setR0ShowOverride] = useState(false);
+
   const isDevOrAdmin = role === 'Developer' || role === 'Administrator';
   const {
     verification: baselineVerification,
@@ -127,16 +137,21 @@ export const ModelLaboratory: React.FC = () => {
       if (datasetData?.success) setDatasets(Array.isArray(datasetData.datasets) ? datasetData.datasets : []);
 
       if (isAuthenticated && isDevOrAdmin) {
-        const [phasesRes, runsRes, approvalsRes] = await Promise.all([
+        const [phasesRes, runsRes, approvalsRes, r0Res] = await Promise.all([
           fetch('/api/training/pipeline/phases', { headers }),
           fetch('/api/training/pipeline/runs', { headers }),
           fetch('/api/governance/approvals', { headers }),
+          fetch('/api/model/r0-runtime', { headers, cache: 'no-store' }),
         ]);
-        const [phasesJson, runsJson, approvalsJson] = await Promise.all([
+        const [phasesJson, runsJson, approvalsJson, r0Json] = await Promise.all([
           phasesRes.json(),
           runsRes.json(),
           approvalsRes.json(),
+          r0Res.json().catch(() => null),
         ]);
+        if (r0Json?.success) {
+          setR0Status(r0Json);
+        }
         if (phasesJson?.success) {
           setPhases(Array.isArray(phasesJson.phases) ? phasesJson.phases : []);
           setPhaseSummary(phasesJson.summary || null);
@@ -219,6 +234,57 @@ export const ModelLaboratory: React.FC = () => {
       setActionMessage(`Reconnect error: ${msg}`);
     } finally {
       setReconnectBusy(false);
+    }
+  };
+
+  const handleInitializeNativeRuntime = async () => {
+    if (!isAuthenticated || !isDevOrAdmin || r0InitBusy) return;
+    setR0InitBusy(true);
+    setR0InitMessage('');
+    setR0InitError('');
+    try {
+      const payload: Record<string, string> = {};
+      if (r0PresignedInput.trim()) {
+        payload.presignedUrl = r0PresignedInput.trim();
+      } else if (cloudUrlInput.trim()) {
+        payload.presignedUrl = cloudUrlInput.trim();
+      }
+      if (cloudKeyInput.trim()) {
+        payload.objectKey = cloudKeyInput.trim();
+      }
+
+      const res = await fetch('/api/model/r0-initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (json?.state) {
+        setR0Status(json.state);
+      }
+      if (!res.ok || !json.success) {
+        setR0InitError(
+          json?.error ||
+            (lang === 'th'
+              ? `เริ่มต้น Native Runtime ไม่สำเร็จ (HTTP ${res.status})`
+              : `Native Runtime initialization blocked (HTTP ${res.status})`)
+        );
+      } else {
+        setR0InitMessage(
+          lang === 'th'
+            ? `เริ่มต้น Native Runtime สำเร็จ (${count(json.state?.activeParams)} พารามิเตอร์ · SHA-256: ${String(
+                json.state?.checkpointSha256 || ''
+              ).slice(0, 12)}…)`
+            : `Native Runtime initialized (${count(json.state?.activeParams)} params · SHA-256: ${String(
+                json.state?.checkpointSha256 || ''
+              ).slice(0, 12)}…)`
+        );
+      }
+      await refresh();
+    } catch (err: any) {
+      setR0InitError(err?.message || 'Native Runtime initialization request failed.');
+    } finally {
+      setR0InitBusy(false);
     }
   };
 
@@ -577,6 +643,179 @@ export const ModelLaboratory: React.FC = () => {
           accentColor={digestVerified ? 'lime' : inspectionResult?.valid ? 'cyan' : 'coral'}
         />
       </div>
+
+      {/* Native Runtime Card for R0 Checkpoint (model_checkpoint_target_41m_step5800.pt) */}
+      <VividCard
+        title="Native Runtime"
+        subtitle={
+          lang === 'th'
+            ? 'สถานะการโหลด R0 Golden Baseline (model_checkpoint_target_41m_step5800.pt · 41,527,808 พารามิเตอร์ · 5,800 Steps)'
+            : 'R0 Golden Baseline loading status (model_checkpoint_target_41m_step5800.pt · 41,527,808 params · 5,800 steps)'
+        }
+        gradientAccent="emerald"
+        headerAction={
+          <StatusBadge
+            status={
+              r0Status?.inferenceReady || ready
+                ? 'VERIFIED'
+                : r0Status?.loadingStatus === 'BLOCKED'
+                ? 'BLOCKED'
+                : 'UNVERIFIED'
+            }
+          />
+        }
+      >
+        <div data-testid="native-runtime-r0-card" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
+              <div className="text-[11px] text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'เป้าหมาย Checkpoint (R0)' : 'R0 Checkpoint Artifact'}
+              </div>
+              <div className="mt-1 font-mono font-semibold text-[var(--app-text-primary)] break-all">
+                model_checkpoint_target_41m_step5800.pt
+              </div>
+              <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)]">
+                {r0Status?.diskArtifact?.primaryExists
+                  ? `${lang === 'th' ? 'พบไฟล์บนดิสก์' : 'Found on disk'} (${(
+                      (r0Status.diskArtifact.primarySizeBytes || 0) /
+                      (1024 * 1024)
+                    ).toFixed(2)} MB)`
+                  : lang === 'th'
+                  ? 'ไม่พบไฟล์บนดิสก์ (native_data/)'
+                  : 'Not found on disk (native_data/)'}
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
+              <div className="text-[11px] text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'สถานะการโหลด (Loading Status)' : 'Loading Status'}
+              </div>
+              <div
+                data-testid="r0-loading-status"
+                className={`mt-1 font-mono font-semibold ${
+                  r0Status?.inferenceReady || ready
+                    ? 'text-[var(--z-ok)]'
+                    : r0Status?.loadingStatus === 'DISK_AVAILABLE_UNLOADED' ||
+                      r0Status?.loadingStatus === 'CLOUD_READY_UNLOADED'
+                    ? 'text-[var(--app-amber)]'
+                    : 'text-[var(--z-danger)]'
+                }`}
+              >
+                {r0Status?.loadingStatus ||
+                  (ready ? 'LOADED_READY' : runtime?.runtimeState || 'NOT_CONFIGURED')}
+              </div>
+              <div className="mt-1 text-[11px] text-[var(--app-text-secondary)]">
+                {lang === 'th'
+                  ? `Python Bridge: ${bridgeReachable ? 'เชื่อมต่อแล้ว' : 'ไม่พร้อม'} · อ่านอย่างเดียว (ไม่ฝึกซ้ำ)`
+                  : `Python Bridge: ${bridgeReachable ? 'Connected' : 'Unreachable'} · Read-only baseline`}
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
+              <div className="text-[11px] text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'พารามิเตอร์ที่โหลดและ Runtime ID' : 'Active Parameters & Runtime ID'}
+              </div>
+              <div className="mt-1 font-mono font-semibold text-[var(--app-text-primary)] tabular-nums">
+                {r0Status?.inferenceReady || ready
+                  ? `${count(r0Status?.activeParams ?? activeParams)} / 41,527,808`
+                  : lang === 'th'
+                  ? 'ยังไม่โหลด (0 / 41,527,808)'
+                  : 'Unloaded (0 / 41,527,808)'}
+              </div>
+              <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)] truncate">
+                {r0Status?.checkpointSha256 || hash
+                  ? `SHA: ${String(r0Status?.checkpointSha256 || hash).slice(0, 16)}… · ${
+                      r0Status?.activeRuntimeId || runtime?.activeRuntimeId || 'zyn-rt'
+                    }`
+                  : lang === 'th'
+                  ? 'R0 Baseline Target: SHA 6e7f… · 5,800 Steps'
+                  : 'Expected R0: SHA 6e7f… · 5,800 steps'}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-[var(--app-text-secondary)] flex-1 min-w-[240px]">
+              {r0Status?.reason ||
+                (lang === 'th'
+                  ? 'ระบบตรวจสอบสถานะจริงของ R0 (model_checkpoint_target_41m_step5800.pt) และพร้อมเริ่มต้นโหลดเมื่อไฟล์หรือปลายทาง Cloud พร้อม'
+                  : 'Inspects real loading state for R0 (model_checkpoint_target_41m_step5800.pt) without modifying or retraining the baseline.')}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {isAuthenticated && isDevOrAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setR0ShowOverride((v) => !v)}
+                  className="px-3 py-2 rounded-xl text-xs font-medium border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+                >
+                  {lang === 'th' ? 'ระบุ URL ปลายทาง R0' : 'Custom R0 URL'}
+                </button>
+              )}
+
+              <button
+                type="button"
+                data-testid="initialize-native-runtime-btn"
+                onClick={() => void handleInitializeNativeRuntime()}
+                disabled={r0InitBusy || !isAuthenticated || !isDevOrAdmin}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--app-accent-deep)] text-white hover:opacity-95 disabled:opacity-50 cursor-pointer whitespace-nowrap"
+              >
+                {r0InitBusy ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Power className="w-3.5 h-3.5" />
+                )}
+                <span>
+                  {r0InitBusy
+                    ? lang === 'th'
+                      ? 'กำลังเริ่มต้น Runtime...'
+                      : 'Initializing...'
+                    : lang === 'th'
+                    ? 'เริ่มต้น Native Runtime'
+                    : 'Initialize Native Runtime'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {r0ShowOverride && isAuthenticated && isDevOrAdmin && (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={r0PresignedInput}
+                onChange={(e) => setR0PresignedInput(e.target.value)}
+                placeholder="https://.../model_checkpoint_target_41m_step5800.pt"
+                aria-label="R0 Checkpoint Presigned URL"
+                className="flex-1 px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+              />
+            </div>
+          )}
+
+          {(!isAuthenticated || !isDevOrAdmin) && (
+            <div className="p-2.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[11px] text-[var(--app-text-secondary)] flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-[var(--app-amber)] shrink-0" />
+              <span>
+                {lang === 'th'
+                  ? 'ต้องเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator เพื่อสั่งเริ่มต้น Native Runtime'
+                  : 'Developer or Administrator session required to trigger Native Runtime initialization.'}
+              </span>
+            </div>
+          )}
+
+          {(r0InitMessage || r0InitError) && (
+            <div
+              data-testid="r0-init-result"
+              className={`p-3 rounded-xl border text-xs font-mono break-words ${
+                r0InitMessage
+                  ? 'border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_8%,transparent)] text-[var(--z-ok)]'
+                  : 'border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_8%,transparent)] text-[var(--z-danger)]'
+              }`}
+            >
+              {r0InitMessage || r0InitError}
+            </div>
+          )}
+        </div>
+      </VividCard>
 
       {/* Runtime & Checkpoint Evidence + Internet vs Model Connectivity */}
       <VividCard

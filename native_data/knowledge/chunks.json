@@ -188,5 +188,35 @@
     "text": "cross-tenant isolation probe content unique 90009a50",
     "language": "en",
     "hash": "92e3d978b090a9ec8a2a021954748e1c4f7d887cd5b0c39df5144d32b7ce3fdc"
+  },
+  {
+    "id": "chk_doc_1795087159671_ghcj0_0",
+    "documentId": "doc_1795087159671_ghcj0",
+    "documentTitle": "TenantA Secret 1795087159664",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 35ecabf4",
+    "language": "en",
+    "hash": "4b8bc20fded66853439c41312b35d3271d7e45f4b4b859e25d6b5f3e666e74a5"
+  },
+  {
+    "id": "chk_doc_1795087687217_l5er2_0",
+    "documentId": "doc_1795087687217_l5er2",
+    "documentTitle": "TenantA Secret 1795087687211",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique c826d689",
+    "language": "en",
+    "hash": "69986b54acd1a6e77c2cef6534b83549fcbb4ea251b46f79289d752fcfac1358"
+  },
+  {
+    "id": "chk_doc_1795088325873_hegkq_0",
+    "documentId": "doc_1795088325873_hegkq",
+    "documentTitle": "TenantA Secret 1795088325868",
+    "collection": "RBAC",
+    "chunkIndex": 0,
+    "text": "cross-tenant isolation probe content unique 832c0296",
+    "language": "en",
+    "hash": "11f848e3cfbe3ec7140392a70e0634398b601339e2d0c03a8f2255a04e7f88cc"
   }
 ]

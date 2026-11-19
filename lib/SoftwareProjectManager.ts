@@ -4340,4 +4340,127 @@ export class SoftwareProjectManager {
       },
     };
   }
+
+  public getProjectFilesList(
+    projectId: string,
+    scope: EngineeringScope
+  ): Array<{ relativePath: string; bytes: number; sha256?: string; snapshotId?: string | null }> {
+    const project = this.getProject(projectId, scope);
+    if (!project) throw new Error(`PROJECT_NOT_FOUND: '${projectId}'`);
+    const revMap = new Map<string, { bytes: number; sha256?: string; snapshotId?: string | null }>();
+    for (const f of project.revisions[0]?.files || []) {
+      revMap.set(f.relativePath, { bytes: f.bytes, sha256: f.sha256, snapshotId: f.snapshotId });
+    }
+    return this.listProjectRelativeFiles(project).map((rel) => {
+      const meta = revMap.get(rel);
+      if (meta) return { relativePath: rel, ...meta };
+      try {
+        const content = ToolGateway.readFile(`${project.workspaceDir}/${rel}`);
+        return { relativePath: rel, bytes: Buffer.byteLength(content, 'utf8'), sha256: sha256Text(content), snapshotId: null };
+      } catch {
+        return { relativePath: rel, bytes: 0, snapshotId: null };
+      }
+    });
+  }
+
+  public async packageProjectZip(
+    projectId: string,
+    scope: EngineeringScope
+  ): Promise<{ zipFilename: string; zipPath: string; zipBytes: number; zipSha256: string }> {
+    const project = this.getProject(projectId, scope);
+    if (!project) throw new Error(`PROJECT_NOT_FOUND: '${projectId}'`);
+    const relFiles = this.listProjectRelativeFiles(project).map((f) => `${project.workspaceDir}/${f}`);
+    if (relFiles.length === 0) {
+      throw new Error('PROJECT_EMPTY: No source files available to bundle.');
+    }
+    const zipRes = await ToolGateway.createZipDeliverable(relFiles, `${project.slug}-${project.currentRevision}.zip`);
+    project.deployment.artifactZip = zipRes.zipFilename;
+    project.deployment.artifactSha256 = zipRes.zipSha256;
+    project.updatedAt = new Date().toISOString();
+    this.appendLog(project, 'INFO', 'DeliverablePackager', `Packaged ${zipRes.zipFilename} (${zipRes.zipBytes}B, sha256=${zipRes.zipSha256.slice(0, 12)})`);
+    this.save();
+    return {
+      zipFilename: zipRes.zipFilename,
+      zipPath: zipRes.zipPath,
+      zipBytes: zipRes.zipBytes,
+      zipSha256: zipRes.zipSha256,
+    };
+  }
+
+  public getPlatformDeliveryTargets(): Array<{
+    id: string;
+    labelTh: string;
+    labelEn: string;
+    status: SoftwareCapabilityState;
+    detailTh: string;
+    detailEn: string;
+  }> {
+    const hasAndroidProj =
+      fs.existsSync(path.resolve(process.cwd(), 'android')) &&
+      fs.existsSync(path.resolve(process.cwd(), 'capacitor.config.ts'));
+    const hasAndroidSdk = Boolean(process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT);
+    const hasMacXcode = process.platform === 'darwin';
+    const hasElectronOrTauri =
+      fs.existsSync(path.resolve(process.cwd(), 'node_modules', 'electron')) ||
+      fs.existsSync(path.resolve(process.cwd(), 'src-tauri'));
+
+    return [
+      {
+        id: 'web_fullstack',
+        labelTh: 'Web Application (Frontend + API)',
+        labelEn: 'Web Application (Frontend + API)',
+        status: 'IMPLEMENTED',
+        detailTh: 'สร้าง ทดสอบ สแกนความปลอดภัย แก้ไข และส่งออก ZIP ได้จริงใน /workspace/projects',
+        detailEn: 'Full HTML/CSS/JS + Node ESM API scaffolding, build, test, security scan & ZIP export active.',
+      },
+      {
+        id: 'backend_api',
+        labelTh: 'Backend Service & REST API (Node / Python)',
+        labelEn: 'Backend Service & REST API (Node / Python)',
+        status: 'IMPLEMENTED',
+        detailTh: 'รองรับ node_api และ python_service พร้อมชุด Unit Tests อัตโนมัติ',
+        detailEn: 'Supports node_api and python_service with automated health & unittest execution.',
+      },
+      {
+        id: 'android_capacitor',
+        labelTh: 'Android (Capacitor Project)',
+        labelEn: 'Android (Capacitor Project)',
+        status: hasAndroidProj ? (hasAndroidSdk ? 'IMPLEMENTED' : 'PARTIAL') : 'NOT_IMPLEMENTED',
+        detailTh: hasAndroidProj
+          ? hasAndroidSdk
+            ? 'มีโครงสร้าง android/ และ Android SDK พร้อมคอมไพล์'
+            : 'มีโครงสร้าง Capacitor android/ แล้ว แต่สภาพแวดล้อมนี้ไม่มี Gradle/Android SDK จึงยังสร้างไฟล์ APK ตรงนี้ไม่ได้'
+          : 'ยังไม่พบโปรเจกต์ Capacitor Android ในพื้นที่ทำงาน',
+        detailEn: hasAndroidProj
+          ? hasAndroidSdk
+            ? 'Capacitor android/ project and Android SDK available.'
+            : 'Capacitor android/ directory exists in repo, but Android SDK/Gradle is absent on this host.'
+          : 'Capacitor android/ directory not present.',
+      },
+      {
+        id: 'desktop_app',
+        labelTh: 'Desktop Binary (Electron / Tauri)',
+        labelEn: 'Desktop Binary (Electron / Tauri)',
+        status: hasElectronOrTauri ? 'IMPLEMENTED' : 'NOT_IMPLEMENTED',
+        detailTh: hasElectronOrTauri
+          ? 'ตรวจพบ toolchain สำหรับสร้างแอป Desktop'
+          : 'ยังไม่ได้ติดตั้ง Electron หรือ Tauri toolchain ในสภาพแวดล้อมนี้ (ใช้งานผ่าน Web/PWA ได้)',
+        detailEn: hasElectronOrTauri
+          ? 'Desktop packager toolchain detected.'
+          : 'Electron/Tauri native desktop packager is not installed in this runtime.',
+      },
+      {
+        id: 'ios_xcode',
+        labelTh: 'iOS App (Xcode)',
+        labelEn: 'iOS App (Xcode)',
+        status: hasMacXcode ? 'PARTIAL' : 'BLOCKED',
+        detailTh: hasMacXcode
+          ? 'รันบน macOS แต่ต้องตั้งค่าใบรับรอง Apple Developer เพื่อออก IPA'
+          : 'BLOCKED: ต้องใช้เครื่อง macOS และ Xcode จึงจะ Build ฝั่ง iOS ได้ (โฮสต์ปัจจุบันเป็น Linux)',
+        detailEn: hasMacXcode
+          ? 'macOS detected; provisioning profile required.'
+          : 'BLOCKED: iOS builds require macOS + Xcode (current host is Linux).',
+      },
+    ];
+  }
 }

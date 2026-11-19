@@ -1,5 +1,6 @@
 import React from 'react';
 import { VividCard } from './ui/VividCard';
+import { useLanguage } from '../context/LanguageContext';
 import { Database } from 'lucide-react';
 
 interface ShardBlock {
@@ -34,24 +35,32 @@ export const MemoryShardMap: React.FC<MemoryShardMapProps> = ({
   isTraining,
   hasTrainedStep
 }) => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
   const totalCovered = SHARD_BLOCKS.reduce((acc, b) => acc + b.params, 0);
 
   return (
     <VividCard
-      title="Memory Shard Map (33.9M Parameters)"
-      subtitle={`Full parameter coverage: ${(totalCovered / 1e6).toFixed(2)}M params across 12 shards · Status: PARTIAL`}
+      title={th ? 'แผนผัง Memory Shard (พารามิเตอร์ 33.9M)' : 'Memory Shard Map (33.9M Parameters)'}
+      subtitle={
+        th
+          ? `ความครอบคลุมพารามิเตอร์ทั้งหมด: ${(totalCovered / 1e6).toFixed(2)}M ผ่าน 12 shards · สถานะ: PARTIAL`
+          : `Full parameter coverage: ${(totalCovered / 1e6).toFixed(2)}M params across 12 shards · Status: PARTIAL`
+      }
       gradientAccent="emerald"
     >
       <div className="flex justify-end mb-3">
-        <span className="px-2.5 py-1 rounded-md text-[10px] font-bold font-mono bg-[color-mix(in_srgb,var(--app-amber)_60%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]">
-          STATUS: PARTIAL
+        <span className="px-2.5 py-1 rounded-md text-[10px] font-bold font-mono bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]">
+          {th ? 'สถานะ: PARTIAL' : 'STATUS: PARTIAL'}
         </span>
       </div>
 
       {/* 10-Layer Neural Coverage Grid */}
       <div className="mb-4">
         <div className="text-[11px] font-bold text-[var(--app-text-secondary)] mb-2">
-          Neural Coverage (10 Transformer Layers · Trained vs. Untrained)
+          {th
+            ? 'ความครอบคลุมโครงข่ายประสาท (10 เลเยอร์ Transformer · ฝึกแล้ว vs. ยังไม่ฝึก)'
+            : 'Neural Coverage (10 Transformer Layers · Trained vs. Untrained)'}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2">
           {Array.from({ length: 10 }, (_, idx) => {
@@ -82,7 +91,7 @@ export const MemoryShardMap: React.FC<MemoryShardMapProps> = ({
               key={block.id}
               className={`p-3 rounded-xl border text-xs transition-colors ${
                 active
-                  ? 'bg-[var(--app-surface-elevated)] border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] text-[var(--app-text-primary)]'
+                  ? 'bg-[var(--app-surface-elevated)] border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)] text-[var(--app-text-primary)]'
                   : 'bg-[var(--app-bg)] border-[var(--app-card-border)] text-[var(--app-text-secondary)]'
               }`}
             >
@@ -96,7 +105,7 @@ export const MemoryShardMap: React.FC<MemoryShardMapProps> = ({
                 {block.label}
               </div>
               <div className="text-[10px] font-mono text-[var(--app-text-secondary)] mt-0.5">
-                {(block.params / 1e6).toFixed(2)}M params {hasTrainedStep && block.trained ? '· ✓' : ''}
+                {(block.params / 1e6).toFixed(2)}M {th ? 'พารามิเตอร์' : 'params'} {hasTrainedStep && block.trained ? '· ✓' : ''}
               </div>
             </div>
           );

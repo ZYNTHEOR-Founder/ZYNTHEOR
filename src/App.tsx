@@ -562,6 +562,8 @@ export default function App() {
   // Quick Modal Execution State
   const [quickGoal, setQuickGoal] = useState('');
   const [isQuickRunning, setIsQuickRunning] = useState(false);
+  const [isCreatingSoftwareProject, setIsCreatingSoftwareProject] = useState(false);
+  const [lastCreatedProject, setLastCreatedProject] = useState<{ projectId: string; name: string; stack: string } | null>(null);
   const [quickLogs, setQuickLogs] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -1857,6 +1859,66 @@ export default function App() {
     }
   };
 
+  const handleCreateSoftwareProject = async (
+    stack: 'node_fullstack' | 'node_api' | 'python_service' | 'static_web'
+  ) => {
+    const promptText = quickGoal.trim();
+    if (!promptText || isCreatingSoftwareProject) return;
+
+    if (!isAuthenticated || (role !== 'Developer' && role !== 'Administrator')) {
+      setQuickLogs((prev) => [
+        ...prev,
+        `[BLOCKED] ${lang === 'th' ? 'ต้องเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator เพื่อสร้างโปรเจกต์ซอฟต์แวร์จริง' : 'Developer or Administrator role required to scaffold software projects.'}`,
+      ]);
+      openAuthSettings('account');
+      return;
+    }
+
+    setIsCreatingSoftwareProject(true);
+    setQuickDone(false);
+    setVerificationHash(null);
+    const t0 = performance.now();
+    setQuickLogs([
+      `[INIT] SoftwareProjectManager: "${promptText}" (${stack})`,
+      `[PLANNER] Analyzing requirements, architecture endpoints, and data schema...`,
+    ]);
+
+    try {
+      const response = await fetch('/api/engineering/projects', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ prompt: promptText, stack, runChecks: true }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || data.message || `Project creation failed (HTTP ${response.status})`);
+      }
+      const proj = data.project;
+      const latestEv = Array.isArray(proj?.evidenceHistory) ? proj.evidenceHistory[0] : null;
+      if (latestEv?.evidenceHash) {
+        setVerificationHash(latestEv.evidenceHash);
+      }
+      setTotalExecMs(Math.max(1, Math.round(performance.now() - t0)));
+      setLastCreatedProject({
+        projectId: proj.projectId,
+        name: proj.name,
+        stack: proj.stack,
+      });
+      setQuickLogs((prev) => [
+        ...prev,
+        `[CODER] Scaffolded ${proj.revisions?.[0]?.files?.length ?? 0} project file(s) in ${proj.currentRevision}`,
+        `[TESTER] Build: ${proj.lastBuild?.status || 'NOT_RUN'} | Tests: ${proj.lastTests ? `${proj.lastTests.passed}/${proj.lastTests.total} (${proj.lastTests.status})` : 'NOT_RUN'} | Security: ${proj.lastSecurityScan?.status || 'NOT_RUN'}`,
+        `[DONE] Project "${proj.name}" ready in DevStudio`,
+      ]);
+      setQuickDone(true);
+      void fetchStatus();
+    } catch (err: any) {
+      setQuickLogs((prev) => [...prev, `[ERROR] ${err?.message || 'Software project creation failed'}`]);
+    } finally {
+      setIsCreatingSoftwareProject(false);
+    }
+  };
+
   // Bridge live Production Integration events (/ws/runtime -> window) into the existing 7-stage Workflow Timeline
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2097,20 +2159,32 @@ export default function App() {
   }, [isExportMenuOpen]);
 
   const renderRbacDenied = (moduleLabel: string, requiredRole: 'Developer' | 'Administrator') => (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] space-y-4">
+    <div className="p-5 sm:p-6 rounded-xl bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] space-y-4">
       <div className="p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_35%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-        [RBAC_DENIED] {moduleLabel} requires {requiredRole} role (current: {role}). Module is not rendered for this session.
+        {lang === 'th'
+          ? `[RBAC_DENIED] ${moduleLabel} ต้องใช้สิทธิ์ ${requiredRole} (สิทธิ์ปัจจุบัน: ${role}) จึงยังไม่แสดงโมดูลนี้ในเซสชันปัจจุบัน`
+          : `[RBAC_DENIED] ${moduleLabel} requires ${requiredRole} role (current: ${role}). Module is not rendered for this session.`}
       </div>
       <div className="text-xs text-[var(--app-text-secondary)]">
         {session.userId && session.userId !== 'anonymous'
-          ? `Signed in as ${session.email || session.userId} (role: ${role}${session.authMode ? `, mode: ${session.authMode}` : ''}). ${
-              devAccessEnabled
-                ? 'Select a Developer or Administrator development session below to access this workspace.'
-                : 'Your account requires a Developer or Administrator role claim to open this workspace.'
-            }`
+          ? lang === 'th'
+            ? `เข้าสู่ระบบในชื่อ ${session.email || session.userId} (บทบาท: ${role}${session.authMode ? `, โหมด: ${session.authMode}` : ''}). ${
+                devAccessEnabled
+                  ? 'เลือกเซสชันพัฒนา Developer หรือ Administrator ด้านล่างเพื่อเข้าถึงพื้นที่ทำงานนี้'
+                  : 'บัญชีของคุณต้องมีสิทธิ์ Developer หรือ Administrator เพื่อเปิดพื้นที่ทำงานนี้'
+              }`
+            : `Signed in as ${session.email || session.userId} (role: ${role}${session.authMode ? `, mode: ${session.authMode}` : ''}). ${
+                devAccessEnabled
+                  ? 'Select a Developer or Administrator development session below to access this workspace.'
+                  : 'Your account requires a Developer or Administrator role claim to open this workspace.'
+              }`
           : devAccessEnabled
-          ? 'Sign in with Google or select a Development Access role below to unlock this workspace.'
-          : 'Sign in with a verified Google account that holds Developer or Administrator privileges.'}
+          ? lang === 'th'
+            ? 'เข้าสู่ระบบด้วย Google หรือเลือกสิทธิ์ Development Access ด้านล่างเพื่อปลดล็อกพื้นที่ทำงานนี้'
+            : 'Sign in with Google or select a Development Access role below to unlock this workspace.'
+          : lang === 'th'
+            ? 'เข้าสู่ระบบด้วยบัญชี Google ที่ยืนยันแล้วและมีสิทธิ์ Developer หรือ Administrator'
+            : 'Sign in with a verified Google account that holds Developer or Administrator privileges.'}
       </div>
       {authError && (
         <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] text-[var(--z-danger)] text-xs">
@@ -2121,10 +2195,10 @@ export default function App() {
         <button
           type="button"
           onClick={() => void loginWithGoogle()}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-black hover:opacity-90 transition-opacity cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] hover:opacity-90 transition-opacity cursor-pointer"
         >
           <LogIn className="w-3.5 h-3.5" />
-          Continue with Google
+          {lang === 'th' ? 'เข้าสู่ระบบด้วย Google' : 'Continue with Google'}
         </button>
         {devAccessEnabled && (
           <>
@@ -2133,14 +2207,14 @@ export default function App() {
               onClick={() => void login('Developer')}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] transition-colors cursor-pointer"
             >
-              Dev Access: Developer
+              {lang === 'th' ? 'สิทธิ์พัฒนา: Developer' : 'Dev Access: Developer'}
             </button>
             <button
               type="button"
               onClick={() => void login('Administrator')}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] transition-colors cursor-pointer"
             >
-              Dev Access: Administrator
+              {lang === 'th' ? 'สิทธิ์พัฒนา: Administrator' : 'Dev Access: Administrator'}
             </button>
           </>
         )}
@@ -2185,6 +2259,9 @@ export default function App() {
             goal={quickGoal}
             onGoalChange={setQuickGoal}
             onRunTask={handleRunQuickAgent}
+            onCreateSoftwareProject={handleCreateSoftwareProject}
+            isCreatingSoftwareProject={isCreatingSoftwareProject}
+            lastCreatedProject={lastCreatedProject}
             showSentimentTrend={showSentimentTrend}
             onToggleSentimentTrend={toggleSentimentTrend}
           />
@@ -2233,7 +2310,7 @@ export default function App() {
         );
       case 'dev_studio':
         return role === 'Developer' || role === 'Administrator' ? (
-          <DevStudio />
+          <DevStudio initialProjectId={lastCreatedProject?.projectId ?? null} />
         ) : (
           renderRbacDenied('DevStudio', 'Developer')
         );
@@ -2326,6 +2403,9 @@ export default function App() {
             goal={quickGoal}
             onGoalChange={setQuickGoal}
             onRunTask={handleRunQuickAgent}
+            onCreateSoftwareProject={handleCreateSoftwareProject}
+            isCreatingSoftwareProject={isCreatingSoftwareProject}
+            lastCreatedProject={lastCreatedProject}
             showSentimentTrend={showSentimentTrend}
             onToggleSentimentTrend={toggleSentimentTrend}
           />

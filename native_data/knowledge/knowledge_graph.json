@@ -1,20 +1,20 @@
 {
   "version": "ZYNTHEOR_KG_V1",
-  "updatedAt": "2026-11-19T10:56:07.846Z",
+  "updatedAt": "2026-11-19T11:38:34.694Z",
   "nodes": [
     {
-      "nodeId": "kgn_da771a79831f",
-      "label": "TenantA Secret 1795085210244",
-      "canonicalKey": "tenanta secret 1795085210244",
+      "nodeId": "kgn_fed616bd149e",
+      "label": "TenantA Secret 1795087687211",
+      "canonicalKey": "tenanta secret 1795087687211",
       "kind": "METRIC",
       "aliases": [
-        "TenantA Secret 1795085210244"
+        "TenantA Secret 1795087687211"
       ],
       "documentIds": [
-        "doc_1795085210248_wql6e"
+        "doc_1795087687217_l5er2"
       ],
       "tenantId": "tenant_a",
-      "updatedAt": "2026-11-19T10:46:50.248Z"
+      "updatedAt": "2026-11-19T11:28:07.218Z"
     },
     {
       "nodeId": "kgn_ec9b1f57c758",
@@ -25,6 +25,9 @@
         "rbac"
       ],
       "documentIds": [
+        "doc_1795087687217_l5er2",
+        "doc_1795087159671_ghcj0",
+        "doc_1795085773566_75lhb",
         "doc_1795085210248_wql6e",
         "doc_1795084511019_kpwqb",
         "doc_1795015983802_0onpx",
@@ -38,6 +41,48 @@
       ],
       "tenantId": "tenant_a",
       "updatedAt": "2026-11-18T11:20:05.194Z"
+    },
+    {
+      "nodeId": "kgn_696422cb95e2",
+      "label": "TenantA Secret 1795087159664",
+      "canonicalKey": "tenanta secret 1795087159664",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795087159664"
+      ],
+      "documentIds": [
+        "doc_1795087159671_ghcj0"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T11:19:19.672Z"
+    },
+    {
+      "nodeId": "kgn_6c3678e78f5c",
+      "label": "TenantA Secret 1795085773561",
+      "canonicalKey": "tenanta secret 1795085773561",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795085773561"
+      ],
+      "documentIds": [
+        "doc_1795085773566_75lhb"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T10:56:13.567Z"
+    },
+    {
+      "nodeId": "kgn_da771a79831f",
+      "label": "TenantA Secret 1795085210244",
+      "canonicalKey": "tenanta secret 1795085210244",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795085210244"
+      ],
+      "documentIds": [
+        "doc_1795085210248_wql6e"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T10:46:50.248Z"
     },
     {
       "nodeId": "kgn_63f34f10bd29",
@@ -950,6 +995,60 @@
   ],
   "edges": [
     {
+      "edgeId": "kge_44810db4a6ea",
+      "subjectId": "kgn_fed616bd149e",
+      "subjectLabel": "TenantA Secret 1795087687211",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795087687217_l5er2",
+      "documentTitle": "TenantA Secret 1795087687211",
+      "contentHash": "69986b54acd1a6e77c2cef6534b83549fcbb4ea251b46f79289d752fcfac1358",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T11:28:07.218Z",
+      "updatedAt": "2026-11-19T11:28:07.218Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795087687211' (RBAC)"
+    },
+    {
+      "edgeId": "kge_be014280ed57",
+      "subjectId": "kgn_696422cb95e2",
+      "subjectLabel": "TenantA Secret 1795087159664",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795087159671_ghcj0",
+      "documentTitle": "TenantA Secret 1795087159664",
+      "contentHash": "4b8bc20fded66853439c41312b35d3271d7e45f4b4b859e25d6b5f3e666e74a5",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T11:19:19.672Z",
+      "updatedAt": "2026-11-19T11:19:19.672Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795087159664' (RBAC)"
+    },
+    {
+      "edgeId": "kge_fef997401e75",
+      "subjectId": "kgn_6c3678e78f5c",
+      "subjectLabel": "TenantA Secret 1795085773561",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795085773566_75lhb",
+      "documentTitle": "TenantA Secret 1795085773561",
+      "contentHash": "92e3d978b090a9ec8a2a021954748e1c4f7d887cd5b0c39df5144d32b7ce3fdc",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T10:56:13.567Z",
+      "updatedAt": "2026-11-19T10:56:13.567Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795085773561' (RBAC)"
+    },
+    {
       "edgeId": "kge_97a3984a269d",
       "subjectId": "kgn_da771a79831f",
       "subjectLabel": "TenantA Secret 1795085210244",
@@ -963,7 +1062,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-19T10:46:50.248Z",
       "updatedAt": "2026-11-19T10:46:50.248Z",
-      "freshnessScore": 1,
+      "freshnessScore": 0.999,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795085210244' (RBAC)"
     },
@@ -981,7 +1080,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-19T10:35:11.020Z",
       "updatedAt": "2026-11-19T10:35:11.020Z",
-      "freshnessScore": 1,
+      "freshnessScore": 0.999,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795084511013' (RBAC)"
     },
@@ -999,7 +1098,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T15:33:03.802Z",
       "updatedAt": "2026-11-18T15:33:03.802Z",
-      "freshnessScore": 0.987,
+      "freshnessScore": 0.986,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795015983794' (RBAC)"
     },
@@ -1123,7 +1222,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T13:01:22.320Z",
       "updatedAt": "2026-11-18T13:01:22.320Z",
-      "freshnessScore": 0.985,
+      "freshnessScore": 0.984,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795006882313' (RBAC)"
     },
@@ -1141,7 +1240,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T12:45:16.287Z",
       "updatedAt": "2026-11-18T12:45:16.287Z",
-      "freshnessScore": 0.985,
+      "freshnessScore": 0.984,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795005916280' (RBAC)"
     },
@@ -1159,7 +1258,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T11:20:05.194Z",
       "updatedAt": "2026-11-18T11:20:05.194Z",
-      "freshnessScore": 0.984,
+      "freshnessScore": 0.983,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795000805185' (RBAC)"
     },
@@ -1177,7 +1276,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.215Z",
       "updatedAt": "2026-11-17T08:33:16.215Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "รัฐธรรมนูญวิศวกรรม Zero-Fake Engineering Standard"
     },
     {
@@ -1194,7 +1293,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.215Z",
       "updatedAt": "2026-11-17T08:33:16.215Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "1. กฎเหล็ก 7 ข้อ"
     },
     {
@@ -1211,7 +1310,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-17T08:33:16.215Z",
       "updatedAt": "2026-11-17T08:33:16.215Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' (Governance)"
     },
     {
@@ -1228,7 +1327,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.215Z",
       "updatedAt": "2026-11-17T08:33:16.215Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' tags: governance, zero-fake, evidence, audit"
     },
     {
@@ -1245,7 +1344,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.215Z",
       "updatedAt": "2026-11-17T08:33:16.215Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' tags: governance, zero-fake, evidence, audit"
     },
     {
@@ -1262,7 +1361,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.215Z",
       "updatedAt": "2026-11-17T08:33:16.215Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Zero-Fake Engineering Constitution & Evidence Classification Matrix' tags: governance, zero-fake, evidence, audit"
     },
     {
@@ -1279,7 +1378,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "มาตรฐานโทเคไนเซอร์ภาษาไทย-อังกฤษ ZYNTHEOR"
     },
     {
@@ -1296,7 +1395,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "1. ขอบเขต"
     },
     {
@@ -1313,7 +1412,7 @@
       "confidence": 0.86,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Tokenizer source defines vocabulary construction and Thai Unicode handling. Vocabulary size, effective vocabulary count, unknown-token rate, and round-trip fidelity must be reporte"
     },
     {
@@ -1330,7 +1429,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "2. การตรวจสอบภาษา"
     },
     {
@@ -1347,7 +1446,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' (Bilingual Language)"
     },
     {
@@ -1364,7 +1463,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' tags: tokenizer, thai, english, unicode, vocab"
     },
     {
@@ -1381,7 +1480,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' tags: tokenizer, thai, english, unicode, vocab"
     },
     {
@@ -1398,7 +1497,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Thai-English Bilingual Tokenizer Standard & Character Preservation Protocol' tags: tokenizer, thai, english, unicode, vocab"
     },
     {
@@ -1415,7 +1514,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Sovereign HMAC Token Verification Standard"
     },
     {
@@ -1432,7 +1531,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "1. Timing-Attack Defense"
     },
     {
@@ -1449,7 +1548,7 @@
       "confidence": 0.86,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Token verification MUST utilize constant-time comparison via crypto.timingSafeEqual() to prevent side-channel timing attacks."
     },
     {
@@ -1466,7 +1565,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "2. Minimum Entropy & Tenant Isolation"
     },
     {
@@ -1483,7 +1582,7 @@
       "confidence": 0.86,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Each token payload enforces strict tenantId validation, role hierarchy checks, and expiration limits."
     },
     {
@@ -1500,7 +1599,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' (Security Invariants)"
     },
     {
@@ -1517,7 +1616,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' tags: security, hmac, timing-attack, tenant-isolation, sha256"
     },
     {
@@ -1534,7 +1633,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' tags: security, hmac, timing-attack, tenant-isolation, sha256"
     },
     {
@@ -1551,7 +1650,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.214Z",
       "updatedAt": "2026-11-17T08:33:16.214Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'Sovereign Token Verification & Constant-Time Security Specification' tags: security, hmac, timing-attack, tenant-isolation, sha256"
     },
     {
@@ -1568,7 +1667,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "ZYNTHEOR Native Architecture & Checkpoint Evidence"
     },
     {
@@ -1585,7 +1684,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "1. Architecture target"
     },
     {
@@ -1602,7 +1701,7 @@
       "confidence": 0.86,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "The source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof o"
     },
     {
@@ -1619,7 +1718,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "The source defines a target decoder architecture of 10 layers, 8 attention heads, model width 512, and SwiGLU feed-forward width 1,472. These are design specifications, not proof o"
     },
     {
@@ -1636,7 +1735,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "2. Measured checkpoint evidence (2026-11-15)"
     },
     {
@@ -1653,7 +1752,7 @@
       "confidence": 0.86,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
     },
     {
@@ -1670,7 +1769,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
     },
     {
@@ -1687,7 +1786,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
     },
     {
@@ -1704,7 +1803,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "The primary checkpoint payload inspected in this source archive contains 231,168 Float32 values. Legacy metadata declares 33,958,400 parameters, which does not match the serialized"
     },
     {
@@ -1721,7 +1820,7 @@
       "confidence": 0.72,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "3. Evidence and training policy"
     },
     {
@@ -1738,7 +1837,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Knowledge retrieval is distinct from weight training."
     },
     {
@@ -1755,7 +1854,7 @@
       "confidence": 0.86,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "New datasets require explicit human approval and provenance evidence before training."
     },
     {
@@ -1772,7 +1871,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Checkpoint integrity, training quality, and inference readiness are separate claims."
     },
     {
@@ -1789,7 +1888,7 @@
       "confidence": 0.8,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "A status is reported only when supported by recorded runtime/test evidence."
     },
     {
@@ -1806,7 +1905,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' (Architecture)"
     },
     {
@@ -1823,7 +1922,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' tags: architecture, transformer, rope, swiglu, sovereign"
     },
     {
@@ -1840,7 +1939,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' tags: architecture, transformer, rope, swiglu, sovereign"
     },
     {
@@ -1857,7 +1956,7 @@
       "confidence": 0.7,
       "validFrom": "2026-11-17T08:33:16.212Z",
       "updatedAt": "2026-11-17T08:33:16.212Z",
-      "freshnessScore": 0.966,
+      "freshnessScore": 0.965,
       "snippet": "Document 'ZYNTHEOR Native Architecture & Checkpoint Evidence' tags: architecture, transformer, rope, swiglu, sovereign"
     }
   ]

@@ -32,7 +32,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch {
       // ignore
     }
-    return 'midnight-navy'; // Default to Vivid Aurora flagship palette
+    return 'emerald-amber'; // Default to Obsidian palette
   });
 
   const [customAccent, setCustomAccentState] = useState<string>(() => {
@@ -60,7 +60,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getResolvedTheme = (mode: ThemeMode): 'emerald-amber' | 'light' | 'dark' | 'midnight-navy' | 'vivid-cyan' | 'royal-purple' => {
     if (mode === 'system') {
       const isDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return isDark ? 'midnight-navy' : 'light';
+      return isDark ? 'emerald-amber' : 'light';
     }
     return mode;
   };
@@ -97,10 +97,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (theme !== 'system') return;
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const listener = (e: MediaQueryListEvent) => {
-      const resolved = e.matches ? 'midnight-navy' : 'light';
+      const resolved = e.matches ? 'emerald-amber' : 'light';
       setResolvedTheme(resolved);
       document.documentElement.setAttribute('data-theme', resolved);
-      if (resolved === 'midnight-navy') {
+      if (resolved === 'emerald-amber') {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');

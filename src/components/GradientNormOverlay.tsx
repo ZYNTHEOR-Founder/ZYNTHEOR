@@ -1,5 +1,6 @@
 import React from 'react';
 import { Activity, AlertTriangle, CheckCircle2, X } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export interface LayerGradientNorm {
   layer: string;
@@ -17,21 +18,25 @@ export const GradientNormOverlay: React.FC<GradientNormOverlayProps> = ({
   onClose,
   layerNorms
 }) => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] shadow-2xl overflow-hidden">
+      <div className="w-full max-w-2xl rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] shadow-lg overflow-hidden">
         <div className="px-5 py-4 flex items-center justify-between border-b border-[var(--app-card-border)] bg-[var(--app-surface-elevated)]">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-[var(--app-accent)]" />
             <h3 className="text-sm font-bold text-[var(--app-text-primary)]">
-              Per-Layer Gradient Norm Inspector
+              {th ? 'ตัวตรวจสอบ Gradient Norm รายเลเยอร์' : 'Per-Layer Gradient Norm Inspector'}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+            aria-label={th ? 'ปิด' : 'Close'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -40,7 +45,9 @@ export const GradientNormOverlay: React.FC<GradientNormOverlayProps> = ({
         <div className="p-5 space-y-3 max-h-[65vh] overflow-y-auto">
           {layerNorms.length === 0 ? (
             <div className="text-xs text-[var(--app-text-secondary)] italic">
-              No gradient norms recorded yet. Run a native training step to inspect layer-wise gradient flow.
+              {th
+                ? 'ยังไม่มีข้อมูล Gradient Norm ให้รันขั้นตอนการฝึก Native เพื่อตรวจสอบการไหลของ Gradient รายเลเยอร์'
+                : 'No gradient norms recorded yet. Run a native training step to inspect layer-wise gradient flow.'}
             </div>
           ) : (
             layerNorms.map((item) => {
@@ -58,12 +65,18 @@ export const GradientNormOverlay: React.FC<GradientNormOverlayProps> = ({
                       {isVanishing || isExploding ? (
                         <span className="flex items-center gap-1 text-[10px] text-[var(--z-danger)] font-bold">
                           <AlertTriangle className="w-3 h-3" />
-                          {isExploding ? 'EXPLODING' : 'VANISHING'}
+                          {isExploding
+                            ? th
+                              ? 'EXPLODING (สูงเกินเกณฑ์)'
+                              : 'EXPLODING'
+                            : th
+                              ? 'VANISHING (ต่ำเกินเกณฑ์)'
+                              : 'VANISHING'}
                         </span>
                       ) : (
                         <span className="flex items-center gap-1 text-[10px] text-[var(--z-ok)] font-bold">
                           <CheckCircle2 className="w-3 h-3" />
-                          HEALTHY
+                          {th ? 'ปกติ (HEALTHY)' : 'HEALTHY'}
                         </span>
                       )}
                       <span className="text-[var(--app-amber)]">{item.norm.toFixed(5)}</span>

@@ -425,10 +425,16 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
 
           {activeSection === 'account' && (
             <>
-              <VividCard title="Account & Identity" subtitle="Profile, Session & Tenant Identity" gradientAccent="emerald">
+              <VividCard
+                title={lang === 'th' ? 'บัญชีและตัวตน (Account & Identity)' : 'Account & Identity'}
+                subtitle={lang === 'th' ? 'โปรไฟล์ เซสชัน และรหัส Tenant' : 'Profile, Session & Tenant Identity'}
+                gradientAccent="emerald"
+              >
                 <div className="space-y-3 text-xs">
                   <div>
-                    <label className="block text-[var(--app-text-secondary)] font-bold mb-1">Tenant Identifier</label>
+                    <label className="block text-[var(--app-text-secondary)] font-bold mb-1">
+                      {lang === 'th' ? 'รหัสองค์กร (Tenant Identifier)' : 'Tenant Identifier'}
+                    </label>
                     <input
                       type="text"
                       value={tenantName}
@@ -440,13 +446,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                     />
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                    <span className="text-[var(--app-text-secondary)]">Authenticated Identity</span>
+                    <span className="text-[var(--app-text-secondary)]">
+                      {lang === 'th' ? 'ตัวตนที่ยืนยันแล้ว' : 'Authenticated Identity'}
+                    </span>
                     <span className="font-mono font-bold text-[var(--app-text-primary)]">
-                      {isAuthenticated ? `${session.email || session.userId} (${role})` : 'Guest (unauthenticated)'}
+                      {isAuthenticated ? `${session.email || session.userId} (${role})` : (lang === 'th' ? 'ผู้เยี่ยมชม (ยังไม่เข้าสู่ระบบ)' : 'Guest (unauthenticated)')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                    <span className="text-[var(--app-text-secondary)]">Active RBAC Role</span>
+                    <span className="text-[var(--app-text-secondary)]">
+                      {lang === 'th' ? 'บทบาทสิทธิ์ RBAC' : 'Active RBAC Role'}
+                    </span>
                     <span className="font-mono font-bold text-[var(--app-accent)]">{role}</span>
                   </div>
                 </div>
@@ -456,18 +466,28 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
           )}
 
           {activeSection === 'intelligence' && (
-            <VividCard title="Native Intelligence Telemetry" subtitle="Live values reported from /api/system/status & /api/system/training-readiness" gradientAccent="emerald">
+            <VividCard
+              title={lang === 'th' ? 'Telemetry ระบบประสาทเทียม (Native Intelligence)' : 'Native Intelligence Telemetry'}
+              subtitle={lang === 'th' ? 'ค่าจริงจาก /api/system/status และ /api/system/training-readiness' : 'Live values reported from /api/system/status & /api/system/training-readiness'}
+              gradientAccent="emerald"
+            >
               <div className="space-y-2.5 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                  <span className="text-[var(--app-text-secondary)]">Active Native Model</span>
+                  <span className="text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'โมเดล Native ที่ใช้งานอยู่' : 'Active Native Model'}
+                  </span>
                   <span className="font-mono font-bold text-[var(--app-text-primary)] tabular-nums">
                     {weightsLoaded
                       ? `${activeParams.toLocaleString()} active params (${liveStatus?.model?.architecture || 'PureSeqLM'})`
-                      : `0 active params · Cloud load not confirmed (target ${targetParams.toLocaleString()})`}
+                      : lang === 'th'
+                        ? `0 active params · ยังไม่โหลดบน Cloud (เป้าหมาย ${targetParams.toLocaleString()})`
+                        : `0 active params · Cloud load not confirmed (target ${targetParams.toLocaleString()})`}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                  <span className="text-[var(--app-text-secondary)]">5,800-Step Full-Model Training Gate</span>
+                  <span className="text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'เกตการฝึกโมเดล 5,800 Steps' : '5,800-Step Full-Model Training Gate'}
+                  </span>
                   <StatusDot
                     status={trainingStatusLabel}
                     label={`${trainingStatusLabel} (${liveReadiness?.pythonBackend?.backendMode || 'PROBING'})`}
@@ -476,7 +496,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                   <span className="text-[var(--app-text-secondary)]">Checkpoint SHA-256</span>
                   <span className="font-mono text-[var(--app-text-primary)] break-all">
-                    {liveStatus?.model?.checkpointSha256 || liveStatus?.model?.checkpointHash || 'Not loaded'}
+                    {liveStatus?.model?.checkpointSha256 || liveStatus?.model?.checkpointHash || (lang === 'th' ? 'ยังไม่โหลด' : 'Not loaded')}
                   </span>
                 </div>
               </div>
@@ -484,10 +504,16 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
           )}
 
           {activeSection === 'memory' && (
-            <VividCard title="Data Sovereignty & Memory" subtitle="Retention, Backup & Governed Data Deletion" gradientAccent="emerald">
+            <VividCard
+              title={lang === 'th' ? 'อธิปไตยข้อมูลและความจำ (Memory)' : 'Data Sovereignty & Memory'}
+              subtitle={lang === 'th' ? 'นโยบายการเก็บข้อมูล การสำรอง และล้างข้อมูลเฉพาะเครื่อง' : 'Retention, Backup & Governed Data Deletion'}
+              gradientAccent="emerald"
+            >
               <div className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-[var(--app-text-secondary)] font-bold mb-1">Episodic Memory Retention</label>
+                  <label className="block text-[var(--app-text-secondary)] font-bold mb-1">
+                    {lang === 'th' ? 'ระยะเวลาเก็บความจำ Episodic Memory' : 'Episodic Memory Retention'}
+                  </label>
                   <select
                     value={memoryRetention}
                     onChange={(e) => {
@@ -496,9 +522,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                     }}
                     className="w-full px-3.5 py-2 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                   >
-                    <option value="infinite">Managed retention policy</option>
-                    <option value="90d">90 Days Rolling</option>
-                    <option value="30d">30 Days Rolling</option>
+                    <option value="infinite">{lang === 'th' ? 'ตามนโยบายระบบ (ถาวรภายใต้การกำกับ)' : 'Managed retention policy'}</option>
+                    <option value="90d">{lang === 'th' ? 'หมุนเวียน 90 วัน' : '90 Days Rolling'}</option>
+                    <option value="30d">{lang === 'th' ? 'หมุนเวียน 30 วัน' : '30 Days Rolling'}</option>
                   </select>
                 </div>
                 <button
@@ -507,7 +533,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[color-mix(in_srgb,var(--z-danger)_16%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-danger)_24%,transparent)] cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  Clear Local Session Logs & Snapshots
+                  {lang === 'th' ? 'ล้างประวัติเซสชันและ Snapshot บนเบราว์เซอร์' : 'Clear Local Session Logs & Snapshots'}
                 </button>
               </div>
             </VividCard>
@@ -515,16 +541,16 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
 
           {activeSection === 'access' && (
             <VividCard
-              title="Access Control (RBAC Permissions)"
-              subtitle={`Granular native intelligence permissions for ${role}`}
+              title={lang === 'th' ? 'ควบคุมสิทธิ์การเข้าถึง (Access Control / RBAC)' : 'Access Control (RBAC Permissions)'}
+              subtitle={lang === 'th' ? `สิทธิ์ระบบปัญญาประดิษฐ์สำหรับบทบาท ${role}` : `Granular native intelligence permissions for ${role}`}
               gradientAccent="emerald"
             >
               <div className="space-y-2.5 text-xs">
                 {[
-                  { key: 'nativeInference', label: 'Native Neural Inference (Cloud Runtime)' },
-                  { key: 'modelTraining', label: 'Model Laboratory Training' },
-                  { key: 'sandboxExec', label: 'DevStudio Sandbox Execution' },
-                  { key: 'auditExport', label: 'Audit Ledger & Provenance Export' },
+                  { key: 'nativeInference', label: lang === 'th' ? 'ประมวลผล Native Neural Inference (Cloud Runtime)' : 'Native Neural Inference (Cloud Runtime)' },
+                  { key: 'modelTraining', label: lang === 'th' ? 'ฝึกโมเดลใน ModelLaboratory' : 'Model Laboratory Training' },
+                  { key: 'sandboxExec', label: lang === 'th' ? 'รันคำสั่งใน DevStudio Sandbox' : 'DevStudio Sandbox Execution' },
+                  { key: 'auditExport', label: lang === 'th' ? 'ส่งออก Audit Ledger & หลักฐานความถูกต้อง' : 'Audit Ledger & Provenance Export' },
                 ].map((perm) => {
                   const enabled = rolePermissions[role][perm.key];
                   return (
@@ -549,7 +575,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                             : 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)]'
                         }`}
                       >
-                        {enabled ? 'ALLOWED' : 'DENIED'}
+                        {enabled ? (lang === 'th' ? 'อนุญาต (ALLOWED)' : 'ALLOWED') : (lang === 'th' ? 'ปฏิเสธ (DENIED)' : 'DENIED')}
                       </button>
                     </div>
                   );
@@ -564,16 +590,24 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
             activeSection === 'developer' ||
             activeSection === 'organization') && (
             <VividCard
-              title={sections.find((s) => s.id === activeSection)?.label || 'System Policy'}
-              subtitle="Backend-enforced sovereign configuration (READ-ONLY)"
+              title={
+                (lang === 'th'
+                  ? sections.find((s) => s.id === activeSection)?.thLabel
+                  : sections.find((s) => s.id === activeSection)?.label) || 'System Policy'
+              }
+              subtitle={lang === 'th' ? 'การตั้งค่าที่บังคับใช้จากฝั่งเซิร์ฟเวอร์ (อ่านอย่างเดียว)' : 'Backend-enforced sovereign configuration (READ-ONLY)'}
               gradientAccent="emerald"
             >
               <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-secondary)] flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-[var(--app-amber)] shrink-0" />
                 <span>
                   {role === 'Administrator'
-                    ? 'Administrator view active. Server-side secrets, ToolGateway sandbox barriers, and scheduler policies are enforced in server.ts.'
-                    : `Read-only for ${role} role. Switch to Administrator to inspect full governance controls.`}
+                    ? lang === 'th'
+                      ? 'มุมมอง Administrator ทำงานอยู่ — Secrets, ขอบเขต ToolGateway Sandbox และนโยบายบังคับใช้ใน server.ts'
+                      : 'Administrator view active. Server-side secrets, ToolGateway sandbox barriers, and scheduler policies are enforced in server.ts.'
+                    : lang === 'th'
+                      ? `สิทธิ์ ${role} อ่านได้อย่างเดียว — ต้องใช้สิทธิ์ Administrator เพื่อตรวจการตั้งค่าระดับองค์กร`
+                      : `Read-only for ${role} role. Switch to Administrator to inspect full governance controls.`}
                 </span>
               </div>
             </VividCard>
@@ -581,13 +615,13 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
 
           {/* Configuration Integrity Audit Trail */}
           <VividCard
-            title="Configuration Integrity Audit Trail"
-            subtitle="Every setting mutation is logged with actor, timestamp, old value & new value"
+            title={lang === 'th' ? 'บันทึกการเปลี่ยนแปลงการตั้งค่า (Audit Trail)' : 'Configuration Integrity Audit Trail'}
+            subtitle={lang === 'th' ? 'ทุกการแก้ไขจะบันทึกผู้ดำเนินการ เวลา ค่าเดิม และค่าใหม่' : 'Every setting mutation is logged with actor, timestamp, old value & new value'}
             gradientAccent="amber"
           >
             {configAudit.length === 0 ? (
               <div className="text-xs text-[var(--app-text-secondary)] italic">
-                No configuration changes recorded in this session.
+                {lang === 'th' ? 'ยังไม่มีการเปลี่ยนแปลงการตั้งค่าในเซสชันนี้' : 'No configuration changes recorded in this session.'}
               </div>
             ) : (
               <div className="space-y-1.5 max-h-40 overflow-y-auto font-mono text-[11px]">

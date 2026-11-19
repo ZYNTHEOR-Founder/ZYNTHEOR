@@ -21,24 +21,20 @@ export const VividCard: React.FC<VividCardProps> = ({
 }) => {
   const getGradientLine = () => {
     switch (gradientAccent) {
-      case 'emerald':
-      case 'lime':
-        return 'h-1 w-full bg-[var(--app-accent)]';
       case 'amber':
-        return 'h-1 w-full bg-[var(--app-amber)]';
-      case 'emerald-amber':
-      case 'cyan':
-      case 'blue':
-        return 'h-1 w-full bg-[var(--app-accent)]';
-      case 'purple':
-      case 'violet':
-        return 'h-1 w-full bg-[var(--app-accent)]';
       case 'coral':
       case 'sunset':
       case 'magenta':
-        return 'h-1 w-full bg-[var(--app-amber)]';
+        return 'h-px w-full bg-[var(--app-amber)] opacity-45';
+      case 'emerald':
+      case 'lime':
+      case 'emerald-amber':
+      case 'cyan':
+      case 'blue':
+      case 'purple':
+      case 'violet':
       case 'energy':
-        return 'h-1 w-full bg-[var(--app-accent)]';
+        return 'h-px w-full bg-[var(--app-accent)] opacity-45';
       default:
         return null;
     }
@@ -48,9 +44,9 @@ export const VividCard: React.FC<VividCardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl transition-all duration-200 overflow-hidden shadow-sm ${
+      className={`rounded-xl transition-colors duration-200 overflow-hidden ${
         isNavy
-          ? 'bg-[var(--app-surface)] text-[var(--app-text-primary)] border border-[color-mix(in_srgb,var(--app-card-border)_60%,transparent)] '
+          ? 'bg-[var(--app-surface)] text-[var(--app-text-primary)] border border-[color-mix(in_srgb,var(--app-card-border)_70%,transparent)] '
           : 'border '
       } ${className}`}
       style={!isNavy ? {
@@ -61,22 +57,22 @@ export const VividCard: React.FC<VividCardProps> = ({
     >
       {getGradientLine() && <div className={getGradientLine()!} />}
       {(title || headerAction) && (
-        <div 
-          className={`px-6 py-4 flex items-center justify-between border-b ${isNavy ? 'border-[var(--app-card-border)]' : ''}`}
+        <div
+          className={`px-4 sm:px-5 py-3.5 flex flex-wrap items-center justify-between gap-2 border-b ${isNavy ? 'border-[var(--app-card-border)]' : ''}`}
           style={!isNavy ? { borderColor: 'var(--app-card-border)' } : undefined}
         >
-          <div>
+          <div className="min-w-0">
             {title && (
-              <h3 
-                className="font-semibold text-base tracking-tight"
+              <h3
+                className="font-semibold text-[15px] tracking-tight leading-snug"
                 style={!isNavy ? { color: 'var(--app-text-primary)' } : undefined}
               >
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p 
-                className="text-xs mt-0.5"
+              <p
+                className="text-xs mt-0.5 leading-relaxed"
                 style={!isNavy ? { color: 'var(--app-text-secondary)' } : undefined}
               >
                 {subtitle}
@@ -86,7 +82,7 @@ export const VividCard: React.FC<VividCardProps> = ({
           {headerAction && <div className="shrink-0">{headerAction}</div>}
         </div>
       )}
-      <div className="p-6">{children}</div>
+      <div className="p-4 sm:p-5">{children}</div>
     </div>
   );
 };

@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { StatusDot } from '../ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   Search,
   Network,
   CheckCircle2,
-  Lightbulb,
   Globe,
   Cpu,
   Play,
@@ -333,6 +333,8 @@ interface ResearchLabProps {
 
 export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
   const { authHeaders, isAuthenticated, role } = useAuth();
+  const { lang } = useLanguage();
+  const th = lang === 'th';
   const isDevOrAdmin = role === 'Developer' || role === 'Administrator';
   const [researchTopic, setResearchTopic] = useState('Thai-English tokenizer and sequence-model evaluation');
   const [includeWeb, setIncludeWeb] = useState(false);
@@ -820,51 +822,59 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
 
   return (
     <div className="space-y-8">
-      {/* Research Search & Topic Banner */}
-      <VividCard gradientAccent="sunset" className="!p-5 sm:!p-6">
+      <VividCard gradientAccent="cyan" className="!p-5 sm:!p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="w-full md:w-2/3">
-            <h2 className="text-xl font-bold text-[var(--app-text-primary)]">Sovereign Intelligence Research Lab</h2>
-            <p className="text-xs text-[var(--app-text-secondary)] mt-1">
-              Grounded Knowledge Workspace retrieval, Native NumPy backend initialization, 5,800-step verification pipeline, and adaptive reasoning.
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--app-text-primary)]">
+              {th ? 'ห้องปฏิบัติการวิจัยและฝึกโมเดล (Research Lab)' : 'Intelligence Research Lab'}
+            </h2>
+            <p className="text-xs text-[var(--app-text-secondary)] mt-1 leading-relaxed">
+              {th
+                ? 'ค้นหาความรู้แบบมีหลักฐานอ้างอิง ตั้งค่า Native NumPy ตรวจสอบ Pipeline ฝึก 5,800 รอบ และประเมิน Tokenizer ไทย-อังกฤษ'
+                : 'Grounded Knowledge Workspace retrieval, Native NumPy backend initialization, 5,800-step verification pipeline, and adaptive reasoning.'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <input
                 type="text"
                 value={researchTopic}
                 onChange={(e) => setResearchTopic(e.target.value)}
-                placeholder="Enter AI research inquiry..."
-                className="flex-1 min-w-[200px] min-h-[44px] px-4 py-2 text-xs bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] font-medium text-[var(--app-text-primary)]"
+                placeholder={th ? 'ระบุหัวข้อวิจัยหรือคำถามเพื่อค้นคว้า...' : 'Enter AI research inquiry...'}
+                className="flex-1 min-w-[200px] min-h-[42px] px-3.5 py-2 text-xs bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] rounded-lg focus:outline-none focus:border-[var(--app-accent)] font-medium text-[var(--app-text-primary)]"
               />
-              <label className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-2 text-xs rounded-xl border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 min-h-[42px] px-3 py-2 text-xs rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeWeb}
                   onChange={(e) => setIncludeWeb(e.target.checked)}
                 />
                 <Globe className="w-3.5 h-3.5" />
-                <span>Include Web</span>
+                <span>{th ? 'รวมผลจากเว็บ' : 'Include Web'}</span>
               </label>
               <button
+                type="button"
                 onClick={handleAnalyze}
                 disabled={isAnalyzing || !isAuthenticated}
-                className="min-h-[44px] px-4 py-2 text-xs font-bold text-white bg-[var(--z-danger)] rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
+                className="min-h-[42px] px-4 py-2 text-xs font-semibold text-white bg-[var(--app-accent-deep)] rounded-lg hover:opacity-95 transition-opacity cursor-pointer flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
               >
                 <Search className="w-3.5 h-3.5" />
-                {isAnalyzing ? 'Investigating...' : 'Investigate'}
+                {isAnalyzing ? (th ? 'กำลังค้นคว้า...' : 'Investigating...') : (th ? 'สืบค้นวิจัย' : 'Investigate')}
               </button>
             </div>
             {(!isAuthenticated || !isDevOrAdmin) && (
               <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] font-mono text-[var(--app-amber)]">
-                <span>Sign in as Developer or Admin to run /api/research/investigate &amp; NumPy pipeline diagnostics</span>
+                <span>
+                  {th
+                    ? 'เข้าสู่ระบบสิทธิ์ Developer หรือ Admin เพื่อใช้ /api/research/investigate และตรวจสอบ NumPy Pipeline'
+                    : 'Sign in as Developer or Admin to run /api/research/investigate & NumPy pipeline diagnostics'}
+                </span>
                 {onOpenSignIn && (
                   <button
                     type="button"
                     onClick={onOpenSignIn}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--app-amber)] text-[var(--app-amber)] hover:bg-[color-mix(in_srgb,var(--app-amber)_12%,transparent)] font-sans font-bold cursor-pointer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--app-amber)] text-[var(--app-amber)] hover:bg-[color-mix(in_srgb,var(--app-amber)_12%,transparent)] font-sans font-semibold cursor-pointer"
                   >
                     <LogIn className="w-3 h-3" />
-                    <span>Sign in</span>
+                    <span>{th ? 'เข้าสู่ระบบ' : 'Sign in'}</span>
                   </button>
                 )}
               </div>
@@ -873,24 +883,31 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
               <div className="mt-2 text-[11px] font-mono text-[var(--z-danger)]">{investigateError}</div>
             )}
             <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-mono text-[var(--app-text-secondary)]">
-              <span>Docs: {effectiveDocCount !== null ? effectiveDocCount : '—'}</span>
+              <span>{th ? 'เอกสาร:' : 'Docs:'} {effectiveDocCount !== null ? effectiveDocCount : '—'}</span>
               <span>·</span>
-              <span>Graph: {graphSummary ? `${graphSummary.nodes} nodes / ${graphSummary.edges} edges` : '—'}</span>
+              <span>
+                {th ? 'กราฟ:' : 'Graph:'}{' '}
+                {graphSummary
+                  ? th
+                    ? `${graphSummary.nodes} โหนด / ${graphSummary.edges} เส้นเชื่อม`
+                    : `${graphSummary.nodes} nodes / ${graphSummary.edges} edges`
+                  : '—'}
+              </span>
               <span>·</span>
               <span>Provenance: {provenanceAudit?.status || 'UNVERIFIED'}</span>
             </div>
             {nativeInspect && (
               <div className="mt-1.5 text-[11px] font-mono text-[var(--z-ok)]">
-                Cloud Runtime checkpoint: {nativeInspect.total_params?.toLocaleString() || '—'} active parameters · Status: {nativeInspect.status || 'UNVERIFIED'}
+                Cloud Runtime checkpoint: {nativeInspect.total_params?.toLocaleString() || '—'} {th ? 'พารามิเตอร์' : 'active parameters'} · {th ? 'สถานะ:' : 'Status:'} {nativeInspect.status || 'UNVERIFIED'}
               </div>
             )}
           </div>
 
           <div className="flex gap-4 border-t md:border-t-0 md:border-l border-[var(--app-card-border)] pt-4 md:pt-0 md:pl-6 w-full md:w-1/3 justify-between tabular-nums">
             <div>
-              <div className="text-[11px] font-bold text-[var(--app-text-secondary)]">Native NumPy</div>
+              <div className="text-[11px] font-semibold text-[var(--app-text-secondary)]">Native NumPy</div>
               <div
-                className={`text-lg font-bold font-mono ${
+                className={`text-base sm:text-lg font-semibold font-mono ${
                   effectiveNumpyReady ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
                 }`}
               >
@@ -898,12 +915,16 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-[var(--app-text-secondary)]">Grounded Hits</div>
-              <div className="text-2xl font-bold font-mono text-[var(--z-ok)]">{verifiedAxiomsCount}</div>
+              <div className="text-[11px] font-semibold text-[var(--app-text-secondary)]">
+                {th ? 'หลักฐานที่พบ' : 'Grounded Hits'}
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--z-ok)]">{verifiedAxiomsCount}</div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-[var(--app-text-secondary)]">Confidence</div>
-              <div className="text-2xl font-bold font-mono text-[var(--app-text-primary)]">
+              <div className="text-[11px] font-semibold text-[var(--app-text-secondary)]">
+                {th ? 'ความเชื่อมั่น' : 'Confidence'}
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--app-text-primary)]">
                 {confidenceVal !== null ? `${confidenceVal}%` : '—'}
               </div>
             </div>
@@ -911,27 +932,28 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
         </div>
       </VividCard>
 
-      {/* Live Investigation Result Banner */}
       {investigation && (
         <VividCard
-          title="Live Research Investigation Findings"
+          title={th ? 'ผลการสืบค้นวิจัยล่าสุด' : 'Live Research Investigation Findings'}
           subtitle={`Verifier: ${investigation.reasoning?.verifierAttribution || 'adaptive_reasoning'} · Native reasoning pipeline`}
           gradientAccent="cyan"
         >
           <div className="space-y-4 text-xs">
             <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] leading-relaxed text-[var(--app-text-primary)]">
-              {investigation.reasoning?.answerSummary || 'No grounded summary produced.'}
+              {investigation.reasoning?.answerSummary || (th ? 'ยังไม่มีสรุปที่อ้างอิงหลักฐานได้' : 'No grounded summary produced.')}
             </div>
 
             {knowledgeResults.length > 0 && (
               <div className="space-y-2">
-                <div className="font-bold text-[var(--app-text-secondary)]">
-                  Grounded Knowledge Workspace Citations ({knowledgeResults.length})
+                <div className="font-semibold text-[var(--app-text-secondary)]">
+                  {th
+                    ? `การอ้างอิงจาก Knowledge Workspace (${knowledgeResults.length})`
+                    : `Grounded Knowledge Workspace Citations (${knowledgeResults.length})`}
                 </div>
                 {knowledgeResults.map((r: any, idx: number) => (
                   <div key={idx} className="p-3 rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)]">
                     <div className="flex items-center justify-between gap-2 font-mono text-[11px]">
-                      <span className="font-bold text-[var(--app-accent)] truncate">{r.documentTitle}</span>
+                      <span className="font-semibold text-[var(--app-accent)] truncate">{r.documentTitle}</span>
                       <span className="tabular-nums text-[var(--app-text-secondary)] shrink-0">score {r.score}</span>
                     </div>
                     <p className="mt-1 text-[var(--app-text-secondary)]">{r.citation?.snippet || r.text}</p>
@@ -948,18 +970,18 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
             {webResearch && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-[var(--app-text-secondary)]">
-                    Live Web Verification ({webItems.length})
+                  <span className="font-semibold text-[var(--app-text-secondary)]">
+                    {th ? `ผลตรวจจากเว็บจริง (${webItems.length})` : `Live Web Verification (${webItems.length})`}
                   </span>
                   <StatusDot status={webResearch.ok ? 'VERIFIED' : webResearch.status || 'BLOCKED'} />
                 </div>
                 {webResearch.ok === false ? (
                   <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_8%,var(--app-surface))] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] font-mono text-[11px] text-[var(--z-danger)]">
-                    {webResearch.error || 'Live web research unavailable or blocked by connectivity.'}
+                    {webResearch.error || (th ? 'ไม่สามารถค้นเว็บจริงได้ในขณะนี้' : 'Live web research unavailable or blocked by connectivity.')}
                   </div>
                 ) : webItems.length === 0 ? (
-                  <div className="text-[11px] text-[var(--app-text-secondary)] italic">
-                    Web lookup succeeded with 0 external citations for this query.
+                  <div className="text-[11px] text-[var(--app-text-secondary)]">
+                    {th ? 'การค้นหาเว็บสำเร็จ แต่ไม่พบการอ้างอิงภายนอก' : 'Web lookup succeeded with 0 external citations for this query.'}
                   </div>
                 ) : (
                   webItems.map((item: any, idx: number) => {
@@ -967,7 +989,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                     return (
                       <div key={idx} className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1">
                         <div className="flex items-center justify-between gap-2 font-mono text-[11px]">
-                          <span className="font-bold text-[var(--app-text-primary)] truncate">
+                          <span className="font-semibold text-[var(--app-text-primary)] truncate">
                             {item.source || 'Web Source'} · {item.title || 'External Result'}
                           </span>
                           {href && (
@@ -977,7 +999,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-[var(--app-accent)] hover:underline shrink-0"
                             >
-                              <span>Source</span>
+                              <span>{th ? 'แหล่งที่มา' : 'Source'}</span>
                               <ExternalLink className="w-3 h-3" />
                             </a>
                           )}
@@ -998,78 +1020,91 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
         </VividCard>
       )}
 
-      {/* Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap border-b border-[var(--app-card-border)] pb-2">
         <button
+          type="button"
           onClick={() => setActiveTab('numpy_pipeline')}
-          className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'numpy_pipeline'
-              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] shadow-sm border border-[var(--app-card-border)]'
+              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)]'
               : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
           }`}
         >
-          Native NumPy &amp; 5,800-Step Pipeline
+          {th ? 'Native NumPy & Pipeline 5,800 รอบ' : 'Native NumPy & 5,800-Step Pipeline'}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('evidence')}
-          className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'evidence'
-              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] shadow-sm border border-[var(--app-card-border)]'
+              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)]'
               : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
           }`}
         >
-          Evidence Classification ({evidenceItems.length})
+          {th ? `จำแนกหลักฐาน (${evidenceItems.length})` : `Evidence Classification (${evidenceItems.length})`}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('graph')}
-          className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'graph'
-              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] shadow-sm border border-[var(--app-card-border)]'
+              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)]'
               : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
           }`}
         >
-          Knowledge Graph Paths ({graphPaths.length})
+          {th ? `เส้นทาง Knowledge Graph (${graphPaths.length})` : `Knowledge Graph Paths (${graphPaths.length})`}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('report')}
-          className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'report'
-              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] shadow-sm border border-[var(--app-card-border)]'
+              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)]'
               : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
           }`}
         >
-          Research Briefing
+          {th ? 'สรุปรายงานวิจัย' : 'Research Briefing'}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('benchmarks')}
-          className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'benchmarks'
-              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] shadow-sm border border-[var(--app-card-border)]'
+              ? 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)]'
               : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
           }`}
         >
-          Sovereign Benchmarks
+          {th ? 'ทดสอบ Benchmark ไทย-อังกฤษ' : 'Language Benchmarks'}
         </button>
       </div>
 
       {activeTab === 'numpy_pipeline' && (
         <div className="space-y-6">
-          {/* 1. Native NumPy Backend Environment */}
           <VividCard
-            title="Native NumPy Backend Environment"
-            subtitle="Requires real C-extension NumPy with verified float32 tensors (pure-Python np_compat fallback is strictly blocked for 41.5M training)"
+            title={th ? 'สภาพแวดล้อม Native NumPy Backend' : 'Native NumPy Backend Environment'}
+            subtitle={
+              th
+                ? 'ต้องใช้ C-extension NumPy ที่รองรับ float32 จริง (ไม่อนุญาต fallback np_compat สำหรับการฝึก 41.5M)'
+                : 'Requires real C-extension NumPy with verified float32 tensors (pure-Python np_compat fallback is strictly blocked for 41.5M training)'
+            }
             gradientAccent="cyan"
           >
             {!isAuthenticated || !isDevOrAdmin ? (
               <div className="flex items-start gap-2.5 text-xs text-[var(--app-text-secondary)]">
                 <ShieldAlert className="w-4 h-4 text-[var(--z-warn)] shrink-0 mt-0.5" />
-                <span>Sign in with Developer or Administrator role in Settings to inspect or bind the Native NumPy environment.</span>
+                <span>
+                  {th
+                    ? 'เข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator เพื่อตรวจหรือเชื่อมสภาพแวดล้อม Native NumPy'
+                    : 'Sign in with Developer or Administrator role in Settings to inspect or bind the Native NumPy environment.'}
+                </span>
               </div>
             ) : (
               <div className="space-y-4 text-xs">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono tabular-nums text-[11px]">
                   <div>
-                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Backend State</div>
+                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                      {th ? 'สถานะ Backend' : 'Backend State'}
+                    </div>
                     <div
                       className={`mt-0.5 font-bold ${
                         numpyEnv?.numpyAvailable ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
@@ -1095,7 +1130,9 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Dependencies</div>
+                    <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                      {th ? 'ไลบรารีที่จำเป็น' : 'Dependencies'}
+                    </div>
                     <div className="mt-0.5 font-semibold text-[var(--app-text-primary)]">
                       boto3: {numpyEnv?.boto3Available ? `v${numpyEnv.boto3Version || 'yes'}` : 'no'} · pip: {numpyEnv?.pipAvailable ? 'yes' : 'no'} · venv: {numpyEnv?.venvAvailable ? 'yes' : 'no'}
                     </div>
@@ -1127,28 +1164,32 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                     type="text"
                     value={customPythonBin}
                     onChange={(e) => setCustomPythonBin(e.target.value)}
-                    placeholder="Optional Python virtualenv executable (/path/to/.venv/bin/python3)"
-                    className="flex-1 px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                    placeholder={
+                      th
+                        ? 'ระบุพาธ Python virtualenv (ไม่บังคับ เช่น /path/to/.venv/bin/python3)'
+                        : 'Optional Python virtualenv executable (/path/to/.venv/bin/python3)'
+                    }
+                    className="flex-1 px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                   />
                   <button
                     type="button"
                     data-testid="probe-numpy-btn"
                     disabled={envBusy}
                     onClick={() => void handleEstablishNumpy(false)}
-                    className="px-3.5 py-2 rounded-xl text-xs font-bold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+                    className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
                   >
                     {envBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                    <span>Probe / Bind Python</span>
+                    <span>{th ? 'ตรวจ / ผูก Python' : 'Probe / Bind Python'}</span>
                   </button>
                   <button
                     type="button"
                     data-testid="establish-numpy-btn"
                     disabled={envBusy}
                     onClick={() => void handleEstablishNumpy(true)}
-                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+                    className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
                   >
                     <Cpu className="w-3.5 h-3.5" />
-                    <span>Establish NumPy Env</span>
+                    <span>{th ? 'ติดตั้ง/ตั้งค่า NumPy' : 'Establish NumPy Env'}</span>
                   </button>
                 </div>
 
@@ -1159,65 +1200,76 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
             )}
           </VividCard>
 
-          {/* 2. Fail-Closed 5,800-Step Training Pipeline Initializer */}
           <VividCard
-            title="5,800-Step Training Pipeline Initializer & Verification Checkpoints"
-            subtitle="Prepares and verifies the 5,800-step PureSeqLM loop and verification checkpoints. Training execution remains blocked until NumPy, Dataset, Provenance, and Human Approval all pass."
+            title={th ? 'ตัวเตรียมและตรวจสอบ Pipeline ฝึก 5,800 รอบ' : '5,800-Step Training Pipeline Initializer & Verification Checkpoints'}
+            subtitle={
+              th
+                ? 'ตรวจความพร้อมของ PureSeqLM 5,800 รอบ และรอบบันทึก Checkpoint (การฝึกจะถูกบล็อกจนกว่า NumPy, Dataset, Provenance และ Human Approval จะผ่านทั้งหมด)'
+                : 'Prepares and verifies the 5,800-step PureSeqLM loop and verification checkpoints. Training execution remains blocked until NumPy, Dataset, Provenance, and Human Approval all pass.'
+            }
             gradientAccent="emerald"
           >
             {!isAuthenticated || !isDevOrAdmin ? (
               <div className="text-xs text-[var(--app-text-secondary)]">
-                Developer or Administrator sign-in required to configure and verify the 5,800-step pipeline.
+                {th
+                  ? 'ต้องเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator เพื่อตั้งค่าและตรวจ Pipeline 5,800 รอบ'
+                  : 'Developer or Administrator sign-in required to configure and verify the 5,800-step pipeline.'}
               </div>
             ) : (
               <div className="space-y-5 text-xs">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Target Steps</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      {th ? 'จำนวน Step เป้าหมาย' : 'Target Steps'}
+                    </label>
                     <input
                       type="number"
                       min={1}
                       max={50000}
                       value={targetSteps}
                       onChange={(e) => setTargetSteps(Math.max(1, Number(e.target.value) || 5800))}
-                      className="w-full px-3 py-2 rounded-xl font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Verify Checkpoint Every</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      {th ? 'บันทึก Checkpoint ทุก' : 'Verify Checkpoint Every'}
+                    </label>
                     <input
                       type="number"
                       min={1}
                       max={5000}
                       value={saveEvery}
                       onChange={(e) => setSaveEvery(Math.max(1, Number(e.target.value) || 100))}
-                      className="w-full px-3 py-2 rounded-xl font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Eval Every</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      {th ? 'ประเมินผลทุก' : 'Eval Every'}
+                    </label>
                     <input
                       type="number"
                       min={1}
                       max={5000}
                       value={evalEvery}
                       onChange={(e) => setEvalEvery(Math.max(1, Number(e.target.value) || 25))}
-                      className="w-full px-3 py-2 rounded-xl font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Batch Size</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">Batch Size</label>
                     <input
                       type="number"
                       min={1}
                       max={32}
                       value={batchSize}
                       onChange={(e) => setBatchSize(Math.max(1, Number(e.target.value) || 2))}
-                      className="w-full px-3 py-2 rounded-xl font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Learning Rate</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">Learning Rate</label>
                     <input
                       type="number"
                       step="0.0001"
@@ -1225,15 +1277,15 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                       max={0.1}
                       value={learningRate}
                       onChange={(e) => setLearningRate(Number(e.target.value) || 0.0003)}
-                      className="w-full px-3 py-2 rounded-xl font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono tabular-nums bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Tokenizer Profile</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">Tokenizer Profile</label>
                     <select
                       value={tokenizerProfile}
                       onChange={(e) => setTokenizerProfile(e.target.value === 'bilingual_v4' ? 'bilingual_v4' : 'v2_base')}
-                      className="w-full px-3 py-2 rounded-xl font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     >
                       <option value="v2_base">v2_base (locked)</option>
                       <option value="bilingual_v4">bilingual_v4</option>
@@ -1243,75 +1295,87 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Init Checkpoint Path (Never Overwritten)</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      {th ? 'ไฟล์ Checkpoint เริ่มต้น (ไม่เขียนทับต้นฉบับ)' : 'Init Checkpoint Path (Never Overwritten)'}
+                    </label>
                     <input
                       type="text"
                       value={initCheckpoint}
                       onChange={(e) => setInitCheckpoint(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Output Step-5800 Checkpoint Path</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      {th ? 'พาธบันทึก Checkpoint ผลลัพธ์ (Step 5800)' : 'Output Step-5800 Checkpoint Path'}
+                    </label>
                     <input
                       type="text"
                       value={outCheckpoint}
                       onChange={(e) => setOutCheckpoint(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Verified Dataset Splits / JSONL</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      {th ? 'ชุดข้อมูลที่ผ่านการตรวจ (Splits / JSONL)' : 'Verified Dataset Splits / JSONL'}
+                    </label>
                     <input
                       type="text"
                       value={datasetFile}
                       onChange={(e) => setDatasetFile(e.target.value)}
                       placeholder="native_data/datasets"
-                      className="w-full px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                      className="w-full px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">Provenance Manifest &amp; HMAC Approval Key</label>
+                    <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                      Provenance Manifest &amp; HMAC Approval Key
+                    </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={provenanceManifest}
                         onChange={(e) => setProvenanceManifest(e.target.value)}
-                        className="w-1/2 px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                        className="w-1/2 px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                       />
                       <input
                         type="text"
                         value={approvalKeyFile}
                         onChange={(e) => setApprovalKeyFile(e.target.value)}
                         placeholder="ZYNTHEOR_APPROVAL_KEY_FILE"
-                        className="w-1/2 px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                        className="w-1/2 px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                       />
                     </div>
                   </div>
                   <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">
-                        AWS S3 Checkpoint Object Key (Cloud Preflight Target — optional override for S3_CHECKPOINT_KEY)
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                        {th
+                          ? 'AWS S3 Checkpoint Object Key (ไม่บังคับ — override ค่า S3_CHECKPOINT_KEY)'
+                          : 'AWS S3 Checkpoint Object Key (Cloud Preflight Target — optional override for S3_CHECKPOINT_KEY)'}
                       </label>
                       <input
                         type="text"
                         value={cloudObjectKey}
                         onChange={(e) => setCloudObjectKey(e.target.value)}
                         placeholder="checkpoints/model_checkpoint.pt (leave empty to use S3_CHECKPOINT_KEY)"
-                        className="w-full px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                        className="w-full px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">
-                        ApprovalGate Request ID (Human Governance Sign-Off)
+                      <label className="block text-[11px] font-semibold text-[var(--app-text-secondary)] mb-1">
+                        {th ? 'ApprovalGate Request ID (การอนุมัติจากผู้ดูแล)' : 'ApprovalGate Request ID (Human Governance Sign-Off)'}
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap sm:flex-nowrap gap-2">
                         <select
                           value={approvalRequestId}
                           onChange={(e) => setApprovalRequestId(e.target.value)}
-                          className="flex-1 px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
+                          className="flex-1 min-w-0 px-3 py-2 rounded-lg font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                         >
-                          <option value="">Manual checkbox only (or select ApprovalGate)</option>
+                          <option value="">
+                            {th ? 'ใช้การติ๊กยืนยันด้วยตนเอง (หรือเลือก ApprovalGate)' : 'Manual checkbox only (or select ApprovalGate)'}
+                          </option>
                           {approvalRequests.map((r) => (
                             <option key={r.requestId} value={r.requestId}>
                               {r.requestId} · {r.status} ({r.resourceId})
@@ -1322,9 +1386,9 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                           type="button"
                           disabled={approvalBusy}
                           onClick={() => void handleRequestTrainingApproval()}
-                          className="px-3 py-2 rounded-xl text-[11px] font-bold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                          className="px-3 py-2 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 whitespace-nowrap"
                         >
-                          Request Approval
+                          {th ? 'ขออนุมัติ' : 'Request Approval'}
                         </button>
                         {role === 'Administrator' &&
                           approvalRequestId &&
@@ -1333,9 +1397,9 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                               type="button"
                               disabled={approvalBusy}
                               onClick={() => void handleApproveTrainingRequest(approvalRequestId)}
-                              className="px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--z-ok)] text-slate-950 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                              className="px-3 py-2 rounded-lg text-[11px] font-semibold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50 whitespace-nowrap"
                             >
-                              Admin Approve
+                              {th ? 'อนุมัติ (Admin)' : 'Admin Approve'}
                             </button>
                           )}
                       </div>
@@ -1351,7 +1415,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                         checked={humanApprovalConfirmed}
                         onChange={(e) => setHumanApprovalConfirmed(e.target.checked)}
                       />
-                      <span>Explicit Human Approval Confirmed</span>
+                      <span>{th ? 'ยืนยันการอนุมัติโดยมนุษย์แล้ว (Human Approval)' : 'Explicit Human Approval Confirmed'}</span>
                     </label>
                     <label className="inline-flex items-center gap-2 text-xs text-[var(--app-text-secondary)] cursor-pointer">
                       <input
@@ -1359,7 +1423,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                         checked={allowFreshInit}
                         onChange={(e) => setAllowFreshInit(e.target.checked)}
                       />
-                      <span>Allow Fresh Init (no baseline .pt)</span>
+                      <span>{th ? 'อนุญาต Fresh Init (กรณีไม่มีไฟล์ .pt ตั้งต้น)' : 'Allow Fresh Init (no baseline .pt)'}</span>
                     </label>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -1367,18 +1431,18 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                       type="button"
                       disabled={approvalBusy}
                       onClick={() => void handleVerifyProvenance()}
-                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
+                      className="px-3 py-2 rounded-lg text-xs font-medium border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
                     >
-                      Verify Provenance HMAC
+                      {th ? 'ตรวจ HMAC Provenance' : 'Verify Provenance HMAC'}
                     </button>
                     {role === 'Administrator' && (
                       <button
                         type="button"
                         disabled={cloudSyncBusy}
                         onClick={() => void handleSyncInitCheckpointToS3()}
-                        className="px-3 py-2 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
+                        className="px-3 py-2 rounded-lg text-xs font-medium border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
                       >
-                        {cloudSyncBusy ? 'Syncing…' : 'Sync Init .pt → S3'}
+                        {cloudSyncBusy ? (th ? 'กำลังซิงค์…' : 'Syncing…') : 'Sync Init .pt → S3'}
                       </button>
                     )}
                     <button
@@ -1386,10 +1450,10 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                       data-testid="init-5800-pipeline-btn"
                       disabled={initBusy}
                       onClick={() => void handleInitializePipeline()}
-                      className="px-4 py-2 rounded-xl text-xs font-bold border border-[var(--app-accent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg text-xs font-semibold border border-[var(--app-accent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
                     >
                       {initBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                      <span>Initialize 5,800-Step Pipeline</span>
+                      <span>{th ? 'เตรียม Pipeline 5,800 รอบ' : 'Initialize 5,800-Step Pipeline'}</span>
                     </button>
                     {role === 'Administrator' && (
                       <button
@@ -1401,15 +1465,27 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                           !pipelineInitSnapshot?.canExecuteTraining
                         }
                         onClick={() => void handleStartTrainingLoop()}
-                        className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--z-ok)] text-slate-950 cursor-pointer disabled:opacity-40 inline-flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-lg text-xs font-semibold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-40 inline-flex items-center gap-1.5"
                         title={
                           pipelineInitSnapshot?.canExecuteTraining
-                            ? 'All governance, dataset, NumPy, and approval gates passed'
+                            ? th
+                              ? 'ผ่านเงื่อนไขธรรมาภิบาล ชุดข้อมูล NumPy และการอนุมัติครบถ้วน'
+                              : 'All governance, dataset, NumPy, and approval gates passed'
+                            : th
+                            ? 'ถูกบล็อกจนกว่าการเตรียม Pipeline 5,800 รอบจะสถานะ READY โดยไม่มีตัวบล็อก'
                             : 'Blocked until Initialize 5,800-Step Pipeline reports READY with zero blockers'
                         }
                       >
                         {startBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-                        <span>{pipelineExecution?.running ? 'Training Running…' : 'Start 5,800-Step Loop'}</span>
+                        <span>
+                          {pipelineExecution?.running
+                            ? th
+                              ? 'กำลังฝึกโมเดล…'
+                              : 'Training Running…'
+                            : th
+                            ? 'เริ่มฝึก 5,800 รอบ'
+                            : 'Start 5,800-Step Loop'}
+                        </span>
                       </button>
                     )}
                   </div>
@@ -1436,25 +1512,24 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                         ) : (
                           <ShieldAlert className="w-4 h-4 text-[var(--z-warn)]" />
                         )}
-                        <span className="font-bold text-[var(--app-text-primary)]">
+                        <span className="font-semibold text-[var(--app-text-primary)]">
                           Pipeline {pipelineInitSnapshot.pipelineId} · {pipelineInitSnapshot.status}
                         </span>
                       </div>
                       <span className="tabular-nums text-[var(--app-text-secondary)]">
                         {pipelineInitSnapshot.schedule.plannedRunSteps.toLocaleString()} steps ·{' '}
-                        {pipelineInitSnapshot.schedule.checkpointCount} verification checkpoints (every {pipelineInitSnapshot.schedule.saveEvery}) ·{' '}
+                        {pipelineInitSnapshot.schedule.checkpointCount} checkpoints (every {pipelineInitSnapshot.schedule.saveEvery}) ·{' '}
                         {pipelineInitSnapshot.schedule.evalCount} evals
                       </span>
                     </div>
 
-                    {/* 6 Fail-Closed Readiness Gates (Cloud Preflight + Native Runtime + Governance) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                       {pipelineInitSnapshot.gates.map((g) => (
                         <div
                           key={g.id}
                           className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-1"
                         >
-                          <div className="flex items-center gap-1.5 font-bold text-[var(--app-text-primary)]">
+                          <div className="flex items-center gap-1.5 font-semibold text-[var(--app-text-primary)]">
                             {g.passed ? (
                               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)] shrink-0" />
                             ) : (
@@ -1469,10 +1544,11 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                       ))}
                     </div>
 
-                    {/* Verification Checkpoint Schedule Sample */}
                     <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-[11px] space-y-1.5">
-                      <div className="font-bold text-[var(--app-text-primary)]">
-                        Verification Checkpoint Schedule (First 6 &amp; Final Milestone)
+                      <div className="font-semibold text-[var(--app-text-primary)]">
+                        {th
+                          ? 'กำหนดการตรวจ Checkpoint (6 จุดแรกและจุดสุดท้าย)'
+                          : 'Verification Checkpoint Schedule (First 6 & Final Milestone)'}
                       </div>
                       <div className="text-[var(--app-text-secondary)]">
                         {[
@@ -1494,8 +1570,8 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
 
                 {pipelineExecution && (pipelineExecution.running || pipelineExecution.startedAt) && (
                   <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] font-mono text-[11px] space-y-1.5">
-                    <div className="font-bold text-[var(--app-text-primary)]">
-                      Execution Status:{' '}
+                    <div className="font-semibold text-[var(--app-text-primary)]">
+                      {th ? 'สถานะการรัน:' : 'Execution Status:'}{' '}
                       {pipelineExecution.running
                         ? `RUNNING (PID ${pipelineExecution.pid})`
                         : pipelineExecution.trainingCompletedVerified && pipelineExecution.exitCode === 0
@@ -1543,16 +1619,19 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                   status={item.type}
                   label={item.type === 'VERIFIED' ? 'VERIFIED AXIOM' : item.type}
                 />
-                <span className="text-xs font-mono font-bold text-[var(--app-text-secondary)]">
-                  {item.confidence > 0 ? `${item.confidence}% Match` : 'Not scored'}
+                <span className="text-xs font-mono font-semibold text-[var(--app-text-secondary)]">
+                  {item.confidence > 0 ? `${item.confidence}%` : (th ? 'ยังไม่ให้คะแนน' : 'Not scored')}
                 </span>
               </div>
 
-              <h4 className="mt-3 text-sm font-bold text-[var(--app-text-primary)]">{item.title}</h4>
-              <p className="mt-1 text-xs text-[var(--app-text-primary)] leading-relaxed">{item.evidence}</p>
+              <h4 className="mt-3 text-sm font-semibold text-[var(--app-text-primary)]">{item.title}</h4>
+              <p className="mt-1 text-xs text-[var(--app-text-secondary)] leading-relaxed">{item.evidence}</p>
 
               <div className="mt-4 pt-3 border-t border-[var(--app-card-border)] flex items-center justify-between text-[11px] text-[var(--app-text-secondary)]">
-                <span className="truncate">Source: <code className="text-[var(--app-text-primary)] font-mono">{item.source}</code> · Open claims: {hypothesesCount}</span>
+                <span className="truncate">
+                  {th ? 'ที่มา:' : 'Source:'} <code className="text-[var(--app-text-primary)] font-mono">{item.source}</code> ·{' '}
+                  {th ? `สมมติฐานที่เปิดอยู่: ${hypothesesCount}` : `Open claims: ${hypothesesCount}`}
+                </span>
               </div>
             </VividCard>
           ))}
@@ -1561,16 +1640,28 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
 
       {activeTab === 'graph' && (
         <VividCard
-          title="Multi-Hop Knowledge Graph Traversal"
-          subtitle={`Verified graph paths from /api/research/investigate${
-            graphSummary ? ` · ${graphSummary.nodes} nodes / ${graphSummary.edges} edges indexed` : ''
+          title={th ? 'การไล่เส้นทางกราฟความรู้แบบ Multi-Hop' : 'Multi-Hop Knowledge Graph Traversal'}
+          subtitle={`${th ? 'เส้นทางที่ตรวจพบจาก' : 'Verified graph paths from'} /api/research/investigate${
+            graphSummary
+              ? th
+                ? ` · จัดดัชนีแล้ว ${graphSummary.nodes} โหนด / ${graphSummary.edges} เส้นเชื่อม`
+                : ` · ${graphSummary.nodes} nodes / ${graphSummary.edges} edges indexed`
+              : ''
           }`}
         >
           {graphPaths.length === 0 ? (
             <div className="p-8 bg-[var(--app-surface)] rounded-xl text-center space-y-3">
-              <Network className="w-12 h-12 text-[var(--app-accent)] mx-auto" />
+              <Network className="w-10 h-10 text-[var(--app-accent)] mx-auto" />
               <div className="max-w-md mx-auto text-xs text-[var(--app-text-secondary)]">
-                Run <strong>Investigate</strong> to traverse Knowledge Graph relationships across ingested documents.
+                {th ? (
+                  <>
+                    กด <strong>สืบค้นวิจัย</strong> เพื่อไล่เส้นทางความสัมพันธ์ใน Knowledge Graph จากเอกสารที่นำเข้า
+                  </>
+                ) : (
+                  <>
+                    Run <strong>Investigate</strong> to traverse Knowledge Graph relationships across ingested documents.
+                  </>
+                )}
               </div>
             </div>
           ) : (
@@ -1578,11 +1669,11 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
               {graphPaths.map((p: any, idx: number) => (
                 <div key={idx} className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-xs font-mono space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-[var(--app-accent)] font-bold">
+                    <div className="text-[var(--app-accent)] font-semibold">
                       Path #{idx + 1} · score {typeof p.score === 'number' ? p.score.toFixed(2) : p.totalWeight ?? '—'}
                     </div>
                     <span className="text-[10px] text-[var(--app-text-secondary)]">
-                      {(p.hops || []).length} hop(s)
+                      {(p.hops || []).length} {th ? 'ช่วงเชื่อม' : 'hop(s)'}
                     </span>
                   </div>
                   <div className="space-y-1.5">
@@ -1594,7 +1685,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                           <span className="font-semibold">{h.toLabel || h.toId}</span>
                         </div>
                         <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[var(--app-text-secondary)]">
-                          <span>Doc: {h.documentTitle || h.documentId}</span>
+                          <span>{th ? 'เอกสาร:' : 'Doc:'} {h.documentTitle || h.documentId}</span>
                           {h.contentHash && <span className="break-all">SHA-256: {String(h.contentHash).slice(0, 16)}…</span>}
                         </div>
                       </div>
@@ -1608,14 +1699,23 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
       )}
 
       {activeTab === 'report' && (
-        <VividCard title="Executive Research Report" subtitle="Evidence and hypotheses · not a certified capability report">
+        <VividCard
+          title={th ? 'รายงานสรุปสำหรับผู้บริหาร' : 'Executive Research Report'}
+          subtitle={th ? 'สรุปหลักฐานและสมมติฐานตามจริง' : 'Evidence and hypotheses · not a certified capability report'}
+        >
           <div className="space-y-4 text-xs text-[var(--app-text-primary)] leading-relaxed font-sans max-w-2xl">
-            <h3 className="text-sm font-bold text-[var(--app-text-primary)]">Executive Summary</h3>
+            <h3 className="text-sm font-semibold text-[var(--app-text-primary)]">
+              {th ? 'สรุปสำหรับผู้บริหาร (Executive Summary)' : 'Executive Summary'}
+            </h3>
             <p>
-              Native model evaluation, grounded Knowledge Workspace retrieval, and Adaptive Reasoning verification remain strictly separated from unverified hypotheses.
+              {th
+                ? 'การประเมินโมเดล การค้นคืนจาก Knowledge Workspace และการตรวจสอบเหตุผลถูกแยกชัดเจนจากสมมติฐานที่ยังไม่ได้รับการยืนยัน'
+                : 'Native model evaluation, grounded Knowledge Workspace retrieval, and Adaptive Reasoning verification remain strictly separated from unverified hypotheses.'}
             </p>
             <p className="text-[var(--app-text-secondary)]">
-              No PDF export is offered here until a real report-generation endpoint exists.
+              {th
+                ? 'ยังไม่มีการส่งออก PDF ในหน้านี้ จนกว่าจะเชื่อมต่อระบบสร้างรายงานจริงจากฝั่ง Server'
+                : 'No PDF export is offered here until a real report-generation endpoint exists.'}
             </p>
             {investigation?.reasoning && (
               <pre className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-[11px] font-mono overflow-auto">
@@ -1628,8 +1728,8 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
 
       {activeTab === 'benchmarks' && (
         <VividCard
-          title="Tokenizer & Runtime Benchmarks (Thai / English)"
-          subtitle="Recorded test results from /api/verify/language-integrity"
+          title={th ? 'ทดสอบ Tokenizer และ Runtime (ไทย / อังกฤษ)' : 'Tokenizer & Runtime Benchmarks (Thai / English)'}
+          subtitle={th ? 'ผลการทดสอบที่บันทึกจาก /api/verify/language-integrity' : 'Recorded test results from /api/verify/language-integrity'}
           gradientAccent="emerald"
         >
           <div className="space-y-4">
@@ -1649,22 +1749,32 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                 type="button"
                 onClick={handleRunBenchmarks}
                 disabled={isRunningBenchmarks || !isAuthenticated || !isDevOrAdmin}
-                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-white vivid-gradient-brand cursor-pointer disabled:opacity-50"
+                className="min-h-[40px] px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[var(--app-accent-deep)] cursor-pointer disabled:opacity-50"
               >
-                {isRunningBenchmarks ? 'Running Live Benchmarks...' : 'Run Live Benchmarks'}
+                {isRunningBenchmarks
+                  ? th
+                    ? 'กำลังรันชุดทดสอบ...'
+                    : 'Running Live Benchmarks...'
+                  : th
+                  ? 'รันชุดทดสอบจริง'
+                  : 'Run Live Benchmarks'}
               </button>
             </div>
             {(!isAuthenticated || !isDevOrAdmin) && (
               <div className="text-xs font-mono text-[var(--app-amber)] flex flex-wrap items-center gap-2">
-                <span>Developer or Administrator sign-in required to execute /api/verify/language-integrity.</span>
+                <span>
+                  {th
+                    ? 'ต้องเข้าสู่ระบบสิทธิ์ Developer หรือ Administrator เพื่อสั่งรัน /api/verify/language-integrity'
+                    : 'Developer or Administrator sign-in required to execute /api/verify/language-integrity.'}
+                </span>
                 {onOpenSignIn && (
                   <button
                     type="button"
                     onClick={onOpenSignIn}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--app-amber)] font-sans font-bold cursor-pointer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--app-amber)] font-sans font-semibold cursor-pointer"
                   >
                     <LogIn className="w-3 h-3" />
-                    <span>Sign in</span>
+                    <span>{th ? 'เข้าสู่ระบบ' : 'Sign in'}</span>
                   </button>
                 )}
               </div>
@@ -1675,8 +1785,10 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
               </div>
             )}
             {!benchmarkResults ? (
-              <div className="text-xs text-[var(--app-text-secondary)] italic">
-                Click "Run Live Benchmarks" to execute real Thai/English tokenizer and runtime checks.
+              <div className="text-xs text-[var(--app-text-secondary)]">
+                {th
+                  ? 'กด "รันชุดทดสอบจริง" เพื่อตรวจสอบ Tokenizer ภาษาไทย-อังกฤษ และสถานะ Runtime'
+                  : 'Click "Run Live Benchmarks" to execute real Thai/English tokenizer and runtime checks.'}
               </div>
             ) : (
               <div className="space-y-2">
@@ -1686,7 +1798,7 @@ export const ResearchLab: React.FC<ResearchLabProps> = ({ onOpenSignIn }) => {
                     className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono"
                   >
                     <div className="min-w-0">
-                      <div className="font-bold text-[var(--app-text-primary)]">{b.name}</div>
+                      <div className="font-semibold text-[var(--app-text-primary)]">{b.name}</div>
                       <div className="text-[11px] text-[var(--app-text-secondary)] break-words">{b.evidence}</div>
                     </div>
                     <StatusDot

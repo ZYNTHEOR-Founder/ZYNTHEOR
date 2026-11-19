@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { VividCard } from '../ui/VividCard';
-import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { VerificationSuiteData } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
-import {
-  Sliders,
-  Play,
-  ShieldCheck,
-  Cpu,
-  RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
-  Server,
-  Activity,
-  RotateCcw
-} from 'lucide-react';
+import { Play, ShieldCheck } from 'lucide-react';
 
 export const AdminConsole: React.FC = () => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   const [isRunningSuite, setIsRunningSuite] = useState(false);
   const [suiteData, setSuiteData] = useState<VerificationSuiteData | null>(null);
   const [healthHistory, setHealthHistory] = useState<Array<{ time: string; cpu: number; ram: number; vram: number }>>([]);
@@ -72,40 +64,54 @@ export const AdminConsole: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Verification Suite Header */}
+    <div className="space-y-6">
       <VividCard
         gradientAccent="cyan"
-        className="!p-6"
+        className="!p-5 sm:!p-6"
         headerAction={
           <button
+            type="button"
             onClick={handleRunVerificationSuite}
             disabled={isRunningSuite}
-            className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[var(--app-accent-deep)] rounded-lg hover:opacity-95 transition-opacity cursor-pointer disabled:opacity-50"
           >
             <Play className="w-3.5 h-3.5 fill-white" />
-            {isRunningSuite ? 'Running 8 Real Proofs...' : 'Execute Full Verification Suite'}
+            {isRunningSuite
+              ? th
+                ? 'กำลังรันชุดตรวจสอบ 8 รายการ...'
+                : 'Running 8 Real Proofs...'
+              : th
+              ? 'รันชุดตรวจสอบความถูกต้องระบบ'
+              : 'Execute Full Verification Suite'}
           </button>
         }
       >
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <div className="text-[11px] font-bold text-[var(--app-accent)] ">
-              Empirical Proof Engine
+            <div className="text-[11px] font-semibold text-[var(--app-accent)]">
+              {th ? 'ระบบตรวจยืนยันเชิงประจักษ์' : 'Empirical Proof Engine'}
             </div>
-            <h2 className="text-xl font-bold text-[var(--app-text-primary)] mt-1">
-              Real-World Execution Verification Standard
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--app-text-primary)] mt-1">
+              {th ? 'มาตรฐานการตรวจสอบจากการทำงานจริง' : 'Real-World Execution Verification Standard'}
             </h2>
-            <p className="text-xs text-[var(--app-text-secondary)] mt-1">
-              "We do not build systems to pass mock tests. We build systems that run real execution and prove capability with evidence."
+            <p className="text-xs text-[var(--app-text-secondary)] mt-1 leading-relaxed">
+              {th
+                ? 'ทดสอบการทำงานจริงกับ Python Bridge, ไฟล์ Checkpoint และ ToolGateway Sandbox พร้อมบันทึกหลักฐานที่ตรวจสอบได้'
+                : 'Executes real checks against runtime bridges, checkpoints, and sandbox boundaries with verifiable evidence.'}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-[var(--app-surface-elevated)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] rounded-xl">
-            <ShieldCheck className="w-6 h-6 text-[var(--z-ok)] shrink-0" />
+          <div className="flex items-center gap-3 p-3 bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] rounded-xl shrink-0">
+            <ShieldCheck className="w-5 h-5 text-[var(--z-ok)] shrink-0" />
             <div>
-              <div className="text-xs font-bold text-[var(--app-text-primary)]">
-                {suiteData ? `${suiteData.passed_tests} / ${suiteData.total_tests} Tests Passed` : 'No verification run recorded'}
+              <div className="text-xs font-semibold text-[var(--app-text-primary)]">
+                {suiteData
+                  ? th
+                    ? `ผ่าน ${suiteData.passed_tests} / ${suiteData.total_tests} รายการ`
+                    : `${suiteData.passed_tests} / ${suiteData.total_tests} Tests Passed`
+                  : th
+                  ? 'ยังไม่มีประวัติการตรวจรอบล่าสุด'
+                  : 'No verification run recorded'}
               </div>
               <div className="text-[10px] text-[var(--z-ok)] font-mono font-bold">
                 {suiteData?.verified ? 'EVIDENCE VERIFIED' : 'UNVERIFIED · AWAITING TEST RUN'}
@@ -115,32 +121,41 @@ export const AdminConsole: React.FC = () => {
         </div>
       </VividCard>
 
-      {/* 8 Proofs Table */}
       <VividCard
-        title="Sovereign AI Proof Verification Matrix"
-        subtitle="Live assertions against local Python bridge, weights checkpoint, and ToolGateway sandbox"
-        gradientAccent="purple"
+        title={th ? 'ตารางยืนยันหลักฐานการทำงานของระบบ' : 'System Proof Verification Matrix'}
+        subtitle={
+          th
+            ? 'ตรวจสอบการเชื่อมต่อ Python Bridge, ไฟล์ Checkpoint และ ToolGateway Sandbox แบบเรียลไทม์'
+            : 'Live assertions against local Python bridge, weights checkpoint, and ToolGateway sandbox'
+        }
+        gradientAccent="emerald"
       >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-semibold">
-                <th className="pb-3 pl-1">Requirement / Standard</th>
-                <th className="pb-3">Proof Target</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Runtime Evidence / Metric</th>
-                <th className="pb-3 text-right pr-1">Latency</th>
+                <th className="pb-3 pl-1">{th ? 'รายการตรวจ / มาตรฐาน' : 'Requirement / Standard'}</th>
+                <th className="pb-3">{th ? 'เป้าหมาย' : 'Proof Target'}</th>
+                <th className="pb-3">{th ? 'สถานะ' : 'Status'}</th>
+                <th className="pb-3">{th ? 'หลักฐาน / ค่าที่วัดได้' : 'Runtime Evidence / Metric'}</th>
+                <th className="pb-3 text-right pr-1">{th ? 'เวลาตอบสนอง' : 'Latency'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)] font-sans">
               {(suiteData?.results || []).map((t: any) => (
                 <tr key={t.test_id} className="hover:bg-[var(--app-surface-elevated)] transition-colors">
-                  <td className="py-3 pl-1 font-bold text-[var(--app-text-primary)]">
+                  <td className="py-3 pl-1 font-semibold text-[var(--app-text-primary)]">
                     <div>{t.name}</div>
                     <div className="text-[10px] font-mono text-[var(--app-text-secondary)]">{t.test_id}</div>
                   </td>
                   <td className="py-3 text-[var(--app-text-primary)] font-mono text-[11px]">
-                    {t.test_id.includes('WEIGHTS') ? 'model_checkpoint.pt' : t.test_id.includes('TOKEN') ? 'tokenizer.py' : t.test_id.includes('MEMORY') ? 'memory_store.json' : 'Python Bridge'}
+                    {t.test_id.includes('WEIGHTS')
+                      ? 'model_checkpoint.pt'
+                      : t.test_id.includes('TOKEN')
+                      ? 'tokenizer.py'
+                      : t.test_id.includes('MEMORY')
+                      ? 'memory_store.json'
+                      : 'Python Bridge'}
                   </td>
                   <td className="py-3">
                     <StatusBadge status={t.status === 'PASS' ? 'VERIFIED' : 'BLOCKED'} />
@@ -154,17 +169,26 @@ export const AdminConsole: React.FC = () => {
                 </tr>
               ))}
               {!suiteData?.results?.length && (
-                <tr><td colSpan={5} className="py-8 text-center text-sm text-[var(--app-text-secondary)]">No verification evidence is available yet. Run the verification suite to populate this table.</td></tr>
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-xs text-[var(--app-text-secondary)]">
+                    {th
+                      ? 'ยังไม่มีหลักฐานการตรวจสอบ กด "รันชุดตรวจสอบความถูกต้องระบบ" เพื่อดูผลลัพธ์จริง'
+                      : 'No verification evidence is available yet. Run the verification suite to populate this table.'}
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
       </VividCard>
 
-      {/* System Health (Recharts) */}
       <VividCard
-        title="System Health (CPU / RAM / VRAM)"
-        subtitle="Real-time infrastructure telemetry from /api/system/status"
+        title={th ? 'สุขภาพระบบ (CPU / RAM / VRAM)' : 'System Health (CPU / RAM / VRAM)'}
+        subtitle={
+          th
+            ? 'ข้อมูล Telemetry จริงแบบเรียลไทม์จาก /api/system/status'
+            : 'Real-time infrastructure telemetry from /api/system/status'
+        }
         gradientAccent="emerald"
       >
         <div className="h-48 w-full">
@@ -181,43 +205,57 @@ export const AdminConsole: React.FC = () => {
         </div>
       </VividCard>
 
-      {/* Active Sessions & Revoke */}
       <VividCard
-        title="Active User Sessions"
-        subtitle="Invalidate active session tokens and log to AuditLedger"
+        title={th ? 'เซสชันผู้ใช้ที่กำลังทำงาน' : 'Active User Sessions'}
+        subtitle={
+          th
+            ? 'จัดการโทเคนเซสชันและบันทึกเหตุการณ์ลง AuditLedger'
+            : 'Invalidate active session tokens and log to AuditLedger'
+        }
         gradientAccent="amber"
       >
         <div className="space-y-2 text-xs font-mono">
           {sessions.length === 0 ? (
             <div className="py-5 text-center text-[var(--app-text-secondary)]">
-              No session-management records are available from the server.
+              {th
+                ? 'ยังไม่มีข้อมูลรายการจัดการเซสชันที่เปิดใช้งานจากฝั่ง Server'
+                : 'No session-management records are available from the server.'}
             </div>
-          ) : sessions.map((s) => (
-            <div key={s.id} className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-              <span className="text-[var(--app-text-primary)] font-bold">{s.id}</span>{' '}
-              <span className="text-[var(--app-text-secondary)]">({s.actor} · {s.ip} · {s.status})</span>
-            </div>
-          ))}
+          ) : (
+            sessions.map((s) => (
+              <div key={s.id} className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
+                <span className="text-[var(--app-text-primary)] font-bold">{s.id}</span>{' '}
+                <span className="text-[var(--app-text-secondary)]">
+                  ({s.actor} · {s.ip} · {s.status})
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </VividCard>
 
-      {/* Admin Audit Log */}
       <VividCard
-        title="Admin Audit Log"
-        subtitle="Recent critical actions sourced from AuditLedger"
+        title={th ? 'บันทึกการตรวจสอบสำหรับผู้ดูแล (Audit Log)' : 'Admin Audit Log'}
+        subtitle={th ? 'กิจกรรมสำคัญล่าสุดจาก AuditLedger' : 'Recent critical actions sourced from AuditLedger'}
         gradientAccent="emerald"
       >
         <div className="max-h-56 overflow-y-auto space-y-1.5 font-mono text-[11px]">
           {auditEntries.length === 0 ? (
-            <div className="text-[var(--app-text-secondary)] italic">No audit entries loaded.</div>
+            <div className="text-[var(--app-text-secondary)]">
+              {th ? 'ยังไม่มีรายการบันทึกการตรวจสอบ' : 'No audit entries loaded.'}
+            </div>
           ) : (
             auditEntries.map((entry, idx) => (
               <div
                 key={entry.id || idx}
                 className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)]"
               >
-                <span className="text-[var(--app-accent)] font-bold">[{entry.actor || 'SYSTEM'}] {entry.action}</span>
-                <span className="text-[var(--app-text-secondary)]">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : ''}</span>
+                <span className="text-[var(--app-accent)] font-semibold">
+                  [{entry.actor || 'SYSTEM'}] {entry.action}
+                </span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : ''}
+                </span>
               </div>
             ))
           )}

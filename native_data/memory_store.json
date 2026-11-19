@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-SOVEREIGN",
-  "lastPersisted": "2026-11-17T13:31:57.950Z",
+  "lastPersisted": "2026-11-19T11:39:21.083Z",
   "verified_knowledge": {
     "architecture": "ZYNTHEOR Native Core; active checkpoint size must be read from verified Cloud Runtime evidence",
     "sovereignty_rule": "Native model is the intelligence core; runtime readiness requires a verified Cloud checkpoint and recorded evidence",
@@ -8,6 +8,199 @@
     "multilingual_engine": "Thai-English Dual Native Vocabulary & Code-Switching"
   },
   "sessions": [],
-  "episodic": {},
+  "episodic": {
+    "eng_project_proj_mwnh8l2n_d920d5": {
+      "key": "eng_project_proj_mwnh8l2n_d920d5",
+      "value": {
+        "name": "Incident Telemetry Service",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwnh8l2n_d920d5",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-19T11:38:41.537Z",
+      "updatedAt": "2026-11-19T11:38:41.537Z",
+      "readCount": 0,
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-19T11:38:41.537Z",
+          "contentDigest": "5612a2ab45bf9966b8b2cf2423e432bf52d197478d70ff6bfb0795a05de2c477",
+          "valuePreview": "{\"name\":\"Incident Telemetry Service\",\"stack\":\"node_fullstack\",\"workspaceDir\":\"projects/proj_mwnh8l2n_d920d5\",\"revision\":\"rev_1\"}"
+        }
+      ],
+      "metadata": {
+        "files": 8
+      },
+      "scope": {
+        "tenantId": "test-tenant-sec10",
+        "userId": "dev-user-1",
+        "role": "developer"
+      },
+      "importanceScore": 0.844,
+      "contentDigest": "5612a2ab45bf9966b8b2cf2423e432bf52d197478d70ff6bfb0795a05de2c477"
+    },
+    "eng_project_proj_mwnh8mz0_f8fea3": {
+      "key": "eng_project_proj_mwnh8mz0_f8fea3",
+      "value": {
+        "name": "Bench L1_INTERACTIVE_PORTAL",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwnh8mz0_f8fea3",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-19T11:38:43.587Z",
+      "updatedAt": "2026-11-19T11:38:43.587Z",
+      "readCount": 0,
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-19T11:38:43.587Z",
+          "contentDigest": "de34d6e489fb1a0f66db90b0431891ce7a49518ad924dfe082effc9dd82c004f",
+          "valuePreview": "{\"name\":\"Bench L1_INTERACTIVE_PORTAL\",\"stack\":\"node_fullstack\",\"workspaceDir\":\"projects/proj_mwnh8mz0_f8fea3\",\"revision\":\"rev_1\"}"
+        }
+      ],
+      "metadata": {
+        "files": 8
+      },
+      "scope": {
+        "tenantId": "test-tenant-sec10",
+        "userId": "dev-user-1",
+        "role": "developer"
+      },
+      "importanceScore": 0.845,
+      "contentDigest": "de34d6e489fb1a0f66db90b0431891ce7a49518ad924dfe082effc9dd82c004f"
+    },
+    "eng_project_proj_mwnh8nbe_25a97f": {
+      "key": "eng_project_proj_mwnh8nbe_25a97f",
+      "value": {
+        "name": "Bench L2_DATA_PERSISTENCE_FINANCE",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwnh8nbe_25a97f",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-19T11:38:43.999Z",
+      "updatedAt": "2026-11-19T11:38:43.999Z",
+      "readCount": 0,
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-19T11:38:43.999Z",
+          "contentDigest": "69f043522a2d97fd5cf913a54b3cd88d7555298092a1e7ec77b9bbaf52d9d460",
+          "valuePreview": "{\"name\":\"Bench L2_DATA_PERSISTENCE_FINANCE\",\"stack\":\"node_fullstack\",\"workspaceDir\":\"projects/proj_mwnh8nbe_25a97f\",\"revision\":\"rev_1\"}"
+        }
+      ],
+      "metadata": {
+        "files": 8
+      },
+      "scope": {
+        "tenantId": "test-tenant-sec10",
+        "userId": "dev-user-1",
+        "role": "developer"
+      },
+      "importanceScore": 0.848,
+      "contentDigest": "69f043522a2d97fd5cf913a54b3cd88d7555298092a1e7ec77b9bbaf52d9d460"
+    },
+    "eng_project_proj_mwnh8nmg_582d67": {
+      "key": "eng_project_proj_mwnh8nmg_582d67",
+      "value": {
+        "name": "Bench L3_MULTI_USER_SAAS",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwnh8nmg_582d67",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-19T11:38:44.396Z",
+      "updatedAt": "2026-11-19T11:38:44.396Z",
+      "readCount": 0,
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-19T11:38:44.396Z",
+          "contentDigest": "344fd490b142718f3120e7a17a3e24554d973e0a35927974cf402c907563bf29",
+          "valuePreview": "{\"name\":\"Bench L3_MULTI_USER_SAAS\",\"stack\":\"node_fullstack\",\"workspaceDir\":\"projects/proj_mwnh8nmg_582d67\",\"revision\":\"rev_1\"}"
+        }
+      ],
+      "metadata": {
+        "files": 8
+      },
+      "scope": {
+        "tenantId": "test-tenant-sec10",
+        "userId": "dev-user-1",
+        "role": "developer"
+      },
+      "importanceScore": 0.843,
+      "contentDigest": "344fd490b142718f3120e7a17a3e24554d973e0a35927974cf402c907563bf29"
+    },
+    "eng_project_proj_mwnh8o62_cd7030": {
+      "key": "eng_project_proj_mwnh8o62_cd7030",
+      "value": {
+        "name": "Bench L4_PYTHON_SERVICE_INTEGRATION",
+        "stack": "python_service",
+        "workspaceDir": "projects/proj_mwnh8o62_cd7030",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-19T11:38:45.099Z",
+      "updatedAt": "2026-11-19T11:38:45.099Z",
+      "readCount": 0,
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-19T11:38:45.099Z",
+          "contentDigest": "92fd46504843809c57148c4e8b7cabd20156117d5673f948239b39c9ed660a2c",
+          "valuePreview": "{\"name\":\"Bench L4_PYTHON_SERVICE_INTEGRATION\",\"stack\":\"python_service\",\"workspaceDir\":\"projects/proj_mwnh8o62_cd7030\",\"revision\":\"rev_1\"}"
+        }
+      ],
+      "metadata": {
+        "files": 5
+      },
+      "scope": {
+        "tenantId": "test-tenant-sec10",
+        "userId": "dev-user-1",
+        "role": "developer"
+      },
+      "importanceScore": 0.849,
+      "contentDigest": "92fd46504843809c57148c4e8b7cabd20156117d5673f948239b39c9ed660a2c"
+    },
+    "eng_project_proj_mwnh9fv3_1978f4": {
+      "key": "eng_project_proj_mwnh9fv3_1978f4",
+      "value": {
+        "name": "Live HTTP smoke test dashboard",
+        "stack": "node_fullstack",
+        "workspaceDir": "projects/proj_mwnh9fv3_1978f4",
+        "revision": "rev_1"
+      },
+      "category": "task_memory",
+      "createdAt": "2026-11-19T11:39:21.082Z",
+      "updatedAt": "2026-11-19T11:39:21.082Z",
+      "readCount": 0,
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "updatedAt": "2026-11-19T11:39:21.082Z",
+          "contentDigest": "8aa03fa35e46839230e3e8e7e324c15785f108b16d3ef176be851c735c12d131",
+          "valuePreview": "{\"name\":\"Live HTTP smoke test dashboard\",\"stack\":\"node_fullstack\",\"workspaceDir\":\"projects/proj_mwnh9fv3_1978f4\",\"revision\":\"rev_1\"}"
+        }
+      ],
+      "metadata": {
+        "files": 8
+      },
+      "scope": {
+        "tenantId": "Sovereign Enterprise Prime",
+        "userId": "usr_sovereign_01",
+        "role": "developer"
+      },
+      "importanceScore": 0.846,
+      "contentDigest": "8aa03fa35e46839230e3e8e7e324c15785f108b16d3ef176be851c735c12d131"
+    }
+  },
   "consolidations": {}
 }

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AuthRole, AuthSession } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { ConnectivityHealthState, SystemStatusData } from '../types';
 
 export interface PrintableAuditEntry {
@@ -105,6 +106,9 @@ export function buildSystemMetadataSnapshot(params: {
 }
 
 export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | null }> = ({ payload }) => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   if (!payload || typeof document === 'undefined') return null;
 
   const { metadata, entries } = payload;
@@ -112,77 +116,96 @@ export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | 
   return createPortal(
     <section
       id="printable-session-audit"
-      aria-label="Printable Session Audit Document"
+      aria-label={th ? 'เอกสารรายงานตรวจสอบเซสชันสำหรับพิมพ์' : 'Printable Session Audit Document'}
       className="print-only-audit"
     >
       <header className="print-header">
         <div>
-          <div className="print-eyebrow">ZYNTHEOR · SOVEREIGN AI ENGINEERING AUDIT REPORT</div>
+          <div className="print-eyebrow">
+            {th
+              ? 'ZYNTHEOR · รายงานตรวจสอบทางวิศวกรรม AI'
+              : 'ZYNTHEOR · SOVEREIGN AI ENGINEERING AUDIT REPORT'}
+          </div>
           <h1 className="print-title">{metadata.reportTitle}</h1>
           {metadata.reportSubtitle && <p className="print-subtitle">{metadata.reportSubtitle}</p>}
         </div>
         <div className="print-header-right">
           <div>
-            <strong>Exported (UTC):</strong> <span className="print-mono">{metadata.exportedAt}</span>
+            <strong>{th ? 'ส่งออก (UTC):' : 'Exported (UTC):'}</strong>{' '}
+            <span className="print-mono">{metadata.exportedAt}</span>
           </div>
           <div>
-            <strong>Local Time:</strong>{' '}
+            <strong>{th ? 'เวลาท้องถิ่น:' : 'Local Time:'}</strong>{' '}
             <span className="print-mono">{new Date(metadata.exportedAt).toLocaleString()}</span>
           </div>
           <div>
-            <strong>Entries Included:</strong> <span className="print-mono">{entries.length}</span>
+            <strong>{th ? 'จำนวนรายการ:' : 'Entries Included:'}</strong>{' '}
+            <span className="print-mono">{entries.length}</span>
           </div>
         </div>
       </header>
 
       <div className="print-grid">
         <div className="print-card">
-          <div className="print-card-title">Session &amp; Identity Metadata</div>
+          <div className="print-card-title">
+            {th ? 'ข้อมูลเซสชันและตัวตนผู้ใช้' : 'Session & Identity Metadata'}
+          </div>
           <dl className="print-dl">
             <div>
               <dt>User ID</dt>
               <dd className="print-mono">{metadata.session.userId || 'anonymous'}</dd>
             </div>
             <div>
-              <dt>Email</dt>
-              <dd className="print-mono">{metadata.session.email || 'Not provided (dev/local)'}</dd>
+              <dt>{th ? 'อีเมล' : 'Email'}</dt>
+              <dd className="print-mono">
+                {metadata.session.email || (th ? 'ไม่ได้ระบุ (dev/local)' : 'Not provided (dev/local)')}
+              </dd>
             </div>
             <div>
               <dt>Tenant ID</dt>
-              <dd className="print-mono">{metadata.session.tenantId || 'Unassigned'}</dd>
+              <dd className="print-mono">
+                {metadata.session.tenantId || (th ? 'ยังไม่ได้กำหนด' : 'Unassigned')}
+              </dd>
             </div>
             <div>
-              <dt>Role / Auth Mode</dt>
+              <dt>{th ? 'บทบาท / โหมดยืนยันตัวตน' : 'Role / Auth Mode'}</dt>
               <dd className="print-mono">
                 {metadata.role} ({metadata.session.authMode || 'verified-token'})
               </dd>
             </div>
             <div>
-              <dt>Authenticated At</dt>
-              <dd className="print-mono">{metadata.session.authenticatedAt || 'Unavailable'}</dd>
+              <dt>{th ? 'ยืนยันตัวตนเมื่อ' : 'Authenticated At'}</dt>
+              <dd className="print-mono">
+                {metadata.session.authenticatedAt || (th ? 'ไม่พร้อมใช้งาน' : 'Unavailable')}
+              </dd>
             </div>
           </dl>
         </div>
 
         <div className="print-card">
-          <div className="print-card-title">Runtime, Model &amp; Integrity State</div>
+          <div className="print-card-title">
+            {th ? 'สถานะ Runtime, โมเดล และความสมบูรณ์' : 'Runtime, Model & Integrity State'}
+          </div>
           <dl className="print-dl">
             <div>
-              <dt>Active Model</dt>
+              <dt>{th ? 'โมเดลที่ใช้งาน' : 'Active Model'}</dt>
               <dd className="print-mono">
-                {metadata.modelName || 'Unavailable'} ({metadata.modelLoaded ? 'WEIGHTS LOADED' : 'NOT LOADED'})
+                {metadata.modelName || (th ? 'ไม่พร้อมใช้งาน' : 'Unavailable')} (
+                {metadata.modelLoaded ? 'WEIGHTS LOADED' : 'NOT LOADED'})
               </dd>
             </div>
             <div>
-              <dt>Connectivity</dt>
+              <dt>{th ? 'การเชื่อมต่อ' : 'Connectivity'}</dt>
               <dd className="print-mono">{metadata.connectivityStatus || 'UNKNOWN'}</dd>
             </div>
             <div>
               <dt>Checkpoint SHA-256</dt>
-              <dd className="print-mono print-break">{metadata.checkpointHash || 'Unavailable'}</dd>
+              <dd className="print-mono print-break">
+                {metadata.checkpointHash || (th ? 'ไม่พร้อมใช้งาน' : 'Unavailable')}
+              </dd>
             </div>
             <div>
-              <dt>Audit Chain Seal</dt>
+              <dt>{th ? 'ตราประทับห่วงโซ่ตรวจสอบ' : 'Audit Chain Seal'}</dt>
               <dd className="print-mono">
                 {metadata.chainValid === null || metadata.chainValid === undefined
                   ? 'UNVERIFIED'
@@ -193,8 +216,10 @@ export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | 
               </dd>
             </div>
             <div>
-              <dt>Ledger Head Hash</dt>
-              <dd className="print-mono print-break">{metadata.headHash || 'Unavailable'}</dd>
+              <dt>{th ? 'แฮชส่วนหัวสมุดบัญชี (Head Hash)' : 'Ledger Head Hash'}</dt>
+              <dd className="print-mono print-break">
+                {metadata.headHash || (th ? 'ไม่พร้อมใช้งาน' : 'Unavailable')}
+              </dd>
             </div>
           </dl>
         </div>
@@ -204,25 +229,28 @@ export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | 
         <div className="print-card print-meta-strip">
           {metadata.goal && (
             <div>
-              <strong>Task Objective:</strong> {metadata.goal}
+              <strong>{th ? 'เป้าหมายงาน:' : 'Task Objective:'}</strong> {metadata.goal}
               {metadata.taskId ? ` (${metadata.taskId})` : ''}
-              {metadata.priority ? ` · Priority: ${metadata.priority}` : ''}
-              {metadata.executionLatencyMs != null ? ` · Duration: ${metadata.executionLatencyMs} ms` : ''}
+              {metadata.priority ? ` · ${th ? 'ระดับความสำคัญ' : 'Priority'}: ${metadata.priority}` : ''}
+              {metadata.executionLatencyMs != null ? ` · ${th ? 'ระยะเวลา' : 'Duration'}: ${metadata.executionLatencyMs} ms` : ''}
             </div>
           )}
           {metadata.verificationSummary && (
             <div>
-              <strong>Integrity Verification:</strong> <span className="print-mono">{metadata.verificationSummary}</span>
+              <strong>{th ? 'การตรวจสอบความสมบูรณ์:' : 'Integrity Verification:'}</strong>{' '}
+              <span className="print-mono">{metadata.verificationSummary}</span>
             </div>
           )}
           {metadata.activeFilterSummary && (
             <div>
-              <strong>Applied Scope / Filters:</strong> <span className="print-mono">{metadata.activeFilterSummary}</span>
+              <strong>{th ? 'ขอบเขต / ตัวกรองที่ใช้:' : 'Applied Scope / Filters:'}</strong>{' '}
+              <span className="print-mono">{metadata.activeFilterSummary}</span>
             </div>
           )}
           {metadata.connectivityReason && (
             <div>
-              <strong>Connectivity Disclosure:</strong> {metadata.connectivityReason}
+              <strong>{th ? 'คำอธิบายการเชื่อมต่อ:' : 'Connectivity Disclosure:'}</strong>{' '}
+              {metadata.connectivityReason}
             </div>
           )}
         </div>
@@ -232,10 +260,10 @@ export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | 
         <thead>
           <tr>
             <th style={{ width: '56px' }}>#</th>
-            <th style={{ width: '132px' }}>Timestamp</th>
-            <th style={{ width: '92px' }}>Role / Tag</th>
-            <th style={{ width: '160px' }}>Action / Event</th>
-            <th>Detail / Payload</th>
+            <th style={{ width: '132px' }}>{th ? 'เวลา (Timestamp)' : 'Timestamp'}</th>
+            <th style={{ width: '92px' }}>{th ? 'บทบาท / แท็ก' : 'Role / Tag'}</th>
+            <th style={{ width: '160px' }}>{th ? 'การดำเนินการ / เหตุการณ์' : 'Action / Event'}</th>
+            <th>{th ? 'รายละเอียด / ข้อมูล' : 'Detail / Payload'}</th>
             <th style={{ width: '128px' }}>SHA-256 Digest</th>
           </tr>
         </thead>
@@ -243,7 +271,9 @@ export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | 
           {entries.length === 0 ? (
             <tr>
               <td colSpan={6} style={{ textAlign: 'center', padding: '14px' }}>
-                No session log entries matched the export scope.
+                {th
+                  ? 'ไม่พบรายการบันทึกเซสชันที่ตรงกับขอบเขตที่ส่งออก'
+                  : 'No session log entries matched the export scope.'}
               </td>
             </tr>
           ) : (
@@ -262,8 +292,14 @@ export const PrintableSessionAudit: React.FC<{ payload: PrintableAuditPayload | 
       </table>
 
       <footer className="print-footer">
-        <span>Generated locally via ZYNTHEOR High-Contrast Audit Exporter · Zero Simulation Policy</span>
-        <span className="print-mono">Page audit snapshot · {metadata.exportedAt}</span>
+        <span>
+          {th
+            ? 'สร้างภายในเครื่องผ่านระบบส่งออกรายงานตรวจสอบ ZYNTHEOR · นโยบาย Zero Simulation'
+            : 'Generated locally via ZYNTHEOR High-Contrast Audit Exporter · Zero Simulation Policy'}
+        </span>
+        <span className="print-mono">
+          {th ? 'สแนปช็อตตรวจสอบ' : 'Page audit snapshot'} · {metadata.exportedAt}
+        </span>
       </footer>
     </section>,
     document.body

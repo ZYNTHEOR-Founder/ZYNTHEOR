@@ -432,5 +432,80 @@
     "parsedMetadata": {
       "headingCount": 0
     }
+  },
+  {
+    "id": "doc_1795087159671_ghcj0",
+    "title": "TenantA Secret 1795087159664",
+    "content": "cross-tenant isolation probe content unique 35ecabf4",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-19T11:19:19.672Z",
+    "updatedAt": "2026-11-19T11:19:19.672Z",
+    "contentHash": "4b8bc20fded66853439c41312b35d3271d7e45f4b4b859e25d6b5f3e666e74a5",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1795087687217_l5er2",
+    "title": "TenantA Secret 1795087687211",
+    "content": "cross-tenant isolation probe content unique c826d689",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-19T11:28:07.218Z",
+    "updatedAt": "2026-11-19T11:28:07.218Z",
+    "contentHash": "69986b54acd1a6e77c2cef6534b83549fcbb4ea251b46f79289d752fcfac1358",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
+  },
+  {
+    "id": "doc_1795088325873_hegkq",
+    "title": "TenantA Secret 1795088325868",
+    "content": "cross-tenant isolation probe content unique 832c0296",
+    "source": "Knowledge Workspace Upload",
+    "format": "markdown",
+    "collection": "RBAC",
+    "tags": [
+      "rbac"
+    ],
+    "language": "en",
+    "version": 1,
+    "createdAt": "2026-11-19T11:38:45.874Z",
+    "updatedAt": "2026-11-19T11:38:45.874Z",
+    "contentHash": "11f848e3cfbe3ec7140392a70e0634398b601339e2d0c03a8f2255a04e7f88cc",
+    "status": "indexed",
+    "chunksCount": 1,
+    "byteSize": 52,
+    "provenance": "rbac-test",
+    "curatedForTraining": false,
+    "tenantId": "tenant_a",
+    "parsedMetadata": {
+      "headingCount": 0
+    }
   }
 ]

@@ -10,3 +10,6 @@
 {"jti":"08e06a65-419c-4030-8dc5-f447db489871","revokedAt":"2026-11-19T10:35:11.066Z","sub":"user_rbac","reason":"logout"}
 {"jti":"2bee5c27-fc19-41c3-8190-ca8861b4c3fa","revokedAt":"2026-11-19T10:46:50.288Z","sub":"user_rbac","reason":"logout"}
 {"jti":"3f8750a9-55c2-4510-88f7-bd8421d6bc78","revokedAt":"2026-11-19T10:56:13.602Z","sub":"user_rbac","reason":"logout"}
+{"jti":"3ac1dae2-8539-47f2-bcc9-31fd0fb8a260","revokedAt":"2026-11-19T11:19:19.715Z","sub":"user_rbac","reason":"logout"}
+{"jti":"a7495856-fc0b-4246-98e9-61a38b517114","revokedAt":"2026-11-19T11:28:07.259Z","sub":"user_rbac","reason":"logout"}
+{"jti":"323bca94-c9c6-4a31-8a73-9fec8a01a9bc","revokedAt":"2026-11-19T11:38:45.921Z","sub":"user_rbac","reason":"logout"}

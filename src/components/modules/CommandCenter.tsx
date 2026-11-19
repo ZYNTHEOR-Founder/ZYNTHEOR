@@ -51,6 +51,9 @@ interface CommandCenterProps {
   goal?: string;
   onGoalChange?: (value: string) => void;
   onRunTask?: () => void;
+  onCreateSoftwareProject?: (stack: 'node_fullstack' | 'node_api' | 'python_service' | 'static_web') => void;
+  isCreatingSoftwareProject?: boolean;
+  lastCreatedProject?: { projectId: string; name: string; stack: string } | null;
   showSentimentTrend?: boolean;
   onToggleSentimentTrend?: () => void;
 }
@@ -168,6 +171,7 @@ function computeTimeToEpochEstimate(params: {
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
   statusData,
+  truthData,
   onRefreshStatus,
   isRefreshingStatus = false,
   onNavigate,
@@ -187,6 +191,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   goal = '',
   onGoalChange,
   onRunTask,
+  onCreateSoftwareProject,
+  isCreatingSoftwareProject = false,
+  lastCreatedProject = null,
   showSentimentTrend: controlledShowSentimentTrend,
   onToggleSentimentTrend,
 }) => {
@@ -205,6 +212,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   const [attachmentError, setAttachmentError] = useState('');
   const [showTrainingDetails, setShowTrainingDetails] = useState(false);
   const [showWorkflowStepper, setShowWorkflowStepper] = useState(false);
+  const [projectStack, setProjectStack] = useState<'node_fullstack' | 'node_api' | 'python_service' | 'static_web'>('node_fullstack');
 
   const MAX_ATTACHMENT_BYTES = 200 * 1024;
   const MAX_GOAL_CHARS = 250000;
@@ -569,17 +577,84 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           </p>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <button
-            type="button"
-            data-testid="command-center-attach-file-btn"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={!onGoalChange || isWorkflowRunning}
-            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3.5 py-2 text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] disabled:opacity-40 cursor-pointer transition-colors"
-          >
-            <Paperclip className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" aria-hidden="true" />
-            <span>{th ? 'แนบไฟล์ (สูงสุด 200 KB)' : 'Attach file'}</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+          <span className="text-[var(--app-text-secondary)]">
+            {th ? 'ตัวอย่างคำสั่ง:' : 'Presets:'}
+          </span>
+          {[
+            {
+              label: th ? 'สร้างเว็บแอป + API' : 'Full-Stack Web + API',
+              text: th
+                ? 'สร้างเว็บแอปพลิเคชันติดตามงานและสถานะระบบ พร้อมหน้าเว็บ Dashboard, REST API CRUD, ฐานข้อมูล และชุดทดสอบอัตโนมัติ'
+                : 'Build a full-stack operations web app with interactive dashboard UI, REST API CRUD, data store, and automated tests',
+            },
+            {
+              label: th ? 'ตรวจและซ่อมบั๊กในระบบ' : 'Inspect & Repair Code',
+              text: th
+                ? 'ตรวจสอบโค้ด ทดสอบ Unit Tests สแกนความปลอดภัย และซ่อมแซมจุดบกพร่องที่พบโดยอัตโนมัติ'
+                : 'Audit source code, execute unit tests, scan security findings, and perform deterministic repair',
+            },
+            {
+              label: th ? 'ตรวจความพร้อม R0' : 'Audit R0 Readiness',
+              text: th
+                ? 'ตรวจสอบความพร้อมโครงสร้าง NativeLM R0 (41.5M / 5,800 steps), Audit Chain และสถานะ Runtime จริง'
+                : 'Inspect NativeLM R0 (41.5M / 5,800 steps) readiness, Audit Chain integrity, and live runtime status',
+            },
+          ].map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => onGoalChange?.(preset.text)}
+              className="px-2.5 py-1 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer transition-colors"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              data-testid="command-center-attach-file-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={!onGoalChange || isWorkflowRunning}
+              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3.5 py-2 text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] disabled:opacity-40 cursor-pointer transition-colors"
+            >
+              <Paperclip className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" aria-hidden="true" />
+              <span>{th ? 'แนบไฟล์ (สูงสุด 200 KB)' : 'Attach file'}</span>
+            </button>
+
+            {onCreateSoftwareProject && (
+              <div className="inline-flex items-center rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] overflow-hidden">
+                <select
+                  value={projectStack}
+                  onChange={(e) => setProjectStack(e.target.value as typeof projectStack)}
+                  aria-label={th ? 'สแต็กโปรเจกต์' : 'Application stack'}
+                  className="min-h-[40px] px-2.5 py-2 bg-transparent text-[11px] font-mono text-[var(--app-text-secondary)] border-r border-[var(--app-card-border)] outline-none cursor-pointer"
+                >
+                  <option value="node_fullstack">Web + API</option>
+                  <option value="node_api">REST API</option>
+                  <option value="python_service">Python 3</option>
+                  <option value="static_web">Static Web</option>
+                </select>
+                <button
+                  type="button"
+                  data-testid="command-center-build-app-btn"
+                  onClick={() => onCreateSoftwareProject(projectStack)}
+                  disabled={isCreatingSoftwareProject || isWorkflowRunning || !goal.trim()}
+                  className="min-h-[40px] inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[var(--app-accent)] hover:bg-[var(--app-surface-elevated)] disabled:opacity-40 cursor-pointer transition-colors whitespace-nowrap"
+                >
+                  <Code2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>
+                    {isCreatingSoftwareProject
+                      ? (th ? 'กำลังสร้างโปรเจกต์…' : 'Scaffolding…')
+                      : (th ? 'สร้างโปรเจกต์แอป' : 'Build App Project')}
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -599,15 +674,31 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             </span>
           </button>
         </div>
+
+        {lastCreatedProject && (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--app-card-border)] text-xs">
+            <span className="font-mono text-[var(--z-ok)] truncate">
+              {th ? 'สร้างโปรเจกต์สำเร็จ:' : 'App scaffolded:'} {lastCreatedProject.name} ({lastCreatedProject.stack})
+            </span>
+            <button
+              type="button"
+              onClick={() => onNavigate('dev_studio')}
+              className="inline-flex items-center gap-1 text-xs font-medium text-[var(--app-accent)] hover:underline cursor-pointer"
+            >
+              <span>{th ? 'เปิดแก้ไข / พรีวิว / ส่งออกใน DevStudio' : 'Open in DevStudio'}</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        )}
       </section>
 
       {/* 3. Fast Tool Access Row (Clean Hairline Tiles) */}
       <section aria-label={th ? 'ทางลัดเครื่องมือหลัก' : 'Primary tools'} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {([
-          { id: 'research_lab', icon: FlaskConical, name: 'ResearchLab', desc: th ? 'วิจัยและทดสอบระบบ' : 'Research & validation' },
-          { id: 'dev_studio', icon: Code2, name: 'DevStudio', desc: th ? 'พัฒนาและแก้ไขโค้ด' : 'Build software' },
-          { id: 'model_laboratory', icon: BrainCircuit, name: 'ModelLaboratory', desc: th ? 'โมเดลและการฝึก R0' : 'Models & training' },
-          { id: 'governance_security', icon: ShieldCheck, name: th ? 'หลักฐาน & Audit' : 'Evidence Ledger', desc: th ? 'ตรวจสอบ SHA-256 Chain' : 'Verification & audit' },
+          { id: 'dev_studio', icon: Code2, name: th ? 'DevStudio & สร้างแอป' : 'DevStudio & App Builder', desc: th ? 'สร้าง พรีวิว ทดสอบ ซ่อม และ GitHub Sync' : 'Build, preview, test, repair & GitHub Sync' },
+          { id: 'research_lab', icon: FlaskConical, name: th ? 'ห้องวิจัย & ทดสอบ' : 'ResearchLab', desc: th ? 'ชุดวิจัยและการตรวจสอบโมเดล' : 'Research & validation' },
+          { id: 'model_laboratory', icon: BrainCircuit, name: th ? 'ห้องโมเดล R0' : 'ModelLaboratory', desc: th ? 'รันไทม์ R0 (41.5M) และไปป์ไลน์ฝึก' : 'Models & 5,800-step training' },
+          { id: 'governance_security', icon: ShieldCheck, name: th ? 'หลักฐาน & Audit' : 'Evidence Ledger', desc: th ? 'ตรวจสอบ SHA-256 Chain และสิทธิ์' : 'Verification & audit' },
         ] as Array<{ id: ModuleId; icon: React.ComponentType<{ className?: string }>; name: string; desc: string }>).map((item) => {
           const Icon = item.icon;
           return (
@@ -627,6 +718,50 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           );
         })}
       </section>
+
+      {/* Live Software Engineering Capability Truth Strip (Read-Only from Backend Truth) */}
+      {truthData?.softwareEngineering?.summary && (
+        <section
+          aria-label={th ? 'สถานะความสามารถการสร้างซอฟต์แวร์จริง' : 'Software engineering capability summary'}
+          className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-card)] px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs"
+        >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[var(--app-text-secondary)]">
+            <span className="font-medium text-[var(--app-text-primary)]">
+              {th ? 'ความสามารถด้านวิศวกรรมซอฟต์แวร์ (Software Engine)' : 'Software Engineering Engine'}
+            </span>
+            <span className="font-mono tabular-nums text-[var(--z-ok)]">
+              {th ? 'พร้อมใช้งานจริง' : 'IMPLEMENTED'} {truthData.softwareEngineering.summary.implemented}/{truthData.softwareEngineering.summary.total}
+            </span>
+            {truthData.softwareEngineering.summary.partial > 0 && (
+              <span className="font-mono tabular-nums text-[var(--app-amber)]">
+                PARTIAL {truthData.softwareEngineering.summary.partial}
+              </span>
+            )}
+            {(truthData.softwareEngineering.summary.blocked + truthData.softwareEngineering.summary.notConfigured) > 0 && (
+              <span className="font-mono tabular-nums text-[var(--app-text-secondary)]">
+                {th ? 'ยังไม่ตั้งค่า/ติดเกต' : 'Gated/Config'} {truthData.softwareEngineering.summary.blocked + truthData.softwareEngineering.summary.notConfigured}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigate('proof_of_intelligence')}
+              className="text-xs font-medium text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+            >
+              {th ? 'ดูรายละเอียดความจริงระบบ' : 'Truth matrix'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate('dev_studio')}
+              className="inline-flex items-center gap-1 text-xs font-medium text-[var(--app-accent)] hover:underline cursor-pointer"
+            >
+              <span>{th ? 'จัดการโปรเจกต์' : 'Open projects'}</span>
+              <ArrowRight size={12} />
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* 4. Concise 5,800-Step Training Progress Summary (Flat + Progressive Disclosure) */}
       <section

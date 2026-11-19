@@ -3,6 +3,7 @@ import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Zap, Play, Clock, ShieldCheck, RefreshCw } from 'lucide-react';
 
 interface AutomationMission {
@@ -29,6 +30,9 @@ interface AutomationPlan {
 
 export const AutomationCenter: React.FC = () => {
   const { authHeaders, authReady, isAuthenticated } = useAuth();
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   const [goalInput, setGoalInput] = useState(
     'Run scheduled system integrity, workspace verification, and security audit sweep'
   );
@@ -47,17 +51,17 @@ export const AutomationCenter: React.FC = () => {
       const res = await fetch('/api/automation/jobs', { headers: authHeaders() });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || `Failed to load automation jobs (HTTP ${res.status})`);
+        throw new Error(data.error || (th ? `โหลดงานอัตโนมัติไม่สำเร็จ (HTTP ${res.status})` : `Failed to load automation jobs (HTTP ${res.status})`));
       }
       setMissions(Array.isArray(data.missions) ? data.missions : []);
       setPlans(Array.isArray(data.plans) ? data.plans : []);
       setMetrics(data.metrics || null);
     } catch (err: any) {
-      setLastError(err?.message || 'Unable to fetch live automation jobs.');
+      setLastError(err?.message || (th ? 'ไม่สามารถดึงรายการงานอัตโนมัติได้' : 'Unable to fetch live automation jobs.'));
     } finally {
       setIsLoading(false);
     }
-  }, [authHeaders, authReady, isAuthenticated]);
+  }, [authHeaders, authReady, isAuthenticated, th]);
 
   useEffect(() => {
     void loadJobs();
@@ -79,13 +83,13 @@ export const AutomationCenter: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || `Automation run failed (HTTP ${res.status})`);
+        throw new Error(data.error || (th ? `รันอัตโนมัติไม่สำเร็จ (HTTP ${res.status})` : `Automation run failed (HTTP ${res.status})`));
       }
       setPipelineState('COMPLETED');
       await loadJobs();
     } catch (err: any) {
       setPipelineState('ERROR');
-      setLastError(err?.message || 'Automation run failed.');
+      setLastError(err?.message || (th ? 'การรันอัตโนมัติล้มเหลว' : 'Automation run failed.'));
     }
   };
 
@@ -98,18 +102,17 @@ export const AutomationCenter: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Top Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricCard
-          title="Recorded Missions"
-          value={isAuthenticated ? String(missions.length) : 'Sign in'}
-          subtitle={`${plans.length} autonomous DAG plans tracked`}
-          icon={<Zap className="w-5 h-5" />}
-          accentColor="orange"
+          title={th ? 'ภารกิจที่บันทึกไว้' : 'Recorded Missions'}
+          value={isAuthenticated ? String(missions.length) : (th ? 'เข้าสู่ระบบ' : 'Sign in')}
+          subtitle={th ? `ติดตามแผน DAG อัตโนมัติ ${plans.length} รายการ` : `${plans.length} autonomous DAG plans tracked`}
+          icon={<Zap className="w-4 h-4" />}
+          accentColor="amber"
         />
         <MetricCard
-          title="Cycle Success Rate"
+          title={th ? 'อัตราความสำเร็จของรอบ' : 'Cycle Success Rate'}
           value={
             metrics && typeof metrics.taskSuccessRatePct === 'number'
               ? `${metrics.taskSuccessRatePct}%`
@@ -117,34 +120,41 @@ export const AutomationCenter: React.FC = () => {
           }
           subtitle={
             metrics
-              ? `${metrics.succeededCycles ?? 0}/${metrics.totalCycles ?? 0} verified cycles`
+              ? th
+                ? `ผ่านการตรวจ ${metrics.succeededCycles ?? 0}/${metrics.totalCycles ?? 0} รอบ`
+                : `${metrics.succeededCycles ?? 0}/${metrics.totalCycles ?? 0} verified cycles`
+              : th
+              ? 'รอข้อมูล Telemetry จริง'
               : 'Awaiting live telemetry'
           }
-          icon={<Clock className="w-5 h-5" />}
-          accentColor="cyan"
+          icon={<Clock className="w-4 h-4" />}
+          accentColor="emerald"
         />
         <MetricCard
-          title="Execution Boundary"
-          value="Isolated"
+          title={th ? 'ขอบเขตการรัน' : 'Execution Boundary'}
+          value={th ? 'แยกส่วนปลอดภัย' : 'Isolated'}
           subtitle="ToolGateway Sandbox + AuditLedger"
-          icon={<ShieldCheck className="w-5 h-5" />}
-          accentColor="lime"
+          icon={<ShieldCheck className="w-4 h-4" />}
+          accentColor="emerald"
         />
       </div>
 
-      {/* Main Automation Runner & Live History */}
       <VividCard
-        title="Autonomous Execution & Verification Runner"
-        subtitle="Dispatches real ActionDrivenEngine sweeps through /api/automation/run (Developer / Administrator role)"
-        gradientAccent="sunset"
+        title={th ? 'ตัวสั่งการรันและตรวจสอบอัตโนมัติ' : 'Autonomous Execution & Verification Runner'}
+        subtitle={
+          th
+            ? 'ส่งคำสั่งตรวจสอบผ่าน ActionDrivenEngine จริงทาง /api/automation/run (สิทธิ์ Developer / Administrator)'
+            : 'Dispatches real ActionDrivenEngine sweeps through /api/automation/run (Developer / Administrator role)'
+        }
+        gradientAccent="cyan"
         headerAction={
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => void loadJobs()}
               disabled={isLoading || !isAuthenticated}
-              className="p-2 rounded-xl border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer disabled:opacity-40"
-              title="Refresh live automation history"
+              className="p-2 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer disabled:opacity-40"
+              title={th ? 'รีเฟรชประวัติงานอัตโนมัติ' : 'Refresh live automation history'}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
@@ -152,10 +162,16 @@ export const AutomationCenter: React.FC = () => {
               type="button"
               onClick={() => void triggerSweep()}
               disabled={pipelineState === 'RUNNING' || !isAuthenticated}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[var(--z-warn)] rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[var(--app-accent-deep)] rounded-lg hover:opacity-95 transition-opacity cursor-pointer disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5 fill-white" />
-              {pipelineState === 'RUNNING' ? 'Executing Sweep...' : 'Run Integrity Sweep'}
+              {pipelineState === 'RUNNING'
+                ? th
+                  ? 'กำลังตรวจความสมบูรณ์...'
+                  : 'Executing Sweep...'
+                : th
+                ? 'รันตรวจความสมบูรณ์ระบบ'
+                : 'Run Integrity Sweep'}
             </button>
           </div>
         }
@@ -165,18 +181,24 @@ export const AutomationCenter: React.FC = () => {
             type="text"
             value={goalInput}
             onChange={(e) => setGoalInput(e.target.value)}
-            placeholder="Describe automation sweep or maintenance objective..."
-            className="flex-1 px-3 py-2 text-xs rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
+            placeholder={
+              th
+                ? 'ระบุเป้าหมายการตรวจความสมบูรณ์หรือบำรุงรักษาระบบ...'
+                : 'Describe automation sweep or maintenance objective...'
+            }
+            className="flex-1 px-3 py-2 text-xs rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
           />
           {!isAuthenticated && (
             <span className="self-center text-[11px] font-mono text-[var(--app-amber)]">
-              Sign in as Developer or Admin to run & inspect automation jobs
+              {th
+                ? 'เข้าสู่ระบบสิทธิ์ Developer หรือ Admin เพื่อสั่งรันและดูงานอัตโนมัติ'
+                : 'Sign in as Developer or Admin to run & inspect automation jobs'}
             </span>
           )}
         </div>
 
         {lastError && (
-          <div className="mb-4 p-3 rounded-xl border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] text-xs font-mono text-[var(--z-danger)]">
+          <div className="mb-4 p-3 rounded-lg border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] text-xs font-mono text-[var(--z-danger)]">
             {lastError}
           </div>
         )}
@@ -185,11 +207,11 @@ export const AutomationCenter: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-semibold">
-                <th className="pb-3 pl-1">Mission ID &amp; Goal</th>
-                <th className="pb-3">Mode</th>
-                <th className="pb-3">Attribution</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3 text-right pr-1">Duration</th>
+                <th className="pb-3 pl-1">{th ? 'รหัสภารกิจและเป้าหมาย' : 'Mission ID & Goal'}</th>
+                <th className="pb-3">{th ? 'โหมด' : 'Mode'}</th>
+                <th className="pb-3">{th ? 'แหล่งที่มา' : 'Attribution'}</th>
+                <th className="pb-3">{th ? 'สถานะ' : 'Status'}</th>
+                <th className="pb-3 text-right pr-1">{th ? 'เวลาที่ใช้' : 'Duration'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)]">
@@ -197,7 +219,11 @@ export const AutomationCenter: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="py-6 text-center text-[var(--app-text-secondary)]">
                     {isAuthenticated
-                      ? 'No automation missions recorded yet. Click "Run Integrity Sweep" to execute a real verification pass.'
+                      ? th
+                        ? 'ยังไม่มีภารกิจอัตโนมัติที่บันทึก กด "รันตรวจความสมบูรณ์ระบบ" เพื่อเริ่มตรวจสอบจริง'
+                        : 'No automation missions recorded yet. Click "Run Integrity Sweep" to execute a real verification pass.'
+                      : th
+                      ? 'ต้องเข้าสู่ระบบก่อนจึงจะดูประวัติงานอัตโนมัติของบัญชีได้'
                       : 'Authenticated session required to read tenant-isolated automation history.'}
                   </td>
                 </tr>
@@ -207,7 +233,7 @@ export const AutomationCenter: React.FC = () => {
                     key={mission.missionId}
                     className="hover:bg-[color-mix(in_srgb,var(--app-surface-elevated)_50%,transparent)] transition-colors"
                   >
-                    <td className="py-3 pl-1 font-semibold text-[var(--app-text-primary)] max-w-md">
+                    <td className="py-3 pl-1 font-medium text-[var(--app-text-primary)] max-w-md">
                       <div className="truncate">{mission.goal}</div>
                       <div className="text-[10px] font-mono text-[var(--app-text-secondary)]">{mission.missionId}</div>
                     </td>

@@ -1,0 +1,38 @@
+{
+  "name": "live-http-smoke-test-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "build": "node --check src/app.mjs && node --check src/server.mjs",
+    "test": "node tests/app.test.mjs"
+  },
+  "zyntheor": {
+    "projectId": "proj_mwnh9fv3_1978f4",
+    "stack": "node_fullstack",
+    "domain": "saas",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "purpose": "Service liveness & version check"
+      },
+      {
+        "method": "GET",
+        "path": "/api/items",
+        "purpose": "List domain records"
+      },
+      {
+        "method": "POST",
+        "path": "/api/items",
+        "purpose": "Create validated domain record"
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "purpose": "Responsive HTML application view"
+      }
+    ]
+  }
+}

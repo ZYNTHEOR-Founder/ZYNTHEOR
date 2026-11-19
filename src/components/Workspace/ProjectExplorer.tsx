@@ -13,6 +13,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { SoftwareProjectRecord } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 import { StatusDot, MinimalIndicatorState } from '../ui/StatusBadge';
 
 export interface ProjectFileEntry {
@@ -151,6 +152,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
   onDeleteFile,
   toDotState,
 }) => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
   const [fileFilter, setFileFilter] = useState('');
   const [newFileRelPath, setNewFileRelPath] = useState('');
@@ -234,7 +238,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
             {renderFileIcon(node.path)}
             <span className="truncate">{node.name}</span>
             {isLoading && (
-              <span className="text-[9px] text-[var(--app-accent)] shrink-0 animate-pulse">loading</span>
+              <span className="text-[9px] text-[var(--app-accent)] shrink-0">
+                {th ? 'กำลังโหลด' : 'loading'}
+              </span>
             )}
           </button>
           <div className="flex items-center gap-1 shrink-0">
@@ -246,8 +252,8 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 type="button"
                 onClick={() => void onDeleteFile(node.path)}
                 className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-0.5 text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] cursor-pointer transition-opacity"
-                title={`Delete ${node.path}`}
-                aria-label={`Delete ${node.path}`}
+                title={th ? `ลบ ${node.path}` : `Delete ${node.path}`}
+                aria-label={th ? `ลบ ${node.path}` : `Delete ${node.path}`}
               >
                 <Trash2 className="w-3 h-3" />
               </button>
@@ -262,9 +268,11 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
       {/* Header */}
       <div className="px-3.5 py-2.5 bg-[var(--app-bg-secondary)] border-b border-[var(--app-card-border)] flex items-center justify-between gap-2 shrink-0">
         <div className="min-w-0">
-          <div className="text-xs font-bold text-[var(--app-text-primary)] truncate">Project Explorer</div>
+          <div className="text-xs font-bold text-[var(--app-text-primary)] truncate">
+            {th ? 'ตัวสำรวจโปรเจกต์ (Project Explorer)' : 'Project Explorer'}
+          </div>
           <div className="text-[11px] font-mono text-[var(--app-text-secondary)] tabular-nums">
-            {projects.length} app(s) · {files.length} file(s)
+            {projects.length} {th ? 'แอป' : 'app(s)'} · {files.length} {th ? 'ไฟล์' : 'file(s)'}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -273,10 +281,10 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               type="button"
               onClick={onNewApp}
               className="px-2 py-1 rounded-lg bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_25%,transparent)] text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap cursor-pointer"
-              title="Focus new app prompt"
+              title={th ? 'โฟกัสที่ช่องสร้างแอปใหม่' : 'Focus new app prompt'}
             >
               <Plus className="w-3 h-3" />
-              <span>New App</span>
+              <span>{th ? 'แอปใหม่' : 'New App'}</span>
             </button>
           )}
           {onRefreshProjects && (
@@ -284,8 +292,8 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               type="button"
               onClick={onRefreshProjects}
               className="p-1.5 rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
-              title="Refresh projects"
-              aria-label="Refresh projects"
+              title={th ? 'รีเฟรชรายการโปรเจกต์' : 'Refresh projects'}
+              aria-label={th ? 'รีเฟรชรายการโปรเจกต์' : 'Refresh projects'}
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
@@ -297,7 +305,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
       <div className="p-2.5 border-b border-[var(--app-card-border)] max-h-44 overflow-y-auto divide-y divide-[var(--app-card-border)] shrink-0">
         {projects.length === 0 ? (
           <div className="py-4 text-center text-xs text-[var(--app-text-secondary)]">
-            No applications created yet. Describe an app above and click Execute Application Task.
+            {th
+              ? 'ยังไม่มีแอปพลิเคชันที่สร้าง ระบุรายละเอียดด้านบนแล้วกดรันงานแอปพลิเคชัน'
+              : 'No applications created yet. Describe an app above and click Execute Application Task.'}
           </div>
         ) : (
           projects.map((p) => {
@@ -340,7 +350,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
       {selectedProject && (
         <div className="p-2.5 space-y-2 flex-1 flex flex-col min-h-0">
           <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)] px-1 shrink-0">
-            <span className="truncate">Source Tree ({selectedProject.currentRevision})</span>
+            <span className="truncate">
+              {th ? `โครงสร้างซอร์สโค้ด (${selectedProject.currentRevision})` : `Source Tree (${selectedProject.currentRevision})`}
+            </span>
             <div className="flex items-center gap-1.5 font-mono text-[10px] shrink-0">
               {allFolderPaths.length > 0 && (
                 <>
@@ -348,18 +360,18 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                     type="button"
                     onClick={() => handleSetAllCollapsed(false)}
                     className="hover:text-[var(--app-accent)] cursor-pointer"
-                    title="Expand all folders"
+                    title={th ? 'ขยายโฟลเดอร์ทั้งหมด' : 'Expand all folders'}
                   >
-                    Expand
+                    {th ? 'ขยาย' : 'Expand'}
                   </button>
                   <span aria-hidden="true">/</span>
                   <button
                     type="button"
                     onClick={() => handleSetAllCollapsed(true)}
                     className="hover:text-[var(--app-accent)] cursor-pointer"
-                    title="Collapse all folders"
+                    title={th ? 'ย่อโฟลเดอร์ทั้งหมด' : 'Collapse all folders'}
                   >
-                    Collapse
+                    {th ? 'ย่อ' : 'Collapse'}
                   </button>
                 </>
               )}
@@ -373,8 +385,8 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               type="text"
               value={fileFilter}
               onChange={(e) => setFileFilter(e.target.value)}
-              placeholder="Filter project files..."
-              aria-label="Filter project files"
+              placeholder={th ? 'กรองไฟล์โปรเจกต์...' : 'Filter project files...'}
+              aria-label={th ? 'กรองไฟล์โปรเจกต์' : 'Filter project files'}
               className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)] focus:outline-none focus:border-[var(--app-accent)]"
             />
           </div>
@@ -386,7 +398,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 value={newFileRelPath}
                 onChange={(e) => setNewFileRelPath(e.target.value)}
                 placeholder="src/helper.mjs"
-                aria-label="New file relative path"
+                aria-label={th ? 'พาธไฟล์ใหม่' : 'New file relative path'}
                 className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[11px] font-mono text-[var(--app-text-primary)] focus:outline-none focus:border-[var(--app-accent)]"
               />
               <button
@@ -394,7 +406,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 disabled={isCreating || !newFileRelPath.trim()}
                 className="px-2.5 py-1.5 rounded-lg bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-accent)] text-[11px] font-semibold whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
               >
-                + File
+                {th ? '+ ไฟล์' : '+ File'}
               </button>
             </form>
           )}
@@ -403,8 +415,12 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
             {treeNodes.length === 0 ? (
               <div className="py-6 text-center text-[11px] text-[var(--app-text-secondary)]">
                 {fileFilter.trim()
-                  ? `No files match "${fileFilter.trim()}"`
-                  : 'No files in active revision.'}
+                  ? th
+                    ? `ไม่พบไฟล์ที่ตรงกับ "${fileFilter.trim()}"`
+                    : `No files match "${fileFilter.trim()}"`
+                  : th
+                    ? 'ไม่มีไฟล์ในเวอร์ชันที่ใช้งานอยู่'
+                    : 'No files in active revision.'}
               </div>
             ) : (
               renderTreeNodes(treeNodes)
@@ -419,8 +435,9 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               className="w-full flex items-center justify-between text-[11px] font-semibold text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] py-1 cursor-pointer"
             >
               <span>
-                13-Stage Lifecycle (
-                {selectedProject.stages.filter((s) => s.status === 'VERIFIED').length}/13 verified)
+                {th
+                  ? `วงจรชีวิต 13 ขั้นตอน (ผ่าน ${selectedProject.stages.filter((s) => s.status === 'VERIFIED').length}/13)`
+                  : `13-Stage Lifecycle (${selectedProject.stages.filter((s) => s.status === 'VERIFIED').length}/13 verified)`}
               </span>
               {showPipelineDetails ? (
                 <ChevronDown className="w-3.5 h-3.5" />

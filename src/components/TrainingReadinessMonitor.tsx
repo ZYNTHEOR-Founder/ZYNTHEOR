@@ -85,6 +85,7 @@ interface TrainingReadinessData {
 
 export const TrainingReadinessMonitor: React.FC = () => {
   const { lang } = useLanguage();
+  const th = lang === 'th';
   const [data, setData] = useState<TrainingReadinessData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,11 +101,16 @@ export const TrainingReadinessMonitor: React.FC = () => {
       }
       setData(json as TrainingReadinessData);
     } catch (err: any) {
-      setError(err?.message || 'Unable to probe Python/NumPy training readiness.');
+      setError(
+        err?.message ||
+          (th
+            ? 'ไม่สามารถตรวจสอบความพร้อมการฝึก Python/NumPy ได้'
+            : 'Unable to probe Python/NumPy training readiness.')
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [th]);
 
   useEffect(() => {
     void fetchReadiness();
@@ -134,9 +140,9 @@ export const TrainingReadinessMonitor: React.FC = () => {
   return (
     <div data-testid="training-readiness-monitor">
       <VividCard
-        title={lang === 'th' ? 'มอนิเตอร์ความพร้อมการฝึก (Training Readiness Monitor)' : 'Training Readiness Monitor'}
+        title={th ? 'มอนิเตอร์ความพร้อมการฝึก (Training Readiness Monitor)' : 'Training Readiness Monitor'}
         subtitle={
-          lang === 'th'
+          th
             ? 'ตรวจสุขภาพ Python/NumPy แบบเรียลไทม์ การใช้หน่วยความจำ ความเสถียรของ Gradient และสถานะการบันทึก Checkpoint'
             : 'Real-time health checks for the Python/NumPy backend, memory footprint, gradient stability metrics, and checkpoint save status.'
         }
@@ -149,7 +155,7 @@ export const TrainingReadinessMonitor: React.FC = () => {
               onClick={() => void fetchReadiness()}
               disabled={loading}
               className="p-2 rounded-xl border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] disabled:opacity-50 cursor-pointer"
-              title="Refresh training readiness probe"
+              title={th ? 'รีเฟรชการตรวจสอบความพร้อมการฝึก' : 'Refresh training readiness probe'}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -162,17 +168,19 @@ export const TrainingReadinessMonitor: React.FC = () => {
           </div>
         ) : !data ? (
           <div className="p-6 text-center text-xs font-mono text-[var(--app-text-secondary)]">
-            Probing Python/NumPy backend and gradient evidence…
+            {th
+              ? 'กำลังตรวจสอบ Python/NumPy backend และหลักฐาน Gradient…'
+              : 'Probing Python/NumPy backend and gradient evidence…'}
           </div>
         ) : (
           <div className="space-y-4">
             {/* 4-column Health Matrix */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 text-xs">
               {/* 1. Python / NumPy Backend */}
-              <div className="p-3.5 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
-                <div className="flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-[var(--app-accent)]" />
+                    <Cpu className="w-4 h-4 text-[var(--app-accent)] shrink-0" />
                     Python / NumPy Backend
                   </span>
                   <span
@@ -187,20 +195,32 @@ export const TrainingReadinessMonitor: React.FC = () => {
                 </div>
                 <div className="font-mono text-[11px] space-y-1 text-[var(--app-text-secondary)]">
                   <div>
-                    Python: <span className="text-[var(--app-text-primary)] font-semibold">{py?.pythonVersion || 'unavailable'}</span> · {py?.probeLatencyMs}ms
+                    Python:{' '}
+                    <span className="text-[var(--app-text-primary)] font-semibold">
+                      {py?.pythonVersion || (th ? 'ไม่พร้อมใช้งาน' : 'unavailable')}
+                    </span>{' '}
+                    · {py?.probeLatencyMs}ms
                   </div>
                   <div>
                     NumPy / boto3:{' '}
                     <span className={py?.numpyAvailable ? 'text-[var(--z-ok)] font-semibold' : 'text-[var(--z-danger)] font-semibold'}>
-                      {py?.numpyAvailable ? `v${py.numpyVersion}` : 'BLOCKED (NumPy missing)'}
+                      {py?.numpyAvailable
+                        ? `v${py.numpyVersion}`
+                        : th
+                          ? 'BLOCKED (ไม่มี NumPy)'
+                          : 'BLOCKED (NumPy missing)'}
                     </span>
                     {' · '}
                     <span className={py?.boto3Available ? 'text-[var(--z-ok)]' : 'text-[var(--z-warn)]'}>
-                      {py?.boto3Available ? `boto3 v${py.boto3Version || 'ok'}` : 'boto3 missing'}
+                      {py?.boto3Available
+                        ? `boto3 v${py.boto3Version || 'ok'}`
+                        : th
+                          ? 'ไม่มี boto3'
+                          : 'boto3 missing'}
                     </span>
                   </div>
                   <div>
-                    41.5M Target Gate:{' '}
+                    {th ? 'เกณฑ์ 41.5M' : '41.5M Target Gate'}:{' '}
                     <span className={py?.target41mNumpyGate === 'READY' ? 'text-[var(--z-ok)] font-bold' : 'text-[var(--z-danger)] font-bold'}>
                       {py?.target41mNumpyGate}
                     </span>
@@ -214,11 +234,11 @@ export const TrainingReadinessMonitor: React.FC = () => {
               </div>
 
               {/* 2. Memory Usage */}
-              <div className="p-3.5 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
-                <div className="flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
-                    <Activity className="w-4 h-4 text-[var(--app-amber)]" />
-                    Memory Usage
+                    <Activity className="w-4 h-4 text-[var(--app-amber)] shrink-0" />
+                    {th ? 'การใช้หน่วยความจำ' : 'Memory Usage'}
                   </span>
                   <span className="font-mono text-[11px] font-bold text-[var(--app-accent)]">
                     {mem?.systemUsedPct ?? 0}% OS RAM
@@ -232,7 +252,7 @@ export const TrainingReadinessMonitor: React.FC = () => {
                 </div>
                 <div className="font-mono text-[11px] space-y-1 text-[var(--app-text-secondary)]">
                   <div>
-                    System: <span className="text-[var(--app-text-primary)]">{mem?.systemUsedMb.toLocaleString()}</span> / {mem?.systemTotalMb.toLocaleString()} MB
+                    {th ? 'ระบบ' : 'System'}: <span className="text-[var(--app-text-primary)]">{mem?.systemUsedMb.toLocaleString()}</span> / {mem?.systemTotalMb.toLocaleString()} MB
                   </div>
                   <div>
                     Node Heap / RSS: <span className="text-[var(--app-text-primary)]">{mem?.nodeHeapUsedMb} MB</span> / {mem?.nodeRssMb} MB
@@ -247,11 +267,11 @@ export const TrainingReadinessMonitor: React.FC = () => {
               </div>
 
               {/* 3. Gradient Stability Metrics */}
-              <div className="p-3.5 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
-                <div className="flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
-                    <TrendingUp className="w-4 h-4 text-[var(--z-ok)]" />
-                    Gradient Stability
+                    <TrendingUp className="w-4 h-4 text-[var(--z-ok)] shrink-0" />
+                    {th ? 'ความเสถียร Gradient' : 'Gradient Stability'}
                   </span>
                   <span
                     className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
@@ -267,13 +287,13 @@ export const TrainingReadinessMonitor: React.FC = () => {
                 </div>
                 <div className="font-mono text-[11px] space-y-1 text-[var(--app-text-secondary)]">
                   <div>
-                    Latest / Mean ‖g‖₂:{' '}
+                    {th ? 'ล่าสุด / เฉลี่ย' : 'Latest / Mean'} ‖g‖₂:{' '}
                     <span className="text-[var(--app-text-primary)] font-semibold">
                       {grad?.latestGradNorm ?? '—'} / {grad?.meanGradNorm ?? '—'}
                     </span>
                   </div>
                   <div>
-                    Range / σ:{' '}
+                    {th ? 'ช่วง / σ' : 'Range / σ'}:{' '}
                     <span className="text-[var(--app-text-primary)]">
                       {grad?.minGradNorm ?? '—'}–{grad?.maxGradNorm ?? '—'} (σ={grad?.stdDevGradNorm ?? '—'})
                     </span>
@@ -283,7 +303,7 @@ export const TrainingReadinessMonitor: React.FC = () => {
                   </div>
                 </div>
                 {grad?.recentPoints && grad.recentPoints.length > 0 && (
-                  <div className="flex items-end gap-1 h-8 pt-1 border-t border-[var(--app-card-border)]" aria-label="Gradient norm history">
+                  <div className="flex items-end gap-1 h-8 pt-1 border-t border-[var(--app-card-border)]" aria-label={th ? 'ประวัติ Gradient norm' : 'Gradient norm history'}>
                     {grad.recentPoints.map((pt) => {
                       const heightPct = Math.max(12, Math.round((pt.gradNorm / maxChartGrad) * 100));
                       return (
@@ -300,11 +320,11 @@ export const TrainingReadinessMonitor: React.FC = () => {
               </div>
 
               {/* 4. Checkpoint Save Status */}
-              <div className="p-3.5 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
-                <div className="flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-2">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-[var(--app-text-primary)] flex items-center gap-1.5">
-                    <HardDrive className="w-4 h-4 text-[var(--app-accent)]" />
-                    Checkpoint Save Status
+                    <HardDrive className="w-4 h-4 text-[var(--app-accent)] shrink-0" />
+                    {th ? 'สถานะบันทึก Checkpoint' : 'Checkpoint Save Status'}
                   </span>
                   {ckpt?.storageWritable ? (
                     <ShieldCheck className="w-4 h-4 text-[var(--z-ok)]" />
@@ -314,19 +334,27 @@ export const TrainingReadinessMonitor: React.FC = () => {
                 </div>
                 <div className="font-mono text-[11px] space-y-1 text-[var(--app-text-secondary)]">
                   <div>
-                    Local Storage:{' '}
+                    {th ? 'พื้นที่ดิสก์' : 'Local Storage'}:{' '}
                     <span className={ckpt?.storageWritable ? 'text-[var(--z-ok)] font-bold' : 'text-[var(--z-danger)] font-bold'}>
-                      {ckpt?.storageWritable ? `WRITABLE (${ckpt.writableDirsCount} dirs)` : 'READ_ONLY'}
+                      {ckpt?.storageWritable
+                        ? `WRITABLE (${ckpt.writableDirsCount} ${th ? 'โฟลเดอร์' : 'dirs'})`
+                        : 'READ_ONLY'}
                     </span>
                   </div>
                   <div>
-                    41.5M Target File:{' '}
+                    {th ? 'ไฟล์เป้าหมาย 41.5M' : '41.5M Target File'}:{' '}
                     <span className={ckpt?.targetCheckpointPresent ? 'text-[var(--z-ok)] font-bold' : 'text-[var(--z-warn)] font-bold'}>
-                      {ckpt?.targetCheckpointPresent ? 'PRESENT' : 'MISSING ON DISK'}
+                      {ckpt?.targetCheckpointPresent
+                        ? th
+                          ? 'PRESENT (พบไฟล์)'
+                          : 'PRESENT'
+                        : th
+                          ? 'MISSING ON DISK (ไม่พบบนดิสก์)'
+                          : 'MISSING ON DISK'}
                     </span>
                   </div>
                   <div>
-                    Saved Bundles: <span className="text-[var(--app-text-primary)]">{ckpt?.localPtCount ?? 0} .pt</span> · Runs: {ckpt?.pipelineRunsCount ?? 0}
+                    {th ? 'ไฟล์ที่บันทึก' : 'Saved Bundles'}: <span className="text-[var(--app-text-primary)]">{ckpt?.localPtCount ?? 0} .pt</span> · {th ? 'รัน' : 'Runs'}: {ckpt?.pipelineRunsCount ?? 0}
                   </div>
                   <div className="truncate" title={ckpt?.latestCheckpoint?.path || ''}>
                     Cloud Sync:{' '}
@@ -344,9 +372,11 @@ export const TrainingReadinessMonitor: React.FC = () => {
 
             <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-[var(--app-text-secondary)] pt-1 border-t border-[var(--app-card-border)]">
               <span>
-                Gradient evidence source: {grad?.sourceArtifact || 'None'} ({grad?.totalSamples ?? 0} steps · best val loss {grad?.bestValLoss ?? '—'})
+                {th ? 'แหล่งหลักฐาน Gradient' : 'Gradient evidence source'}: {grad?.sourceArtifact || (th ? 'ไม่มี' : 'None')} ({grad?.totalSamples ?? 0} {th ? 'steps' : 'steps'} · best val loss {grad?.bestValLoss ?? '—'})
               </span>
-              <span>Last readiness probe: {new Date(data.checkedAt).toLocaleTimeString()}</span>
+              <span>
+                {th ? 'ตรวจล่าสุด' : 'Last readiness probe'}: {new Date(data.checkedAt).toLocaleTimeString()}
+              </span>
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 {
   "version": "ZYNTHEOR_PERF_V1",
-  "updatedAt": "2026-11-17T13:34:05.442Z",
+  "updatedAt": "2026-11-19T11:39:21.014Z",
   "config": {
     "retrievalLimit": 5,
     "contextMaxChars": 1200,
@@ -70,12 +70,84 @@
       "cacheHit": false,
       "succeeded": true,
       "accuracyScore": 0.88
+    },
+    {
+      "sampleId": "perf_1795088321489_a52d",
+      "timestamp": "2026-11-19T11:38:41.489Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 110.828,
+      "heapDeltaKb": 212.45,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1795088323559_c66e",
+      "timestamp": "2026-11-19T11:38:43.559Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 154.056,
+      "heapDeltaKb": 135.22,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1795088323966_98cd",
+      "timestamp": "2026-11-19T11:38:43.966Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 114.805,
+      "heapDeltaKb": 144.63,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1795088324365_c7f1",
+      "timestamp": "2026-11-19T11:38:44.366Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 115.99,
+      "heapDeltaKb": 131.33,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1795088325077_6345",
+      "timestamp": "2026-11-19T11:38:45.077Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "test-tenant-sec10",
+      "durationMs": 121.29,
+      "heapDeltaKb": -27749.4,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
+    },
+    {
+      "sampleId": "perf_1795088361014_38f8",
+      "timestamp": "2026-11-19T11:39:21.014Z",
+      "operation": "adaptive_reasoning",
+      "strategy": "csp_dependency_solver",
+      "tenantId": "Sovereign Enterprise Prime",
+      "durationMs": 149.17,
+      "heapDeltaKb": 169.71,
+      "cacheHit": false,
+      "succeeded": true,
+      "accuracyScore": 0.94
     }
   ],
   "snapshots": [],
   "cacheStats": {
-    "hits": 1,
-    "misses": 1,
+    "hits": 0,
+    "misses": 0,
     "invalidations": 0
   }
 }

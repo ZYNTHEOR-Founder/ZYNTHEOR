@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { VividCard } from './ui/VividCard';
+import { useLanguage } from '../context/LanguageContext';
 import { Cpu, HardDrive, Activity } from 'lucide-react';
 
 interface HardwareMonitorProps {
@@ -21,6 +22,9 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
   isTraining,
   memoryBudgetMb = 512
 }) => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
+
   const [telemetry, setTelemetry] = useState<ResourceTelemetry>({
     cpuPercent: 0,
     processHeapUsedMb: 0,
@@ -68,8 +72,12 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
 
   return (
     <VividCard
-      title="HardwareMonitor (33.9M Memory-Bounded)"
-      subtitle={`Real-time CPU, RAM & VRAM utilization · Budget: ${memoryBudgetMb} MB`}
+      title={th ? 'มอนิเตอร์ฮาร์ดแวร์ (HardwareMonitor · จำกัดหน่วยความจำ 33.9M)' : 'HardwareMonitor (33.9M Memory-Bounded)'}
+      subtitle={
+        th
+          ? `การใช้ CPU, RAM และ VRAM แบบเรียลไทม์ · งบประมาณ: ${memoryBudgetMb} MB`
+          : `Real-time CPU, RAM & VRAM utilization · Budget: ${memoryBudgetMb} MB`
+      }
       gradientAccent="emerald"
     >
       <div className="flex justify-end mb-3">
@@ -80,7 +88,7 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
               : 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_40%,transparent)]'
           }`}
         >
-          {withinBudget ? 'BOUNDED OK' : 'NEAR BUDGET'}
+          {withinBudget ? (th ? 'BOUNDED OK (ปกติ)' : 'BOUNDED OK') : th ? 'NEAR BUDGET (ใกล้ขีดจำกัด)' : 'NEAR BUDGET'}
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -88,7 +96,7 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
           <div className="flex items-center justify-between text-xs">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)] font-semibold">
               <Cpu className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-              CPU Load
+              {th ? 'ภาระ CPU (CPU Load)' : 'CPU Load'}
             </span>
             <span className="font-mono font-bold text-[var(--app-text-primary)]">{telemetry.cpuPercent}%</span>
           </div>
@@ -104,7 +112,7 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
           <div className="flex items-center justify-between text-xs">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)] font-semibold">
               <HardDrive className="w-3.5 h-3.5 text-[var(--app-amber)]" />
-              Process RSS / Budget
+              {th ? 'Process RSS / งบประมาณ' : 'Process RSS / Budget'}
             </span>
             <span className="font-mono font-bold text-[var(--app-text-primary)]">
               {telemetry.processRssMb.toFixed(1)} / {memoryBudgetMb} MB
@@ -122,7 +130,7 @@ export const HardwareMonitor: React.FC<HardwareMonitorProps> = ({
           <div className="flex items-center justify-between text-xs">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)] font-semibold">
               <Activity className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-              Heap / Tensor Buffer
+              {th ? 'Heap / บัฟเฟอร์ Tensor' : 'Heap / Tensor Buffer'}
             </span>
             <span className="font-mono font-bold text-[var(--app-text-primary)]">
               {telemetry.vramMb.toFixed(1)} MB

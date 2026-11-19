@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { Cpu, HardDrive, Zap, Server, Activity } from 'lucide-react';
 import { ResourceSample } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ResourceMonitorProps {
   history?: ResourceSample[];
@@ -18,6 +19,8 @@ interface ResourceMonitorProps {
 }
 
 export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], current }) => {
+  const { lang } = useLanguage();
+  const th = lang === 'th';
   const [activeMetric, setActiveMetric] = useState<'all' | 'load' | 'process_memory' | 'system_ram'>('all');
 
   const chartData = history.length > 0 ? history : (current ? [current] : []);
@@ -26,9 +29,9 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] p-3 rounded-xl shadow-xl text-xs font-mono space-y-1">
+        <div className="bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] p-3 rounded-xl shadow-md text-xs font-mono space-y-1">
           <div className="text-[var(--app-text-secondary)] font-bold border-b border-[var(--app-card-border)] pb-1 mb-1">
-            Timestamp: {label}
+            {th ? 'เวลา' : 'Timestamp'}: {label}
           </div>
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4">
@@ -57,9 +60,10 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* Metric 1: System Load Average */}
         <div className="p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)]">
-          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold">
+          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold gap-1">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
-              <Cpu className="w-3.5 h-3.5 text-[var(--z-ok)]" /> System Load Avg
+              <Cpu className="w-3.5 h-3.5 text-[var(--z-ok)] shrink-0" />
+              {th ? 'โหลดเฉลี่ยระบบ' : 'System Load Avg'}
             </span>
             <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${loadRatio > 100 ? 'bg-[color-mix(in_srgb,var(--app-amber)_14%,transparent)] text-[var(--app-amber)] border-[color-mix(in_srgb,var(--app-amber)_35%,transparent)]' : 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_35%,transparent)]'}`}>
               {loadRatio > 100 ? 'SATURATED' : 'NOMINAL'}
@@ -67,7 +71,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
           </div>
           <div className="text-xl font-bold font-mono text-[var(--app-text-primary)] mt-1.5 tabular-nums">
             {load1m.toFixed(2)}{' '}
-            <span className="text-xs text-[var(--app-text-secondary)] font-normal">/ {cpuCores} cores</span>
+            <span className="text-xs text-[var(--app-text-secondary)] font-normal">/ {cpuCores} {th ? 'คอร์' : 'cores'}</span>
           </div>
           <div className="text-[10px] text-[var(--app-text-secondary)] mt-1 flex justify-between font-mono">
             <span>5m: {latest?.loadAvg5m?.toFixed(2) ?? '—'}</span>
@@ -77,9 +81,9 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
 
         {/* Metric 2: Process Node Heap */}
         <div className="p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)]">
-          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold">
+          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold gap-1">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
-              <Server className="w-3.5 h-3.5 text-[var(--app-accent)]" /> Process Heap
+              <Server className="w-3.5 h-3.5 text-[var(--app-accent)] shrink-0" /> Process Heap
             </span>
             <span className="text-[10px] text-[var(--app-accent)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)]">
               NODE RSS
@@ -90,16 +94,17 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <span className="text-xs text-[var(--app-text-secondary)] font-normal">MB</span>
           </div>
           <div className="text-[10px] text-[var(--app-text-secondary)] mt-1 flex justify-between font-mono">
-            <span>Total: {latest?.processHeapTotalMb?.toFixed(1) ?? '—'} MB</span>
+            <span>{th ? 'รวม' : 'Total'}: {latest?.processHeapTotalMb?.toFixed(1) ?? '—'} MB</span>
             <span>RSS: {latest?.processRssMb?.toFixed(1) ?? '—'} MB</span>
           </div>
         </div>
 
         {/* Metric 3: System Physical RAM */}
         <div className="p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)]">
-          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold">
+          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold gap-1">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
-              <HardDrive className="w-3.5 h-3.5 text-[var(--app-accent)]" /> Host Memory
+              <HardDrive className="w-3.5 h-3.5 text-[var(--app-accent)] shrink-0" />
+              {th ? 'หน่วยความจำโฮสต์' : 'Host Memory'}
             </span>
             <span className="text-[10px] text-[var(--app-accent)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)]">
               PHYSICAL
@@ -110,15 +115,16 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <span className="text-xs text-[var(--app-text-secondary)] font-normal">/ {latest?.systemRamTotalMb ? Math.round(latest.systemRamTotalMb) : '—'} MB</span>
           </div>
           <div className="text-[10px] text-[var(--app-text-secondary)] mt-1 font-mono">
-            Free: {latest?.systemRamFreeMb ? Math.round(latest.systemRamFreeMb) : '—'} MB available
+            {th ? 'ว่าง' : 'Free'}: {latest?.systemRamFreeMb ? Math.round(latest.systemRamFreeMb) : '—'} MB {th ? 'พร้อมใช้' : 'available'}
           </div>
         </div>
 
         {/* Metric 4: Real Measured Throughput */}
         <div className="p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)]">
-          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold">
+          <div className="flex items-center justify-between text-[var(--app-text-secondary)] text-[11px] font-bold gap-1">
             <span className="flex items-center gap-1.5 text-[var(--app-text-secondary)]">
-              <Zap className="w-3.5 h-3.5 text-[var(--app-amber)]" /> Measured Speed
+              <Zap className="w-3.5 h-3.5 text-[var(--app-amber)] shrink-0" />
+              {th ? 'ความเร็วที่วัดได้จริง' : 'Measured Speed'}
             </span>
             <span className="text-[10px] text-[var(--z-ok)] font-mono px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] border border-[color-mix(in_srgb,var(--z-ok)_35%,transparent)]">
               FIRST-PARTY
@@ -131,14 +137,16 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                 <span className="text-xs text-[var(--app-text-secondary)] font-normal">tok/s</span>
               </>
             ) : (
-              <span className="text-sm text-[var(--app-text-secondary)] font-normal">Standby</span>
+              <span className="text-sm text-[var(--app-text-secondary)] font-normal">
+                {th ? 'สแตนด์บาย' : 'Standby'}
+              </span>
             )}
           </div>
           <div className="text-[10px] text-[var(--app-text-secondary)] mt-1 font-mono">
             {latest?.lastInferenceLatencyMs ? (
-              `Last Latency: ${latest.lastInferenceLatencyMs.toFixed(0)} ms`
+              `${th ? 'เวลาล่าสุด' : 'Last Latency'}: ${latest.lastInferenceLatencyMs.toFixed(0)} ms`
             ) : (
-              'Awaiting inference trace'
+              th ? 'รอผลเทรซการอนุมาน' : 'Awaiting inference trace'
             )}
           </div>
         </div>
@@ -148,34 +156,38 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[color-mix(in_srgb,var(--app-card-border)_60%,transparent)]">
         <div className="text-xs font-medium text-[var(--app-text-secondary)] flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-[var(--z-ok)]" />
-          <span>Real OS & Process Runtime Metrics (Zero Simulation)</span>
+          <span>
+            {th
+              ? 'เมตริก OS และ Process Runtime จริง (Zero Simulation)'
+              : 'Real OS & Process Runtime Metrics (Zero Simulation)'}
+          </span>
         </div>
-        <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--app-bg)_80%,transparent)] p-1 rounded-lg text-xs border border-[var(--app-card-border)]">
+        <div className="flex flex-wrap items-center gap-1 bg-[color-mix(in_srgb,var(--app-bg)_80%,transparent)] p-1 rounded-lg text-xs border border-[var(--app-card-border)]">
           <button
             onClick={() => setActiveMetric('all')}
             className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
               activeMetric === 'all'
-                ? 'bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+                ? 'bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
             }`}
           >
-            All
+            {th ? 'ทั้งหมด' : 'All'}
           </button>
           <button
             onClick={() => setActiveMetric('load')}
             className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
               activeMetric === 'load'
-                ? 'bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+                ? 'bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
             }`}
           >
-            System Load (1m)
+            {th ? 'โหลดระบบ (1m)' : 'System Load (1m)'}
           </button>
           <button
             onClick={() => setActiveMetric('process_memory')}
             className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
               activeMetric === 'process_memory'
-                ? 'bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+                ? 'bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
             }`}
           >
@@ -185,41 +197,45 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             onClick={() => setActiveMetric('system_ram')}
             className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
               activeMetric === 'system_ram'
-                ? 'bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
+                ? 'bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
             }`}
           >
-            Host RAM
+            {th ? 'RAM เครื่อง' : 'Host RAM'}
           </button>
         </div>
       </div>
 
       {/* Chart Canvas */}
-      <div className="h-64 w-full bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] rounded-2xl border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] p-3 pt-5">
+      <div className="h-64 w-full bg-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] rounded-xl border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] p-3 pt-5">
         {chartData.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-[var(--app-text-secondary)] text-xs">
-            <Activity className="w-6 h-6 mb-2 text-[var(--app-text-primary)] animate-pulse" />
-            <span>Collecting initial real-time OS telemetry samples...</span>
+            <Activity className="w-6 h-6 mb-2 text-[var(--app-text-primary)]" />
+            <span>
+              {th
+                ? 'กำลังเก็บตัวอย่าง Telemetry ของระบบปฏิบัติการแบบเรียลไทม์...'
+                : 'Collecting initial real-time OS telemetry samples...'}
+            </span>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FF9A3C" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#FF9A3C" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#d97706" stopOpacity={0.28} />
+                  <stop offset="95%" stopColor="#d97706" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorHeap" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00F0FF" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#00F0FF" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.28} />
+                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorRss" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#CCFF00" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorRam" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FF426D" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#FF426D" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#e11d48" stopOpacity={0.28} />
+                  <stop offset="95%" stopColor="#e11d48" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
@@ -245,7 +261,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   tickLine={false}
                   axisLine={false}
                   domain={[0, (max: number) => Math.max(cpuCores, Math.ceil((max || 0) * 1.2))]}
-                  tick={{ fontSize: 10, fill: '#FF9A3C' }}
+                  tick={{ fontSize: 10, fill: '#d97706' }}
                 />
               )}
               <Tooltip content={<CustomTooltip />} />
@@ -262,7 +278,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   type="monotone"
                   dataKey="loadAvg1m"
                   name="Load Avg (1m)"
-                  stroke="#FF9A3C"
+                  stroke="#d97706"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
@@ -275,8 +291,8 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   yAxisId="mb"
                   type="monotone"
                   dataKey="processHeapUsedMb"
-                  name="Heap Used (MB)"
-                  stroke="#00F0FF"
+                  name={th ? 'Heap ใช้งาน (MB)' : 'Heap Used (MB)'}
+                  stroke="#0ea5e9"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
@@ -290,7 +306,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   type="monotone"
                   dataKey="processRssMb"
                   name="Process RSS (MB)"
-                  stroke="#CCFF00"
+                  stroke="#10b981"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
@@ -303,8 +319,8 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   yAxisId="mb"
                   type="monotone"
                   dataKey="systemRamUsedMb"
-                  name="Host RAM Used (MB)"
-                  stroke="#FF426D"
+                  name={th ? 'RAM เครื่องที่ใช้ (MB)' : 'Host RAM Used (MB)'}
+                  stroke="#e11d48"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
