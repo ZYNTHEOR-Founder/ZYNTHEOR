@@ -220,7 +220,7 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
                 {reasoningSteps.map((step) => (
                   <div
                     key={step.stepNumber}
-                    className="flex items-start gap-3 p-2.5 rounded-xl bg-white dark:bg-[var(--app-bg)] border border-[color-mix(in_srgb,var(--app-accent)_80%,transparent)] dark:border-[var(--app-card-border)] shadow-2xs transition-colors"
+                    className="flex items-start gap-3 p-2.5 rounded-xl bg-[var(--app-card)] border border-[var(--app-card-border)] shadow-2xs transition-colors"
                   >
                     <div className="w-5 h-5 rounded-full bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] text-[var(--app-accent)] dark:text-[var(--app-accent)] font-mono text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5 border border-[color-mix(in_srgb,var(--app-accent)_20%,transparent)]">
                       {step.stepNumber}

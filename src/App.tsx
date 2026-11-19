@@ -3290,7 +3290,7 @@ export default function App() {
                       }
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-colors cursor-pointer border ${
                         logTheme === 'high_contrast'
-                          ? 'bg-white text-black border-white hover:bg-[var(--app-surface-elevated)]'
+                          ? 'bg-[var(--app-text-primary)] text-[var(--app-bg)] border-[var(--app-text-primary)] hover:opacity-90'
                           : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
                       }`}
                     >

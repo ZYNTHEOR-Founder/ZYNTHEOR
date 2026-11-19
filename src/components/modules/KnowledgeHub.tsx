@@ -1534,7 +1534,7 @@ export const KnowledgeHub: React.FC = () => {
                     try {
                       const res = await fetch('/api/knowledge/documents', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: authHeaders(),
                         body: JSON.stringify({
                           title: bf.name,
                           content: bf.content || `Imported ${bf.name}`,

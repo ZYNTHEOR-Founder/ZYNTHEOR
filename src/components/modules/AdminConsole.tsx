@@ -1,63 +1,109 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { VerificationSuiteData } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
-import { Play, ShieldCheck } from 'lucide-react';
+import { Play, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export const AdminConsole: React.FC = () => {
   const { lang } = useLanguage();
+  const { authHeaders, isAuthenticated, role } = useAuth();
   const th = lang === 'th';
 
   const [isRunningSuite, setIsRunningSuite] = useState(false);
   const [suiteData, setSuiteData] = useState<VerificationSuiteData | null>(null);
+  const [suiteError, setSuiteError] = useState<string | null>(null);
+  const [auditError, setAuditError] = useState<string | null>(null);
   const [healthHistory, setHealthHistory] = useState<Array<{ time: string; cpu: number; ram: number; vram: number }>>([]);
   const [auditEntries, setAuditEntries] = useState<any[]>([]);
   // does not display fabricated sessions or simulate token revocation; no session API exists yet.
   const [sessions] = useState<Array<{ id: string; actor: string; ip: string; status: string }>>([]);
 
-  useEffect(() => {
-    const loadAdminData = async () => {
-      try {
-        const [statusRes, auditRes] = await Promise.all([
-          fetch('/api/system/status').then((r) => r.json()),
-          fetch('/api/audit?limit=20').then((r) => r.json())
-        ]);
+  const mapResourcePoint = (sample: any) => ({
+    time: sample?.timeLabel || new Date().toTimeString().slice(0, 8),
+    cpu: sample?.cpuPercent ?? 0,
+    ram: Math.round((sample?.processRssMb ?? 0) / 10),
+    vram: Math.round((sample?.vramMb ?? 0) / 10),
+  });
+
+  const loadAdminData = useCallback(async () => {
+    try {
+      const statusResponse = await fetch('/api/system/status');
+      if (statusResponse.ok) {
+        const statusRes = await statusResponse.json();
         if (statusRes.success && statusRes.resources) {
-          const r = statusRes.resources;
-          setHealthHistory((prev) => [
-            ...prev.slice(-14),
-            {
-              time: new Date().toTimeString().slice(0, 8),
-              cpu: r.cpuPercent ?? 0,
-              ram: Math.round((r.processRssMb ?? 0) / 10),
-              vram: Math.round((r.vramMb ?? 0) / 10)
-            }
-          ]);
+          const resObj = statusRes.resources;
+          if (Array.isArray(resObj.history) && resObj.history.length > 0) {
+            setHealthHistory(resObj.history.slice(-15).map(mapResourcePoint));
+          } else {
+            const current = resObj.current ?? resObj;
+            setHealthHistory((prev) => [...prev.slice(-14), mapResourcePoint(current)]);
+          }
         }
-        if (auditRes.success && Array.isArray(auditRes.entries)) {
-          setAuditEntries(auditRes.entries);
-        }
-      } catch {
-        // ignore transient error
       }
-    };
-    loadAdminData();
-    const interval = setInterval(loadAdminData, 5000);
+
+      if (isAuthenticated && (role === 'Developer' || role === 'Administrator')) {
+        const auditResponse = await fetch('/api/audit?limit=20', { headers: authHeaders() });
+        const auditRes = await auditResponse.json().catch(() => ({}));
+        if (auditResponse.ok && auditRes.success && Array.isArray(auditRes.records)) {
+          setAuditEntries(auditRes.records);
+          setAuditError(null);
+        } else if (!auditResponse.ok) {
+          setAuditError(
+            auditRes?.error ||
+              (th ? 'ไม่สามารถโหลด Audit Log ได้' : `Unable to load audit log (HTTP ${auditResponse.status})`)
+          );
+        }
+      } else {
+        setAuditEntries([]);
+        setAuditError(null);
+      }
+    } catch {
+      // ignore transient error
+    }
+  }, [authHeaders, isAuthenticated, role, th]);
+
+  useEffect(() => {
+    void loadAdminData();
+    const interval = setInterval(() => void loadAdminData(), 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadAdminData]);
 
   const handleRunVerificationSuite = async () => {
+    if (!isAuthenticated) {
+      setSuiteError(
+        th
+          ? 'กรุณาเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator ก่อนรันชุดตรวจสอบ'
+          : 'Sign in with Developer or Administrator role before running the verification suite.'
+      );
+      return;
+    }
     setIsRunningSuite(true);
+    setSuiteError(null);
     try {
-      const res = await fetch('/api/verify/suite', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
+      const res = await fetch('/api/verify/suite', {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
         setSuiteData(data.suite);
+      } else {
+        setSuiteError(
+          data?.error ||
+            (res.status === 403
+              ? th
+                ? 'ต้องใช้สิทธิ์ Developer หรือ Administrator เพื่อรันชุดตรวจสอบระบบ'
+                : 'Developer or Administrator role is required to execute the verification suite.'
+              : th
+              ? `การตรวจสอบล้มเหลว (HTTP ${res.status})`
+              : `Verification suite failed (HTTP ${res.status})`)
+        );
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setSuiteError(err?.message || (th ? 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ' : 'Failed to connect to server'));
     } finally {
       setIsRunningSuite(false);
     }
@@ -119,6 +165,12 @@ export const AdminConsole: React.FC = () => {
             </div>
           </div>
         </div>
+        {suiteError && (
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] px-3.5 py-2.5 text-xs text-[var(--z-danger)]">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{suiteError}</span>
+          </div>
+        )}
       </VividCard>
 
       <VividCard
@@ -240,20 +292,28 @@ export const AdminConsole: React.FC = () => {
         gradientAccent="emerald"
       >
         <div className="max-h-56 overflow-y-auto space-y-1.5 font-mono text-[11px]">
-          {auditEntries.length === 0 ? (
+          {auditError ? (
+            <div className="text-[var(--z-danger)]">{auditError}</div>
+          ) : !isAuthenticated || (role !== 'Developer' && role !== 'Administrator') ? (
+            <div className="text-[var(--app-text-secondary)]">
+              {th
+                ? 'เข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator เพื่อดูบันทึกการตรวจสอบ (AuditLedger)'
+                : 'Sign in with Developer or Administrator role to view AuditLedger records.'}
+            </div>
+          ) : auditEntries.length === 0 ? (
             <div className="text-[var(--app-text-secondary)]">
               {th ? 'ยังไม่มีรายการบันทึกการตรวจสอบ' : 'No audit entries loaded.'}
             </div>
           ) : (
             auditEntries.map((entry, idx) => (
               <div
-                key={entry.id || idx}
+                key={entry.id ?? entry.index ?? idx}
                 className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[var(--app-bg)] border border-[var(--app-card-border)]"
               >
-                <span className="text-[var(--app-accent)] font-semibold">
-                  [{entry.actor || 'SYSTEM'}] {entry.action}
+                <span className="text-[var(--app-accent)] font-semibold truncate">
+                  [{entry.role || entry.actor || 'SYSTEM'}] {entry.action}
                 </span>
-                <span className="text-[var(--app-text-secondary)]">
+                <span className="text-[var(--app-text-secondary)] shrink-0">
                   {entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : ''}
                 </span>
               </div>

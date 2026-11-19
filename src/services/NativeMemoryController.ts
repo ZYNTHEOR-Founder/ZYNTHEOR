@@ -5,6 +5,8 @@
  * Every write operation is permanently recorded as a transaction in the SystemAuditLedger with SHA-256 digests.
  */
 
+import { getStoredAuthHeaders } from '../context/AuthContext';
+
 export interface EpisodicMemoryItem {
   key: string;
   value: any;
@@ -45,12 +47,12 @@ export class NativeMemoryControllerService {
   ): Promise<EpisodicMemoryItem> {
     const res = await fetch('/api/memory/episodic', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getStoredAuthHeaders(),
       body: JSON.stringify({ key, value, category, metadata })
     });
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to create episodic memory');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to create episodic memory (HTTP ${res.status})`);
     }
     return data.item;
   }
@@ -60,11 +62,13 @@ export class NativeMemoryControllerService {
    * Increments readCount and records a MEMORY_READ_OP audit event.
    */
   public async retrieveMemory(key: string): Promise<EpisodicMemoryItem | null> {
-    const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`);
+    const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`, {
+      headers: getStoredAuthHeaders()
+    });
     if (res.status === 404) return null;
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to retrieve episodic memory');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to retrieve episodic memory (HTTP ${res.status})`);
     }
     return data.item;
   }
@@ -81,12 +85,12 @@ export class NativeMemoryControllerService {
   ): Promise<EpisodicMemoryItem> {
     const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getStoredAuthHeaders(),
       body: JSON.stringify({ value, category, metadata })
     });
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to update episodic memory');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to update episodic memory (HTTP ${res.status})`);
     }
     return data.item;
   }
@@ -97,11 +101,12 @@ export class NativeMemoryControllerService {
    */
   public async deleteMemory(key: string): Promise<boolean> {
     const res = await fetch(`/api/memory/episodic/${encodeURIComponent(key)}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getStoredAuthHeaders()
     });
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to delete episodic memory');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to delete episodic memory (HTTP ${res.status})`);
     }
     return Boolean(data.deleted);
   }
@@ -110,10 +115,12 @@ export class NativeMemoryControllerService {
    * LIST: Lists all persisted episodic memory entries.
    */
   public async listAll(): Promise<EpisodicMemoryItem[]> {
-    const res = await fetch('/api/memory/episodic');
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to list episodic memories');
+    const res = await fetch('/api/memory/episodic', {
+      headers: getStoredAuthHeaders()
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to list episodic memories (HTTP ${res.status})`);
     }
     return data.items || [];
   }
@@ -122,10 +129,12 @@ export class NativeMemoryControllerService {
    * STATS: Returns storage health, item counts, and disk size metrics.
    */
   public async getStats(): Promise<MemoryStats> {
-    const res = await fetch('/api/memory/episodic');
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to get episodic memory stats');
+    const res = await fetch('/api/memory/episodic', {
+      headers: getStoredAuthHeaders()
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to get episodic memory stats (HTTP ${res.status})`);
     }
     return data.stats || {
       totalItems: 0,

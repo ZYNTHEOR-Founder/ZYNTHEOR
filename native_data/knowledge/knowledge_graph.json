@@ -1,20 +1,20 @@
 {
   "version": "ZYNTHEOR_KG_V1",
-  "updatedAt": "2026-11-19T11:38:34.694Z",
+  "updatedAt": "2026-11-19T11:59:03.575Z",
   "nodes": [
     {
-      "nodeId": "kgn_fed616bd149e",
-      "label": "TenantA Secret 1795087687211",
-      "canonicalKey": "tenanta secret 1795087687211",
+      "nodeId": "kgn_2c6af4b45d62",
+      "label": "TenantA Secret 1795089513893",
+      "canonicalKey": "tenanta secret 1795089513893",
       "kind": "METRIC",
       "aliases": [
-        "TenantA Secret 1795087687211"
+        "TenantA Secret 1795089513893"
       ],
       "documentIds": [
-        "doc_1795087687217_l5er2"
+        "doc_1795089513897_ok9sy"
       ],
       "tenantId": "tenant_a",
-      "updatedAt": "2026-11-19T11:28:07.218Z"
+      "updatedAt": "2026-11-19T11:58:33.898Z"
     },
     {
       "nodeId": "kgn_ec9b1f57c758",
@@ -25,6 +25,9 @@
         "rbac"
       ],
       "documentIds": [
+        "doc_1795089513897_ok9sy",
+        "doc_1795089090160_yz2pt",
+        "doc_1795088325873_hegkq",
         "doc_1795087687217_l5er2",
         "doc_1795087159671_ghcj0",
         "doc_1795085773566_75lhb",
@@ -41,6 +44,48 @@
       ],
       "tenantId": "tenant_a",
       "updatedAt": "2026-11-18T11:20:05.194Z"
+    },
+    {
+      "nodeId": "kgn_5b4f14cda69b",
+      "label": "TenantA Secret 1795089090156",
+      "canonicalKey": "tenanta secret 1795089090156",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795089090156"
+      ],
+      "documentIds": [
+        "doc_1795089090160_yz2pt"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T11:51:30.161Z"
+    },
+    {
+      "nodeId": "kgn_a1d1208f6a5b",
+      "label": "TenantA Secret 1795088325868",
+      "canonicalKey": "tenanta secret 1795088325868",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795088325868"
+      ],
+      "documentIds": [
+        "doc_1795088325873_hegkq"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T11:38:45.874Z"
+    },
+    {
+      "nodeId": "kgn_fed616bd149e",
+      "label": "TenantA Secret 1795087687211",
+      "canonicalKey": "tenanta secret 1795087687211",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795087687211"
+      ],
+      "documentIds": [
+        "doc_1795087687217_l5er2"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T11:28:07.218Z"
     },
     {
       "nodeId": "kgn_696422cb95e2",
@@ -995,6 +1040,60 @@
   ],
   "edges": [
     {
+      "edgeId": "kge_51a7acfe9c5f",
+      "subjectId": "kgn_2c6af4b45d62",
+      "subjectLabel": "TenantA Secret 1795089513893",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795089513897_ok9sy",
+      "documentTitle": "TenantA Secret 1795089513893",
+      "contentHash": "43af04d6a7a923171ccc9c01f9371215a862a3cd4eadd5f30b6ea174b76f0940",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T11:58:33.898Z",
+      "updatedAt": "2026-11-19T11:58:33.898Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795089513893' (RBAC)"
+    },
+    {
+      "edgeId": "kge_070e4183d297",
+      "subjectId": "kgn_5b4f14cda69b",
+      "subjectLabel": "TenantA Secret 1795089090156",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795089090160_yz2pt",
+      "documentTitle": "TenantA Secret 1795089090156",
+      "contentHash": "986a122a1a994c8f50ae437e39dcac9f3aa6284e3f577746fef767f6a6a70289",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T11:51:30.161Z",
+      "updatedAt": "2026-11-19T11:51:30.161Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795089090156' (RBAC)"
+    },
+    {
+      "edgeId": "kge_0e5e2a976e56",
+      "subjectId": "kgn_a1d1208f6a5b",
+      "subjectLabel": "TenantA Secret 1795088325868",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795088325873_hegkq",
+      "documentTitle": "TenantA Secret 1795088325868",
+      "contentHash": "11f848e3cfbe3ec7140392a70e0634398b601339e2d0c03a8f2255a04e7f88cc",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T11:38:45.874Z",
+      "updatedAt": "2026-11-19T11:38:45.874Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795088325868' (RBAC)"
+    },
+    {
       "edgeId": "kge_44810db4a6ea",
       "subjectId": "kgn_fed616bd149e",
       "subjectLabel": "TenantA Secret 1795087687211",
@@ -1044,7 +1143,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-19T10:56:13.567Z",
       "updatedAt": "2026-11-19T10:56:13.567Z",
-      "freshnessScore": 1,
+      "freshnessScore": 0.999,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795085773561' (RBAC)"
     },
@@ -1151,7 +1250,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T14:56:51.223Z",
       "updatedAt": "2026-11-18T14:56:51.223Z",
-      "freshnessScore": 0.986,
+      "freshnessScore": 0.985,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795013811213' (RBAC)"
     },
@@ -1169,7 +1268,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T14:56:31.368Z",
       "updatedAt": "2026-11-18T14:56:31.368Z",
-      "freshnessScore": 0.986,
+      "freshnessScore": 0.985,
       "snippet": "Document 'Synthetic Test Benchmark Generation' (Synthetic_Test)"
     },
     {
@@ -1186,7 +1285,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T13:25:41.911Z",
       "updatedAt": "2026-11-18T13:25:41.911Z",
-      "freshnessScore": 0.985,
+      "freshnessScore": 0.984,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795008341903' (RBAC)"
     },
@@ -1204,7 +1303,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T13:22:59.886Z",
       "updatedAt": "2026-11-18T13:22:59.886Z",
-      "freshnessScore": 0.985,
+      "freshnessScore": 0.984,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795008179878' (RBAC)"
     },

@@ -333,7 +333,7 @@ export const GovernanceSecurity: React.FC = () => {
           </div>
 
           {tamperResult && (
-            <div className="flex items-center gap-3 p-3 bg-white border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] rounded-xl shadow-xs shrink-0">
+            <div className="flex items-center gap-3 p-3 bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] rounded-xl shadow-xs shrink-0">
               <FolderLock
                 className={`w-6 h-6 shrink-0 ${
                   tamperResult.status === 'TAMPER_FREE' ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
@@ -481,7 +481,7 @@ export const GovernanceSecurity: React.FC = () => {
           </div>
 
           {languageSuiteResult && (
-            <div className="flex items-center gap-3 p-3 bg-white dark:bg-[var(--app-bg)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] dark:border-[var(--app-card-border)] rounded-xl shadow-xs shrink-0">
+            <div className="flex items-center gap-3 p-3 bg-[var(--app-surface)] border border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] rounded-xl shadow-xs shrink-0">
               <Languages className="w-6 h-6 text-[var(--app-accent)] shrink-0" />
               <div>
                 <div className="text-xs font-bold text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)]">
@@ -664,7 +664,7 @@ export const GovernanceSecurity: React.FC = () => {
                 value={newMemKey}
                 onChange={(e) => setNewMemKey(e.target.value)}
                 placeholder="e.g. user_project_goal"
-                className="w-full px-3 py-2 text-xs bg-white border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-mono"
+                className="w-full px-3 py-2 text-xs bg-[var(--app-input-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-mono"
                 required
               />
             </div>
@@ -674,7 +674,7 @@ export const GovernanceSecurity: React.FC = () => {
               <select
                 value={newMemCat}
                 onChange={(e) => setNewMemCat(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-medium"
+                className="w-full px-3 py-2 text-xs bg-[var(--app-input-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-medium"
               >
                 <option value="episodic">Episodic</option>
                 <option value="semantic">Semantic</option>
@@ -690,7 +690,7 @@ export const GovernanceSecurity: React.FC = () => {
                 value={newMemVal}
                 onChange={(e) => setNewMemVal(e.target.value)}
                 placeholder="Content, preference, or fact to persist..."
-                className="w-full px-3 py-2 text-xs bg-white border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-sans"
+                className="w-full px-3 py-2 text-xs bg-[var(--app-input-bg)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] font-sans"
                 required
               />
             </div>
@@ -734,18 +734,18 @@ export const GovernanceSecurity: React.FC = () => {
                       {item.key}
                     </td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded-md bg-[var(--app-accent)] dark:bg-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] dark:border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-md bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] text-[var(--app-accent)] border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] text-[10px] font-bold">
                         {item.category}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-[var(--app-text-primary)] dark:text-[var(--app-text-secondary)] max-w-xs">
+                    <td className="py-2.5 px-3 text-[var(--app-text-primary)] max-w-xs">
                       {editingKey === item.key ? (
                         <div className="flex items-center gap-1.5">
                           <input
                             type="text"
                             value={editVal}
                             onChange={(e) => setEditVal(e.target.value)}
-                            className="w-full px-2 py-1 text-xs bg-white dark:bg-[var(--app-bg)] border border-[var(--app-accent)] rounded-lg text-[var(--app-text-primary)] dark:text-[var(--app-text-primary)] font-sans"
+                            className="w-full px-2 py-1 text-xs bg-[var(--app-input-bg)] border border-[var(--app-accent)] rounded-lg text-[var(--app-text-primary)] font-sans"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') handleUpdateMemory(item.key, item.category);

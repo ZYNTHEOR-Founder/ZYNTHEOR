@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { ShoppingBag, CheckCircle2, Download } from 'lucide-react';
+import { ShoppingBag, CheckCircle2, Download, AlertCircle, Loader2 } from 'lucide-react';
 
 interface SkillItem {
   id: string;
@@ -20,7 +20,9 @@ export const Marketplace: React.FC = () => {
   const { lang } = useLanguage();
   const th = lang === 'th';
 
+  const [deployingId, setDeployingId] = useState<string | null>(null);
   const [deployedId, setDeployedId] = useState<string | null>(null);
+  const [deployError, setDeployError] = useState<string | null>(null);
 
   const skills: SkillItem[] = [
     {
@@ -74,10 +76,18 @@ export const Marketplace: React.FC = () => {
   ];
 
   const handleDeploySkill = async (skill: SkillItem) => {
-    if (!isAuthenticated) return;
-    setDeployedId(skill.id);
+    if (!isAuthenticated) {
+      setDeployError(
+        th
+          ? 'กรุณาเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator เพื่อติดตั้งเข้า Sandbox'
+          : 'Sign in with Developer or Administrator role to deploy into /workspace.'
+      );
+      return;
+    }
+    setDeployingId(skill.id);
+    setDeployError(null);
     try {
-      await fetch('/api/workspace/run', {
+      const res = await fetch('/api/workspace/run', {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({
@@ -85,10 +95,26 @@ export const Marketplace: React.FC = () => {
           args: ['-e', `console.log("Deployed skill: ${skill.name}");`]
         })
       });
-      setTimeout(() => setDeployedId(null), 2500);
-    } catch (err) {
-      console.error(err);
-      setDeployedId(null);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        setDeployedId(skill.id);
+        setTimeout(() => setDeployedId((curr) => (curr === skill.id ? null : curr)), 2500);
+      } else {
+        setDeployError(
+          data?.error ||
+            (res.status === 403
+              ? th
+                ? 'ต้องใช้สิทธิ์ Developer หรือ Administrator เพื่อรันคำสั่งติดตั้งใน /workspace'
+                : 'Developer or Administrator role is required to deploy to /workspace.'
+              : th
+              ? `ติดตั้งทักษะไม่สำเร็จ (HTTP ${res.status})`
+              : `Deployment failed (HTTP ${res.status})`)
+        );
+      }
+    } catch (err: any) {
+      setDeployError(err?.message || (th ? 'เชื่อมต่อ Sandbox ไม่สำเร็จ' : 'Failed to reach workspace API'));
+    } finally {
+      setDeployingId(null);
     }
   };
 
@@ -113,6 +139,12 @@ export const Marketplace: React.FC = () => {
             <ShoppingBag className="w-5 h-5" />
           </div>
         </div>
+        {deployError && (
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] px-3.5 py-2.5 text-xs text-[var(--z-danger)]">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{deployError}</span>
+          </div>
+        )}
       </VividCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
@@ -137,10 +169,15 @@ export const Marketplace: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleDeploySkill(skill)}
-                disabled={deployedId === skill.id || !isAuthenticated}
+                disabled={deployingId === skill.id || deployedId === skill.id}
                 className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[var(--app-text-primary)] bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               >
-                {deployedId === skill.id ? (
+                {deployingId === skill.id ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>{th ? 'กำลังติดตั้ง...' : 'Deploying...'}</span>
+                  </>
+                ) : deployedId === skill.id ? (
                   <>
                     <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)]" />
                     <span>{th ? 'ติดตั้งใน /workspace แล้ว' : 'Deployed to /workspace'}</span>
