@@ -20,7 +20,7 @@ const bad = (n,d='')=>{console.error('✖',n,d||'');evidence.push('FAIL:'+n+(d?'
 const blk = (n,d='')=>{console.log('△',n,d||'');evidence.push('BLOCKED:'+n+(d?'|'+d:''));blocked++;};
 
 function offlineRouteAudit() {
-  console.log('\n=== Offline route RBAC audit ===');
+  console.log('\n=== Static route RBAC audit (no server) ===');
   const sensitive = [
     ["/api/workspace/files", "requireAuth"],
     ["/api/workspace/file", "requireAuth"],
