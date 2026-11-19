@@ -30,69 +30,69 @@ export const ThemeSwitcher: React.FC = () => {
   }> = [
     {
       id: 'emerald-amber',
-      labelTh: 'Obsidian (ค่าเริ่มต้น)',
-      labelEn: 'Obsidian (Default)',
-      subTh: 'พื้นมืดเรียบ อ่านง่าย สบายตา',
-      subEn: 'Calm dark neutral with slate-indigo accent',
+      labelTh: 'กราไฟต์ & มรกต (ค่าเริ่มต้น)',
+      labelEn: 'Graphite & Emerald (Default)',
+      subTh: 'พื้นเทาเข้มขรึม ตัดสีเขียวมรกตคมชัด สบายตา',
+      subEn: 'Nordic charcoal slate with crisp emerald accent',
       icon: <Moon className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0B0E14',
-      borderPreview: '#232A38',
-      accentPreview: '#6E8BFF'
+      bgPreview: '#090D12',
+      borderPreview: '#232E3F',
+      accentPreview: '#10B981'
     },
     {
       id: 'light',
-      labelTh: 'Paper (โหมดสว่าง)',
-      labelEn: 'Paper (Light)',
-      subTh: 'พื้นสว่างสะอาดตา ตัวหนังสือคมชัด',
-      subEn: 'Clean paper light mode',
+      labelTh: 'กระดาษสว่าง & เทอร์ควอยซ์ (Light)',
+      labelEn: 'Porcelain & Teal (Light)',
+      subTh: 'พื้นสว่างสะอาดตา ตัวหนังสือคมชัด อ่านง่าย',
+      subEn: 'Clean porcelain light surface with forest teal',
       icon: <Sun className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#F7F8FA',
-      borderPreview: '#E2E6EE',
-      accentPreview: '#2563EB'
+      bgPreview: '#F8FAFC',
+      borderPreview: '#DDE4EE',
+      accentPreview: '#0D9488'
     },
     {
       id: 'dark',
-      labelTh: 'Obsidian Dark',
-      labelEn: 'Obsidian Dark',
-      subTh: 'โทนเดียวกับค่าเริ่มต้น',
-      subEn: 'Same as default',
+      labelTh: 'คาร์บอน & ฟ้าโคบอลต์',
+      labelEn: 'Carbon & Sky',
+      subTh: 'พื้นคาร์บอนเข้มตัดสีฟ้าสกายคมชัด',
+      subEn: 'Deep carbon dark with crisp sky blue',
       icon: <Moon className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0B0E14',
-      borderPreview: '#232A38',
-      accentPreview: '#6E8BFF'
-    },
-    {
-      id: 'midnight-navy',
-      labelTh: 'Slate Neutral',
-      labelEn: 'Slate Neutral',
-      subTh: 'เทาเข้มเป็นกลาง ลดความจัดจ้าน',
-      subEn: 'Neutral slate surfaces',
-      icon: <Palette className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0B0E14',
-      borderPreview: '#232A38',
-      accentPreview: '#6E8BFF'
-    },
-    {
-      id: 'vivid-cyan',
-      labelTh: 'Ocean Slate',
-      labelEn: 'Ocean Slate',
-      subTh: 'โทนฟ้าน้ำทะเลสุขุม',
-      subEn: 'Restrained sea slate',
-      icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#0B1416',
-      borderPreview: '#23373D',
+      bgPreview: '#0A0E15',
+      borderPreview: '#253145',
       accentPreview: '#38BDF8'
     },
     {
-      id: 'royal-purple',
-      labelTh: 'Warm Graphite',
-      labelEn: 'Warm Graphite',
-      subTh: 'โทนมืดอุ่นสบายตา',
-      subEn: 'Warm obsidian dark',
+      id: 'midnight-navy',
+      labelTh: 'มิดไนท์เนวี & แซฟไฟร์',
+      labelEn: 'Midnight Sapphire',
+      subTh: 'กรมท่าลึกตัดฟ้าแซฟไฟร์และทองแชมเปญ',
+      subEn: 'Deep navy slate with sapphire blue',
+      icon: <Palette className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#09101D',
+      borderPreview: '#243554',
+      accentPreview: '#60A5FA'
+    },
+    {
+      id: 'vivid-cyan',
+      labelTh: 'ดีปเทอร์ควอยซ์ & กลาเซียร์',
+      labelEn: 'Glacier Teal',
+      subTh: 'โทนเขียวอมฟ้าน้ำลึก สุขุมและทันสมัย',
+      subEn: 'Deep sea teal with glacier mint accent',
       icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: '#14120E',
-      borderPreview: '#383124',
-      accentPreview: '#E0A94F'
+      bgPreview: '#071316',
+      borderPreview: '#1E3D47',
+      accentPreview: '#2DD4BF'
+    },
+    {
+      id: 'royal-purple',
+      labelTh: 'ออบซิเดียน & ทองอำพัน',
+      labelEn: 'Warm Obsidian & Gold',
+      subTh: 'โทนมืดอุ่นตัดทองคำอำพันพรีเมียม',
+      subEn: 'Warm espresso obsidian with burnished gold',
+      icon: <Sparkles className="w-4 h-4 text-[var(--app-accent)]" />,
+      bgPreview: '#12100C',
+      borderPreview: '#383024',
+      accentPreview: '#F59E0B'
     },
     {
       id: 'system',
@@ -101,18 +101,18 @@ export const ThemeSwitcher: React.FC = () => {
       subTh: 'สลับมืด/สว่างตามการตั้งค่าเครื่อง',
       subEn: 'Follows OS dark/light',
       icon: <Laptop className="w-4 h-4 text-[var(--app-accent)]" />,
-      bgPreview: 'linear-gradient(135deg, #F7F8FA 50%, #0B0E14 50%)',
+      bgPreview: 'linear-gradient(135deg, #F8FAFC 50%, #090D12 50%)',
       borderPreview: '#94A3B8',
-      accentPreview: '#3B5BDB'
+      accentPreview: '#10B981'
     },
   ];
 
   const presetAccents = [
-    { label: 'Indigo', hex: '#6E8BFF' },
-    { label: 'Cobalt', hex: '#2563EB' },
-    { label: 'Amber', hex: '#E0A94F' },
+    { label: 'Emerald', hex: '#10B981' },
+    { label: 'Teal', hex: '#0D9488' },
     { label: 'Sky', hex: '#38BDF8' },
-    { label: 'Emerald', hex: '#34D399' },
+    { label: 'Sapphire', hex: '#60A5FA' },
+    { label: 'Amber Gold', hex: '#F59E0B' },
     { label: 'Slate', hex: '#94A3B8' }
   ];
 
@@ -217,16 +217,16 @@ export const ThemeSwitcher: React.FC = () => {
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-[var(--app-card-border)] bg-[var(--app-input-bg)]">
               <input
                 type="color"
-                value={customAccent || 'var(--app-accent)'}
+                value={/^#[0-9a-fA-F]{6}$/.test(customAccent) ? customAccent : '#10B981'}
                 onChange={(e) => setCustomAccent(e.target.value)}
                 className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent"
                 title="Pick custom color"
               />
               <input
                 type="text"
-                value={customAccent || 'var(--app-accent)'}
+                value={customAccent}
                 onChange={(e) => setCustomAccent(e.target.value)}
-                placeholder="var(--app-accent)"
+                placeholder="#10B981"
                 className="w-20 text-[11px] font-mono bg-transparent text-[var(--app-text-primary)] focus:outline-none"
               />
             </div>

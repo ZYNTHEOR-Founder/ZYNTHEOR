@@ -58,7 +58,7 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
     ? 'VERIFIED'
     : connectivity.cloudStorageConfigured
     ? 'BLOCKED'
-    : 'BLOCKED';
+    : 'NOT_CONFIGURED';
 
   const runtimeStatus: StatusLevel =
     connectivity.online && connectivity.weightsLoaded && connectivity.executionVerified
@@ -71,7 +71,7 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
     ? 'VERIFIED'
     : cloudRuntimeProbe?.configured
     ? 'BLOCKED'
-    : 'BLOCKED';
+    : 'NOT_CONFIGURED';
 
   const activeError =
     apiError ||

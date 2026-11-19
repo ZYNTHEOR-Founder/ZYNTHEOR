@@ -44,6 +44,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
           UNVERIFIED
         </span>
       );
+    case 'NOT_CONFIGURED':
+      return (
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border border-[var(--app-card-border)] ${className}`}>
+          <Clock className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
+          UNSET
+        </span>
+      );
     case 'NOT IMPLEMENTED':
     default:
       return (

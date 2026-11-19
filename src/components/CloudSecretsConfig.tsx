@@ -331,7 +331,15 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
             <span className="font-semibold text-[var(--app-text-primary)]">
               Config Status:
             </span>
-            <StatusBadge status={snapshot?.configValid ? 'VERIFIED' : 'BLOCKED'} />
+            <StatusBadge
+              status={
+                snapshot?.configValid
+                  ? 'VERIFIED'
+                  : snapshot?.provider && snapshot.provider !== 'none'
+                    ? 'BLOCKED'
+                    : 'NOT_CONFIGURED'
+              }
+            />
             <span className="font-mono text-[11px] text-[var(--app-text-secondary)]">
               Provider: {snapshot?.provider || 'none'} · Store: {snapshot?.storagePath || '.env.local'}
             </span>
@@ -357,14 +365,14 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
             {renderInputField({
               key: 'CLOUD_RUNTIME_URL',
               label: 'Cloud Runtime URL',
-              placeholder: 'https://your-zyntheor-runtime.up.railway.app',
+              placeholder: 'UNSET (ระบุ URL จริงจาก Railway)',
               sensitive: false,
               helper: 'Base HTTPS endpoint of the deployed ZYNTHEOR Native Runtime service.',
             })}
             {renderInputField({
               key: 'ZYNTHEOR_CONNECTIVITY_PROBE_URL',
               label: 'Connectivity Probe Override',
-              placeholder: 'https://your-zyntheor-runtime.up.railway.app/api/health',
+              placeholder: 'UNSET (optional /api/health URL)',
               sensitive: false,
               helper: 'Optional explicit health probe URL if distinct from CLOUD_RUNTIME_URL.',
             })}
@@ -381,38 +389,38 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
             {renderInputField({
               key: 'S3_BUCKET',
               label: 'S3 Bucket Name',
-              placeholder: 'zyntheor-checkpoints',
+              placeholder: 'UNSET',
               sensitive: false,
             })}
             {renderInputField({
               key: 'S3_REGION',
               label: 'S3 Region',
-              placeholder: 'auto or us-east-1',
+              placeholder: 'UNSET',
               sensitive: false,
             })}
             {renderInputField({
               key: 'S3_ENDPOINT',
               label: 'S3 Endpoint URL',
-              placeholder: 'https://<account>.r2.cloudflarestorage.com',
+              placeholder: 'UNSET',
               sensitive: false,
               helper: 'Optional for AWS S3; required for R2, Supabase S3, GCS S3-interop, or MinIO.',
             })}
             {renderInputField({
               key: 'S3_CHECKPOINT_KEY',
               label: 'Checkpoint Object Key',
-              placeholder: 'checkpoints/model_checkpoint.pt',
+              placeholder: 'UNSET',
               sensitive: false,
             })}
             {renderInputField({
               key: 'S3_ACCESS_KEY_ID',
               label: 'S3 Access Key ID',
-              placeholder: 'AKIA... / R2 Access Key',
+              placeholder: 'UNSET',
               sensitive: true,
             })}
             {renderInputField({
               key: 'S3_SECRET_ACCESS_KEY',
               label: 'S3 Secret Access Key',
-              placeholder: 'Secret access key (stored masked)',
+              placeholder: 'UNSET',
               sensitive: true,
             })}
           </div>
@@ -438,13 +446,13 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
             {renderInputField({
               key: 'CHECKPOINT_PRESIGNED_URL',
               label: 'Checkpoint Presigned Download URL',
-              placeholder: 'https://.../model_checkpoint.pt?X-Amz-Signature=...',
+              placeholder: 'UNSET',
               sensitive: true,
             })}
             {renderInputField({
               key: 'CHECKPOINT_UPLOAD_URL',
               label: 'Checkpoint Presigned Upload URL',
-              placeholder: 'https://.../model_checkpoint.pt?X-Amz-Signature=...',
+              placeholder: 'UNSET',
               sensitive: true,
             })}
           </div>

@@ -22,7 +22,7 @@ export type ModuleId =
   | 'user_settings'
   | 'admin_console';
 
-export type StatusLevel = 'IMPLEMENTED' | 'VERIFIED' | 'PARTIAL' | 'BLOCKED' | 'UNVERIFIED' | 'NOT IMPLEMENTED';
+export type StatusLevel = 'IMPLEMENTED' | 'VERIFIED' | 'PARTIAL' | 'BLOCKED' | 'UNVERIFIED' | 'NOT IMPLEMENTED' | 'NOT_CONFIGURED';
 
 export interface EvidenceDrawerItem {
   id?: string;

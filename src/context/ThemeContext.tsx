@@ -81,11 +81,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.remove('dark');
     }
 
-    // Apply custom accent color if defined
+    // Apply custom accent color if defined and keep deep/glow tokens synchronized
     if (customAccent) {
       root.style.setProperty('--app-accent', customAccent);
+      root.style.setProperty('--app-accent-deep', `color-mix(in srgb, ${customAccent} 78%, #000000)`);
+      root.style.setProperty('--app-accent-glow', `color-mix(in srgb, ${customAccent} 16%, transparent)`);
     } else {
       root.style.removeProperty('--app-accent');
+      root.style.removeProperty('--app-accent-deep');
+      root.style.removeProperty('--app-accent-glow');
     }
 
     // Apply accent intensity

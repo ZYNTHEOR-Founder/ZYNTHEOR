@@ -96,7 +96,6 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
   const [memoryRetention, setMemoryRetention] = useState('infinite');
   const [liveStatus, setLiveStatus] = useState<any>(null);
   const [liveReadiness, setLiveReadiness] = useState<any>(null);
-  const [sovereigntyStatus, setSovereigntyStatus] = useState<'VERIFIED' | 'BLOCKED' | 'UNVERIFIED'>('UNVERIFIED');
   const [configAudit, setConfigAudit] = useState<ConfigAuditEntry[]>([]);
   const [rolePermissions, setRolePermissions] = useState<Record<ControlRole, Record<string, boolean>>>({
     User: { nativeInference: true, modelTraining: false, sandboxExec: false, auditExport: false },
@@ -123,15 +122,12 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
       const readyJson = await readyRes.json().catch(() => null);
       if (statusJson?.success) {
         setLiveStatus(statusJson);
-        setSovereigntyStatus(
-          statusJson.model?.weightsLoaded && statusJson.model?.inferenceReady ? 'VERIFIED' : 'BLOCKED'
-        );
       }
       if (readyJson?.success) {
         setLiveReadiness(readyJson);
       }
     } catch {
-      setSovereigntyStatus('UNVERIFIED');
+      /* keep prior telemetry */
     }
   }, []);
 
@@ -212,7 +208,23 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
   const targetParams = liveStatus?.model?.targetParams ?? 41_527_808;
   const weightsLoaded = Boolean(liveStatus?.model?.weightsLoaded);
   const numpyAvailable = Boolean(liveReadiness?.pythonBackend?.numpyAvailable);
-  const trainingStatusLabel = numpyAvailable && weightsLoaded ? 'READY' : 'BLOCKED';
+  const trainingStatusLabel = numpyAvailable && weightsLoaded ? 'READY' : 'NOT_CONFIGURED';
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState<boolean>(
+    Boolean(initialSection && initialSection !== 'account')
+  );
+
+  useEffect(() => {
+    if (initialSection && initialSection !== 'account') {
+      setShowAdvancedSettings(true);
+    }
+  }, [initialSection]);
+
+  const displayUserId =
+    isAuthenticated && session.userId && session.userId !== 'anonymous'
+      ? session.userId
+      : 'usr_sovereign_01';
+
+  const isAuthBlocked = Boolean(authError || sessionExpired);
 
   const renderAndroidConnectorCard = () => (
     <VividCard
@@ -244,7 +256,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
               type="url"
               value={backendUrlInput}
               onChange={(e) => setBackendUrlInput(e.target.value)}
-              placeholder="https://your-zyntheor-backend.run.app or http://10.0.2.2:3000"
+              placeholder="UNSET"
               className="flex-1 min-w-[220px] px-3.5 py-2 rounded-xl font-mono text-xs bg-[var(--app-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
             />
             <button
@@ -274,8 +286,80 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
     </VividCard>
   );
 
+  // Clean, spacious, single-button Login screen when unauthenticated and viewing Account/Login
+  if (!isAuthenticated && !showAdvancedSettings && activeSection === 'account') {
+    return (
+      <div className="min-h-[60dvh] flex items-center justify-center px-2 py-8">
+        <div
+          data-testid="clean-login-card"
+          className="w-full max-w-md rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] p-6 sm:p-8 text-center space-y-6"
+        >
+          {returnToModuleLabel && onReturnToTask && (
+            <div className="flex items-center justify-between gap-2 text-xs text-[var(--app-text-secondary)]">
+              <button
+                type="button"
+                onClick={onReturnToTask}
+                className="inline-flex items-center gap-1.5 font-medium text-[var(--app-accent)] hover:underline cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{returnToModuleLabel}</span>
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--app-text-primary)]">
+              {lang === 'th' ? 'เข้าสู่ระบบ ZYNTHEOR' : 'Sign in to ZYNTHEOR'}
+            </h2>
+            <p className="text-xs text-[var(--app-text-secondary)]">
+              {lang === 'th' ? 'บัญชีและการตั้งค่า' : 'Account & Settings'}
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              data-testid="login-continue-google-btn"
+              onClick={() => void loginWithGoogle()}
+              className="w-full min-h-[54px] px-6 py-3.5 rounded-xl text-base font-bold bg-[var(--app-accent)] text-slate-950 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center"
+            >
+              Continue with Google
+            </button>
+
+            <p
+              data-testid="login-user-id-label"
+              className="font-mono text-xs text-[var(--app-text-secondary)] tabular-nums"
+            >
+              User: {displayUserId}
+            </p>
+          </div>
+
+          {isAuthBlocked && (
+            <div
+              role="alert"
+              data-testid="login-blocked-notice"
+              className="p-3 rounded-xl text-xs font-mono text-left text-[var(--z-danger)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_35%,transparent)]"
+            >
+              BLOCKED: {authError || (lang === 'th' ? 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่' : 'Session expired. Sign in again.')}
+            </div>
+          )}
+
+          <div className="pt-2 border-t border-[var(--app-card-border)]">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedSettings(true)}
+              className="min-h-[40px] px-4 py-2 text-xs font-medium text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+            >
+              {lang === 'th' ? 'เปิดเมนูตั้งค่าระบบ' : 'Open system settings menu'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-6xl pb-8">
       {returnToModuleLabel && onReturnToTask && (
         <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-[color-mix(in_srgb,var(--app-accent)_45%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_10%,var(--app-surface))]">
           <div className="text-xs text-[var(--app-text-primary)]">
@@ -301,80 +385,47 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
         </div>
       )}
 
-      {/* System Control Center Header + RBAC Switcher */}
+      {/* Clean Top Identity Card — Single Continue with Google button, User ID underneath, BLOCKED only if blocked */}
       <VividCard
-        title={lang === 'th' ? 'ศูนย์ควบคุมระบบ ZYNTHEOR (Account & Settings)' : 'ZYNTHEOR Account & System Settings'}
+        title={lang === 'th' ? 'บัญชีและการตั้งค่า' : 'Account & Settings'}
         subtitle={
           lang === 'th'
-            ? 'ควบคุมผู้ใช้ การเชื่อมต่อ Android App, Secrets, ระบบประสาทเทียม และสิทธิ์ RBAC'
-            : 'Unified control plane for Identity, Android Backend Connector, Cloud Secrets, and Runtime'
+            ? 'ยืนยันตัวตนและจัดการค่าพื้นฐานของระบบ'
+            : 'Identity and workspace settings'
         }
         gradientAccent="emerald"
       >
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void loginWithGoogle()}
-                className="min-h-[40px] px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer transition-colors"
-              >
-                Continue with Google
-              </button>
-              {devAccessEnabled && (
-                <>
-                  <span className="text-xs font-semibold text-[var(--app-text-secondary)]">
-                    {lang === 'th' ? 'สิทธิ์การเข้าถึง (Dev Access):' : 'Dev Role:'}
-                  </span>
-                  {(['User', 'Developer', 'Administrator'] as ControlRole[]).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
-                      className={`min-h-[38px] px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
-                        role === r && isAuthenticated
-                          ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[var(--app-accent)]'
-                          : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </>
-              )}
-              {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="min-h-[38px] px-3 py-1 rounded-lg text-xs font-semibold bg-[var(--app-surface)] text-[var(--z-danger)] border border-[var(--app-card-border)] hover:border-[var(--z-danger)] cursor-pointer"
-                >
-                  Sign out
-                </button>
-              )}
-            </div>
+        <div className="flex flex-col items-start gap-3">
+          <button
+            type="button"
+            data-testid="login-continue-google-btn"
+            onClick={() => void loginWithGoogle()}
+            className="w-full sm:w-auto sm:min-w-[280px] min-h-[52px] px-6 py-3 rounded-xl text-sm sm:text-base font-bold bg-[var(--app-accent)] text-slate-950 hover:brightness-110 cursor-pointer transition-all"
+          >
+            Continue with Google
+          </button>
 
-            <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono">
-              {session.authMode === 'development' && (
-                <StatusDot status="PARTIAL" label="DEV ACCESS" />
-              )}
-              <StatusDot
-                status={sovereigntyStatus}
-                label={`SOVEREIGNTY: ${sovereigntyStatus}`}
-              />
-              <StatusDot status="BLOCKED" label="EXTERNAL AI: BLOCKED" />
-            </div>
-          </div>
+          <p
+            data-testid="login-user-id-label"
+            className="font-mono text-xs text-[var(--app-text-secondary)] tabular-nums"
+          >
+            User: {displayUserId}
+          </p>
 
-          {(authError || sessionExpired) && (
-            <div className="p-2.5 rounded-lg text-xs font-mono text-[var(--z-danger)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_35%,transparent)]">
-              Auth notice: {authError || 'Session expired. Sign in again to restore protected privileges.'}
+          {isAuthBlocked && (
+            <div
+              role="alert"
+              data-testid="login-blocked-notice"
+              className="w-full p-2.5 rounded-lg text-xs font-mono text-[var(--z-danger)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_35%,transparent)]"
+            >
+              BLOCKED: {authError || 'Session expired. Sign in again to restore protected privileges.'}
             </div>
           )}
         </div>
       </VividCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Navigation */}
+        {/* Left Navigation + Single Sign out button in menu */}
         <div className="space-y-1.5">
           {sections
             .filter((sec) => {
@@ -391,7 +442,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                 key={sec.id}
                 type="button"
                 onClick={() => setActiveSection(sec.id)}
-                className={`w-full min-h-[42px] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer text-left ${
+                className={`w-full min-h-[44px] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer text-left ${
                   activeSection === sec.id
                     ? 'bg-[var(--app-surface-elevated)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)]'
                     : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
@@ -401,6 +452,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                 <span>{lang === 'th' ? sec.thLabel : sec.label}</span>
               </button>
             ))}
+
+          {isAuthenticated && (
+            <button
+              type="button"
+              data-testid="menu-sign-out-btn"
+              onClick={logout}
+              className="w-full min-h-[44px] mt-2 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-surface)] text-[var(--z-danger)] border border-[var(--app-card-border)] hover:border-[var(--z-danger)] cursor-pointer transition-colors"
+            >
+              Sign out
+            </button>
+          )}
         </div>
 
         {/* Right Content */}
@@ -545,7 +607,29 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
               subtitle={lang === 'th' ? `สิทธิ์ระบบปัญญาประดิษฐ์สำหรับบทบาท ${role}` : `Granular native intelligence permissions for ${role}`}
               gradientAccent="emerald"
             >
-              <div className="space-y-2.5 text-xs">
+              <div className="space-y-3 text-xs">
+                {devAccessEnabled && (
+                  <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-[var(--app-card-border)]">
+                    <span className="font-semibold text-[var(--app-text-secondary)]">
+                      {lang === 'th' ? 'บทบาทการพัฒนา:' : 'Dev Role:'}
+                    </span>
+                    {(['User', 'Developer', 'Administrator'] as ControlRole[]).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                          role === r && isAuthenticated
+                            ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[var(--app-accent)]'
+                            : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-[var(--app-card-border)] hover:text-[var(--app-text-primary)]'
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {[
                   { key: 'nativeInference', label: lang === 'th' ? 'ประมวลผล Native Neural Inference (Cloud Runtime)' : 'Native Neural Inference (Cloud Runtime)' },
                   { key: 'modelTraining', label: lang === 'th' ? 'ฝึกโมเดลใน ModelLaboratory' : 'Model Laboratory Training' },

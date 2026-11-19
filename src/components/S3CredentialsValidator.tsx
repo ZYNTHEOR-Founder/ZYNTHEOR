@@ -260,7 +260,7 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
                       configuredMap.S3_ACCESS_KEY_ID?.configured &&
                       configuredMap.S3_SECRET_ACCESS_KEY?.configured
                     ? 'IMPLEMENTED'
-                    : 'BLOCKED'
+                    : 'NOT_CONFIGURED'
               }
             />
             {verifyResult && (
@@ -310,7 +310,7 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
                 placeholder={
                   configuredMap.S3_ACCESS_KEY_ID?.configured
                     ? `Stored (${configuredMap.S3_ACCESS_KEY_ID.maskedPreview || '••••'}) — enter new key to replace`
-                    : 'AKIAIOSFODNN7EXAMPLE'
+                    : 'UNSET'
                 }
                 autoComplete="off"
                 spellCheck={false}
@@ -355,7 +355,7 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
                 placeholder={
                   configuredMap.S3_SECRET_ACCESS_KEY?.configured
                     ? `Stored (${configuredMap.S3_SECRET_ACCESS_KEY.maskedPreview || '••••'}) — enter new secret to replace`
-                    : 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+                    : 'UNSET'
                 }
                 autoComplete="off"
                 spellCheck={false}
@@ -374,16 +374,21 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
 
           {/* S3_BUCKET */}
           <div className="space-y-1">
-            <label htmlFor="s3-bucket" className="block text-[11px] font-mono font-bold text-[var(--app-text-primary)]">
-              S3_BUCKET
-            </label>
+            <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+              <label htmlFor="s3-bucket" className="font-bold text-[var(--app-text-primary)]">
+                S3_BUCKET
+              </label>
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${configuredMap.S3_BUCKET?.configured ? 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)]' : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)]'}`}>
+                {configuredMap.S3_BUCKET?.configured ? 'SET' : 'UNSET'}
+              </span>
+            </div>
             <input
               id="s3-bucket"
               data-testid="s3-input-S3_BUCKET"
               type="text"
               value={bucket}
               onChange={(e) => setBucket(e.target.value)}
-              placeholder="zyntheor-checkpoints"
+              placeholder="UNSET"
               spellCheck={false}
               className="w-full px-3.5 py-2 rounded-xl font-mono text-xs bg-[var(--app-bg)] border border-[var(--app-card-border)] focus:border-[var(--app-accent)] outline-none text-[var(--app-text-primary)]"
             />
@@ -391,16 +396,21 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
 
           {/* S3_REGION */}
           <div className="space-y-1">
-            <label htmlFor="s3-region" className="block text-[11px] font-mono font-bold text-[var(--app-text-primary)]">
-              S3_REGION
-            </label>
+            <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+              <label htmlFor="s3-region" className="font-bold text-[var(--app-text-primary)]">
+                S3_REGION
+              </label>
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${configuredMap.S3_REGION?.configured ? 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)]' : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)]'}`}>
+                {configuredMap.S3_REGION?.configured ? 'SET' : 'UNSET'}
+              </span>
+            </div>
             <input
               id="s3-region"
               data-testid="s3-input-S3_REGION"
               type="text"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              placeholder="us-east-1 or auto"
+              placeholder="UNSET"
               spellCheck={false}
               className="w-full px-3.5 py-2 rounded-xl font-mono text-xs bg-[var(--app-bg)] border border-[var(--app-card-border)] focus:border-[var(--app-accent)] outline-none text-[var(--app-text-primary)]"
             />
@@ -408,16 +418,21 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
 
           {/* S3_ENDPOINT */}
           <div className="space-y-1">
-            <label htmlFor="s3-endpoint" className="block text-[11px] font-mono font-bold text-[var(--app-text-primary)]">
-              S3_ENDPOINT
-            </label>
+            <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+              <label htmlFor="s3-endpoint" className="font-bold text-[var(--app-text-primary)]">
+                S3_ENDPOINT
+              </label>
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${configuredMap.S3_ENDPOINT?.configured ? 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)]' : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)]'}`}>
+                {configuredMap.S3_ENDPOINT?.configured ? 'SET' : 'UNSET'}
+              </span>
+            </div>
             <input
               id="s3-endpoint"
               data-testid="s3-input-S3_ENDPOINT"
               type="url"
               value={endpoint}
               onChange={(e) => setEndpoint(e.target.value)}
-              placeholder="https://<account>.r2.cloudflarestorage.com (optional for AWS S3)"
+              placeholder="UNSET"
               spellCheck={false}
               className="w-full px-3.5 py-2 rounded-xl font-mono text-xs bg-[var(--app-bg)] border border-[var(--app-card-border)] focus:border-[var(--app-accent)] outline-none text-[var(--app-text-primary)]"
             />
@@ -425,16 +440,21 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
 
           {/* S3_CHECKPOINT_KEY */}
           <div className="space-y-1">
-            <label htmlFor="s3-checkpoint-key" className="block text-[11px] font-mono font-bold text-[var(--app-text-primary)]">
-              S3_CHECKPOINT_KEY
-            </label>
+            <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+              <label htmlFor="s3-checkpoint-key" className="font-bold text-[var(--app-text-primary)]">
+                S3_CHECKPOINT_KEY
+              </label>
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${configuredMap.S3_CHECKPOINT_KEY?.configured ? 'bg-[color-mix(in_srgb,var(--z-ok)_14%,transparent)] text-[var(--z-ok)]' : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)]'}`}>
+                {configuredMap.S3_CHECKPOINT_KEY?.configured ? 'SET' : 'UNSET'}
+              </span>
+            </div>
             <input
               id="s3-checkpoint-key"
               data-testid="s3-input-S3_CHECKPOINT_KEY"
               type="text"
               value={checkpointKey}
               onChange={(e) => setCheckpointKey(e.target.value)}
-              placeholder="checkpoints/model_checkpoint.pt"
+              placeholder="UNSET"
               spellCheck={false}
               className="w-full px-3.5 py-2 rounded-xl font-mono text-xs bg-[var(--app-bg)] border border-[var(--app-card-border)] focus:border-[var(--app-accent)] outline-none text-[var(--app-text-primary)]"
             />

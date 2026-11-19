@@ -1,20 +1,20 @@
 {
   "version": "ZYNTHEOR_KG_V1",
-  "updatedAt": "2026-11-19T11:59:03.575Z",
+  "updatedAt": "2026-11-19T12:06:09.664Z",
   "nodes": [
     {
-      "nodeId": "kgn_2c6af4b45d62",
-      "label": "TenantA Secret 1795089513893",
-      "canonicalKey": "tenanta secret 1795089513893",
+      "nodeId": "kgn_5ffa5f870b8d",
+      "label": "TenantA Secret 1795089941477",
+      "canonicalKey": "tenanta secret 1795089941477",
       "kind": "METRIC",
       "aliases": [
-        "TenantA Secret 1795089513893"
+        "TenantA Secret 1795089941477"
       ],
       "documentIds": [
-        "doc_1795089513897_ok9sy"
+        "doc_1795089941482_huex9"
       ],
       "tenantId": "tenant_a",
-      "updatedAt": "2026-11-19T11:58:33.898Z"
+      "updatedAt": "2026-11-19T12:05:41.482Z"
     },
     {
       "nodeId": "kgn_ec9b1f57c758",
@@ -25,6 +25,7 @@
         "rbac"
       ],
       "documentIds": [
+        "doc_1795089941482_huex9",
         "doc_1795089513897_ok9sy",
         "doc_1795089090160_yz2pt",
         "doc_1795088325873_hegkq",
@@ -44,6 +45,20 @@
       ],
       "tenantId": "tenant_a",
       "updatedAt": "2026-11-18T11:20:05.194Z"
+    },
+    {
+      "nodeId": "kgn_2c6af4b45d62",
+      "label": "TenantA Secret 1795089513893",
+      "canonicalKey": "tenanta secret 1795089513893",
+      "kind": "METRIC",
+      "aliases": [
+        "TenantA Secret 1795089513893"
+      ],
+      "documentIds": [
+        "doc_1795089513897_ok9sy"
+      ],
+      "tenantId": "tenant_a",
+      "updatedAt": "2026-11-19T11:58:33.898Z"
     },
     {
       "nodeId": "kgn_5b4f14cda69b",
@@ -1040,6 +1055,24 @@
   ],
   "edges": [
     {
+      "edgeId": "kge_7142238b79f7",
+      "subjectId": "kgn_5ffa5f870b8d",
+      "subjectLabel": "TenantA Secret 1795089941477",
+      "relation": "TAGGED_AS",
+      "objectId": "kgn_ec9b1f57c758",
+      "objectLabel": "rbac",
+      "documentId": "doc_1795089941482_huex9",
+      "documentTitle": "TenantA Secret 1795089941477",
+      "contentHash": "641b59890d611ace145e1302769e9b8b58a7478a00532b0190c4e1c89d880323",
+      "provenance": "rbac-test",
+      "confidence": 0.75,
+      "validFrom": "2026-11-19T12:05:41.482Z",
+      "updatedAt": "2026-11-19T12:05:41.482Z",
+      "freshnessScore": 1,
+      "tenantId": "tenant_a",
+      "snippet": "Document 'TenantA Secret 1795089941477' (RBAC)"
+    },
+    {
       "edgeId": "kge_51a7acfe9c5f",
       "subjectId": "kgn_2c6af4b45d62",
       "subjectLabel": "TenantA Secret 1795089513893",
@@ -1125,7 +1158,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-19T11:19:19.672Z",
       "updatedAt": "2026-11-19T11:19:19.672Z",
-      "freshnessScore": 1,
+      "freshnessScore": 0.999,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795087159664' (RBAC)"
     },

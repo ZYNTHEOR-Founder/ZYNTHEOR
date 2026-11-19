@@ -5,24 +5,37 @@ import { WorkflowStepper } from '../WorkflowStepper';
 import { TaskExecutionProgressBar } from '../TaskExecutionProgressBar';
 import {
   deriveWorkflowSnapshot,
+  getWorkflowStageMeta,
   type WorkflowStageId,
   type WorkflowStageState,
+  type WorkflowStageStatus,
 } from '../../utils/workflowStages';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowRight,
   BrainCircuit,
+  CheckCircle2,
   ChevronDown,
+  CircleDashed,
   Code2,
   Eye,
   EyeOff,
   FlaskConical,
+  Loader2,
+  Maximize2,
+  Minimize2,
   Paperclip,
   Play,
   RefreshCw,
+  RotateCcw,
   ShieldCheck,
+  Terminal,
+  Wifi,
+  WifiOff,
+  X,
 } from 'lucide-react';
 import { useSentimentTrendShortcut } from '../../hooks/useSentimentTrendShortcut';
 
@@ -209,10 +222,53 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const goalInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const terminalInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const terminalLogsContainerRef = useRef<HTMLDivElement | null>(null);
   const [attachmentError, setAttachmentError] = useState('');
   const [showTrainingDetails, setShowTrainingDetails] = useState(false);
-  const [showWorkflowStepper, setShowWorkflowStepper] = useState(false);
+  const [showWorkflowStepper, setShowWorkflowStepper] = useState(true);
+  const [terminalMode, setTerminalMode] = useState<'closed' | 'maximized' | 'minimized'>('closed');
+  const [terminalAutoScroll, setTerminalAutoScroll] = useState(true);
+  const [browserOnline, setBrowserOnline] = useState<boolean>(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
   const [projectStack, setProjectStack] = useState<'node_fullstack' | 'node_api' | 'python_service' | 'static_web'>('node_fullstack');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleOnline = () => setBrowserOnline(true);
+    const handleOffline = () => setBrowserOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || terminalMode !== 'maximized') return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setTerminalMode('closed');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [terminalMode]);
+
+  useEffect(() => {
+    if (terminalMode !== 'maximized' || !terminalAutoScroll) return;
+    const el = terminalLogsContainerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [terminalMode, terminalAutoScroll, workflowLogs.length]);
 
   const MAX_ATTACHMENT_BYTES = 200 * 1024;
   const MAX_GOAL_CHARS = 250000;
@@ -302,9 +358,69 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
     };
   }, [workflowLogs]);
 
+  const activeStageForIndicator = useMemo<WorkflowStageState>(() => {
+    return (
+      workflowSnapshot.stages.find((s) => s.status === 'FAILED') ??
+      workflowSnapshot.stages.find((s) => s.status === 'RUNNING') ??
+      workflowSnapshot.stages.find((s) => s.id === workflowSnapshot.activeStageId) ??
+      workflowSnapshot.stages[0]
+    );
+  }, [workflowSnapshot]);
+
+  const activeStageMeta = useMemo(
+    () => getWorkflowStageMeta(activeStageForIndicator.id),
+    [activeStageForIndicator.id]
+  );
+
+  const stageStatusTone = (status: WorkflowStageStatus) => {
+    switch (status) {
+      case 'COMPLETED':
+        return {
+          text: 'text-[var(--z-ok)]',
+          badge: 'border-[color-mix(in_srgb,var(--z-ok)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-ok)_12%,var(--app-surface))] text-[var(--z-ok)]',
+          label: th ? 'เสร็จสิ้น' : 'COMPLETED',
+        };
+      case 'RUNNING':
+        return {
+          text: 'text-[var(--app-accent)]',
+          badge: 'border-[var(--app-accent)] bg-[color-mix(in_srgb,var(--app-accent)_14%,var(--app-surface))] text-[var(--app-accent)]',
+          label: th ? 'กำลังทำงาน' : 'RUNNING',
+        };
+      case 'FAILED':
+        return {
+          text: 'text-[var(--z-danger)]',
+          badge: 'border-[var(--z-danger)] bg-[color-mix(in_srgb,var(--z-danger)_14%,var(--app-surface))] text-[var(--z-danger)]',
+          label: th ? 'ติดขัด' : 'FAILED',
+        };
+      case 'PENDING':
+      default:
+        return {
+          text: 'text-[var(--app-text-secondary)]',
+          badge: 'border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)]',
+          label: th ? 'รอดำเนินการ' : 'PENDING',
+        };
+    }
+  };
+
   const model = statusData?.model;
   const audit = statusData?.audit;
   const training = statusData?.training ?? null;
+  const connectivity = statusData?.connectivity;
+  const cloudOnline = Boolean(connectivity?.online);
+  const onlineModeStatus: string = !browserOnline
+    ? 'BLOCKED'
+    : cloudOnline
+      ? 'VERIFIED'
+      : statusData
+        ? 'PARTIAL'
+        : 'CHECKING';
+  const onlineModeLabel = !browserOnline
+    ? (th ? 'ออฟไลน์ถูกบล็อก (ต้องออนไลน์)' : 'OFFLINE BLOCKED')
+    : cloudOnline
+      ? (th ? 'ออนไลน์ (Live Cloud)' : 'ONLINE (LIVE)')
+      : statusData
+        ? (th ? 'ออนไลน์ (API สด · รอตั้งค่า Cloud)' : 'ONLINE (API LIVE)')
+        : (th ? 'กำลังตรวจออนไลน์' : 'CHECKING');
   const inferenceReady = Boolean(model?.inferenceReady && model?.weightsLoaded);
   const runtimeStatus: StatusLevel = inferenceReady ? 'VERIFIED' : 'BLOCKED';
   const checkpointStatus: StatusLevel = model?.weightsLoaded ? 'VERIFIED' : 'BLOCKED';
@@ -492,6 +608,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2 border-t border-[var(--app-card-border)] text-xs text-[var(--app-text-secondary)]">
+          <span className="inline-flex items-center gap-2" data-testid="online-only-status">
+            {browserOnline ? (
+              <Wifi className="w-3.5 h-3.5 text-[var(--app-accent)]" aria-hidden="true" />
+            ) : (
+              <WifiOff className="w-3.5 h-3.5 text-[var(--z-danger)]" aria-hidden="true" />
+            )}
+            <span>{th ? 'การเชื่อมต่อ' : 'Connectivity'}</span>
+            <StatusDot
+              status={onlineModeStatus}
+              label={onlineModeLabel}
+              detail={connectivity?.reason || (th ? 'ระบบทำงานแบบออนไลน์เท่านั้น (ไม่ใช้ออฟไลน์)' : 'Online-only mode enforced')}
+            />
+          </span>
           <span className="inline-flex items-center gap-2">
             <span>Runtime</span>
             <StatusDot
@@ -538,13 +667,59 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-card)] p-4 sm:p-6 space-y-3.5"
         aria-label={th ? 'สั่งงานระบบโดยตรง' : 'Direct task dispatch'}
       >
-        <div className="flex items-center justify-between gap-2">
-          <label htmlFor="command-center-goal-input" className="text-sm font-medium text-[var(--app-text-primary)]">
-            {th ? 'คุณต้องการให้ ZYNTHEOR ทำอะไร?' : 'What should ZYNTHEOR work on?'}
-          </label>
-          <span className="text-[11px] font-mono tabular-nums text-[var(--app-text-secondary)]">
-            {goal.length.toLocaleString()} / {MAX_GOAL_CHARS.toLocaleString()}
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-3 min-w-0">
+            <label htmlFor="command-center-goal-input" className="text-sm font-medium text-[var(--app-text-primary)]">
+              {th ? 'คุณต้องการให้ ZYNTHEOR ทำอะไร?' : 'What should ZYNTHEOR work on?'}
+            </label>
+            <span className="text-[11px] font-mono tabular-nums text-[var(--app-text-secondary)]">
+              {goal.length.toLocaleString()} / {MAX_GOAL_CHARS.toLocaleString()}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 ml-auto shrink-0">
+            <button
+              type="button"
+              data-testid="command-center-open-terminal-btn"
+              onClick={() => setTerminalMode('maximized')}
+              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3.5 py-2 text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] hover:text-[var(--app-accent)] cursor-pointer transition-colors whitespace-nowrap"
+            >
+              {terminalMode === 'minimized' ? (
+                <Maximize2 className="w-3.5 h-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />
+              ) : (
+                <Terminal className="w-3.5 h-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />
+              )}
+              <span>
+                {terminalMode === 'minimized'
+                  ? (th ? 'ขยาย Terminal' : 'Resume Terminal')
+                  : (th ? 'เปิด Terminal' : 'Open Terminal')}
+              </span>
+              {workflowLogs.length > 0 && (
+                <span className="font-mono text-[10px] tabular-nums text-[var(--app-text-secondary)]">
+                  ({workflowLogs.length})
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              data-testid="command-center-run-task-btn"
+              onClick={() => {
+                if (!browserOnline) return;
+                if (onRunTask && onGoalChange) onRunTask();
+                else onOpenQuickTask();
+              }}
+              disabled={!browserOnline || isWorkflowRunning || !goal.trim()}
+              className="min-h-[40px] inline-flex items-center gap-2 rounded-lg bg-[var(--app-accent-deep)] px-4 sm:px-5 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 cursor-pointer transition-all whitespace-nowrap"
+            >
+              <Play className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                {isWorkflowRunning
+                  ? (th ? 'กำลังดำเนินงาน…' : 'Executing…')
+                  : (th ? 'เริ่มดำเนินงาน' : 'Run task')}
+              </span>
+            </button>
+          </div>
         </div>
 
         <textarea
@@ -560,7 +735,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               ? 'พิมพ์คำสั่งภาษาไทยหรืออังกฤษปนกันได้ เช่น สร้าง API ตรวจสอบสิทธิ์, วิเคราะห์ไฟล์, หรือสรุปสถานะการฝึก R0...'
               : 'Describe your task in Thai or English: build an API, analyze workspace files, or verify training readiness…'
           }
-          className="w-full resize-y rounded-lg border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-4 py-3 text-sm leading-relaxed text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)]/70 outline-none focus:border-[var(--app-accent)]"
+          className="w-full resize-y rounded-lg border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-4 py-3 text-base sm:text-sm leading-relaxed text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)]/70 outline-none focus:border-[var(--app-accent)]"
         />
 
         <input
@@ -642,7 +817,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                   type="button"
                   data-testid="command-center-build-app-btn"
                   onClick={() => onCreateSoftwareProject(projectStack)}
-                  disabled={isCreatingSoftwareProject || isWorkflowRunning || !goal.trim()}
+                  disabled={!browserOnline || isCreatingSoftwareProject || isWorkflowRunning || !goal.trim()}
                   className="min-h-[40px] inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[var(--app-accent)] hover:bg-[var(--app-surface-elevated)] disabled:opacity-40 cursor-pointer transition-colors whitespace-nowrap"
                 >
                   <Code2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -655,25 +830,22 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               </div>
             )}
           </div>
-
-          <button
-            type="button"
-            data-testid="command-center-run-task-btn"
-            onClick={() => {
-              if (onRunTask && onGoalChange) onRunTask();
-              else onOpenQuickTask();
-            }}
-            disabled={isWorkflowRunning || !goal.trim()}
-            className="min-h-[40px] inline-flex items-center gap-2 rounded-lg bg-[var(--app-accent-deep)] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 cursor-pointer transition-all"
-          >
-            <Play className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>
-              {isWorkflowRunning
-                ? (th ? 'กำลังดำเนินงาน…' : 'Executing…')
-                : (th ? 'เริ่มดำเนินงาน' : 'Run task')}
-            </span>
-          </button>
         </div>
+
+        {!browserOnline && (
+          <div
+            role="alert"
+            data-testid="offline-blocked-banner"
+            className="flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] px-3.5 py-2 text-xs text-[var(--z-danger)]"
+          >
+            <WifiOff className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span>
+              {th
+                ? 'ไม่รองรับการทำงานแบบออฟไลน์ — กรุณาเชื่อมต่ออินเทอร์เน็ตและเซิร์ฟเวอร์ออนไลน์ก่อนสั่งงาน'
+                : 'Offline execution is disabled — connect to an online network and live server to dispatch tasks.'}
+            </span>
+          </div>
+        )}
 
         {lastCreatedProject && (
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--app-card-border)] text-xs">
@@ -1036,55 +1208,161 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
       </section>
 
-      {/* 5. Active Task Execution Progress (Shown only when running or logs exist) */}
-      {(workflowLogs.length > 0 || isWorkflowRunning) && (
-        <div className="space-y-4">
-          <TaskExecutionProgressBar
-            snapshot={workflowSnapshot}
-            logs={workflowLogs}
-            goal={workflowGoal || goal}
-            lang={lang}
-            verificationHash={workflowVerificationHash}
-            activeFilterStageId={activeFilterStageId}
-            onStageClick={onStageClick}
-            onInspectStageInTerminal={onInspectStageInTerminal}
-            onStartTask={() => {
-              if (onRunTask && onGoalChange) onRunTask();
-              else onOpenQuickTask();
-            }}
-            onRetryTask={onRetryQuickTask}
-          />
+      {/* 5. 7-Stage Workflow Timeline & Stage-Specific Status Indicator (Live Online Stream) */}
+      <section
+        aria-label={th ? 'ไทม์ไลน์การทำงาน 7 ขั้นตอนและสถานะรายขั้นตอน' : '7-Stage Workflow Timeline & Stage Status Indicator'}
+        data-testid="command-center-workflow-section"
+        className="space-y-4"
+      >
+        {/* Stage-Specific Status Indicator derived directly from workflowStages */}
+        <div
+          data-testid="workflow-stage-status-indicator"
+          className="rounded-xl border border-[var(--app-card-border)] bg-[var(--app-card)] p-4 sm:p-5 space-y-3"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border font-mono text-xs font-bold tabular-nums ${
+                  stageStatusTone(activeStageForIndicator.status).badge
+                }`}
+              >
+                {String(activeStageForIndicator.order).padStart(2, '0')}
+              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+                  <span className="font-semibold text-[var(--app-text-secondary)]">
+                    {th
+                      ? `สถานะรายขั้นตอน (${activeStageForIndicator.order}/${workflowSnapshot.totalSteps})`
+                      : `STAGE STATUS (${activeStageForIndicator.order}/${workflowSnapshot.totalSteps})`}
+                  </span>
+                  <span className={`font-bold ${stageStatusTone(activeStageForIndicator.status).text}`}>
+                    · {stageStatusTone(activeStageForIndicator.status).label}
+                  </span>
+                  <span className="text-[var(--app-text-secondary)]">
+                    · {workflowSnapshot.completedSteps}/{workflowSnapshot.totalSteps} {th ? 'ขั้นตอนสำเร็จ' : 'completed'}
+                  </span>
+                </div>
+                <div className="mt-0.5 flex flex-wrap items-baseline gap-2">
+                  <span className="text-sm font-bold text-[var(--app-text-primary)] truncate">
+                    {th
+                      ? activeStageMeta?.labelTh || activeStageForIndicator.labelTh
+                      : activeStageMeta?.labelEn || activeStageForIndicator.labelEn}
+                  </span>
+                  <span className="text-xs text-[var(--app-text-secondary)] truncate">
+                    — {th
+                      ? activeStageMeta?.subtitleTh || activeStageForIndicator.subtitleTh
+                      : activeStageMeta?.subtitleEn || activeStageForIndicator.subtitleEn}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowWorkflowStepper((v) => !v)}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
-            >
-              <span>{showWorkflowStepper ? (th ? 'ซ่อนลำดับ 7 ขั้นตอน' : 'Hide 7-stage trace') : (th ? 'ดูรายละเอียด 7 ขั้นตอน' : 'Show 7-stage trace')}</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showWorkflowStepper ? 'rotate-180' : ''}`} />
-            </button>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-2.5 py-1 text-[11px] font-mono text-[var(--app-text-secondary)]">
+                {browserOnline ? (
+                  <Wifi className="w-3 h-3 text-[var(--z-ok)]" aria-hidden="true" />
+                ) : (
+                  <WifiOff className="w-3 h-3 text-[var(--z-danger)]" aria-hidden="true" />
+                )}
+                <span>{th ? 'โหมดออนไลน์สด' : 'Live Online'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowWorkflowStepper((v) => !v)}
+                aria-expanded={showWorkflowStepper}
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-2.5 py-1 text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer transition-colors"
+              >
+                <span>
+                  {showWorkflowStepper
+                    ? th
+                      ? 'ย่อรายละเอียดไทม์ไลน์'
+                      : 'Collapse timeline'
+                    : th
+                    ? 'แสดงไทม์ไลน์ 7 ขั้นตอน'
+                    : 'Expand 7-stage timeline'}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showWorkflowStepper ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
           </div>
 
-          {showWorkflowStepper && (
-            <WorkflowStepper
-              activeStageIndex={workflowSnapshot.activeStageIndex}
-              stageStatuses={workflowSnapshot.stageStatuses}
-              stages={workflowSnapshot.stages}
-              totalLogs={workflowSnapshot.totalLogs}
-              totalDurationMs={workflowSnapshot.totalDurationMs}
-              goal={workflowSnapshot.goal}
-              lang={lang}
-              activeFilterStageId={activeFilterStageId}
-              onStageClick={onStageClick}
-              onClearStageFilter={onClearStageFilter}
-              onOpenQuickTask={onOpenQuickTask}
-              onInspectStageInTerminal={onInspectStageInTerminal}
-              onRetryQuickTask={onRetryQuickTask}
-            />
-          )}
+          {/* 7-Stage Compact Status Pills */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-2 border-t border-[var(--app-card-border)]">
+            {workflowSnapshot.stages.map((stage) => {
+              const tone = stageStatusTone(stage.status);
+              const isSelected = activeFilterStageId === stage.id || activeStageForIndicator.id === stage.id;
+              return (
+                <button
+                  key={stage.id}
+                  type="button"
+                  data-testid={`stage-indicator-pill-${stage.id}`}
+                  data-status={stage.status}
+                  onClick={() => {
+                    onStageClick?.(stage);
+                    setShowWorkflowStepper(true);
+                  }}
+                  className={`flex items-center justify-between gap-1.5 rounded-lg border px-2.5 py-2 text-left transition-colors cursor-pointer ${tone.badge} ${
+                    isSelected ? 'ring-1 ring-[var(--app-accent)] bg-[var(--app-surface-elevated)]' : 'hover:border-[var(--app-accent)]'
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className="font-mono text-[10px] font-bold opacity-85">
+                      {String(stage.order).padStart(2, '0')} · {tone.label}
+                    </div>
+                    <div className="text-[11px] font-semibold text-[var(--app-text-primary)] truncate">
+                      {th ? stage.labelTh : stage.labelEn}
+                    </div>
+                  </div>
+                  {stage.status === 'COMPLETED' ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--z-ok)] shrink-0" aria-hidden="true" />
+                  ) : stage.status === 'RUNNING' ? (
+                    <Loader2 className="w-3.5 h-3.5 text-[var(--app-accent)] animate-spin shrink-0" aria-hidden="true" />
+                  ) : stage.status === 'FAILED' ? (
+                    <AlertCircle className="w-3.5 h-3.5 text-[var(--z-danger)] shrink-0" aria-hidden="true" />
+                  ) : (
+                    <CircleDashed className="w-3.5 h-3.5 text-[var(--app-text-secondary)] shrink-0" aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
+
+        <TaskExecutionProgressBar
+          snapshot={workflowSnapshot}
+          logs={workflowLogs}
+          goal={workflowGoal || goal}
+          lang={lang}
+          verificationHash={workflowVerificationHash}
+          activeFilterStageId={activeFilterStageId}
+          onStageClick={onStageClick}
+          onInspectStageInTerminal={onInspectStageInTerminal}
+          onStartTask={() => {
+            if (!browserOnline) return;
+            if (onRunTask && onGoalChange) onRunTask();
+            else onOpenQuickTask();
+          }}
+          onRetryTask={onRetryQuickTask}
+        />
+
+        {showWorkflowStepper && (
+          <WorkflowStepper
+            activeStageIndex={workflowSnapshot.activeStageIndex}
+            stageStatuses={workflowSnapshot.stageStatuses}
+            stages={workflowSnapshot.stages}
+            totalLogs={workflowSnapshot.totalLogs}
+            totalDurationMs={workflowSnapshot.totalDurationMs}
+            goal={workflowSnapshot.goal}
+            lang={lang}
+            activeFilterStageId={activeFilterStageId}
+            onStageClick={onStageClick}
+            onClearStageFilter={onClearStageFilter}
+            onOpenQuickTask={onOpenQuickTask}
+            onInspectStageInTerminal={onInspectStageInTerminal}
+            onRetryQuickTask={onRetryQuickTask}
+          />
+        )}
+      </section>
 
       {/* 6. Session Sentiment Trend (Preserved for Alt+V shortcut & tests when logs exist) */}
       {workflowLogs.length > 0 && (
@@ -1193,6 +1471,198 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             </div>
           )}
         </section>
+      )}
+      {/* 7. Full-Screen Maximized Execution Terminal Overlay (Mobile-Keyboard Safe) */}
+      {terminalMode === 'maximized' && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={th ? 'แผงควบคุม Terminal แบบเต็มจอ' : 'Maximized Execution Terminal'}
+          data-testid="command-center-maximized-terminal"
+          className="fixed inset-0 z-[80] flex flex-col w-full h-[100dvh] bg-[var(--app-bg)] text-[var(--app-text-primary)] overflow-hidden"
+        >
+          {/* Sticky Top Terminal Bar */}
+          <header className="shrink-0 flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 py-3 border-b border-[var(--app-card-border)] bg-[var(--app-surface)]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] flex items-center justify-center text-[var(--app-accent)] shrink-0">
+                <Terminal className="w-4 h-4" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold tracking-tight truncate">
+                    {th ? 'Execution Terminal' : 'Execution Terminal'}
+                  </h3>
+                  <span className="font-mono text-[11px] tabular-nums text-[var(--app-text-secondary)]">
+                    · {workflowLogs.length} {th ? 'บรรทัด' : 'lines'}
+                  </span>
+                </div>
+                <p className="text-[11px] font-mono text-[var(--app-text-secondary)] truncate">
+                  {isWorkflowRunning
+                    ? (th ? 'กำลังประมวลผลแบบสด...' : 'Streaming execution...')
+                    : workflowDone
+                      ? (th ? 'เสร็จสิ้นการทำงาน' : 'Execution finished')
+                      : (th ? 'พร้อมรับคำสั่ง' : 'Ready for command')}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                data-testid="terminal-minimize-btn"
+                onClick={() => setTerminalMode('minimized')}
+                className="min-h-[40px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-card)] text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer whitespace-nowrap"
+              >
+                <Minimize2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{th ? 'ย่อ' : 'Minimize'}</span>
+              </button>
+              <button
+                type="button"
+                data-testid="terminal-close-btn"
+                onClick={() => setTerminalMode('closed')}
+                className="min-h-[40px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_12%,var(--app-card))] text-xs font-semibold text-[var(--z-danger)] hover:brightness-110 cursor-pointer whitespace-nowrap"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{th ? 'ปิด' : 'Close'}</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Top Sticky Command Input Band — anchored above log stream so mobile keyboard NEVER covers typing */}
+          <div className="shrink-0 px-4 sm:px-6 py-3 border-b border-[var(--app-card-border)] bg-[var(--app-card)] space-y-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-stretch gap-2.5">
+              <textarea
+                ref={terminalInputRef}
+                data-testid="terminal-command-input"
+                value={goal}
+                onChange={(e) => onGoalChange?.(e.target.value.slice(0, MAX_GOAL_CHARS))}
+                readOnly={!onGoalChange}
+                rows={2}
+                maxLength={MAX_GOAL_CHARS}
+                onKeyDown={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (browserOnline && !isWorkflowRunning && goal.trim()) {
+                      if (onRunTask && onGoalChange) onRunTask();
+                      else onOpenQuickTask();
+                    }
+                  }
+                }}
+                placeholder={
+                  th
+                    ? 'พิมพ์คำสั่งที่นี่ (Ctrl+Enter เพื่อรัน)...'
+                    : 'Type command or goal here (Ctrl+Enter to run)...'
+                }
+                aria-label={th ? 'ช่องพิมพ์คำสั่ง Terminal' : 'Terminal command input'}
+                className="flex-1 resize-none rounded-lg border border-[var(--app-card-border)] bg-[var(--app-input-bg)] px-3.5 py-2.5 text-base sm:text-sm text-[var(--app-text-primary)] placeholder:text-[var(--app-text-secondary)]/70 outline-none focus:border-[var(--app-accent)]"
+              />
+              <div className="flex items-center justify-end gap-2 shrink-0">
+                {workflowLogs.some((l) => /\[ERROR\]/i.test(l)) && !isWorkflowRunning && onRetryQuickTask && (
+                  <button
+                    type="button"
+                    onClick={onRetryQuickTask}
+                    className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--z-danger)_14%,transparent)] text-xs font-semibold text-[var(--z-danger)] hover:brightness-110 cursor-pointer whitespace-nowrap"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>{th ? 'ลองใหม่' : 'Retry'}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  data-testid="terminal-run-btn"
+                  onClick={() => {
+                    if (!browserOnline) return;
+                    if (onRunTask && onGoalChange) onRunTask();
+                    else onOpenQuickTask();
+                  }}
+                  disabled={!browserOnline || isWorkflowRunning || !goal.trim()}
+                  className="min-h-[44px] flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-[var(--app-accent-deep)] text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 cursor-pointer whitespace-nowrap"
+                >
+                  <Play className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>
+                    {isWorkflowRunning
+                      ? (th ? 'กำลังรัน…' : 'Running…')
+                      : (th ? 'เริ่มดำเนินงาน' : 'Run')}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[var(--app-text-secondary)]">
+              <span>
+                {th
+                  ? 'พิมพ์ด้านบนแล้วเลื่อนดูบันทึกการทำงานด้านล่างได้ทันที (ไม่โดนคีย์บอร์ดบัง)'
+                  : 'Input stays pinned at top; scroll execution logs freely below.'}
+              </span>
+              <div className="flex items-center gap-3">
+                <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={terminalAutoScroll}
+                    onChange={(e) => setTerminalAutoScroll(e.target.checked)}
+                    className="accent-[var(--app-accent)]"
+                  />
+                  <span>{th ? 'เลื่อนตามอัตโนมัติ' : 'Auto-scroll'}</span>
+                </label>
+                {workflowLogs.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = terminalLogsContainerRef.current;
+                      if (el) el.scrollTop = el.scrollHeight;
+                    }}
+                    className="text-[var(--app-accent)] hover:underline cursor-pointer"
+                  >
+                    {th ? 'ไปบรรทัดล่าสุด ↓' : 'Latest ↓'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Scrollable Execution Logs Area */}
+          <div
+            ref={terminalLogsContainerRef}
+            data-testid="terminal-logs-scroll-area"
+            className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 pb-12 font-mono text-xs sm:text-[13px] leading-relaxed bg-[var(--app-bg)]"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {workflowLogs.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center py-12 text-[var(--app-text-secondary)] space-y-2">
+                <Terminal className="w-6 h-6 text-[var(--app-accent)] opacity-75" aria-hidden="true" />
+                <p className="text-xs font-sans">
+                  {th
+                    ? 'ยังไม่มีบันทึกการทำงาน — พิมพ์คำสั่งด้านบนแล้วกด เริ่มดำเนินงาน'
+                    : 'No execution logs yet — enter a command above and tap Run.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {workflowLogs.map((line, idx) => {
+                  const isError = /\[ERROR\]|FAIL_CLOSED|blocked/i.test(line);
+                  const isDone = !isError && /\[DONE\]|VERIFIED|passed/i.test(line);
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex items-start gap-3 rounded px-2 py-1 ${
+                        isError
+                          ? 'bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] text-[var(--z-danger)]'
+                          : isDone
+                            ? 'bg-[color-mix(in_srgb,var(--z-ok)_8%,transparent)] text-[var(--z-ok)]'
+                            : 'text-[var(--app-text-primary)]'
+                      }`}
+                    >
+                      <span className="shrink-0 select-none text-[11px] tabular-nums text-[var(--app-text-secondary)] w-8 text-right">
+                        {idx + 1}
+                      </span>
+                      <span className="min-w-0 break-words whitespace-pre-wrap">{line}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

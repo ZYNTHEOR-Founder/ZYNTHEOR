@@ -135,7 +135,7 @@ export const TaskExecutionProgressBar: React.FC<TaskExecutionProgressBarProps> =
       : summary.overallState === 'COMPLETED'
         ? 'bg-[var(--z-ok)]'
         : summary.overallState === 'RUNNING'
-          ? 'bg-gradient-to-r from-[var(--app-accent)] to-[#7c3aed]'
+          ? 'bg-gradient-to-r from-[var(--app-accent-deep)] to-[var(--app-accent)]'
           : 'bg-[var(--app-accent)]';
 
   const stateLabel =
@@ -328,7 +328,7 @@ export const TaskExecutionProgressBar: React.FC<TaskExecutionProgressBarProps> =
               type="button"
               data-testid="task-progress-start-btn"
               onClick={onStartTask}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--app-accent)] px-3 py-1.5 text-[11px] font-bold text-black cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--app-accent-deep)] px-3 py-1.5 text-[11px] font-bold text-white hover:brightness-110 transition-all cursor-pointer"
             >
               <Play className="w-3 h-3" aria-hidden="true" />
               {th ? 'เริ่มงานนี้' : 'Run task'}
