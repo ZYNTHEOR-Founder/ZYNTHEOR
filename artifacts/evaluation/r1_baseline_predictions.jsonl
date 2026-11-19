@@ -1,0 +1,30 @@
+{"id": "th_qa_01", "category": "thai_qa", "prediction": "`training | 'provery' | 'null | 'nonly | 'connective andident a", "reference_answer": "120 คน", "exact_match": false}
+{"id": "th_qa_02", "category": "thai_qa", "prediction": "`training' | 'null' | 'node | 'non-string';\n  const status = number;", "reference_answer": "16:00 น.", "exact_match": false}
+{"id": "th_qa_03", "category": "thai_qa", "prediction": "`training' | 'null' | 'null' | 'null' | 'null';\n  const status = new |", "reference_answer": "1 เมตร", "exact_match": false}
+{"id": "th_qa_04", "category": "thai_qa", "prediction": "`train_steps' | 'null' | 'non-memple';\n  const state = 'S3_CLOCKED';", "reference_answer": "25 ชิ้น", "exact_match": false}
+{"id": "th_qa_05", "category": "thai_qa", "prediction": "`train_steps' | 'null' | 'non-memple';\n  const state = 'S3_CLOCKED';", "reference_answer": "ภาคเหนือ", "exact_match": false}
+{"id": "th_qa_06", "category": "thai_qa", "prediction": "`train_steps' | 'null' | 'noner',\n      'PROVERIFIED',\n      'PARTECKED", "reference_answer": "100 องศาเซลเซียส", "exact_match": false}
+{"id": "th_qa_07", "category": "thai_qa", "prediction": "`training' | 'node | 'null' | 'non-string | 'null';\n  const status = n", "reference_answer": "5 นาที", "exact_match": false}
+{"id": "th_qa_08", "category": "thai_qa", "prediction": "`training | 'training' | 'nonly' | 'null' | 'null' | 'null';\n  const", "reference_answer": "14 คน", "exact_match": false}
+{"id": "th_qa_09", "category": "thai_qa", "prediction": "`training | 'FAIL '${contents}',\n      params: 'Params',\n      resolved: '", "reference_answer": "เท่ากัน", "exact_match": false}
+{"id": "th_qa_10", "category": "thai_qa", "prediction": "`training | 'provery' | 'null' | 'null' | 'null';\n  const status = num", "reference_answer": "1 ชั่วโมง 30 นาที", "exact_match": false}
+{"id": "th_qa_11", "category": "thai_qa", "prediction": "`training | 'provery' | 'null | 'nonly | 'connective andident a", "reference_answer": "525 ราย", "exact_match": false}
+{"id": "th_qa_12", "category": "thai_qa", "prediction": "`train_steps' | 'null' | 'non-memple';\n  const state = 'S3_CLOCKED';", "reference_answer": "12 หน้า", "exact_match": false}
+{"id": "th_qa_13", "category": "thai_qa", "prediction": "`training and and and and and and and and and and stepshot stri", "reference_answer": "เซิร์ฟเวอร์ B", "exact_match": false}
+{"id": "th_qa_14", "category": "thai_qa", "prediction": "`train_steps' | 'null' | 'noner',\n      'PROVERIFIED',\n      'PARTECKED", "reference_answer": "3 กิโลกรัม", "exact_match": false}
+{"id": "th_qa_15", "category": "thai_qa", "prediction": "`train_steps' | 'null' | 'non-memple';\n  const state = 'S3_CLOCKED';", "reference_answer": "วันพฤหัสบดี", "exact_match": false}
+{"id": "th_qa_16", "category": "thai_qa", "prediction": "Tuple Content string | number | null | null;\n  const status = number(c", "reference_answer": "3 ชุด", "exact_match": false}
+{"id": "th_qa_17", "category": "thai_qa", "prediction": "`training | 'provery' | 'null | 'nonly | 'connective | 'nonly |", "reference_answer": "40 คน", "exact_match": false}
+{"id": "th_qa_18", "category": "thai_qa", "prediction": "`training' | 'null' | 'null' | 'null' | 'noner',\n      'Params: 'TA", "reference_answer": "60 เปอร์เซ็นต์", "exact_match": false}
+{"id": "th_qa_19", "category": "thai_qa", "prediction": "`training', 'utf8', 'utf8', 'utf8', ', 'S3_CLOCKED: 'S3_CHECKED", "reference_answer": "02:00 น.", "exact_match": false}
+{"id": "th_qa_20", "category": "thai_qa", "prediction": "`training' | 'null' | 'non-string';\n  const string | 'content' | 'co", "reference_answer": "ทดสอบ", "exact_match": false}
+{"id": "math_01", "category": "math", "prediction": "``` |**********************************************************", "reference_answer": "42", "exact_match": false}
+{"id": "math_02", "category": "math", "prediction": "`train_status',\n      'PRED',\n      'PAPROVERIFIED',\n      'STECT_CLOCKED',", "reference_answer": "53", "exact_match": false}
+{"id": "math_03", "category": "math", "prediction": "`train_steps';\n  const status = nowner.trim();\n  const state(status === 'native_", "reference_answer": "96", "exact_match": false}
+{"id": "math_04", "category": "math", "prediction": "`train_configured_configuration';\n  const checkpoint = 'S3_CLOCKED' |", "reference_answer": "12", "exact_match": false}
+{"id": "math_05", "category": "math", "prediction": "`training | 'provery' | 'null | 'nonly | 'connective and | 'non", "reference_answer": "230", "exact_match": false}
+{"id": "math_06", "category": "math", "prediction": "`train_status' | 'nonly' | 'null' | 'null';\n  const status = new | 'no", "reference_answer": "30", "exact_match": false}
+{"id": "math_07", "category": "math", "prediction": "`training | 'provery' | 'null | 'nonly | 'connective | 'nonly |", "reference_answer": "40", "exact_match": false}
+{"id": "math_08", "category": "math", "prediction": "`train_steps' | 'null' | 'non-memple';\n  const state = 'S3_CLOCKED';", "reference_answer": "325", "exact_match": false}
+{"id": "math_09", "category": "math", "prediction": "`training' | 'null' | 'null';\n  | 'content' | 'content';\n  const stat", "reference_answer": "9", "exact_match": false}
+{"id": "math_10", "category": "math", "prediction": "`train_steps' | 'null' | 'non-memple';\n  const state = 'S3_CLOCKED';", "reference_answer": "60", "exact_match": false}

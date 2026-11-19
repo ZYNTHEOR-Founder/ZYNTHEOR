@@ -1,0 +1,30 @@
+{"id": "th_qa_01", "category": "thai_qa", "context": "บริษัทมีพนักงาน 120 คน แบ่งเป็นฝ่ายผลิต 70 คน และฝ่ายขาย 50 คน", "question": "บริษัทมีพนักงานทั้งหมดกี่คน?", "reference_answer": "120 คน"}
+{"id": "th_qa_02", "category": "thai_qa", "context": "ห้องสมุดเปิดวันจันทร์ถึงศุกร์ เวลา 08:00 ถึง 16:00 น.", "question": "ห้องสมุดปิดกี่โมง?", "reference_answer": "16:00 น."}
+{"id": "th_qa_03", "category": "thai_qa", "context": "ต้นไม้สูง 2 เมตร เมื่อผ่านไปหนึ่งปีสูง 3 เมตร", "question": "ต้นไม้สูงขึ้นกี่เมตร?", "reference_answer": "1 เมตร"}
+{"id": "th_qa_04", "category": "thai_qa", "context": "ร้านค้ามีสินค้า 40 ชิ้น ขายไป 15 ชิ้น", "question": "เหลือสินค้ากี่ชิ้น?", "reference_answer": "25 ชิ้น"}
+{"id": "th_qa_05", "category": "thai_qa", "context": "จังหวัดเชียงใหม่อยู่ในภาคเหนือของประเทศไทย", "question": "เชียงใหม่อยู่ในภาคใด?", "reference_answer": "ภาคเหนือ"}
+{"id": "th_qa_06", "category": "thai_qa", "context": "น้ำบริสุทธิ์ที่ความดันบรรยากาศปกติเดือดที่ประมาณ 100 องศาเซลเซียส", "question": "น้ำบริสุทธิ์เดือดที่ประมาณกี่องศาเซลเซียส?", "reference_answer": "100 องศาเซลเซียส"}
+{"id": "th_qa_07", "category": "thai_qa", "context": "ระบบรับข้อมูลเวลา 09:00 น. และประมวลผลเสร็จเวลา 09:05 น.", "question": "ใช้เวลาประมวลผลกี่นาที?", "reference_answer": "5 นาที"}
+{"id": "th_qa_08", "category": "thai_qa", "context": "ทีม A มีสมาชิก 8 คน ทีม B มีสมาชิก 6 คน", "question": "ทั้งสองทีมมีสมาชิกทั้งหมดกี่คน?", "reference_answer": "14 คน"}
+{"id": "th_qa_09", "category": "thai_qa", "context": "ไฟล์ต้นฉบับมีขนาด 10 MB และไฟล์สำเนามีขนาด 10 MB", "question": "ไฟล์ทั้งสองมีขนาดเท่ากันหรือไม่?", "reference_answer": "เท่ากัน"}
+{"id": "th_qa_10", "category": "thai_qa", "context": "รถไฟออกเวลา 10:30 น. และถึงปลายทางเวลา 12:00 น.", "question": "รถไฟใช้เวลาเดินทางกี่ชั่วโมง 30 นาที?", "reference_answer": "1 ชั่วโมง 30 นาที"}
+{"id": "th_qa_11", "category": "thai_qa", "context": "ฐานข้อมูลมีผู้ใช้ 500 ราย เพิ่มเข้ามาอีก 25 ราย", "question": "มีผู้ใช้ทั้งหมดกี่ราย?", "reference_answer": "525 ราย"}
+{"id": "th_qa_12", "category": "thai_qa", "context": "เอกสารฉบับนี้มี 12 หน้า โดยหน้าสุดท้ายคือหน้า 12", "question": "เอกสารมีทั้งหมดกี่หน้า?", "reference_answer": "12 หน้า"}
+{"id": "th_qa_13", "category": "thai_qa", "context": "เซิร์ฟเวอร์ A ทำงานปกติ ส่วนเซิร์ฟเวอร์ B หยุดทำงาน", "question": "เซิร์ฟเวอร์ใดหยุดทำงาน?", "reference_answer": "เซิร์ฟเวอร์ B"}
+{"id": "th_qa_14", "category": "thai_qa", "context": "น้ำหนักกล่องแรก 4 กิโลกรัม กล่องที่สอง 7 กิโลกรัม", "question": "กล่องที่สองหนักกว่ากล่องแรกกี่กิโลกรัม?", "reference_answer": "3 กิโลกรัม"}
+{"id": "th_qa_15", "category": "thai_qa", "context": "การประชุมเริ่มวันอังคารและสิ้นสุดวันพฤหัสบดี", "question": "การประชุมสิ้นสุดวันอะไร?", "reference_answer": "วันพฤหัสบดี"}
+{"id": "th_qa_16", "category": "thai_qa", "context": "มีข้อมูล 3 ชุด ได้แก่ A, B และ C", "question": "มีข้อมูลทั้งหมดกี่ชุด?", "reference_answer": "3 ชุด"}
+{"id": "th_qa_17", "category": "thai_qa", "context": "ผู้สมัคร 100 คน ผ่านการคัดเลือก 60 คน", "question": "มีผู้สมัครที่ไม่ผ่านกี่คน?", "reference_answer": "40 คน"}
+{"id": "th_qa_18", "category": "thai_qa", "context": "แบตเตอรี่มีพลังงาน 80 เปอร์เซ็นต์ ลดลง 20 เปอร์เซ็นต์", "question": "แบตเตอรี่เหลือกี่เปอร์เซ็นต์?", "reference_answer": "60 เปอร์เซ็นต์"}
+{"id": "th_qa_19", "category": "thai_qa", "context": "ระบบสำรองข้อมูลทุกวันเวลา 02:00 น.", "question": "ระบบสำรองข้อมูลเวลาใด?", "reference_answer": "02:00 น."}
+{"id": "th_qa_20", "category": "thai_qa", "context": "โครงการมีสามระยะ คือ วิเคราะห์ พัฒนา และทดสอบ", "question": "ระยะสุดท้ายของโครงการคืออะไร?", "reference_answer": "ทดสอบ"}
+{"id": "math_01", "category": "math", "context": "จงหาผลลัพธ์ของ 17 + 25", "question": "17 + 25 = ?", "reference_answer": "42"}
+{"id": "math_02", "category": "math", "context": "จงหาผลลัพธ์ของ 90 - 37", "question": "90 - 37 = ?", "reference_answer": "53"}
+{"id": "math_03", "category": "math", "context": "จงหาผลลัพธ์ของ 12 × 8", "question": "12 × 8 = ?", "reference_answer": "96"}
+{"id": "math_04", "category": "math", "context": "จงหาผลลัพธ์ของ 144 ÷ 12", "question": "144 ÷ 12 = ?", "reference_answer": "12"}
+{"id": "math_05", "category": "math", "context": "สินค้าราคา 250 บาท ลดราคา 20 บาท", "question": "ราคาหลังลดเป็นกี่บาท?", "reference_answer": "230"}
+{"id": "math_06", "category": "math", "context": "รถเดินทาง 60 กิโลเมตรในเวลา 2 ชั่วโมง", "question": "ความเร็วเฉลี่ยกี่กิโลเมตรต่อชั่วโมง?", "reference_answer": "30"}
+{"id": "math_07", "category": "math", "context": "สี่เหลี่ยมผืนผ้ายาว 8 หน่วย กว้าง 5 หน่วย", "question": "พื้นที่เท่ากับเท่าไร?", "reference_answer": "40"}
+{"id": "math_08", "category": "math", "context": "มีเงิน 500 บาท ใช้ไป 175 บาท", "question": "เหลือเงินกี่บาท?", "reference_answer": "325"}
+{"id": "math_09", "category": "math", "context": "จำนวนหนึ่งคูณ 7 ได้ 63", "question": "จำนวนนั้นคือเท่าไร?", "reference_answer": "9"}
+{"id": "math_10", "category": "math", "context": "มีหนังสือ 5 กล่อง กล่องละ 12 เล่ม", "question": "มีหนังสือทั้งหมดกี่เล่ม?", "reference_answer": "60"}

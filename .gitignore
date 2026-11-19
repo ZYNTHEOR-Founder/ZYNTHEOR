@@ -84,3 +84,5 @@ native_data/datasets/*.jsonl
 *.log.*
 workspace/.zyntheor/snapshots/
 native_data/training_pipeline/approval.key
+native_data/
+*.pt

@@ -1,0 +1,22 @@
+=== train.jsonl ===
+Lines: 116 | Duplicates: 0 | Empty: 0
+Languages: {'english': 90, 'mixed': 26}
+Missing License: 0 | Missing Source: 0
+
+=== validation.jsonl ===
+Lines: 27 | Duplicates: 0 | Empty: 0
+Languages: {'english': 21, 'mixed': 6}
+Missing License: 0 | Missing Source: 0
+
+=== test.jsonl ===
+Lines: 27 | Duplicates: 0 | Empty: 0
+Languages: {'mixed': 9, 'english': 18}
+Missing License: 0 | Missing Source: 0
+
+=== verified_dataset.jsonl ===
+Lines: 8 | Duplicates: 0 | Empty: 0
+Languages: {'english': 7, 'mixed': 1}
+Missing License: 8 | Missing Source: 8
+
+=== LEAKAGE CHECK ===
+{'validation.jsonl': 0, 'test.jsonl': 0}

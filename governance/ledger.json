@@ -1,0 +1,7 @@
+{
+  "status": "verified",
+  "provenance": "pureseq_lm_41.5m",
+  "steps": 5800,
+  "governance_checked": true,
+  "human_approval": true
+}

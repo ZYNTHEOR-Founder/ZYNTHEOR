@@ -1,0 +1,20 @@
+{
+  "train": {
+    "total": 116,
+    "instruction": 2,
+    "knowledge": 27,
+    "review": 87
+  },
+  "validation": {
+    "total": 27,
+    "instruction": 0,
+    "knowledge": 8,
+    "review": 19
+  },
+  "test": {
+    "total": 27,
+    "instruction": 0,
+    "knowledge": 11,
+    "review": 16
+  }
+}

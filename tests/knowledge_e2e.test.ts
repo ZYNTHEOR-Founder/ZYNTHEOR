@@ -65,7 +65,7 @@ startxref
 }
 
 async function offline() {
-  console.log('\n=== Offline binary pipeline ===');
+  console.log('\n=== Binary parsing pipeline (no server) ===');
   const caps = await parserCapabilityReport();
   if (caps.pdf) ok('PDF capability', JSON.stringify(caps.engines));
   else bad('PDF capability');
@@ -76,15 +76,15 @@ async function offline() {
 
   const fx = await ensureFixtures();
   const pdf = await parsePdfBuffer(fx.pdf);
-  if (pdf.success && pdf.extracted && /ZYNTHEOR|Hello/.test(pdf.text)) ok('PDF extract offline', pdf.text.slice(0, 40));
-  else bad('PDF extract offline', JSON.stringify(pdf.errors));
+  if (pdf.success && pdf.extracted && /ZYNTHEOR|Hello/.test(pdf.text)) ok('PDF extract', pdf.text.slice(0, 40));
+  else bad('PDF extract', JSON.stringify(pdf.errors));
 
   if (fx.docx) {
     const docx = await parseDocxBuffer(fx.docx);
     if (docx.success && docx.extracted) ok('DOCX extract offline', docx.text.slice(0, 40));
     else bad('DOCX extract offline', JSON.stringify(docx.errors));
   } else {
-    ok('DOCX fixture skipped (create with python-docx offline)');
+    ok('DOCX fixture skipped (create the fixture with python-docx)');
   }
 
   // multipart framing

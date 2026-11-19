@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": {
+    "tokenizer": "PASS",
+    "r0_checkpoint": "PASS",
+    "disk_space": "6909 MB free"
+  },
+  "errors": []
+}
