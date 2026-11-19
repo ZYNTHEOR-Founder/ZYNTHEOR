@@ -2670,7 +2670,7 @@ export default function App() {
               }}
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg vivid-gradient-brand flex items-center justify-center text-[var(--app-text-primary)] font-bold shrink-0 shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_28%,transparent)] flex items-center justify-center text-[var(--app-accent)] shrink-0">
                   <Terminal className="w-4 h-4" />
                 </div>
                 <div>
@@ -2771,13 +2771,13 @@ export default function App() {
                         className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-danger)_30%,transparent)] transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-3 h-3" />
-                        Retry
+                        {lang === 'th' ? 'ลองใหม่' : 'Retry'}
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={() => setShowPerfMetrics((prev) => !prev)}
-                      title="Toggle Performance Metrics"
+                      title={lang === 'th' ? 'แสดง/ซ่อนตัวชี้วัดประสิทธิภาพ' : 'Toggle Performance Metrics'}
                       className={`px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                         showPerfMetrics
                           ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
@@ -2786,7 +2786,7 @@ export default function App() {
                           : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
                       }`}
                     >
-                      Metrics
+                      {lang === 'th' ? 'เมตริก' : 'Metrics'}
                     </button>
                     <button
                       type="button"
@@ -2877,7 +2877,7 @@ export default function App() {
                       }`}
                     >
                       <ListOrdered className="w-3.5 h-3.5" />
-                      <span className="hidden xl:inline">Lines</span>
+                      <span className="hidden xl:inline">{lang === 'th' ? 'เลขบรรทัด' : 'Lines'}</span>
                     </button>
                     <button
                       type="button"
@@ -2905,7 +2905,7 @@ export default function App() {
                       }`}
                     >
                       <WrapText className="w-3.5 h-3.5" />
-                      <span>{logTextWrap ? 'Wrap Text' : 'No-Wrap'}</span>
+                      <span>{lang === 'th' ? (logTextWrap ? 'ตัดบรรทัด' : 'ไม่ตัดบรรทัด') : (logTextWrap ? 'Wrap Text' : 'No-Wrap')}</span>
                     </button>
                     <button
                       type="button"
@@ -2996,7 +2996,7 @@ export default function App() {
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>
-                        Clear Resolved Logs{resolvedLogCount > 0 ? ` (${resolvedLogCount})` : ''}
+                        {lang === 'th' ? 'ล้างรายการที่เสร็จแล้ว' : 'Clear Resolved Logs'}{resolvedLogCount > 0 ? ` (${resolvedLogCount})` : ''}
                       </span>
                     </button>
                     <button

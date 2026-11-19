@@ -95,12 +95,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right: Concise Truthful Status & Essential Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <div
             role="status"
             data-testid="header-cloud-status"
             aria-label={runtimeAriaLabel}
-            className="flex items-center gap-2 px-2 py-1 text-[11px] text-[var(--app-text-secondary)]"
+            className="flex items-center gap-1.5 sm:gap-2 px-1 sm:px-2 py-1 text-[11px] text-[var(--app-text-secondary)]"
           >
             <span
               className="h-2 w-2 rounded-full shrink-0"
@@ -126,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onOpenSearch}
               title={lang === 'th' ? 'ค้นหา (Ctrl+F)' : 'Search (Ctrl+F)'}
               aria-label={lang === 'th' ? 'ค้นหา' : 'Search'}
-              className="min-h-[36px] min-w-[36px] flex items-center justify-center gap-1.5 px-2.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-card)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] transition-colors cursor-pointer shrink-0"
+              className="min-h-[34px] min-w-[34px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center gap-1.5 px-2 sm:px-2.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-card)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] transition-colors cursor-pointer shrink-0"
             >
               <Search className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden xl:inline text-[11px]">{t('btn.search')}</span>
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             data-testid="header-auth-btn"
             onClick={hasValidSessionTime ? onOpenSettings : (onOpenSignIn || onOpenSettings)}
-            className={`min-h-[36px] flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap shrink-0 tabular-nums ${
+            className={`min-h-[34px] min-w-[34px] sm:min-h-[36px] flex items-center justify-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap shrink-0 tabular-nums ${
               sessionExpired
                 ? 'border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] text-[var(--z-danger)] bg-[var(--app-card)]'
                 : 'border-[var(--app-card-border)] bg-[var(--app-card)] text-[var(--app-text-primary)] hover:border-[var(--app-accent)]'
@@ -168,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
             disabled={isRefreshing}
             title={t('btn.refresh')}
             aria-label={t('btn.refresh')}
-            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg border border-[var(--app-card-border)] bg-[var(--app-card)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] transition-colors cursor-pointer shrink-0"
+            className="hidden sm:flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg border border-[var(--app-card-border)] bg-[var(--app-card)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] transition-colors cursor-pointer shrink-0"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[var(--app-accent)]' : ''}`} />
           </button>
@@ -177,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             onClick={onOpenQuickTask}
             title={lang === 'th' ? 'สั่งงานด่วน (Ctrl+K)' : 'Quick Run (Ctrl+K)'}
-            className="min-h-[36px] flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-white bg-[var(--app-accent-deep)] hover:brightness-110 rounded-lg transition-all whitespace-nowrap cursor-pointer shrink-0"
+            className="min-h-[34px] sm:min-h-[36px] flex items-center gap-1.5 px-2.5 sm:px-3 py-1 text-xs font-semibold text-white bg-[var(--app-accent-deep)] hover:brightness-110 rounded-lg transition-all whitespace-nowrap cursor-pointer shrink-0"
           >
             <Play className="w-3 h-3 shrink-0" />
             <span>{t('btn.run')}</span>

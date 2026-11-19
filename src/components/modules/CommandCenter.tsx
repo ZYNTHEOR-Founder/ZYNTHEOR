@@ -575,7 +575,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             data-testid="command-center-attach-file-btn"
             onClick={() => fileInputRef.current?.click()}
             disabled={!onGoalChange || isWorkflowRunning}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3 py-2 text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] disabled:opacity-40 cursor-pointer transition-colors"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] px-3.5 py-2 text-xs font-medium text-[var(--app-text-primary)] hover:border-[var(--app-accent)] disabled:opacity-40 cursor-pointer transition-colors"
           >
             <Paperclip className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" aria-hidden="true" />
             <span>{th ? 'แนบไฟล์ (สูงสุด 200 KB)' : 'Attach file'}</span>
@@ -589,7 +589,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               else onOpenQuickTask();
             }}
             disabled={isWorkflowRunning || !goal.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--app-accent-deep)] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 cursor-pointer transition-all"
+            className="min-h-[40px] inline-flex items-center gap-2 rounded-lg bg-[var(--app-accent-deep)] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 cursor-pointer transition-all"
           >
             <Play className="w-3.5 h-3.5" aria-hidden="true" />
             <span>
@@ -1044,15 +1044,15 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-[var(--app-text-secondary)]">
                 <span className="inline-flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-[var(--z-ok)]" />
-                  Completion (+1)
+                  {th ? 'สำเร็จ (+1)' : 'Completion (+1)'}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-[var(--app-accent)]" />
-                  Neutral (0)
+                  {th ? 'ทั่วไป (0)' : 'Neutral (0)'}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-[var(--z-danger)]" />
-                  Error (-1)
+                  {th ? 'ผิดพลาด (-1)' : 'Error (-1)'}
                 </span>
               </div>
             </div>
