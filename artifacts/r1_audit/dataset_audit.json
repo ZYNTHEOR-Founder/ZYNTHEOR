@@ -1,0 +1,127 @@
+{
+  "files": {
+    "train.jsonl": {
+      "status": "AUDITED",
+      "file": "native_data/datasets/train.jsonl",
+      "sha256": "83444b89c1f6908eafadc7c0f82842b6dc520238cb38a05fe9c462f346c886b8",
+      "total_lines": 116,
+      "invalid_json": 0,
+      "empty_text": 0,
+      "duplicates": 0,
+      "missing_license": 0,
+      "missing_source": 0,
+      "domains": {
+        "English Language": 13,
+        "Thai-English Mixed Language": 10,
+        "Error Detection and Correction": 9,
+        "Research and Analysis": 11,
+        "Programming and Software Engineering": 31,
+        "Mathematics": 17,
+        "Planning and Multi-step Execution": 10,
+        "Context Understanding": 3,
+        "Reasoning and Problem Solving": 11,
+        "Thai Language": 1
+      },
+      "languages": {
+        "english": 90,
+        "mixed": 26
+      },
+      "length_stats": {
+        "min": 120,
+        "max": 73895,
+        "avg": 12377.336206896553
+      }
+    },
+    "validation.jsonl": {
+      "status": "AUDITED",
+      "file": "native_data/datasets/validation.jsonl",
+      "sha256": "def2477e9b730a51cf7b623040ce359a93b605656958ad9d025bc835d1ce5010",
+      "total_lines": 27,
+      "invalid_json": 0,
+      "empty_text": 0,
+      "duplicates": 0,
+      "missing_license": 0,
+      "missing_source": 0,
+      "domains": {
+        "English Language": 4,
+        "Thai Language": 1,
+        "Programming and Software Engineering": 6,
+        "Research and Analysis": 2,
+        "Context Understanding": 1,
+        "Error Detection and Correction": 2,
+        "Planning and Multi-step Execution": 4,
+        "Reasoning and Problem Solving": 2,
+        "Mathematics": 3,
+        "Thai-English Mixed Language": 2
+      },
+      "languages": {
+        "english": 21,
+        "mixed": 6
+      },
+      "length_stats": {
+        "min": 124,
+        "max": 52639,
+        "avg": 13118.518518518518
+      }
+    },
+    "test.jsonl": {
+      "status": "AUDITED",
+      "file": "native_data/datasets/test.jsonl",
+      "sha256": "fa2df12ab23b613e0e7a3edb78f5f2982f03339da3910eb1937c56f213d3a67c",
+      "total_lines": 27,
+      "invalid_json": 0,
+      "empty_text": 0,
+      "duplicates": 0,
+      "missing_license": 0,
+      "missing_source": 0,
+      "domains": {
+        "Thai Language": 1,
+        "Thai-English Mixed Language": 3,
+        "English Language": 3,
+        "Reasoning and Problem Solving": 2,
+        "Planning and Multi-step Execution": 4,
+        "Programming and Software Engineering": 6,
+        "Context Understanding": 1,
+        "Research and Analysis": 2,
+        "Mathematics": 3,
+        "Error Detection and Correction": 2
+      },
+      "languages": {
+        "mixed": 9,
+        "english": 18
+      },
+      "length_stats": {
+        "min": 113,
+        "max": 42012,
+        "avg": 10761.925925925925
+      }
+    },
+    "verified_dataset.jsonl": {
+      "status": "AUDITED",
+      "file": "native_data/training_pipeline/datasets/verified_dataset.jsonl",
+      "sha256": "3f40c7883715d8a7a8607a4ada8b31e330ac660efb78252eda140827ae89fe9e",
+      "total_lines": 8,
+      "invalid_json": 0,
+      "empty_text": 0,
+      "duplicates": 0,
+      "missing_license": 8,
+      "missing_source": 8,
+      "domains": {
+        "unknown": 8
+      },
+      "languages": {
+        "english": 7,
+        "mixed": 1
+      },
+      "length_stats": {
+        "min": 113,
+        "max": 131,
+        "avg": 122.625
+      }
+    }
+  },
+  "leakage_overlap_with_train": {
+    "validation.jsonl": 0,
+    "test.jsonl": 0
+  }
+}
