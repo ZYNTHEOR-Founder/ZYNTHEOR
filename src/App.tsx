@@ -25,6 +25,7 @@ import {
 
 // Eager home view + lazy code-split secondary ecosystem modules & drawers
 import { CommandCenter } from './components/modules/CommandCenter';
+import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import type { ControlSection } from './components/modules/UserSettings';
 import type { StepLatencyPoint } from './components/PerformanceTrendsChart';
 import { useReconnectionService } from './hooks/useReconnectionService';
@@ -651,6 +652,7 @@ export default function App() {
   const [groupByCategory, setGroupByCategory] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [isExportPreviewOpen, setIsExportPreviewOpen] = useState(false);
+  const [isClearLogsConfirmOpen, setIsClearLogsConfirmOpen] = useState(false);
   const [workspaceContextExported, setWorkspaceContextExported] = useState(false);
   const [criticalActionError, setCriticalActionError] = useState<ButtonFailureReport | null>(null);
   const exportMenuRef = useRef<HTMLDivElement | null>(null);
@@ -3081,14 +3083,10 @@ export default function App() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        setQuickLogs([]);
-                        setLogCategories({});
-                        setGroupByCategory(false);
-                        setSelectedLogIndices([]);
-                      }}
+                      onClick={() => setIsClearLogsConfirmOpen(true)}
                       disabled={quickLogs.length === 0}
                       title={lang === 'th' ? 'ล้างบันทึกทั้งหมด' : 'Clear all logs'}
+                      aria-label={lang === 'th' ? 'ล้างบันทึกทั้งหมด' : 'Clear all logs'}
                       className={`p-1.5 rounded-md transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
                         logTheme === 'high_contrast'
                           ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
@@ -5242,6 +5240,26 @@ export default function App() {
           )}
         </Suspense>
       </LazyErrorBoundary>
+
+      <ConfirmDialog
+        open={isClearLogsConfirmOpen}
+        title={lang === 'th' ? 'ยืนยันการล้างบันทึกการทำงานทั้งหมด' : 'Clear All Execution Logs'}
+        description={
+          lang === 'th'
+            ? 'บันทึกการทำงานทั้งหมดในหน้าต่างปัจจุบันจะถูกลบออกและไม่สามารถกู้คืนได้ (ยกเว้น Snapshot ที่บันทึกไว้แยกต่างหาก)'
+            : 'All execution logs in the current terminal stream will be permanently cleared.'
+        }
+        targetLabel={`${quickLogs.length} ${lang === 'th' ? 'รายการบันทึก' : 'log entries'}`}
+        confirmLabel={lang === 'th' ? 'ล้างบันทึกทั้งหมด' : 'Clear All Logs'}
+        onCancel={() => setIsClearLogsConfirmOpen(false)}
+        onConfirm={() => {
+          setQuickLogs([]);
+          setLogCategories({});
+          setGroupByCategory(false);
+          setSelectedLogIndices([]);
+          setIsClearLogsConfirmOpen(false);
+        }}
+      />
     </div>
   );
 }

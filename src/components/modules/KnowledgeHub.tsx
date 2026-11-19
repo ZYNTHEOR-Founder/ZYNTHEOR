@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DatasetProvenance } from '../DatasetProvenance';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -146,6 +147,8 @@ export const KnowledgeHub: React.FC = () => {
   const [viewingDoc, setViewingDoc] = useState<KnowledgeDoc | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [pendingDeleteDoc, setPendingDeleteDoc] = useState<KnowledgeDoc | null>(null);
+  const [deleteDocError, setDeleteDocError] = useState<string | null>(null);
 
   // Interactive Retrieval Playground
   const [retrievalQuery, setRetrievalQuery] = useState('Native Core architecture and checkpoint evidence');
@@ -226,15 +229,19 @@ export const KnowledgeHub: React.FC = () => {
   };
 
   const handleDeleteDocument = async (id: string) => {
-    if (!confirm(lang === 'th' ? 'ยืนยันการลบเอกสารความรู้นี้?' : 'Delete this knowledge document?')) return;
+    setDeleteDocError(null);
     try {
       const res = await fetch(`/api/knowledge/documents/${id}`, { method: 'DELETE', headers: authHeaders() });
-      if (res.ok) {
-        if (viewingDoc?.id === id) setViewingDoc(null);
-        fetchKnowledgeData();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.error || `HTTP ${res.status}`);
       }
-    } catch (err) {
+      if (viewingDoc?.id === id) setViewingDoc(null);
+      setPendingDeleteDoc(null);
+      await fetchKnowledgeData();
+    } catch (err: any) {
       console.error(err);
+      setDeleteDocError(err?.message || (lang === 'th' ? 'ไม่สามารถลบเอกสารได้' : 'Failed to delete document'));
     }
   };
 
@@ -939,9 +946,14 @@ export const KnowledgeHub: React.FC = () => {
                       {lang === 'th' ? 'เปิดอ่าน / แก้ไข' : 'Inspect'}
                     </button>
                     <button
-                      onClick={() => handleDeleteDocument(doc.id)}
+                      type="button"
+                      onClick={() => {
+                        setDeleteDocError(null);
+                        setPendingDeleteDoc(doc);
+                      }}
                       className="p-1.5 rounded-xl text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] transition-colors cursor-pointer"
-                      title="Delete document"
+                      title={lang === 'th' ? 'ลบเอกสาร' : 'Delete document'}
+                      aria-label={lang === 'th' ? `ลบเอกสาร ${doc.title}` : `Delete ${doc.title}`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -1826,6 +1838,27 @@ export const KnowledgeHub: React.FC = () => {
       )}
 
 
+      <ConfirmDialog
+        open={Boolean(pendingDeleteDoc)}
+        title={lang === 'th' ? 'ยืนยันการลบเอกสารความรู้' : 'Delete Knowledge Document'}
+        description={
+          lang === 'th'
+            ? 'เอกสารและดัชนี Chunk ที่เกี่ยวข้องจะถูกลบออกจากคลังความรู้อย่างถาวร และไม่สามารถกู้คืนได้'
+            : 'This document and its indexed chunks will be permanently removed from the knowledge base.'
+        }
+        targetLabel={pendingDeleteDoc ? `${pendingDeleteDoc.title} (${pendingDeleteDoc.collection})` : undefined}
+        confirmLabel={lang === 'th' ? 'ลบเอกสาร' : 'Delete Document'}
+        error={deleteDocError}
+        onCancel={() => {
+          setPendingDeleteDoc(null);
+          setDeleteDocError(null);
+        }}
+        onConfirm={async () => {
+          if (pendingDeleteDoc) {
+            await handleDeleteDocument(pendingDeleteDoc.id);
+          }
+        }}
+      />
     </div>
   );
 };

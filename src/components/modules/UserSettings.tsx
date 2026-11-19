@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { StatusDot } from '../ui/StatusBadge';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { CloudSecretsConfig } from '../CloudSecretsConfig';
 import { S3CredentialsValidator } from '../S3CredentialsValidator';
@@ -111,6 +112,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
     latencyMs?: number;
   } | null>(null);
   const [probingBackend, setProbingBackend] = useState(false);
+  const [isClearLocalConfirmOpen, setIsClearLocalConfirmOpen] = useState(false);
 
   const loadLiveStatus = useCallback(async () => {
     try {
@@ -591,7 +593,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={handleClearLocalData}
+                  onClick={() => setIsClearLocalConfirmOpen(true)}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[color-mix(in_srgb,var(--z-danger)_16%,transparent)] text-[var(--z-danger)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-danger)_24%,transparent)] cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -725,6 +727,23 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
           </VividCard>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={isClearLocalConfirmOpen}
+        title={lang === 'th' ? 'ยืนยันการล้างข้อมูลบนเบราว์เซอร์' : 'Clear Local Logs & Snapshots'}
+        description={
+          lang === 'th'
+            ? 'ประวัติ Quick Logs และ Log Snapshots ที่บันทึกไว้ในเบราว์เซอร์นี้จะถูกลบออกทั้งหมดและไม่สามารถกู้คืนได้'
+            : 'All Quick Logs and Log Snapshots stored in this browser will be permanently removed.'
+        }
+        targetLabel="localStorage: zyntheor_quick_logs · zyntheor_log_snapshots"
+        confirmLabel={lang === 'th' ? 'ล้างข้อมูลทั้งหมด' : 'Clear Local Data'}
+        onCancel={() => setIsClearLocalConfirmOpen(false)}
+        onConfirm={() => {
+          handleClearLocalData();
+          setIsClearLocalConfirmOpen(false);
+        }}
+      />
     </div>
   );
 };

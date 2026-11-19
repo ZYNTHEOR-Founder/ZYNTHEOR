@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { VividCard } from './ui/VividCard';
 import { StatusBadge } from './ui/StatusBadge';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { reconnectionService } from '../services/reconnectionService';
@@ -53,6 +54,8 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [pendingClearKey, setPendingClearKey] = useState<string | null>(null);
+  const [clearKeyError, setClearKeyError] = useState<string | null>(null);
 
   const loadSecrets = useCallback(async () => {
     if (!isAuthenticated || !isDevOrAdmin) return;
@@ -202,11 +205,13 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
       }
       await loadSecrets();
       await reconnectionService.notifyCredentialsUpdated([key], authHeaders());
+      setPendingClearKey(null);
       setStatusMessage({
         ok: true,
         text: lang === 'th' ? `ล้างค่า ${key} เรียบร้อยแล้ว` : `Cleared ${key} from .env.local`,
       });
     } catch (err: any) {
+      setClearKeyError(err?.message || `Unable to clear ${key}`);
       setStatusMessage({
         ok: false,
         text: err?.message || `Unable to clear ${key}`,
@@ -252,9 +257,13 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
             {configured && (
               <button
                 type="button"
-                onClick={() => void handleClearKey(cfg.key)}
+                onClick={() => {
+                  setClearKeyError(null);
+                  setPendingClearKey(cfg.key);
+                }}
                 disabled={saving}
-                title={`Clear ${cfg.key}`}
+                title={lang === 'th' ? `ล้างค่า ${cfg.key}` : `Clear ${cfg.key}`}
+                aria-label={lang === 'th' ? `ล้างค่า ${cfg.key}` : `Clear ${cfg.key}`}
                 className="p-1 rounded-md text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] cursor-pointer disabled:opacity-40"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -506,6 +515,29 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
           </button>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={Boolean(pendingClearKey)}
+        title={lang === 'th' ? 'ยืนยันการลบค่า Secret' : 'Clear Cloud Secret'}
+        description={
+          lang === 'th'
+            ? 'ค่าตัวแปรนี้จะถูกลบออกจาก .env.local และระบบจะตรวจสอบสถานะการเชื่อมต่อ Cloud Runtime ใหม่'
+            : 'This credential will be removed from .env.local and the Cloud Runtime connection status will be re-evaluated.'
+        }
+        targetLabel={pendingClearKey ?? undefined}
+        confirmLabel={lang === 'th' ? 'ลบค่า Secret' : 'Clear Secret'}
+        loading={saving}
+        error={clearKeyError}
+        onCancel={() => {
+          setPendingClearKey(null);
+          setClearKeyError(null);
+        }}
+        onConfirm={async () => {
+          if (pendingClearKey) {
+            await handleClearKey(pendingClearKey);
+          }
+        }}
+      />
     </VividCard>
   );
 };

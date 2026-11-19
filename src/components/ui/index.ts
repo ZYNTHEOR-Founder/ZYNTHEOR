@@ -7,3 +7,4 @@ export * from './MetricCard';
 export * from './StatusBadge';
 export * from './NavigationPrimitives';
 export * from './LayoutPrimitives';
+export * from './ConfirmDialog';

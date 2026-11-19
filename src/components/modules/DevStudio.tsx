@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { StatusBadge, StatusDot, MinimalIndicatorState } from '../ui/StatusBadge';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { BenchmarkArena } from './BenchmarkArena';
 import { ProjectExplorer, ProjectFileEntry } from '../Workspace/ProjectExplorer';
 import { OrchestrationEvent, SoftwareProjectRecord, WorkspaceFileDetail } from '../../types';
@@ -124,6 +125,8 @@ export const DevStudio: React.FC<DevStudioProps> = ({ initialProjectId = null })
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [newFileName, setNewFileName] = useState('');
   const [isCreatingFile, setIsCreatingFile] = useState(false);
+  const [pendingDeleteTarget, setPendingDeleteTarget] = useState<{ kind: 'project' | 'workspace'; path: string } | null>(null);
+  const [deleteTargetError, setDeleteTargetError] = useState<string | null>(null);
 
   // Active Role State Tracker
   const [activeAgentRole, setActiveAgentRole] = useState<'IDLE' | 'PLANNER' | 'CODER' | 'REVIEWER' | 'TESTER'>('IDLE');
@@ -399,15 +402,19 @@ export const DevStudio: React.FC<DevStudioProps> = ({ initialProjectId = null })
 
   const handleDeleteProjectFile = async (relativePath: string) => {
     if (!selectedProject) return;
+    setDeleteTargetError(null);
     const res = await fetch(
       `/api/engineering/projects/${encodeURIComponent(selectedProject.projectId)}/file?path=${encodeURIComponent(relativePath)}`,
       { method: 'DELETE', headers: authHeaders() }
     );
     const data = await res.json();
     if (!res.ok || !data.success) {
-      setProjectNotice({ kind: 'err', text: data.error || 'Unable to delete file.' });
+      const msg = data.error || (th ? 'ไม่สามารถลบไฟล์ได้' : 'Unable to delete file.');
+      setDeleteTargetError(msg);
+      setProjectNotice({ kind: 'err', text: msg });
       return;
     }
+    setPendingDeleteTarget(null);
     await loadProjectDetails(selectedProject.projectId);
   };
 
@@ -585,21 +592,25 @@ export const DevStudio: React.FC<DevStudioProps> = ({ initialProjectId = null })
 
   const handleDeleteFile = async (fileName: string) => {
     if (!isAuthenticated) return;
+    setDeleteTargetError(null);
     try {
       const res = await fetch(`/api/workspace/file?path=${encodeURIComponent(fileName)}`, {
         method: 'DELETE',
         headers: authHeaders(),
       });
       const data = await res.json();
-      if (data.success) {
-        await fetchFiles();
-        if (selectedFile === fileName) {
-          setSelectedFile('');
-          setFileContent('// File deleted');
-        }
+      if (!res.ok || !data.success) {
+        throw new Error(data?.error || (th ? 'ไม่สามารถลบไฟล์ได้' : 'Unable to delete file.'));
       }
-    } catch (e) {
+      setPendingDeleteTarget(null);
+      await fetchFiles();
+      if (selectedFile === fileName) {
+        setSelectedFile('');
+        setFileContent('// File deleted');
+      }
+    } catch (e: any) {
       console.error(e);
+      setDeleteTargetError(e?.message || (th ? 'ไม่สามารถลบไฟล์ได้' : 'Unable to delete file.'));
     }
   };
 
@@ -1219,7 +1230,10 @@ export const DevStudio: React.FC<DevStudioProps> = ({ initialProjectId = null })
                 selectedProject ? loadProjectFile(selectedProject.projectId, relPath) : undefined
               }
               onCreateFile={(relPath) => handleCreateProjectFile(relPath)}
-              onDeleteFile={(relPath) => handleDeleteProjectFile(relPath)}
+              onDeleteFile={(relPath) => {
+                setDeleteTargetError(null);
+                setPendingDeleteTarget({ kind: 'project', path: relPath });
+              }}
               toDotState={mapStatusToDotState}
             />
           </div>
@@ -1696,10 +1710,12 @@ export const DevStudio: React.FC<DevStudioProps> = ({ initialProjectId = null })
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteFile(file.path);
+                            setDeleteTargetError(null);
+                            setPendingDeleteTarget({ kind: 'workspace', path: file.path });
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-[var(--z-danger)] transition-opacity cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-[var(--z-danger)] transition-opacity cursor-pointer"
                           title={th ? 'ลบไฟล์' : 'Delete file'}
+                          aria-label={th ? `ลบไฟล์ ${file.path}` : `Delete ${file.path}`}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -2247,6 +2263,35 @@ export const DevStudio: React.FC<DevStudioProps> = ({ initialProjectId = null })
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDeleteTarget)}
+        title={th ? 'ยืนยันการลบไฟล์' : 'Delete File'}
+        description={
+          pendingDeleteTarget?.kind === 'project'
+            ? th
+              ? 'ไฟล์นี้จะถูกลบออกจากโปรเจกต์อย่างถาวร และไม่สามารถกู้คืนได้เว้นแต่จะย้อน Revision'
+              : 'This file will be deleted from the engineering project.'
+            : th
+            ? 'ไฟล์นี้จะถูกลบออกจากพื้นที่ /workspace sandbox อย่างถาวร'
+            : 'This file will be permanently deleted from the /workspace sandbox.'
+        }
+        targetLabel={pendingDeleteTarget?.path}
+        confirmLabel={th ? 'ลบไฟล์' : 'Delete File'}
+        error={deleteTargetError}
+        onCancel={() => {
+          setPendingDeleteTarget(null);
+          setDeleteTargetError(null);
+        }}
+        onConfirm={async () => {
+          if (!pendingDeleteTarget) return;
+          if (pendingDeleteTarget.kind === 'project') {
+            await handleDeleteProjectFile(pendingDeleteTarget.path);
+          } else {
+            await handleDeleteFile(pendingDeleteTarget.path);
+          }
+        }}
+      />
     </div>
   );
 };

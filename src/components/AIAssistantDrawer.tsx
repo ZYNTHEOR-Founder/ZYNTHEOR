@@ -25,6 +25,7 @@ import {
 import { ModuleId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 
 export type ThinkingMode = 'fast' | 'balanced' | 'deep';
 
@@ -218,6 +219,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
   const [attachments, setAttachments] = useState<AssistantAttachmentPayload[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isClearSessionConfirmOpen, setIsClearSessionConfirmOpen] = useState(false);
   const [liveStatus, setLiveStatus] = useState('');
   const [liveTools, setLiveTools] = useState<AssistantToolLog[]>([]);
   const [streamingText, setStreamingText] = useState('');
@@ -818,9 +820,10 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => void handleClearSession()}
+                onClick={() => setIsClearSessionConfirmOpen(true)}
                 disabled={messages.length === 0 || isStreaming}
                 title={lang === 'th' ? 'ล้างหน่วยความจำสนทนาเซสชันนี้' : 'Clear session memory'}
+                aria-label={lang === 'th' ? 'ล้างหน่วยความจำสนทนาเซสชันนี้' : 'Clear session memory'}
                 className="min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center p-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] hover:border-[var(--z-danger)] disabled:opacity-40 cursor-pointer transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1298,6 +1301,23 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
           </div>
         </div>
       </aside>
+
+      <ConfirmDialog
+        open={isClearSessionConfirmOpen}
+        title={lang === 'th' ? 'ยืนยันการล้างประวัติสนทนา' : 'Clear Session History'}
+        description={
+          lang === 'th'
+            ? 'ข้อความทั้งหมดและหน่วยความจำระยะสั้นของเซสชันนี้จะถูกลบออกอย่างถาวร'
+            : 'All messages and short-term memory for this session will be permanently cleared.'
+        }
+        targetLabel={`${sessionId} (${messages.length} ${lang === 'th' ? 'ข้อความ' : 'messages'})`}
+        confirmLabel={lang === 'th' ? 'ล้างประวัติสนทนา' : 'Clear Session'}
+        onCancel={() => setIsClearSessionConfirmOpen(false)}
+        onConfirm={async () => {
+          await handleClearSession();
+          setIsClearSessionConfirmOpen(false);
+        }}
+      />
     </div>
   );
 };

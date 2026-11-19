@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { VividCard } from '../ui/VividCard';
 import { StatusBadge } from '../ui/StatusBadge';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { SystemAuditLedger } from './SystemAuditLedger';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -68,6 +69,8 @@ export const GovernanceSecurity: React.FC = () => {
   const [newMemCat, setNewMemCat] = useState('episodic');
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editVal, setEditVal] = useState('');
+  const [pendingDeleteMemoryKey, setPendingDeleteMemoryKey] = useState<string | null>(null);
+  const [deleteMemoryError, setDeleteMemoryError] = useState<string | null>(null);
 
   // Training Epoch Provenance Validation state
   const [epochProvenance, setEpochProvenance] = useState<{
@@ -280,11 +283,14 @@ export const GovernanceSecurity: React.FC = () => {
   };
 
   const handleDeleteMemory = async (key: string) => {
+    setDeleteMemoryError(null);
     try {
       await NativeMemoryController.deleteMemory(key);
-      fetchEpisodicMemory();
-    } catch (err) {
+      setPendingDeleteMemoryKey(null);
+      await fetchEpisodicMemory();
+    } catch (err: any) {
       console.error('Failed to delete memory:', err);
+      setDeleteMemoryError(err?.message || (lang === 'th' ? 'ไม่สามารถลบข้อมูลความจำได้' : 'Failed to delete memory record'));
     }
   };
 
@@ -792,9 +798,14 @@ export const GovernanceSecurity: React.FC = () => {
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDeleteMemory(item.key)}
+                          type="button"
+                          onClick={() => {
+                            setDeleteMemoryError(null);
+                            setPendingDeleteMemoryKey(item.key);
+                          }}
                           className="text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] p-1 rounded-md transition-colors cursor-pointer"
-                          title="Delete memory key"
+                          title={lang === 'th' ? 'ลบคีย์ความจำ' : 'Delete memory key'}
+                          aria-label={lang === 'th' ? `ลบความจำ ${item.key}` : `Delete memory ${item.key}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1089,6 +1100,28 @@ export const GovernanceSecurity: React.FC = () => {
 
       {/* 5. Filterable System Audit Ledger */}
       <SystemAuditLedger />
+
+      <ConfirmDialog
+        open={Boolean(pendingDeleteMemoryKey)}
+        title={lang === 'th' ? 'ยืนยันการลบข้อมูลความจำ' : 'Delete Episodic Memory Record'}
+        description={
+          lang === 'th'
+            ? 'ข้อมูลความจำถาวรของคีย์นี้จะถูกลบออกและบันทึกเหตุการณ์ลงใน Audit Ledger'
+            : 'This persistent episodic memory entry will be deleted and logged to the Audit Ledger.'
+        }
+        targetLabel={pendingDeleteMemoryKey ?? undefined}
+        confirmLabel={lang === 'th' ? 'ลบความจำ' : 'Delete Memory'}
+        error={deleteMemoryError}
+        onCancel={() => {
+          setPendingDeleteMemoryKey(null);
+          setDeleteMemoryError(null);
+        }}
+        onConfirm={async () => {
+          if (pendingDeleteMemoryKey) {
+            await handleDeleteMemory(pendingDeleteMemoryKey);
+          }
+        }}
+      />
     </div>
   );
 };
