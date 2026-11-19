@@ -29,7 +29,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   danger:
     'bg-[color-mix(in_srgb,var(--z-danger)_15%,transparent)] text-[var(--z-danger)] font-semibold border border-[color-mix(in_srgb,var(--z-danger)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-danger)_25%,transparent)]',
   lime:
-    'bg-[var(--z-ok)] text-[var(--app-bg)] font-semibold shadow-sm hover:brightness-95 border border-[color-mix(in_srgb,var(--z-ok)_60%,transparent)]',
+    'bg-[#15803D] text-white font-semibold shadow-sm hover:brightness-110 border border-transparent',
   ghost:
     'bg-transparent text-[var(--app-text-secondary)] font-semibold hover:text-[var(--app-text-primary)] hover:bg-[color-mix(in_srgb,var(--app-text-primary)_6%,transparent)] border border-transparent',
   outline:

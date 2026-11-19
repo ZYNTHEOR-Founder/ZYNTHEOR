@@ -122,7 +122,7 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
         <div className="relative p-5 rounded-2xl bg-[var(--app-bg)] border border-[var(--app-card-border)] overflow-hidden shadow-inner">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Brain className="w-4 h-4 text-[var(--app-accent)] animate-pulse" />
+              <Brain className="w-4 h-4 text-[var(--app-accent)]" />
               <span className="text-xs font-bold text-[var(--app-text-primary)]">
                 {lang === 'th' ? 'โครงข่ายการประมวลผลหมอกเวกเตอร์ (Latent Manifold Projection)' : '10-Layer Transformer & Synaptic Attention Manifold'}
               </span>
@@ -149,8 +149,8 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
 
               {/* Input Embedding Node */}
               <g transform="translate(40, 80)">
-                <circle r="22" fill="var(--app-accent)" stroke="var(--app-accent)" strokeWidth="2" filter="url(#glowEffect)" />
-                <text textAnchor="middle" dy="4" fill="var(--app-accent)" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                <circle r="22" fill="var(--app-accent-deep)" stroke="var(--app-accent)" strokeWidth="2" filter="url(#glowEffect)" />
+                <text textAnchor="middle" dy="4" fill="#FFFFFF" fontSize="9" fontWeight="bold" fontFamily="monospace">
                   VOCAB
                 </text>
                 <text textAnchor="middle" dy="32" fill="var(--app-accent)" fontSize="8" fontFamily="monospace">
@@ -234,8 +234,8 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
                   strokeWidth="2"
                   strokeDasharray="3 3"
                 />
-                <circle r="22" fill="var(--app-accent)" stroke="var(--app-accent-deep)" strokeWidth="2" filter="url(#glowEffect)" />
-                <text textAnchor="middle" dy="4" fill="var(--app-accent-deep)" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                <circle r="22" fill="var(--app-accent-deep)" stroke="var(--app-accent)" strokeWidth="2" filter="url(#glowEffect)" />
+                <text textAnchor="middle" dy="4" fill="#FFFFFF" fontSize="9" fontWeight="bold" fontFamily="monospace">
                   LATENT
                 </text>
                 <text textAnchor="middle" dy="32" fill="var(--app-accent)" fontSize="8" fontFamily="monospace">
@@ -248,11 +248,16 @@ export const IntelligenceVisualizer: React.FC<IntelligenceVisualizerProps> = ({
           {/* Real-time State Readout Footer */}
           <div className="mt-3 pt-3 border-t border-[color-mix(in_srgb,var(--app-card-border)_80%,transparent)] flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono">
             <div className="flex items-center gap-2 text-[var(--app-text-secondary)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--z-ok)] animate-ping" />
-              <span>Illustration: <span className="text-[var(--app-text-secondary)] font-bold">NOT LIVE INFERENCE</span></span>
+              <span className="w-2 h-2 rounded-full bg-[var(--z-ok)]" />
+              <span>
+                {lang === 'th' ? 'ภาพประกอบ:' : 'Illustration:'}{' '}
+                <span className="text-[var(--app-text-secondary)] font-bold">
+                  {lang === 'th' ? 'ไม่ใช่ Trace การอนุมานสด' : 'NOT LIVE INFERENCE'}
+                </span>
+              </span>
             </div>
             <div className="text-[var(--app-text-secondary)]">
-              Checkpoint SHA-256: <span className="text-[var(--app-accent)]">{checkpointHash ? `${checkpointHash.slice(0, 16)}…` : 'not loaded'}</span>
+              Checkpoint SHA-256: <span className="text-[var(--app-accent)]">{checkpointHash ? `${checkpointHash.slice(0, 16)}…` : (lang === 'th' ? 'ยังไม่โหลด' : 'not loaded')}</span>
             </div>
             <div className="text-[var(--app-text-secondary)]">
               Rotary Embeddings: <span className="text-[var(--app-accent)] font-bold">RoPE + SwiGLU</span>

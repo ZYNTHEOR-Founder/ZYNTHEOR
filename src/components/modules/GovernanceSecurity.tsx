@@ -311,7 +311,7 @@ export const GovernanceSecurity: React.FC = () => {
           <button
             onClick={handleRunTamperVerification}
             disabled={isVerifyingTamper}
-            className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 min-h-[38px] text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isVerifyingTamper ? 'animate-spin' : ''}`} />
             <span>
@@ -434,14 +434,14 @@ export const GovernanceSecurity: React.FC = () => {
 
         {/* Evidence Logs */}
         {tamperResult && (
-          <div className="mt-4 p-3 rounded-xl bg-[var(--app-accent)] border border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-mono text-xs">
+          <div className="mt-4 p-3.5 rounded-xl bg-[color-mix(in_srgb,var(--app-accent)_10%,var(--app-surface))] border border-[color-mix(in_srgb,var(--app-accent)_38%,transparent)] text-[var(--app-text-primary)] font-mono text-xs">
             <div className="flex items-center gap-2 text-[var(--app-accent)] text-[11px] font-bold mb-1">
               <Terminal className="w-3.5 h-3.5" />
-              <span>LIVE EVIDENCE & CRYPTOGRAPHIC VERIFICATION PROOF:</span>
+              <span>{lang === 'th' ? 'หลักฐานการทำงานจริงและการตรวจสอบเชิงคริปโตกราฟี:' : 'LIVE EVIDENCE & CRYPTOGRAPHIC VERIFICATION PROOF:'}</span>
             </div>
-            <div className="text-[var(--app-text-secondary)] whitespace-pre-wrap">{tamperResult.evidence}</div>
+            <div className="text-[var(--app-text-primary)] whitespace-pre-wrap">{tamperResult.evidence}</div>
             <div className="text-[11px] text-[var(--app-text-secondary)] mt-1">
-              Probe Execution Digest: <span className="text-[var(--z-ok)]">{tamperResult.executionDigest}</span>
+              {lang === 'th' ? 'ค่า Digest การทดสอบ Probe:' : 'Probe Execution Digest:'} <span className="text-[var(--z-ok)] font-bold">{tamperResult.executionDigest}</span>
             </div>
           </div>
         )}
@@ -455,7 +455,7 @@ export const GovernanceSecurity: React.FC = () => {
           <button
             onClick={handleRunLanguageSuite}
             disabled={isVerifyingLanguage}
-            className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 min-h-[38px] text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isVerifyingLanguage ? 'animate-spin' : ''}`} />
             <span>
@@ -563,14 +563,14 @@ export const GovernanceSecurity: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-[var(--app-surface-elevated)] dark:bg-[var(--app-bg)] border-b border-[var(--app-card-border)] dark:border-[var(--app-card-border)] text-[var(--app-text-secondary)] text-[11px] font-semibold">
               <tr>
-                <th className="py-2.5 px-3">Test ID</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'รหัสทดสอบ' : 'Test ID'}</th>
                 <th className="py-2.5 px-3">{lang === 'th' ? 'การทดสอบสคริปต์' : 'Script Integrity Test'}</th>
                 <th className="py-2.5 px-3">{lang === 'th' ? 'ข้อความตัวอย่าง' : 'Test Sample'}</th>
-                <th className="py-2.5 px-3">Tokens</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'โทเค็น' : 'Tokens'}</th>
                 <th className="py-2.5 px-3">UNKs</th>
-                <th className="py-2.5 px-3">Fidelity</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Latency</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'ความเที่ยงตรง' : 'Fidelity'}</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'สถานะ' : 'Status'}</th>
+                <th className="py-2.5 px-3 text-right">{lang === 'th' ? 'เวลาตอบสนอง' : 'Latency'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)] dark:divide-[var(--app-card-border)] font-sans">
@@ -642,13 +642,13 @@ export const GovernanceSecurity: React.FC = () => {
           </div>
 
           {memoryStats && (
-            <div className="flex items-center gap-4 text-xs font-mono bg-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] border border-[var(--app-accent)] p-3 rounded-xl shrink-0">
+            <div className="flex items-center gap-4 text-xs font-mono bg-[color-mix(in_srgb,var(--app-accent)_10%,var(--app-surface))] border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] p-3 rounded-xl shrink-0">
               <div>
                 <span className="text-[var(--app-text-secondary)]">{t('mem.total_items')}:</span>{' '}
                 <span className="font-bold text-[var(--app-accent)]">{memoryStats.totalItems}</span>
               </div>
               <div>
-                <span className="text-[var(--app-text-secondary)]">Disk Size:</span>{' '}
+                <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ขนาดดิสก์:' : 'Disk Size:'}</span>{' '}
                 <span className="font-bold text-[var(--app-accent)]">{memoryStats.storeSizeBytes} B</span>
               </div>
             </div>
@@ -704,7 +704,7 @@ export const GovernanceSecurity: React.FC = () => {
             <div className="md:col-span-2">
               <button
                 type="submit"
-                className="w-full py-2 px-3 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-xs hover:opacity-95 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full min-h-[38px] py-2 px-3 text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-xs hover:opacity-95 transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Database className="w-3.5 h-3.5" />
                 <span>{lang === 'th' ? 'บันทึก' : 'Store'}</span>
@@ -718,12 +718,12 @@ export const GovernanceSecurity: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-[var(--app-surface-elevated)] border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-semibold text-[11px]">
               <tr>
-                <th className="py-2.5 px-3">Memory Key</th>
-                <th className="py-2.5 px-3">Category</th>
-                <th className="py-2.5 px-3">Content / Value</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'คีย์ความจำ' : 'Memory Key'}</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'หมวดหมู่' : 'Category'}</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'เนื้อหา / ค่าที่บันทึก' : 'Content / Value'}</th>
                 <th className="py-2.5 px-3">SHA-256 Digest</th>
-                <th className="py-2.5 px-3">Reads</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'จำนวนอ่าน' : 'Reads'}</th>
+                <th className="py-2.5 px-3 text-right">{lang === 'th' ? 'จัดการ' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)] font-sans">
@@ -759,16 +759,20 @@ export const GovernanceSecurity: React.FC = () => {
                             }}
                           />
                           <button
+                            type="button"
                             onClick={() => handleUpdateMemory(item.key, item.category)}
-                            className="p-1 rounded bg-[var(--app-accent)] text-white hover:opacity-90 cursor-pointer"
-                            title="Save update"
+                            className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center rounded-lg bg-[var(--app-accent-deep)] text-white hover:opacity-90 cursor-pointer"
+                            title={lang === 'th' ? 'บันทึกการแก้ไข' : 'Save update'}
+                            aria-label={lang === 'th' ? 'บันทึกการแก้ไข' : 'Save update'}
                           >
                             <Save className="w-3.5 h-3.5" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => setEditingKey(null)}
-                            className="p-1 rounded text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
-                            title="Cancel"
+                            className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+                            title={lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+                            aria-label={lang === 'th' ? 'ยกเลิก' : 'Cancel'}
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -788,12 +792,14 @@ export const GovernanceSecurity: React.FC = () => {
                     <td className="py-2.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          type="button"
                           onClick={() => {
                             setEditingKey(item.key);
                             setEditVal(typeof item.value === 'string' ? item.value : JSON.stringify(item.value));
                           }}
-                          className="text-[var(--app-text-secondary)] hover:text-[var(--app-accent)] p-1 rounded-md transition-colors cursor-pointer"
-                          title="Edit / Update Memory"
+                          className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center text-[var(--app-text-secondary)] hover:text-[var(--app-accent)] rounded-md transition-colors cursor-pointer"
+                          title={lang === 'th' ? 'แก้ไขความจำ' : 'Edit / Update Memory'}
+                          aria-label={lang === 'th' ? `แก้ไขความจำ ${item.key}` : `Edit memory ${item.key}`}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -803,7 +809,7 @@ export const GovernanceSecurity: React.FC = () => {
                             setDeleteMemoryError(null);
                             setPendingDeleteMemoryKey(item.key);
                           }}
-                          className="text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] p-1 rounded-md transition-colors cursor-pointer"
+                          className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] rounded-md transition-colors cursor-pointer"
                           title={lang === 'th' ? 'ลบคีย์ความจำ' : 'Delete memory key'}
                           aria-label={lang === 'th' ? `ลบความจำ ${item.key}` : `Delete memory ${item.key}`}
                         >
@@ -827,7 +833,7 @@ export const GovernanceSecurity: React.FC = () => {
           <button
             onClick={handleRunSecuritySuite}
             disabled={isRunningSim}
-            className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 min-h-[38px] text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer disabled:opacity-50"
           >
             <Play className="w-3.5 h-3.5 fill-white" />
             {isRunningSim
@@ -842,10 +848,12 @@ export const GovernanceSecurity: React.FC = () => {
               {lang === 'th' ? 'เลเยอร์ความปลอดภัยและอัตลักษณ์สมบูรณ์' : 'Sovereign Identity & Access Layer'}
             </div>
             <h2 className="text-xl font-bold text-[var(--app-text-primary)] mt-1">
-              Hardened HMAC-SHA256 Token & RBAC Invariants
+              {lang === 'th' ? 'การตรวจสอบโทเค็น HMAC-SHA256 และข้อกำหนดสิทธิ์ RBAC' : 'Hardened HMAC-SHA256 Token & RBAC Invariants'}
             </h2>
             <p className="text-xs text-[var(--app-text-secondary)] mt-1">
-              Zero hardcoded secrets, timingSafeEqual constant-time verification, exp expiration, and strict tenant isolation.
+              {lang === 'th'
+                ? 'ไม่ฝังรหัสลับแบบ Hardcoded ตรวจสอบแบบ Constant-Time (timingSafeEqual) พร้อมตรวจเวลาหมดอายุและแยกส่วน Tenant อย่างเคร่งครัด'
+                : 'Zero hardcoded secrets, timingSafeEqual constant-time verification, exp expiration, and strict tenant isolation.'}
             </p>
           </div>
 
@@ -853,10 +861,12 @@ export const GovernanceSecurity: React.FC = () => {
             <Lock className="w-6 h-6 text-[var(--app-accent)] shrink-0" />
             <div>
               <div className="text-xs font-bold text-[var(--app-text-primary)]">
-                {simResults ? '6 / 6 Attack Vectors Blocked' : 'Constant-Time Security Standard'}
+                {simResults
+                  ? (lang === 'th' ? 'สกัดกั้นการโจมตีครบ 6 / 6 รูปแบบ' : '6 / 6 Attack Vectors Blocked')
+                  : (lang === 'th' ? 'มาตรฐานความปลอดภัย Constant-Time' : 'Constant-Time Security Standard')}
               </div>
               <div className="text-[10px] text-[var(--z-ok)] font-mono font-bold">
-                {simResults ? 'VERIFIED HARDENED' : 'Ready for Attack Simulation'}
+                {simResults ? 'VERIFIED HARDENED' : (lang === 'th' ? 'พร้อมจำลองการโจมตี' : 'Ready for Attack Simulation')}
               </div>
             </div>
           </div>
@@ -867,11 +877,11 @@ export const GovernanceSecurity: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-[color-mix(in_srgb,var(--app-surface-elevated)_80%,transparent)] border-b border-[var(--app-card-border)] text-[var(--app-text-secondary)] font-semibold text-[11px]">
               <tr>
-                <th className="py-2.5 px-3">Vector ID</th>
-                <th className="py-2.5 px-3">Attack Vector</th>
-                <th className="py-2.5 px-3">Simulated Exploit</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Defense Invariant</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'รหัสเวกเตอร์' : 'Vector ID'}</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'รูปแบบการโจมตี' : 'Attack Vector'}</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'พฤติกรรมจำลอง' : 'Simulated Exploit'}</th>
+                <th className="py-2.5 px-3">{lang === 'th' ? 'สถานะ' : 'Status'}</th>
+                <th className="py-2.5 px-3 text-right">{lang === 'th' ? 'กลไกป้องกัน' : 'Defense Invariant'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--app-card-border)] font-sans">
@@ -944,61 +954,73 @@ export const GovernanceSecurity: React.FC = () => {
 
       {/* 4. Sandbox Invariants */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <VividCard title="Sandbox Isolation Barrier" subtitle="ToolGateway confinement" gradientAccent="cyan">
+        <VividCard
+          title={lang === 'th' ? 'ขอบเขตการแยกส่วน Sandbox' : 'Sandbox Isolation Barrier'}
+          subtitle={lang === 'th' ? 'การจำกัดขอบเขต ToolGateway' : 'ToolGateway confinement'}
+          gradientAccent="cyan"
+        >
           <div className="space-y-2 text-xs text-[var(--app-text-primary)]">
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
-              <span className="text-[var(--app-text-secondary)]">Root Directory</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'โฟลเดอร์ราก' : 'Root Directory'}</span>
               <span className="font-mono text-[var(--app-text-primary)] font-bold">/workspace</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
-              <span className="text-[var(--app-text-secondary)]">Path Traversal Defense</span>
-              <span className="text-[var(--z-ok)] font-bold">Fail-Closed Active</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ป้องกัน Path Traversal' : 'Path Traversal Defense'}</span>
+              <span className="text-[var(--z-ok)] font-bold">{lang === 'th' ? 'เปิดใช้งาน (Fail-Closed)' : 'Fail-Closed Active'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
-              <span className="text-[var(--app-text-secondary)]">Whitelisted Commands</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'คำสั่งที่อนุญาต' : 'Whitelisted Commands'}</span>
               <span className="font-mono text-[var(--app-text-primary)] text-[11px]">node, python3, ls, cat</span>
             </div>
             <div className="flex justify-between py-1.5">
-              <span className="text-[var(--app-text-secondary)]">Hard Execution Timeout</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'เวลาจำกัดสูงสุด' : 'Hard Execution Timeout'}</span>
               <span className="font-mono text-[var(--app-text-primary)] font-bold">5,000 ms</span>
             </div>
           </div>
         </VividCard>
 
-        <VividCard title="Air-Gapped Network Policy" subtitle="Zero socket outbound" gradientAccent="purple">
+        <VividCard
+          title={lang === 'th' ? 'นโยบายเครือข่ายปิด (Air-Gapped)' : 'Air-Gapped Network Policy'}
+          subtitle={lang === 'th' ? 'ไม่มีการส่งออกข้อมูลภายนอก' : 'Zero socket outbound'}
+          gradientAccent="purple"
+        >
           <div className="space-y-2 text-xs text-[var(--app-text-primary)]">
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
-              <span className="text-[var(--app-text-secondary)]">External AI APIs</span>
-              <span className="text-[var(--z-ok)] font-bold">0 Invocations</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'AI API ภายนอก' : 'External AI APIs'}</span>
+              <span className="text-[var(--z-ok)] font-bold">{lang === 'th' ? '0 ครั้ง (ไม่เรียกใช้)' : '0 Invocations'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
-              <span className="text-[var(--app-text-secondary)]">Telemetry Tracking</span>
-              <span className="text-[var(--app-text-secondary)]">Disabled</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'การติดตาม Telemetry ภายนอก' : 'Telemetry Tracking'}</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ปิดใช้งาน' : 'Disabled'}</span>
             </div>
             <div className="flex justify-between py-1.5">
-              <span className="text-[var(--app-text-secondary)]">Storage Security</span>
-              <span className="font-mono text-[var(--app-text-primary)] text-[11px]">Local File System</span>
+              <span className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ความปลอดภัยการจัดเก็บ' : 'Storage Security'}</span>
+              <span className="font-mono text-[var(--app-text-primary)] text-[11px]">{lang === 'th' ? 'ระบบไฟล์ในเครื่อง' : 'Local File System'}</span>
             </div>
           </div>
         </VividCard>
 
-        <VividCard title="Role Separation Matrix" subtitle="4-Agent state boundaries" gradientAccent="energy">
+        <VividCard
+          title={lang === 'th' ? 'ตารางแยกบทบาทเอเจนต์' : 'Role Separation Matrix'}
+          subtitle={lang === 'th' ? 'ขอบเขตสถานะ 4 บทบาท' : '4-Agent state boundaries'}
+          gradientAccent="energy"
+        >
           <div className="space-y-2 text-xs text-[var(--app-text-primary)]">
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
               <span className="text-[var(--app-text-secondary)]">PLANNER</span>
-              <span className="text-[var(--app-accent)] font-bold">No Code Writes</span>
+              <span className="text-[var(--app-accent)] font-bold">{lang === 'th' ? 'ไม่เขียนโค้ดโดยตรง' : 'No Code Writes'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
               <span className="text-[var(--app-text-secondary)]">CODER</span>
-              <span className="text-[var(--app-accent)] font-bold">No Self-Approval</span>
+              <span className="text-[var(--app-accent)] font-bold">{lang === 'th' ? 'ไม่อนุมัติโค้ดตนเอง' : 'No Self-Approval'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--app-card-border)]">
               <span className="text-[var(--app-text-secondary)]">REVIEWER</span>
-              <span className="text-[var(--app-accent)] font-bold">Security Auditor</span>
+              <span className="text-[var(--app-accent)] font-bold">{lang === 'th' ? 'ผู้ตรวจความปลอดภัย' : 'Security Auditor'}</span>
             </div>
             <div className="flex justify-between py-1.5">
               <span className="text-[var(--app-text-secondary)]">TESTER</span>
-              <span className="text-[var(--z-ok)] font-bold">Real Sandbox Eval</span>
+              <span className="text-[var(--z-ok)] font-bold">{lang === 'th' ? 'ทดสอบ Sandbox จริง' : 'Real Sandbox Eval'}</span>
             </div>
           </div>
         </VividCard>
@@ -1026,7 +1048,7 @@ export const GovernanceSecurity: React.FC = () => {
           <button
             onClick={handleExportSignedAuditTrail}
             disabled={!epochProvenance}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand hover:opacity-95 transition-opacity cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold text-white vivid-gradient-brand hover:opacity-95 transition-opacity cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
             {lang === 'th' ? 'ส่งออก JSON ที่ลงนาม' : 'Export Signed JSON'}
@@ -1057,7 +1079,7 @@ export const GovernanceSecurity: React.FC = () => {
             </div>
 
             {epochProvenance.discrepancies.length > 0 && (
-              <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-xs text-[var(--z-danger)] space-y-1">
+              <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-xs text-[var(--z-danger)] space-y-1">
                 {epochProvenance.discrepancies.map((d, i) => (
                   <div key={i} className="font-mono text-[11px]">
                     • {d}

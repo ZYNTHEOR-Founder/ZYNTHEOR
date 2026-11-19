@@ -81,7 +81,7 @@ class LazyErrorBoundary extends Component<
               this.setState({ hasError: false });
               this.props.onReset?.();
             }}
-            className="px-3 py-1.5 rounded-lg font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg font-bold bg-[var(--app-accent-deep)] text-white hover:brightness-110 transition-all cursor-pointer"
           >
             {th ? 'ลองใหม่' : 'Retry'}
           </button>
@@ -2197,7 +2197,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => void loginWithGoogle()}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] hover:opacity-90 transition-opacity cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white hover:brightness-110 transition-all cursor-pointer"
         >
           <LogIn className="w-3.5 h-3.5" />
           {lang === 'th' ? 'เข้าสู่ระบบด้วย Google' : 'Continue with Google'}
@@ -2445,26 +2445,30 @@ export default function App() {
               </div>
             </div>
             <div className="context-status-line">
-              <span><Activity className="w-3.5 h-3.5" />Runtime</span>
+              <span><Activity className="w-3.5 h-3.5" />{th ? 'รันไทม์' : 'Runtime'}</span>
               <b className={model?.weightsLoaded ? 'status-live' : 'status-muted'}>
-                {model?.weightsLoaded ? (th ? 'โหลดโมเดลแล้ว' : 'WEIGHTS LOADED') : statusData ? (model?.runtimeState || 'BLOCKED') : 'CHECKING'}
+                {model?.weightsLoaded
+                  ? (th ? 'โหลดโมเดลแล้ว' : 'WEIGHTS LOADED')
+                  : statusData
+                  ? (th ? (model?.runtimeState === 'BLOCKED' ? 'ติดขัด' : model?.runtimeState || 'ติดขัด') : (model?.runtimeState || 'BLOCKED'))
+                  : (th ? 'กำลังตรวจ' : 'CHECKING')}
               </b>
             </div>
             <div className="context-stat-grid">
               <div><span>{th ? 'พารามิเตอร์' : 'Parameters'}</span><strong>{model ? `${(model.totalParams / 1000000).toFixed(1)}M` : '—'}</strong></div>
               <div><span>{th ? 'ความเร็ว' : 'Throughput'}</span><strong>{resources?.tokensPerSec ? `${resources.tokensPerSec}/s` : '—'}</strong></div>
-              <div><span>Audit Chain</span><strong>{audit ? (audit.chainValid ? 'VALID' : 'CHECK') : '—'}</strong></div>
+              <div><span>{th ? 'ห่วงโซ่ Audit' : 'Audit Chain'}</span><strong>{audit ? (audit.chainValid ? (th ? 'สมบูรณ์' : 'VALID') : (th ? 'รอตรวจ' : 'CHECK')) : '—'}</strong></div>
               <div><span>{th ? 'หน่วยความจำ' : 'Memory'}</span><strong>{resources?.processRssMb ? `${resources.processRssMb} MB` : '—'}</strong></div>
             </div>
             <div className="context-section">
               <span className="eyebrow">{th ? 'ขอบเขตข้อมูล' : 'KNOWLEDGE SCOPE'}</span>
               <div className="context-chip"><Database className="w-3.5 h-3.5" />{th ? 'เอกสารและชุดข้อมูล' : 'Documents & datasets'} <b>{statusData?.sandbox.fileCount ?? '—'}</b></div>
-              <div className="context-chip"><Network className="w-3.5 h-3.5" />Memory Graph <b>{statusData ? 'runtime-backed' : '—'}</b></div>
+              <div className="context-chip"><Network className="w-3.5 h-3.5" />{th ? 'กราฟความจำ' : 'Memory Graph'} <b>{statusData ? (th ? 'เชื่อมต่อรันไทม์' : 'runtime-backed') : '—'}</b></div>
             </div>
             <div className="context-section">
               <span className="eyebrow">{th ? 'เครื่องมือด่วน' : 'TOOL ACCESS'}</span>
               <button className="context-action" onClick={() => setActiveModule('knowledge_hub')}><Sparkles className="w-3.5 h-3.5" />{th ? 'คลังความรู้' : 'Knowledge workspace'} <span>→</span></button>
-              <button className={`context-action ${role === 'User' ? 'context-action-disabled' : ''}`} onClick={() => role !== 'User' && setActiveModule('governance_security')} disabled={role === 'User'} title={role === 'User' ? (th ? 'ต้องใช้สิทธิ์ Developer' : 'Developer role required') : undefined}><LockKeyhole className="w-3.5 h-3.5" />{th ? 'หลักฐานและ Audit' : 'Governance & audit'} <span>{role === 'User' ? 'Developer' : '→'}</span></button>
+              <button className={`context-action ${role === 'User' ? 'context-action-disabled' : ''}`} onClick={() => role !== 'User' && setActiveModule('governance_security')} disabled={role === 'User'} title={role === 'User' ? (th ? 'ต้องใช้สิทธิ์ Developer' : 'Developer role required') : undefined}><LockKeyhole className="w-3.5 h-3.5" />{th ? 'หลักฐานและ Audit' : 'Governance & audit'} <span>{role === 'User' ? (th ? 'สิทธิ์ Developer' : 'Developer') : '→'}</span></button>
               <button type="button" className="context-action" data-testid="export-workspace-context-btn" onClick={handleExportWorkspaceContext} title={th ? 'ดาวน์โหลดไฟล์ JSON บริบทพื้นที่ทำงานสำหรับตรวจสอบ' : 'Download workspace context JSON'}><FileJson className="w-3.5 h-3.5" />{th ? 'ส่งออกบริบท JSON' : 'Export Workspace Context'} <span>{workspaceContextExported ? '✓' : '↓'}</span></button>
             </div>
             <div className="context-note">
@@ -2485,7 +2489,8 @@ export default function App() {
     isGlobalSearchOpen ||
     Boolean(evidenceDrawerItem) ||
     isShortcutsModalOpen ||
-    isExportPreviewOpen;
+    isExportPreviewOpen ||
+    isClearLogsConfirmOpen;
 
   return (
     <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-text-primary)] flex transition-colors duration-200 app-shell">
@@ -2646,7 +2651,7 @@ export default function App() {
                           setDashboardView('overview');
                           setActiveModule('command_center');
                         }}
-                        className="px-3.5 py-1.5 rounded-lg bg-[var(--app-accent)] text-slate-950 font-bold cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-lg bg-[var(--app-accent-deep)] text-white font-bold hover:brightness-110 transition-all cursor-pointer"
                       >
                         {lang === 'th' ? 'ไปที่ Command Center' : 'Go to Command Center'}
                       </button>
@@ -2657,10 +2662,10 @@ export default function App() {
                         <thead className="bg-[var(--app-surface)] text-[var(--app-text-secondary)] border-b border-[var(--app-card-border)] sticky top-0">
                           <tr>
                             <th className="px-3 py-2">#</th>
-                            <th className="px-3 py-2">Tag</th>
-                            <th className="px-3 py-2">Step Latency</th>
-                            <th className="px-3 py-2">Elapsed</th>
-                            <th className="px-3 py-2">Log Message</th>
+                            <th className="px-3 py-2">{lang === 'th' ? 'แท็ก' : 'Tag'}</th>
+                            <th className="px-3 py-2">{lang === 'th' ? 'ความหน่วง/ขั้น' : 'Step Latency'}</th>
+                            <th className="px-3 py-2">{lang === 'th' ? 'เวลารวม' : 'Elapsed'}</th>
+                            <th className="px-3 py-2">{lang === 'th' ? 'ข้อความบันทึก' : 'Log Message'}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--app-card-border)] bg-[var(--app-bg)]">
@@ -2735,9 +2740,18 @@ export default function App() {
 
       {/* Quick Agent Launch Modal */}
       {isQuickTaskOpen && (
-        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--app-bg)_70%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
-          <div 
-            className="rounded-3xl w-full max-w-xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors"
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={lang === 'th' ? 'สั่งการประมวลผล Native Intelligence' : 'Dispatch Native Intelligence Engine'}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsQuickTaskOpen(false);
+          }}
+          className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--app-bg)_70%,transparent)] backdrop-blur-sm flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-2xl w-full max-w-xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors"
             style={{
               backgroundColor: 'var(--app-card)',
               borderColor: 'var(--app-card-border)',
@@ -2765,8 +2779,10 @@ export default function App() {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsQuickTaskOpen(false)}
-                className="p-1.5 rounded-lg transition-colors cursor-pointer"
+                aria-label={lang === 'th' ? 'ปิดหน้าต่างสั่งการด่วน' : 'Close quick task modal'}
+                className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg border border-transparent hover:border-[var(--app-card-border)] transition-colors cursor-pointer shrink-0"
                 style={{ color: 'var(--app-text-secondary)' }}
               >
                 <X className="w-5 h-5" />
@@ -2780,7 +2796,7 @@ export default function App() {
                     {lang === 'th' ? 'เป้าหมายงาน หรือคำถามเพื่อการวิเคราะห์' : 'Task Specification & Problem Goal'}
                   </label>
                   <span className="text-[10px] font-mono opacity-80 flex items-center gap-1 text-[var(--app-text-secondary)]">
-                    <span>Dispatch:</span>
+                    <span>{lang === 'th' ? 'สั่งการ:' : 'Dispatch:'}</span>
                     <kbd className="px-1.5 py-0.2 rounded bg-black/40 text-[var(--app-accent)] border border-[var(--app-card-border)] font-bold text-[9px]">
                       Ctrl + Enter
                     </kbd>
@@ -2833,7 +2849,7 @@ export default function App() {
                     <span
                       className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono border ${
                         isTampered
-                          ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[var(--z-danger)] animate-pulse'
+                          ? 'bg-[color-mix(in_srgb,var(--z-danger)_20%,transparent)] text-[var(--z-danger)] border-[var(--z-danger)]'
                           : integrityStatus === 'EMPTY'
                           ? 'bg-[color-mix(in_srgb,var(--app-surface-elevated)_10%,transparent)] text-[var(--app-text-secondary)] border-[color-mix(in_srgb,var(--app-card-border)_30%,transparent)]'
                           : 'bg-[color-mix(in_srgb,var(--z-ok)_10%,transparent)] text-[var(--z-ok)] border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)]'
@@ -2841,7 +2857,7 @@ export default function App() {
                       title={`Integrity Status: ${integrityStatus} · SHA-256: ${rollingHash || 'empty'}`}
                     >
                       {isTampered ? <ShieldAlert className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
-                      {isTampered ? 'TAMPERED' : rollingHash ? `${rollingHash.slice(0, 8)}` : integrityStatus}
+                      {isTampered ? (lang === 'th' ? 'ตรวจพบการแก้ไข' : 'TAMPERED') : rollingHash ? `${rollingHash.slice(0, 8)}` : integrityStatus}
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -2924,14 +2940,14 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setLogTimeMode((prev) => (prev === 'absolute' ? 'relative' : 'absolute'))}
-                      title="Toggle Relative / Absolute Timestamp"
+                      title={lang === 'th' ? 'สลับเวลาสัมพัทธ์ / เวลาจริง' : 'Toggle Relative / Absolute Timestamp'}
                       className={`px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                         logTheme === 'high_contrast'
                           ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)] hover:bg-[var(--app-surface)]'
                           : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
                       }`}
                     >
-                      {logTimeMode === 'absolute' ? 'ABS' : 'REL'}
+                      {logTimeMode === 'absolute' ? (lang === 'th' ? 'เวลาจริง' : 'ABS') : (lang === 'th' ? 'สัมพัทธ์' : 'REL')}
                     </button>
                     <button
                       type="button"
@@ -2948,8 +2964,12 @@ export default function App() {
                         });
                       }}
                       aria-pressed={showLineNumbers}
-                      aria-label="Toggle Line Numbers"
-                      title={showLineNumbers ? 'Toggle Line Numbers (Hide)' : 'Toggle Line Numbers (Show)'}
+                      aria-label={lang === 'th' ? 'แสดง/ซ่อนเลขบรรทัด' : 'Toggle Line Numbers'}
+                      title={
+                        lang === 'th'
+                          ? (showLineNumbers ? 'ซ่อนเลขบรรทัด' : 'แสดงเลขบรรทัด')
+                          : (showLineNumbers ? 'Toggle Line Numbers (Hide)' : 'Toggle Line Numbers (Show)')
+                      }
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer border text-[10px] font-mono font-bold ${
                         showLineNumbers
                           ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
@@ -2977,7 +2997,11 @@ export default function App() {
                           return next;
                         });
                       }}
-                      title={logTextWrap ? 'Wrap Text (click to switch to No-Wrap)' : 'No-Wrap (click to switch to Wrap Text)'}
+                      title={
+                        lang === 'th'
+                          ? (logTextWrap ? 'ตัดบรรทัดอัตโนมัติ (คลิกเพื่อไม่ตัด)' : 'ไม่ตัดบรรทัด (คลิกเพื่อตัดบรรทัด)')
+                          : (logTextWrap ? 'Wrap Text (click to switch to No-Wrap)' : 'No-Wrap (click to switch to Wrap Text)')
+                      }
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer border text-[10px] font-mono font-bold ${
                         logTextWrap
                           ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
@@ -2992,7 +3016,8 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setTtsEnabled((prev) => !prev)}
-                      title={ttsEnabled ? 'Disable TTS' : 'Enable Text-to-Speech'}
+                      title={lang === 'th' ? (ttsEnabled ? 'ปิดเสียงอ่าน' : 'เปิดเสียงอ่านข้อความ') : (ttsEnabled ? 'Disable TTS' : 'Enable Text-to-Speech')}
+                      aria-label={lang === 'th' ? (ttsEnabled ? 'ปิดเสียงอ่าน' : 'เปิดเสียงอ่าน') : (ttsEnabled ? 'Disable TTS' : 'Enable TTS')}
                       className={`p-1.5 rounded-md transition-colors cursor-pointer border ${
                         ttsEnabled
                           ? 'bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)] text-[var(--app-accent)] border-[color-mix(in_srgb,var(--app-accent)_50%,transparent)]'
@@ -3008,13 +3033,19 @@ export default function App() {
                       onClick={handleToggleTtsPause}
                       disabled={!ttsEnabled}
                       aria-pressed={ttsPaused}
-                      aria-label={ttsPaused ? 'Resume TTS' : 'Pause TTS'}
+                      aria-label={lang === 'th' ? (ttsPaused ? 'เล่นเสียงอ่านต่อ' : 'พักเสียงอ่าน') : (ttsPaused ? 'Resume TTS' : 'Pause TTS')}
                       title={
-                        !ttsEnabled
-                          ? 'Enable TTS to pause or resume speech'
-                          : ttsPaused
-                          ? 'Resume queued speech synthesis'
-                          : 'Pause ongoing speech synthesis'
+                        lang === 'th'
+                          ? (!ttsEnabled
+                            ? 'เปิดเสียงอ่านก่อนเพื่อพักหรือเล่นต่อ'
+                            : ttsPaused
+                            ? 'เล่นเสียงอ่านต่อ'
+                            : 'พักเสียงอ่านชั่วคราว')
+                          : (!ttsEnabled
+                            ? 'Enable TTS to pause or resume speech'
+                            : ttsPaused
+                            ? 'Resume queued speech synthesis'
+                            : 'Pause ongoing speech synthesis')
                       }
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-colors cursor-pointer border disabled:opacity-40 disabled:cursor-not-allowed ${
                         ttsEnabled && ttsPaused
@@ -3027,7 +3058,7 @@ export default function App() {
                       }`}
                     >
                       {ttsPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
-                      <span className="hidden sm:inline">{ttsPaused ? 'Resume' : 'Pause'}</span>
+                      <span className="hidden sm:inline">{lang === 'th' ? (ttsPaused ? 'เล่นต่อ' : 'พักเสียง') : (ttsPaused ? 'Resume' : 'Pause')}</span>
                     </button>
                     <div
                       className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono ${
@@ -3035,10 +3066,10 @@ export default function App() {
                           ? 'bg-[var(--app-bg)] text-[var(--app-text-primary)] border-[color-mix(in_srgb,var(--app-text-primary)_40%,transparent)]'
                           : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-[var(--app-card-border)]'
                       }`}
-                      title="TTS Pitch (0.5x – 2.0x)"
+                      title={lang === 'th' ? 'ระดับเสียง (0.5x – 2.0x)' : 'TTS Pitch (0.5x – 2.0x)'}
                     >
                       <label htmlFor="tts-pitch-header-slider" className="shrink-0 font-semibold">
-                        TTS Pitch
+                        {lang === 'th' ? 'ระดับเสียง' : 'TTS Pitch'}
                       </label>
                       <input
                         id="tts-pitch-header-slider"
@@ -3047,7 +3078,7 @@ export default function App() {
                         max="2.0"
                         step="0.1"
                         value={ttsPitch}
-                        aria-label="TTS Pitch"
+                        aria-label={lang === 'th' ? 'ระดับเสียง' : 'TTS Pitch'}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
                           setTtsPitch(val);
@@ -3138,7 +3169,7 @@ export default function App() {
                         }`}
                       >
                         <Download className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Export</span>
+                        <span className="hidden sm:inline">{lang === 'th' ? 'ส่งออก' : 'Export'}</span>
                         <ChevronDown className="w-3 h-3" />
                       </button>
                       {isExportMenuOpen && (
@@ -3160,7 +3191,7 @@ export default function App() {
                           >
                             <span className="inline-flex items-center gap-2">
                               <Eye className="w-3.5 h-3.5" />
-                              <span>Preview</span>
+                              <span>{lang === 'th' ? 'ดูตัวอย่าง' : 'Preview'}</span>
                             </span>
                             <span className="px-1.5 py-0.2 rounded text-[9.5px] bg-[color-mix(in_srgb,var(--app-accent)_16%,transparent)] border border-[color-mix(in_srgb,var(--app-accent)_35%,transparent)] tabular-nums">
                               {selectedLogIndices.length > 0
@@ -3181,7 +3212,7 @@ export default function App() {
                             className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--z-ok)]" />
-                            <span>Export CSV (.csv)</span>
+                            <span>{lang === 'th' ? 'ส่งออก CSV (.csv)' : 'Export CSV (.csv)'}</span>
                           </button>
                           <button
                             type="button"
@@ -3194,7 +3225,7 @@ export default function App() {
                             className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <FileText className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-                            <span>Export Markdown (.md)</span>
+                            <span>{lang === 'th' ? 'ส่งออก Markdown (.md)' : 'Export Markdown (.md)'}</span>
                           </button>
                           <button
                             type="button"
@@ -3207,7 +3238,7 @@ export default function App() {
                             className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <FileJson className="w-3.5 h-3.5 text-[var(--app-amber)]" />
-                            <span>Export JSON (.json)</span>
+                            <span>{lang === 'th' ? 'ส่งออก JSON (.json)' : 'Export JSON (.json)'}</span>
                           </button>
                           <button
                             type="button"
@@ -3220,7 +3251,7 @@ export default function App() {
                             className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <Download className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
-                            <span>Raw Log (.log)</span>
+                            <span>{lang === 'th' ? 'ไฟล์บันทึกดิบ (.log)' : 'Raw Log (.log)'}</span>
                           </button>
                           <button
                             type="button"
@@ -3233,7 +3264,7 @@ export default function App() {
                             className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <Printer className="w-3.5 h-3.5 text-[var(--app-text-secondary)]" />
-                            <span>Print / PDF</span>
+                            <span>{lang === 'th' ? 'พิมพ์ / PDF' : 'Print / PDF'}</span>
                           </button>
                           <button
                             type="button"
@@ -3246,7 +3277,7 @@ export default function App() {
                             className="w-full px-3 py-1.5 flex items-center gap-2 text-left text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] border-t border-[var(--app-card-border)] mt-0.5 cursor-pointer"
                           >
                             <FileJson className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-                            <span>Workspace Context (.json)</span>
+                            <span>{lang === 'th' ? 'บริบทพื้นที่ทำงาน (.json)' : 'Workspace Context (.json)'}</span>
                           </button>
                         </div>
                       )}
@@ -3279,7 +3310,7 @@ export default function App() {
                       }`}
                     >
                       <Keyboard className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Shortcuts</span>
+                      <span className="hidden sm:inline">{lang === 'th' ? 'คีย์ลัด' : 'Shortcuts'}</span>
                     </button>
                     <button
                       type="button"
@@ -3292,7 +3323,9 @@ export default function App() {
                           : 'bg-[var(--app-surface-elevated)] text-[var(--app-text-primary)] border-[var(--app-card-border)] hover:border-[var(--app-accent)]'
                       }`}
                     >
-                      {logTheme === 'emerald_dark' ? 'Emerald Dark' : 'High Contrast'}
+                      {lang === 'th'
+                        ? (logTheme === 'emerald_dark' ? 'โหมดมืดมรกต' : 'คอนทราสต์สูง')
+                        : (logTheme === 'emerald_dark' ? 'Emerald Dark' : 'High Contrast')}
                     </button>
                   </div>
                 </div>
@@ -3301,8 +3334,11 @@ export default function App() {
                     <div className="flex items-center gap-2">
                       <ShieldAlert className="w-4 h-4 shrink-0 text-[var(--z-danger)]" />
                       <span>
-                        <strong>INTEGRITY ALARM:</strong> quickLogs hash no longer matches the sealed baseline.
-                        Session flagged as TAMPERED — possible unauthorized browser script mutation.
+                        {lang === 'th' ? (
+                          <><strong>แจ้งเตือนความสมบูรณ์ของบันทึก:</strong> แฮชของบันทึกไม่ตรงกับฐานข้อมูลตั้งต้น เซสชันถูกทำเครื่องหมายว่าอาจถูกแก้ไขโดยไม่ได้รับอนุญาต</>
+                        ) : (
+                          <><strong>INTEGRITY ALARM:</strong> quickLogs hash no longer matches the sealed baseline. Session flagged as TAMPERED — possible unauthorized browser script mutation.</>
+                        )}
                       </span>
                     </div>
                     <button
@@ -3310,7 +3346,7 @@ export default function App() {
                       onClick={handleIntegrityAutoRecovery}
                       className="self-start px-3 py-1.5 rounded-md text-[10px] font-bold bg-[color-mix(in_srgb,var(--z-ok)_20%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] cursor-pointer"
                     >
-                      Integrity Auto-Recovery
+                      {lang === 'th' ? 'กู้คืนความสมบูรณ์อัตโนมัติ' : 'Integrity Auto-Recovery'}
                     </button>
                   </div>
                 )}
@@ -4366,7 +4402,7 @@ export default function App() {
                                 ttsEnabled ? 'cursor-pointer' : ''
                               } ${
                                 isActiveTtsLine
-                                  ? 'bg-[var(--app-accent)] text-black font-bold rounded px-1 border-r-transparent ring-1 ring-[var(--app-accent)] shadow-sm'
+                                  ? 'bg-[var(--app-accent-deep)] text-white font-bold rounded px-1 border-r-transparent ring-1 ring-[var(--app-accent)] shadow-sm'
                                   : logTheme === 'high_contrast'
                                   ? 'text-[var(--app-text-secondary)] border-[color-mix(in_srgb,var(--app-text-primary)_25%,transparent)]'
                                   : 'text-[color-mix(in_srgb,var(--app-text-secondary)_60%,transparent)] border-[color-mix(in_srgb,var(--app-card-border)_60%,transparent)]'
@@ -5147,7 +5183,7 @@ export default function App() {
                       setCriticalActionError(null);
                       openAuthSettings('account');
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--app-accent)] text-slate-950 text-[11px] font-bold cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--app-accent-deep)] text-white text-[11px] font-bold hover:brightness-110 transition-all cursor-pointer"
                   >
                     <LogIn className="w-3.5 h-3.5" />
                     <span>{lang === 'th' ? 'เข้าสู่ระบบ' : 'Sign in'}</span>
@@ -5164,7 +5200,7 @@ export default function App() {
               type="button"
               onClick={() => setCriticalActionError(null)}
               aria-label={lang === 'th' ? 'ปิดแจ้งเตือนข้อผิดพลาด' : 'Dismiss error notification'}
-              className="p-1 rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer shrink-0"
+              className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-lg text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-surface-elevated)] cursor-pointer shrink-0"
             >
               <X className="w-3.5 h-3.5" />
             </button>

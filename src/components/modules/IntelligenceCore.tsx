@@ -167,39 +167,47 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard
-          title="Active parameters"
+          title={lang === 'th' ? 'พารามิเตอร์ที่ทำงานอยู่' : 'Active parameters'}
           value={ready ? count(activeParams) : '—'}
           subtitle={
             ready
               ? typeof activeParams === 'number' && activeParams < TARGET_PARAMS
-                ? 'Partial Trained Subgraph · not full 41.5M Core'
-                : 'Loaded & verified full Native Core'
-              : 'Hidden until Cloud Checkpoint verified & loaded'
+                ? lang === 'th'
+                  ? 'ซับกราฟฝึกบางส่วน · ยังไม่ครบ 41.5M'
+                  : 'Partial Trained Subgraph · not full 41.5M Core'
+                : lang === 'th'
+                  ? 'โหลดและตรวจยืนยัน Native Core ครบแล้ว'
+                  : 'Loaded & verified full Native Core'
+              : lang === 'th'
+                ? 'ซ่อนไว้จนกว่าจะตรวจและโหลด Cloud Checkpoint'
+                : 'Hidden until Cloud Checkpoint verified & loaded'
           }
           icon={<BrainCircuit className="w-5 h-5" />}
           accentColor="cyan"
         />
         <MetricCard
-          title="Target architecture"
+          title={lang === 'th' ? 'สถาปัตยกรรมเป้าหมาย' : 'Target architecture'}
           value={count(model?.targetParams ?? TARGET_PARAMS)}
-          subtitle="Design target · not active weights"
+          subtitle={lang === 'th' ? 'สเปกออกแบบเป้าหมาย · ยังไม่ใช่น้ำหนักที่โหลด' : 'Design target · not active weights'}
           icon={<Layers3 className="w-5 h-5" />}
           accentColor="purple"
         />
         <MetricCard
-          title="Inference runtime"
-          value={ready ? 'READY' : 'BLOCKED'}
-          subtitle={model?.runtimeState || connectivity?.runtimeState || 'No runtime telemetry'}
+          title={lang === 'th' ? 'สถานะ Inference Runtime' : 'Inference runtime'}
+          value={ready ? (lang === 'th' ? 'พร้อมทำงาน' : 'READY') : (lang === 'th' ? 'ถูกระงับ (BLOCKED)' : 'BLOCKED')}
+          subtitle={model?.runtimeState || connectivity?.runtimeState || (lang === 'th' ? 'ยังไม่มีข้อมูล Telemetry' : 'No runtime telemetry')}
           icon={<Cloud className="w-5 h-5" />}
           accentColor={ready ? 'lime' : 'coral'}
         />
         <MetricCard
-          title="Checkpoint seal"
-          value={checkpointSeal ? 'PRESENT' : 'NOT LOADED'}
+          title={lang === 'th' ? 'ลายเซ็น Checkpoint' : 'Checkpoint seal'}
+          value={checkpointSeal ? (lang === 'th' ? 'ตรวจพบแฮช' : 'PRESENT') : (lang === 'th' ? 'ยังไม่โหลด' : 'NOT LOADED')}
           subtitle={
             checkpointSeal
               ? checkpointSeal.slice(0, 16) + '…'
-              : 'Cloud checkpoint fingerprint unavailable'
+              : lang === 'th'
+                ? 'ยังไม่มีลายนิ้วมือ Cloud Checkpoint'
+                : 'Cloud checkpoint fingerprint unavailable'
           }
           icon={<ShieldCheck className="w-5 h-5" />}
           accentColor="cyan"
@@ -207,8 +215,12 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
       </div>
 
       <VividCard
-        title="Native Intelligence Runtime"
-        subtitle="Active graph and target architecture are reported separately. Inference calls the real Native Cloud Runtime."
+        title={lang === 'th' ? 'แกนประมวลผล Native Intelligence Runtime' : 'Native Intelligence Runtime'}
+        subtitle={
+          lang === 'th'
+            ? 'แยกรายงานพารามิเตอร์ที่ใช้งานจริงออกจากสถาปัตยกรรมเป้าหมายอย่างชัดเจน และเรียกใช้ Native Cloud Runtime จริงเท่านั้น'
+            : 'Active graph and target architecture are reported separately. Inference calls the real Native Cloud Runtime.'
+        }
         gradientAccent="cyan"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -216,14 +228,16 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
             <span className={`vivid-status-dot ${ready ? 'is-ready' : 'is-blocked'}`} />
             <span className="text-sm font-semibold text-[var(--app-text-primary)]">
               {ready
-                ? 'READY'
-                : model?.runtimeState || connectivity?.runtimeState || 'RUNTIME STATUS UNAVAILABLE'}
+                ? lang === 'th'
+                  ? 'พร้อมทำงาน (READY)'
+                  : 'READY'
+                : model?.runtimeState || connectivity?.runtimeState || (lang === 'th' ? 'ไม่พบสถานะรันไทม์' : 'RUNTIME STATUS UNAVAILABLE')}
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <StatusDot
               status={internetReachable ? 'ONLINE' : 'BLOCKED'}
-              label={`INTERNET: ${internetReachable ? 'ONLINE' : 'OFFLINE'}`}
+              label={`${lang === 'th' ? 'อินเทอร์เน็ต' : 'INTERNET'}: ${internetReachable ? (lang === 'th' ? 'ออนไลน์' : 'ONLINE') : (lang === 'th' ? 'ออฟไลน์' : 'OFFLINE')}`}
             />
             <span className="text-[var(--app-text-secondary)]">·</span>
             <StatusDot
@@ -234,9 +248,9 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
                 type="button"
                 onClick={() => void handleRefresh()}
                 disabled={refreshing}
-                aria-label="Refresh connectivity status"
+                aria-label={lang === 'th' ? 'รีเฟรชสถานะการเชื่อมต่อ' : 'Refresh connectivity status'}
                 className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center p-2 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-primary)] disabled:opacity-50 cursor-pointer"
-                title="Refresh connectivity status"
+                title={lang === 'th' ? 'รีเฟรชสถานะการเชื่อมต่อ' : 'Refresh connectivity status'}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               </button>
@@ -248,22 +262,22 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
           <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
             <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">
-              1. Internet Connectivity
+              {lang === 'th' ? '1. อินเทอร์เน็ต' : '1. Internet Connectivity'}
             </div>
             <div
               className={`mt-1 font-bold ${
                 internetReachable ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
               }`}
             >
-              {internetReachable ? 'ONLINE' : 'OFFLINE'}
+              {internetReachable ? (lang === 'th' ? 'ออนไลน์' : 'ONLINE') : (lang === 'th' ? 'ออฟไลน์' : 'OFFLINE')}
             </div>
             <div className="mt-1 text-[11px] text-[var(--app-text-secondary)] break-words">
-              {connectivity?.internetProbeDetail || 'Checking public network reachability…'}
+              {connectivity?.internetProbeDetail || (lang === 'th' ? 'กำลังตรวจสอบเครือข่ายสาธารณะ…' : 'Checking public network reachability…')}
             </div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
             <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">
-              2. Cloud Storage
+              {lang === 'th' ? '2. Cloud Storage' : '2. Cloud Storage'}
             </div>
             <div
               className={`mt-1 font-bold ${
@@ -274,18 +288,30 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
                   : 'text-[var(--z-danger)]'
               }`}
             >
-              {cloudConfigured ? (cloudReachable ? 'REACHABLE' : 'UNREACHABLE') : 'NOT CONFIGURED'}
+              {cloudConfigured
+                ? cloudReachable
+                  ? lang === 'th'
+                    ? 'เชื่อมต่อได้'
+                    : 'REACHABLE'
+                  : lang === 'th'
+                    ? 'เข้าถึงไม่ได้'
+                    : 'UNREACHABLE'
+                : lang === 'th'
+                  ? 'ยังไม่ตั้งค่า'
+                  : 'NOT CONFIGURED'}
             </div>
             <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)] break-all">
               {connectivity?.cloudSourceUri ||
                 (connectivity?.cloudConfigMissingKeys?.length
-                  ? `Missing: ${connectivity.cloudConfigMissingKeys.join(', ')}`
-                  : 'Set CHECKPOINT_PRESIGNED_URL or S3_BUCKET')}
+                  ? `${lang === 'th' ? 'ขาดตัวแปร:' : 'Missing:'} ${connectivity.cloudConfigMissingKeys.join(', ')}`
+                  : lang === 'th'
+                    ? 'ตั้งค่า CHECKPOINT_PRESIGNED_URL หรือ S3_BUCKET'
+                    : 'Set CHECKPOINT_PRESIGNED_URL or S3_BUCKET')}
             </div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
             <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">
-              3. Native Bridge & Weights
+              {lang === 'th' ? '3. Native Bridge & Weights' : '3. Native Bridge & Weights'}
             </div>
             <div
               className={`mt-1 font-bold ${
@@ -297,25 +323,37 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
               }`}
             >
               {ready
-                ? 'VERIFIED & READY'
+                ? lang === 'th'
+                  ? 'ยืนยันแล้ว & พร้อมทำงาน'
+                  : 'VERIFIED & READY'
                 : bridgeReachable
-                ? 'BRIDGE UP · NO WEIGHTS'
-                : 'BRIDGE UNREACHABLE'}
+                ? lang === 'th'
+                  ? 'Bridge พร้อม · ยังไม่โหลด Weights'
+                  : 'BRIDGE UP · NO WEIGHTS'
+                : lang === 'th'
+                  ? 'Bridge ไม่ตอบสนอง'
+                  : 'BRIDGE UNREACHABLE'}
             </div>
             <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)]">
               {ready
-                ? `Active Params: ${count(activeParams)}`
-                : 'Active Params withheld until SHA-256 & forward-pass verified'}
+                ? `${lang === 'th' ? 'พารามิเตอร์ที่ใช้งาน:' : 'Active Params:'} ${count(activeParams)}`
+                : lang === 'th'
+                  ? 'ซ่อนค่าพารามิเตอร์จนกว่าจะตรวจ SHA-256 และ Forward Pass ผ่าน'
+                  : 'Active Params withheld until SHA-256 & forward-pass verified'}
             </div>
           </div>
         </div>
 
         <p className="text-sm leading-6 text-[var(--app-text-secondary)] mb-4">
           {ready
-            ? 'The Cloud Runtime reports a loaded checkpoint and enabled inference. This status applies to the active payload only.'
+            ? lang === 'th'
+              ? 'Cloud Runtime ยืนยันการโหลด Checkpoint และเปิดใช้งาน Inference แล้ว สถานะนี้มีผลเฉพาะ Payload ปัจจุบันเท่านั้น'
+              : 'The Cloud Runtime reports a loaded checkpoint and enabled inference. This status applies to the active payload only.'
             : model?.readinessReason ||
               connectivity?.reason ||
-              'Native inference remains blocked until a valid checkpoint is loaded and verified from Cloud Storage.'}
+              (lang === 'th'
+                ? 'Native Inference ถูกระงับแบบ Fail-Closed จนกว่าจะโหลดและตรวจยืนยัน Checkpoint จาก Cloud Storage'
+                : 'Native inference remains blocked until a valid checkpoint is loaded and verified from Cloud Storage.')}
         </p>
 
         {!ready && remediationSteps.length > 0 && (
@@ -346,23 +384,35 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
             type="url"
             value={cloudUrlInput}
             onChange={(e) => setCloudUrlInput(e.target.value)}
-            placeholder="Presigned Checkpoint URL (https://.../model_checkpoint.pt)"
+            placeholder={
+              lang === 'th'
+                ? 'Presigned Checkpoint URL (https://.../model_checkpoint.pt)'
+                : 'Presigned Checkpoint URL (https://.../model_checkpoint.pt)'
+            }
             className="flex-1 min-w-0 px-3 py-2.5 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
           />
           <input
             type="text"
             value={cloudKeyInput}
             onChange={(e) => setCloudKeyInput(e.target.value)}
-            placeholder="Optional S3 Key"
+            placeholder={lang === 'th' ? 'S3 Key (ไม่บังคับ)' : 'Optional S3 Key'}
             className="sm:w-44 px-3 py-2.5 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
           />
           <button
             type="submit"
             disabled={reconnectBusy}
-            className="min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 disabled:opacity-50 inline-flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+            className="min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
           >
             <Cloud className="w-3.5 h-3.5" />
-            <span>{reconnectBusy ? 'Connecting…' : 'Connect & Load Checkpoint'}</span>
+            <span>
+              {reconnectBusy
+                ? lang === 'th'
+                  ? 'กำลังเชื่อมต่อ…'
+                  : 'Connecting…'
+                : lang === 'th'
+                  ? 'เชื่อมต่อและโหลด Checkpoint'
+                  : 'Connect & Load Checkpoint'}
+            </span>
           </button>
         </form>
 
@@ -372,20 +422,20 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-5 text-xs">
           <div className="rounded-xl p-3 bg-[var(--app-surface-elevated)]">
-            <div className="text-[var(--app-text-secondary)]">Target width</div>
-            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">512 dimensions</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ความกว้างเป้าหมาย' : 'Target width'}</div>
+            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">{lang === 'th' ? '512 มิติ' : '512 dimensions'}</div>
           </div>
           <div className="rounded-xl p-3 bg-[var(--app-surface-elevated)]">
-            <div className="text-[var(--app-text-secondary)]">Target depth</div>
-            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">10 layers</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ความลึกเป้าหมาย' : 'Target depth'}</div>
+            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">{lang === 'th' ? '10 ชั้น' : '10 layers'}</div>
           </div>
           <div className="rounded-xl p-3 bg-[var(--app-surface-elevated)]">
-            <div className="text-[var(--app-text-secondary)]">Target attention</div>
-            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">8 heads</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'หัว Attention เป้าหมาย' : 'Target attention'}</div>
+            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">{lang === 'th' ? '8 Heads' : '8 heads'}</div>
           </div>
           <div className="rounded-xl p-3 bg-[var(--app-surface-elevated)]">
-            <div className="text-[var(--app-text-secondary)]">Target FFN</div>
-            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">1,472 width</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ชั้น FFN เป้าหมาย' : 'Target FFN'}</div>
+            <div className="mt-1 font-semibold text-[var(--app-text-primary)]">{lang === 'th' ? '1,472 มิติ' : '1,472 width'}</div>
           </div>
         </div>
 
@@ -401,7 +451,7 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
             onChange={(event) => setPrompt(event.target.value)}
             disabled={busy}
             className="flex-1 min-w-0 px-4 py-3 rounded-xl text-sm bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)] disabled:opacity-60"
-            placeholder="Enter a real inference request"
+            placeholder={lang === 'th' ? 'ป้อนคำสั่งสำหรับประมวลผลผ่าน Inference จริง' : 'Enter a real inference request'}
           />
           <button
             type="submit"
@@ -409,7 +459,7 @@ export const IntelligenceCore: React.FC<IntelligenceCoreProps> = ({
             className="min-h-[44px] px-4 py-3 rounded-xl text-sm font-semibold vivid-gradient-brand text-white disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
           >
             <Send className="w-4 h-4" />
-            {busy ? 'Running…' : 'Run inference'}
+            {busy ? (lang === 'th' ? 'กำลังประมวลผล…' : 'Running…') : (lang === 'th' ? 'รัน Inference' : 'Run inference')}
           </button>
         </form>
         {!isAuthenticated && (

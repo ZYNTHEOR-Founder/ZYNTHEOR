@@ -123,7 +123,7 @@ export const ThemeSwitcher: React.FC = () => {
         <div className="text-xs font-bold text-[var(--app-text-primary)] mb-3 flex items-center justify-between">
           <span>{lang === 'th' ? 'เลือกชุดสีและธีมหลัก (Theme Presets)' : 'Select Primary Theme Preset'}</span>
           <span className="text-[11px] font-mono font-medium text-[var(--app-text-secondary)]">
-            Active: <span className="font-bold text-[var(--app-accent)] ">{resolvedTheme}</span>
+            {lang === 'th' ? 'ใช้งานอยู่:' : 'Active:'} <span className="font-bold text-[var(--app-accent)] ">{resolvedTheme}</span>
           </span>
         </div>
 
@@ -156,7 +156,7 @@ export const ThemeSwitcher: React.FC = () => {
                   </div>
 
                   {isSelected && (
-                    <span className="w-5 h-5 rounded-full bg-[var(--app-accent)] text-white flex items-center justify-center shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-[var(--app-accent-deep)] text-white flex items-center justify-center shrink-0">
                       <Check className="w-3 h-3 stroke-[3]" />
                     </span>
                   )}
@@ -253,9 +253,9 @@ export const ThemeSwitcher: React.FC = () => {
             className="w-full accent-[var(--app-accent)] cursor-pointer"
           />
           <div className="flex justify-between text-[10px] text-[var(--app-text-secondary)] mt-0.5">
-            <span>60% (Subtle)</span>
-            <span>100% (Standard)</span>
-            <span>140% (High Contrast)</span>
+            <span>{lang === 'th' ? '60% (นุ่มนวล)' : '60% (Subtle)'}</span>
+            <span>{lang === 'th' ? '100% (มาตรฐาน)' : '100% (Standard)'}</span>
+            <span>{lang === 'th' ? '140% (คอนทราสต์สูง)' : '140% (High Contrast)'}</span>
           </div>
         </div>
 

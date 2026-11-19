@@ -622,7 +622,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             />
           </span>
           <span className="inline-flex items-center gap-2">
-            <span>Runtime</span>
+            <span>{th ? 'รันไทม์' : 'Runtime'}</span>
             <StatusDot
               status={runtimeStatus}
               label={inferenceReady ? (th ? 'พร้อม' : 'READY') : (th ? 'ยังไม่โหลด' : 'BLOCKED')}
@@ -630,7 +630,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             />
           </span>
           <span className="inline-flex items-center gap-2">
-            <span>Checkpoint</span>
+            <span>{th ? 'เช็กพอยต์' : 'Checkpoint'}</span>
             <StatusDot
               status={checkpointStatus}
               label={model?.weightsLoaded ? (th ? 'โหลดแล้ว' : 'LOADED') : (th ? 'ยังไม่โหลด' : 'UNLOADED')}
@@ -638,7 +638,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             />
           </span>
           <span className="inline-flex items-center gap-2">
-            <span>Audit</span>
+            <span>{th ? 'การตรวจ Audit' : 'Audit'}</span>
             <StatusDot
               status={auditStatus}
               label={audit?.chainValid === true ? (th ? 'ถูกต้อง' : 'VALID') : audit?.chainValid === false ? (th ? 'ผิดพลาด' : 'INVALID') : (th ? 'รอตรวจ' : 'UNVERIFIED')}
@@ -906,7 +906,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             </span>
             {truthData.softwareEngineering.summary.partial > 0 && (
               <span className="font-mono tabular-nums text-[var(--app-amber)]">
-                PARTIAL {truthData.softwareEngineering.summary.partial}
+                {th ? 'บางส่วน' : 'PARTIAL'} {truthData.softwareEngineering.summary.partial}
               </span>
             )}
             {(truthData.softwareEngineering.summary.blocked + truthData.softwareEngineering.summary.notConfigured) > 0 && (
@@ -1057,7 +1057,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               {statusData ? `Epoch ${currentEpoch} / ${totalEpochs}` : '—'}
               {statusData && (
                 <span className="ml-2 text-[11px] font-normal text-[var(--app-text-secondary)]">
-                  ({completedCheckpointCycles}/{plannedCheckpointsCount} ckpt)
+                  ({completedCheckpointCycles}/{plannedCheckpointsCount} {th ? 'รอบ' : 'ckpt'})
                 </span>
               )}
             </div>
@@ -1091,7 +1091,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               {statusData ? `${gatesPassed} / ${gatesTotal}` : '—'}
               {typeof training?.latestValLoss === 'number' && (
                 <span className="ml-2 text-[11px] font-normal text-[var(--app-text-secondary)]">
-                  Loss {training.latestValLoss.toFixed(3)}
+                  {th ? 'ค่า Loss' : 'Loss'} {training.latestValLoss.toFixed(3)}
                 </span>
               )}
             </div>
@@ -1102,7 +1102,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         {statusData && training?.status === 'BLOCKED' && blockers.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--app-card-border)] text-xs text-[var(--app-text-secondary)]">
             <span className="truncate">
-              <span className="font-mono font-semibold text-[var(--z-danger)]">BLOCKED:</span>{' '}
+              <span className="font-mono font-semibold text-[var(--z-danger)]">{th ? 'ติดขัด:' : 'BLOCKED:'}</span>{' '}
               <span className="font-mono">{blockers.slice(0, 2).join(' · ')}{blockers.length > 2 ? ` (+${blockers.length - 2})` : ''}</span>
             </span>
             <button
@@ -1126,7 +1126,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 {th ? 'เฉลี่ย 10 ขั้นล่าสุด:' : 'Last-10 avg:'}{' '}
                 <strong className="text-[var(--app-text-primary)]">
                   {timeToEpoch.averageStepSeconds !== null
-                    ? `${timeToEpoch.averageStepSeconds.toFixed(3)}s/step`
+                    ? `${timeToEpoch.averageStepSeconds.toFixed(3)}s/${th ? 'ขั้น' : 'step'}`
                     : '—'}
                 </strong>
               </span>
@@ -1145,7 +1145,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               <span data-testid="time-to-epoch-remaining-steps">
                 {th ? 'คงเหลือ:' : 'Remaining:'}{' '}
                 <strong className="text-[var(--app-text-primary)]">
-                  {statusData ? `${timeToEpoch.remainingStepsInEpoch.toLocaleString()} steps` : '—'}
+                  {statusData ? `${timeToEpoch.remainingStepsInEpoch.toLocaleString()} ${th ? 'ขั้น' : 'steps'}` : '—'}
                 </strong>
               </span>
             </div>

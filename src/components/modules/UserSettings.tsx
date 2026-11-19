@@ -251,7 +251,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
 
         <div className="space-y-1.5">
           <label className="block text-[11px] font-bold text-[var(--app-text-secondary)]">
-            Express Server Base URL (leave empty for same-origin web; Android emulator uses http://10.0.2.2:3000)
+            {lang === 'th'
+              ? 'URL เซิร์ฟเวอร์ Express (เว้นว่างสำหรับเว็บโดเมนเดียวกัน; Android Emulator ใช้ http://10.0.2.2:3000)'
+              : 'Express Server Base URL (leave empty for same-origin web; Android emulator uses http://10.0.2.2:3000)'}
           </label>
           <div className="flex flex-wrap gap-2">
             <input
@@ -265,10 +267,18 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
               type="button"
               disabled={probingBackend}
               onClick={() => void handleSaveAndTestBackendUrl()}
-              className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+              className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50 whitespace-nowrap"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${probingBackend ? 'animate-spin' : ''}`} />
-              <span>{probingBackend ? 'Testing…' : 'Save & Test /api/health'}</span>
+              <span>
+                {probingBackend
+                  ? lang === 'th'
+                    ? 'กำลังทดสอบ…'
+                    : 'Testing…'
+                  : lang === 'th'
+                  ? 'บันทึกและทดสอบ /api/health'
+                  : 'Save & Test /api/health'}
+              </span>
             </button>
           </div>
         </div>
@@ -323,7 +333,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
               type="button"
               data-testid="login-continue-google-btn"
               onClick={() => void loginWithGoogle()}
-              className="w-full min-h-[54px] px-6 py-3.5 rounded-xl text-base font-bold bg-[var(--app-accent)] text-slate-950 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center"
+              className="w-full min-h-[54px] px-6 py-3.5 rounded-xl text-base font-bold bg-[var(--app-accent-deep)] text-white hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center"
             >
               Continue with Google
             </button>
@@ -367,22 +377,39 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
           <div className="text-xs text-[var(--app-text-primary)]">
             {isAuthenticated ? (
               <span>
-                Signed in as <strong className="font-mono text-[var(--app-accent)]">{role}</strong>. Ready to return to{' '}
-                <strong>{returnToModuleLabel}</strong>.
+                {lang === 'th' ? (
+                  <>
+                    เข้าสู่ระบบในสิทธิ์ <strong className="font-mono text-[var(--app-accent)]">{role}</strong> แล้ว · พร้อมกลับไปที่{' '}
+                    <strong>{returnToModuleLabel}</strong>
+                  </>
+                ) : (
+                  <>
+                    Signed in as <strong className="font-mono text-[var(--app-accent)]">{role}</strong>. Ready to return to{' '}
+                    <strong>{returnToModuleLabel}</strong>.
+                  </>
+                )}
               </span>
             ) : (
               <span>
-                Sign in below to unlock protected actions and return to <strong>{returnToModuleLabel}</strong>.
+                {lang === 'th' ? (
+                  <>
+                    เข้าสู่ระบบด้านล่างเพื่อปลดล็อกสิทธิ์และกลับไปที่ <strong>{returnToModuleLabel}</strong>
+                  </>
+                ) : (
+                  <>
+                    Sign in below to unlock protected actions and return to <strong>{returnToModuleLabel}</strong>.
+                  </>
+                )}
               </span>
             )}
           </div>
           <button
             type="button"
             onClick={onReturnToTask}
-            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer whitespace-nowrap"
+            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer whitespace-nowrap"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to {returnToModuleLabel}</span>
+            <span>{lang === 'th' ? `กลับไปยัง ${returnToModuleLabel}` : `Return to ${returnToModuleLabel}`}</span>
           </button>
         </div>
       )}
@@ -402,7 +429,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
             type="button"
             data-testid="login-continue-google-btn"
             onClick={() => void loginWithGoogle()}
-            className="w-full sm:w-auto sm:min-w-[280px] min-h-[52px] px-6 py-3 rounded-xl text-sm sm:text-base font-bold bg-[var(--app-accent)] text-slate-950 hover:brightness-110 cursor-pointer transition-all"
+            className="w-full sm:w-auto sm:min-w-[280px] min-h-[52px] px-6 py-3 rounded-xl text-sm sm:text-base font-bold bg-[var(--app-accent-deep)] text-white hover:brightness-110 cursor-pointer transition-all"
           >
             Continue with Google
           </button>
@@ -462,7 +489,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
               onClick={logout}
               className="w-full min-h-[44px] mt-2 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--app-surface)] text-[var(--z-danger)] border border-[var(--app-card-border)] hover:border-[var(--z-danger)] cursor-pointer transition-colors"
             >
-              Sign out
+              {lang === 'th' ? 'ออกจากระบบ' : 'Sign out'}
             </button>
           )}
         </div>
@@ -472,7 +499,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
           {activeSection === 'appearance' && (
             <VividCard
               title={lang === 'th' ? 'ธีม ภาษา และประสบการณ์ผู้ใช้' : 'Appearance, Language & Experience'}
-              subtitle="VIVID INTELLIGENCE Theme & Voice Engine"
+              subtitle={lang === 'th' ? 'ชุดสีอินเทอร์เฟซและความคมชัดระดับมืออาชีพ' : 'VIVID INTELLIGENCE Theme & Voice Engine'}
               gradientAccent="emerald"
             >
               <ThemeSwitcher />

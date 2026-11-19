@@ -197,53 +197,69 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
 
   const prerequisites = [
     {
-      name: lang === 'th' ? 'Native Architecture (PureSeqLM)' : 'Native Architecture (PureSeqLM)',
+      name: lang === 'th' ? 'สถาปัตยกรรมโมเดล Native (PureSeqLM)' : 'Native Architecture (PureSeqLM)',
       state: 'IMPLEMENTED',
-      detail: '512d · 10 layers · 8 heads · 1,472 FFN · 41,527,808 target params',
+      detail:
+        lang === 'th'
+          ? '512 มิติ · 10 ชั้น · 8 heads · 1,472 FFN · เป้าหมาย 41,527,808 พารามิเตอร์'
+          : '512d · 10 layers · 8 heads · 1,472 FFN · 41,527,808 target params',
     },
     {
       name: lang === 'th' ? 'Sovereign Tokenizer (TH/EN)' : 'Sovereign Tokenizer (TH/EN)',
       state: model?.tokenizerSha256 ? 'VERIFIED' : 'PARTIAL',
       detail: model?.tokenizerSha256
         ? `SHA-256 ${model.tokenizerSha256.slice(0, 14)}…`
-        : '16k bilingual subword structure active; runtime seal awaits weight binding',
+        : lang === 'th'
+          ? 'โครงสร้างซับเวิร์ด 2 ภาษา 16k พร้อมใช้งาน รอผูกตราประทับน้ำหนักจริง'
+          : '16k bilingual subword structure active; runtime seal awaits weight binding',
     },
     {
-      name: lang === 'th' ? '41.5M Model Checkpoint' : '41.5M Model Checkpoint',
+      name: lang === 'th' ? 'ไฟล์น้ำหนัก 41.5M Model Checkpoint' : '41.5M Model Checkpoint',
       state: model?.weightsLoaded ? 'VERIFIED' : 'NOT_CONFIGURED',
       detail: model?.weightsLoaded
-        ? `${Number(model.activeParams ?? model.totalParams).toLocaleString()} params loaded`
-        : 'Cloud Checkpoint URL / S3 not bound or weights not loaded yet',
+        ? `${Number(model.activeParams ?? model.totalParams).toLocaleString()} ${lang === 'th' ? 'พารามิเตอร์ที่โหลด' : 'params loaded'}`
+        : lang === 'th'
+          ? 'ยังไม่ได้ผูก Cloud Checkpoint URL / S3 หรือยังไม่ได้โหลดน้ำหนัก'
+          : 'Cloud Checkpoint URL / S3 not bound or weights not loaded yet',
     },
     {
-      name: 'Native Runtime',
+      name: lang === 'th' ? 'รันไทม์ Native (Native Runtime)' : 'Native Runtime',
       state: ready ? 'VERIFIED' : 'BLOCKED',
-      detail: model?.readinessReason || model?.runtimeState || 'Fail-closed until verified forward pass',
+      detail:
+        model?.readinessReason ||
+        model?.runtimeState ||
+        (lang === 'th' ? 'ล็อก Fail-Closed จนกว่าจะตรวจยืนยัน Forward Pass' : 'Fail-closed until verified forward pass'),
     },
     {
-      name: 'Native NumPy Training',
+      name: lang === 'th' ? 'ระบบฝึก Native NumPy' : 'Native NumPy Training',
       state: numpyReady ? 'VERIFIED' : 'BLOCKED',
       detail: numpyReady
         ? `NumPy v${trainingReadiness.pythonBackend.numpyVersion}`
-        : 'NumPy C-extension missing (np_compat fallback blocked for 41.5M)',
+        : lang === 'th'
+          ? 'ขาด C-extension NumPy (โหมด np_compat ไม่รองรับรุ่น 41.5M)'
+          : 'NumPy C-extension missing (np_compat fallback blocked for 41.5M)',
     },
     {
-      name: lang === 'th' ? 'Training 5,800 Steps' : 'Training 5,800 Steps',
+      name: lang === 'th' ? 'การฝึกครบ 5,800 ขั้นตอน' : 'Training 5,800 Steps',
       state:
         trainingReadiness?.checkpointSave?.latestRunStatus === 'COMPLETED_VERIFIED'
           ? 'VERIFIED'
           : 'UNVERIFIED',
       detail:
         trainingReadiness?.checkpointSave?.pipelineRunsCount > 0
-          ? `${trainingReadiness.checkpointSave.pipelineRunsCount} run(s) recorded`
-          : 'Locked 5,800-step verification not completed yet',
+          ? `${trainingReadiness.checkpointSave.pipelineRunsCount} ${lang === 'th' ? 'รอบที่บันทึกไว้' : 'run(s) recorded'}`
+          : lang === 'th'
+            ? 'ยังไม่ได้รันการยืนยันครบ 5,800 ขั้นตอนตามเกณฑ์'
+            : 'Locked 5,800-step verification not completed yet',
     },
     {
-      name: 'Evaluation & Benchmarks',
+      name: lang === 'th' ? 'ชุดประเมินผลและ Benchmarks' : 'Evaluation & Benchmarks',
       state: ready && stageBenchLatest?.stage_pass_rates ? 'VERIFIED' : 'PARTIAL',
       detail: stageBenchLatest?.total_tasks
-        ? `Latest stage_bench: ${stageBenchLatest.total_tasks} tasks (${stageBenchLatest.mode})`
-        : 'Harness implemented; must prove against active 41.5M Native Model weights',
+        ? `${lang === 'th' ? 'ผล stage_bench ล่าสุด:' : 'Latest stage_bench:'} ${stageBenchLatest.total_tasks} ${lang === 'th' ? 'งาน' : 'tasks'} (${stageBenchLatest.mode})`
+        : lang === 'th'
+          ? 'ติดตั้ง Harness แล้ว แต่ต้องรอพิสูจน์กับน้ำหนัก 41.5M จริง'
+          : 'Harness implemented; must prove against active 41.5M Native Model weights',
     },
   ];
 
@@ -288,7 +304,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* 01 Software Engineering */}
         <VividCard
-          title="01 — Software Engineering"
+          title={lang === 'th' ? '01 — วิศวกรรมซอฟต์แวร์' : '01 — Software Engineering'}
           subtitle={lang === 'th' ? 'สร้างโปรแกรม ทดสอบ แก้ไข และส่งมอบซอร์สโค้ด' : 'Create, build, test, repair, and deliver verified code'}
           gradientAccent="cyan"
           headerAction={<StatusDot status={seStatus} />}
@@ -296,32 +312,52 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
           <div className="space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-2.5 font-mono tabular-nums">
               <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Capabilities</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                  {lang === 'th' ? 'ความสามารถ' : 'Capabilities'}
+                </div>
                 <div className="mt-1 text-base font-bold text-[var(--app-text-primary)]">
                   {swSummary ? `${swSummary.implemented}/${swSummary.total}` : '—'}
                 </div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Sandbox Files</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                  {lang === 'th' ? 'ไฟล์ใน Sandbox' : 'Sandbox Files'}
+                </div>
                 <div className="mt-1 text-base font-bold text-[var(--app-text-primary)]">{sandboxFiles}</div>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-1.5 font-mono text-[11px]">
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Native Model Assist:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'ช่วยด้วยโมเดล Native:' : 'Native Model Assist:'}
+                </span>
                 <span className={ready ? 'text-[var(--z-ok)] font-bold' : 'text-[var(--z-warn)] font-bold'}>
-                  {ready ? 'NATIVE READY' : 'DETERMINISTIC FALLBACK ONLY'}
+                  {ready
+                    ? lang === 'th'
+                      ? 'NATIVE พร้อมใช้'
+                      : 'NATIVE READY'
+                    : lang === 'th'
+                      ? 'เอนจินเชิงกำหนดเท่านั้น'
+                      : 'DETERMINISTIC FALLBACK ONLY'}
                 </span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Recorded Benchmarks:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'Benchmark ที่บันทึก:' : 'Recorded Benchmarks:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">{swBenchmarks.length || swEvidenceList.length}</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">20-Task Stage Bench:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'ชุดทดสอบ 20 งาน:' : '20-Task Stage Bench:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">
-                  {stageBenchLatest?.total_tasks ? `${stageBenchLatest.total_tasks} tasks` : 'Not run'}
+                  {stageBenchLatest?.total_tasks
+                    ? `${stageBenchLatest.total_tasks} ${lang === 'th' ? 'งาน' : 'tasks'}`
+                    : lang === 'th'
+                      ? 'ยังไม่รัน'
+                      : 'Not run'}
                 </span>
               </div>
             </div>
@@ -332,17 +368,17 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
                   type="button"
                   disabled={runningSwBench}
                   onClick={() => void handleRunSwBench()}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer disabled:opacity-50"
+                  className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50"
                 >
                   {runningSwBench ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-                  <span>Run SE Check</span>
+                  <span>{lang === 'th' ? 'ตรวจความสามารถ SE' : 'Run SE Check'}</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() =>
                   onInspectEvidence({
-                    title: '01 — Software Engineering Evidence',
+                    title: lang === 'th' ? '01 — หลักฐานด้านวิศวกรรมซอฟต์แวร์' : '01 — Software Engineering Evidence',
                     subtitle: 'Capability & execution records from SoftwareProjectManager & BenchmarkArena',
                     status: seStatus,
                     source: '/api/benchmarks + TruthDashboard.softwareEngineering',
@@ -361,13 +397,19 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
                       ? []
                       : ['Bind & verify 41.5M Cloud Checkpoint so code synthesis runs on Native Runtime rather than deterministic engine alone.'],
                     targetModule: isDevOrAdmin ? 'dev_studio' : 'infrastructure_cloud',
-                    targetLabel: isDevOrAdmin ? 'Open Creation Studio' : 'Open Infrastructure',
+                    targetLabel: isDevOrAdmin
+                      ? lang === 'th'
+                        ? 'เปิด DevStudio'
+                        : 'Open Creation Studio'
+                      : lang === 'th'
+                        ? 'เปิดโครงสร้างพื้นฐาน'
+                        : 'Open Infrastructure',
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>Inspect</span>
+                <span>{lang === 'th' ? 'ตรวจสอบหลักฐาน' : 'Inspect'}</span>
               </button>
               {isDevOrAdmin && (
                 <button
@@ -384,7 +426,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
 
         {/* 02 Research & Analysis */}
         <VividCard
-          title="02 — Research & Analysis"
+          title={lang === 'th' ? '02 — วิจัยและวิเคราะห์' : '02 — Research & Analysis'}
           subtitle={lang === 'th' ? 'ดึงข้อมูลจริง วิเคราะห์ และสรุปรายงานพร้อมแหล่งอ้างอิง' : 'Real ingestion, multi-hop graph analysis & SHA-256 citations'}
           gradientAccent="violet"
           headerAction={<StatusDot status={researchStatus} />}
@@ -392,38 +434,48 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
           <div className="space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-2.5 font-mono tabular-nums">
               <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Documents</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                  {lang === 'th' ? 'เอกสารในคลัง' : 'Documents'}
+                </div>
                 <div className="mt-1 text-base font-bold text-[var(--app-text-primary)]">
                   {knowledgeStats?.totalDocuments ?? recentDocs.length}
                 </div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Provenance Gate</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                  {lang === 'th' ? 'เกตที่มาข้อมูล' : 'Provenance Gate'}
+                </div>
                 <div
                   className={`mt-1 text-base font-bold ${
                     provenanceAudit?.status === 'PASS' ? 'text-[var(--z-ok)]' : 'text-[var(--z-warn)]'
                   }`}
                 >
-                  {provenanceAudit?.status || 'UNVERIFIED'}
+                  {provenanceAudit?.status || (lang === 'th' ? 'รอตรวจ' : 'UNVERIFIED')}
                 </div>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-1.5 font-mono text-[11px]">
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Vector Chunks:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'ส่วนข้อมูลเวกเตอร์:' : 'Vector Chunks:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">{knowledgeStats?.totalChunks ?? '—'}</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Dataset Records:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'รายการชุดข้อมูล:' : 'Dataset Records:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">
                   {provenanceAudit?.totalRecords ?? provenanceAudit?.workspaceSummary?.total_records ?? '—'}
                 </span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Latest Doc Hash:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'แฮชเอกสารล่าสุด:' : 'Latest Doc Hash:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">
-                  {recentDocs[0]?.sha256 ? `${String(recentDocs[0].sha256).slice(0, 12)}…` : 'None'}
+                  {recentDocs[0]?.sha256 ? `${String(recentDocs[0].sha256).slice(0, 12)}…` : (lang === 'th' ? 'ไม่มี' : 'None')}
                 </span>
               </div>
             </div>
@@ -432,7 +484,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('research_lab')}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--app-violet)] text-white cursor-pointer hover:opacity-90"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer hover:brightness-110"
               >
                 <FlaskConical className="w-3.5 h-3.5" />
                 <span>{lang === 'th' ? 'เปิด ResearchLab' : 'Open ResearchLab'}</span>
@@ -441,7 +493,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
                 type="button"
                 onClick={() =>
                   onInspectEvidence({
-                    title: '02 — Research & Analysis Evidence',
+                    title: lang === 'th' ? '02 — หลักฐานด้านการวิจัยและวิเคราะห์' : '02 — Research & Analysis Evidence',
                     subtitle: 'Knowledge Workspace ingestion, graph traversal & dataset provenance audit',
                     status: researchStatus,
                     source: '/api/knowledge/stats + /api/knowledge/dataset-provenance-audit',
@@ -460,20 +512,20 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
                     rawJson: { provenanceAudit, recentDocs },
                     remediation: Array.isArray(provenanceAudit?.blockingReasons) ? provenanceAudit.blockingReasons : [],
                     targetModule: 'knowledge_hub',
-                    targetLabel: 'Open Knowledge & Memory',
+                    targetLabel: lang === 'th' ? 'เปิดคลังความรู้และความจำ' : 'Open Knowledge & Memory',
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>Inspect</span>
+                <span>{lang === 'th' ? 'ตรวจสอบหลักฐาน' : 'Inspect'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => onNavigate('knowledge_hub')}
                 className="ml-auto vivid-inline-link"
               >
-                Memory <ArrowRight className="w-3.5 h-3.5" />
+                {lang === 'th' ? 'คลังความรู้' : 'Memory'} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -481,7 +533,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
 
         {/* 03 Autonomous Execution */}
         <VividCard
-          title="03 — Autonomous Execution"
+          title={lang === 'th' ? '03 — ปฏิบัติงานอัตโนมัติ' : '03 — Autonomous Execution'}
           subtitle={lang === 'th' ? 'ทำงานหลายขั้นตอน ทดสอบ และส่งมอบผ่านระบบจริง' : 'Multi-step planning, runtime execution & verified delivery'}
           gradientAccent="emerald"
           headerAction={<StatusDot status={autoStatus} />}
@@ -489,13 +541,17 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
           <div className="space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-2.5 font-mono tabular-nums">
               <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Success Rate</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                  {lang === 'th' ? 'อัตราความสำเร็จ' : 'Success Rate'}
+                </div>
                 <div className="mt-1 text-base font-bold text-[var(--app-text-primary)]">
                   {typeof execAutonomy?.taskSuccessRatePct === 'number' ? `${execAutonomy.taskSuccessRatePct}%` : '—'}
                 </div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Recovery Rate</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                  {lang === 'th' ? 'อัตราการกู้คืน' : 'Recovery Rate'}
+                </div>
                 <div className="mt-1 text-base font-bold text-[var(--app-text-primary)]">
                   {typeof execAutonomy?.recoverySuccessRatePct === 'number' ? `${execAutonomy.recoverySuccessRatePct}%` : '—'}
                 </div>
@@ -504,19 +560,27 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
 
             <div className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] space-y-1.5 font-mono text-[11px]">
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Active Jobs:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'งานที่กำลังทำ:' : 'Active Jobs:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">{execAutonomy?.activeJobs?.length ?? 0}</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Verified Cycles:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'รอบที่ตรวจสอบแล้ว:' : 'Verified Cycles:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">{execAutonomy?.history?.length ?? agentTasks.length}</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Verification Rate:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'อัตราการยืนยันผล:' : 'Verification Rate:'}
+                </span>
                 <span className="text-[var(--app-text-primary)]">
                   {typeof execAutonomy?.verificationSuccessRatePct === 'number'
                     ? `${execAutonomy.verificationSuccessRatePct}%`
-                    : 'NOT_ENOUGH_DATA'}
+                    : lang === 'th'
+                      ? 'ข้อมูลยังไม่พอ'
+                      : 'NOT_ENOUGH_DATA'}
                 </span>
               </div>
             </div>
@@ -525,7 +589,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
               <button
                 type="button"
                 onClick={onOpenQuickTask}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--z-ok)] text-slate-950 cursor-pointer"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer"
               >
                 <Workflow className="w-3.5 h-3.5" />
                 <span>{lang === 'th' ? 'สั่งงานทดสอบจริง' : 'Dispatch Real Task'}</span>
@@ -534,7 +598,7 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
                 type="button"
                 onClick={() =>
                   onInspectEvidence({
-                    title: '03 — Autonomous Execution Evidence',
+                    title: lang === 'th' ? '03 — หลักฐานการปฏิบัติงานอัตโนมัติ' : '03 — Autonomous Execution Evidence',
                     subtitle: 'ActionDrivenEngine verified cycles, recovery attempts & active plans',
                     status: autoStatus,
                     source: 'TruthDashboard.executionAndAutonomy',
@@ -549,20 +613,20 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
                       ? []
                       : ['Complete Native Runtime 41.5M loading and execute multi-step verification tasks to prove autonomous loops on Native Model.'],
                     targetModule: 'automation_center',
-                    targetLabel: 'Open Autonomous Execution',
+                    targetLabel: lang === 'th' ? 'เปิดศูนย์ปฏิบัติงานอัตโนมัติ' : 'Open Autonomous Execution',
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>Inspect</span>
+                <span>{lang === 'th' ? 'ตรวจสอบหลักฐาน' : 'Inspect'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => onNavigate('automation_center')}
                 className="ml-auto vivid-inline-link"
               >
-                <Bot className="w-3.5 h-3.5" /> Engine <ArrowRight className="w-3.5 h-3.5" />
+                <Bot className="w-3.5 h-3.5" /> {lang === 'th' ? 'เอนจิน' : 'Engine'} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -584,10 +648,10 @@ export const ProofOfIntelligence: React.FC<ProofOfIntelligenceProps> = ({
               type="button"
               disabled={runningStageBench}
               onClick={() => void handleRunStageBench()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
+              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
             >
               {runningStageBench ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
-              <span>Run 20-Task Benchmark</span>
+              <span>{lang === 'th' ? 'รันชุดทดสอบ 20 งาน' : 'Run 20-Task Benchmark'}</span>
             </button>
           ) : undefined
         }

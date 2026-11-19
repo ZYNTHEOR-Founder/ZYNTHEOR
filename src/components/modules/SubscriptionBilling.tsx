@@ -303,7 +303,7 @@ export const SubscriptionBilling: React.FC<SubscriptionBillingProps> = ({ status
                 type="button"
                 data-testid="billing-empty-command-center-btn"
                 onClick={() => onNavigate('command_center')}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[var(--app-accent)] text-slate-950 text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer whitespace-nowrap shrink-0"
+                className="min-h-[40px] inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[var(--app-accent-deep)] text-white text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer whitespace-nowrap shrink-0"
               >
                 <span>{th ? 'ไปที่ Command Center' : 'Go to Command Center'}</span>
                 <ArrowRight className="w-4 h-4" />

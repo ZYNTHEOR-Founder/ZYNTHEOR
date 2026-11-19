@@ -165,7 +165,7 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
               data-testid="diagnostics-reconnect-btn"
               disabled={isReconnecting}
               onClick={() => void reconnectNow({ headers: authHeaders() })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer"
+              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer"
             >
               <RotateCw className={`w-3.5 h-3.5 ${isReconnecting ? 'animate-spin' : ''}`} />
               <span>{lang === 'th' ? 'เชื่อม Cloud Runtime' : 'Reconnect'}</span>
@@ -235,7 +235,11 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
                 data-testid="cloud-probe-url-input"
                 value={probeUrlInput}
                 onChange={(e) => setProbeUrlInput(e.target.value)}
-                placeholder="Optional probe URL override (defaults to CLOUD_RUNTIME_URL)"
+                placeholder={
+                  lang === 'th'
+                    ? 'ระบุ URL สำรองสำหรับ Probe (ค่าเริ่มต้นใช้ CLOUD_RUNTIME_URL)'
+                    : 'Optional probe URL override (defaults to CLOUD_RUNTIME_URL)'
+                }
                 className="w-64 sm:w-80 px-3 py-1.5 rounded-xl font-mono text-[11px] bg-[var(--app-bg)] border border-[var(--app-card-border)] focus:border-[var(--app-accent)] outline-none text-[var(--app-text-primary)]"
               />
               <button
@@ -253,7 +257,9 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] font-mono">
             <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-              <div className="text-[10px] text-[var(--app-text-secondary)]">HTTP Status</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'สถานะ HTTP' : 'HTTP Status'}
+              </div>
               <div
                 className={`font-bold mt-0.5 ${
                   cloudRuntimeProbe?.healthy
@@ -270,7 +276,9 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
             </div>
 
             <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-              <div className="text-[10px] text-[var(--app-text-secondary)]">Probe Latency</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'ความหน่วง Probe' : 'Probe Latency'}
+              </div>
               <div
                 className={`font-bold mt-0.5 ${
                   cloudRuntimeProbe?.latencyStatus === 'FAST'
@@ -288,7 +296,9 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
             </div>
 
             <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-              <div className="text-[10px] text-[var(--app-text-secondary)]">DNS Resolution</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'การแปลง DNS' : 'DNS Resolution'}
+              </div>
               <div className="font-bold mt-0.5 text-[var(--app-text-primary)] truncate">
                 {cloudRuntimeProbe?.dnsResolved
                   ? cloudRuntimeProbe.dnsAddress || 'RESOLVED'
@@ -318,24 +328,31 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
 
           <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] font-mono text-[11px] space-y-1">
             <div className="flex justify-between gap-2">
-              <span className="text-[var(--app-text-secondary)]">Target Health URL:</span>
+              <span className="text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'URL เป้าหมาย:' : 'Target Health URL:'}
+              </span>
               <span className="text-[var(--app-text-primary)] break-all text-right">
-                {cloudRuntimeProbe?.healthEndpointUrl || 'CLOUD_RUNTIME_URL not configured'}
+                {cloudRuntimeProbe?.healthEndpointUrl ||
+                  (lang === 'th' ? 'ยังไม่ได้ตั้งค่า CLOUD_RUNTIME_URL' : 'CLOUD_RUNTIME_URL not configured')}
               </span>
             </div>
             <div className="flex justify-between gap-2">
-              <span className="text-[var(--app-text-secondary)]">Failure Category:</span>
+              <span className="text-[var(--app-text-secondary)]">
+                {lang === 'th' ? 'ประเภทความล้มเหลว:' : 'Failure Category:'}
+              </span>
               <span className="text-[var(--app-amber)] font-bold text-right">
                 {cloudRuntimeProbe?.failureCategory || 'PENDING'}
               </span>
             </div>
             <div className="text-[var(--app-text-primary)] pt-1 break-all">
               {cloudRuntimeProbe?.diagnosticSummary ||
-                'Running active network probe to CLOUD_RUNTIME_URL...'}
+                (lang === 'th'
+                  ? 'กำลังยิง Probe ตรวจสอบเครือข่ายไปยัง CLOUD_RUNTIME_URL...'
+                  : 'Running active network probe to CLOUD_RUNTIME_URL...')}
             </div>
             {cloudRuntimeProbe?.responsePreview && (
               <div className="text-[10px] text-[var(--app-text-secondary)] pt-1 break-all border-t border-[var(--app-card-border)]">
-                Response preview: {cloudRuntimeProbe.responsePreview}
+                {lang === 'th' ? 'ตัวอย่างผลตอบกลับ:' : 'Response preview:'} {cloudRuntimeProbe.responsePreview}
               </div>
             )}
           </div>
@@ -355,40 +372,58 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
 
             <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
               <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)]">Provider Mode</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'โหมดผู้ให้บริการ' : 'Provider Mode'}
+                </div>
                 <div className="font-bold text-[var(--app-text-primary)] mt-0.5">
                   {connectivity.cloudConfigProvider || 'none'}
                 </div>
               </div>
               <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)]">Reachability</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'สถานะการเชื่อมต่อ' : 'Reachability'}
+                </div>
                 <div
                   className={`font-bold mt-0.5 ${
                     connectivity.cloudStorageReachable ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
                   }`}
                 >
                   {connectivity.cloudStorageReachable
-                    ? 'REACHABLE'
+                    ? lang === 'th'
+                      ? 'เชื่อมต่อได้'
+                      : 'REACHABLE'
                     : connectivity.cloudStorageConfigured
-                    ? 'UNREACHABLE'
-                    : 'NOT_CONFIGURED'}
+                      ? lang === 'th'
+                        ? 'เข้าถึงไม่ได้'
+                        : 'UNREACHABLE'
+                      : lang === 'th'
+                        ? 'ยังไม่ตั้งค่า'
+                        : 'NOT_CONFIGURED'}
                 </div>
               </div>
             </div>
 
             <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] font-mono text-[11px] space-y-1">
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Source URI:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'แหล่งจัดเก็บ (URI):' : 'Source URI:'}
+                </span>
                 <span className="text-[var(--app-text-primary)] break-all text-right">
-                  {connectivity.cloudSource || connectivity.cloudSourceUri || 'Not configured'}
+                  {connectivity.cloudSource ||
+                    connectivity.cloudSourceUri ||
+                    (lang === 'th' ? 'ยังไม่ตั้งค่า' : 'Not configured')}
                 </span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Missing Vars:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'ตัวแปรที่ขาด:' : 'Missing Vars:'}
+                </span>
                 <span className="text-[var(--z-warn)] break-all text-right">
                   {connectivity.cloudConfigMissingKeys && connectivity.cloudConfigMissingKeys.length > 0
                     ? connectivity.cloudConfigMissingKeys.join(', ')
-                    : 'None'}
+                    : lang === 'th'
+                      ? 'ไม่มี'
+                      : 'None'}
                 </span>
               </div>
             </div>
@@ -406,23 +441,35 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
 
             <div className="grid grid-cols-3 gap-2 text-[11px] font-mono">
               <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)]">Runtime State</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'สถานะรันไทม์' : 'Runtime State'}
+                </div>
                 <div className="font-bold text-[var(--app-text-primary)] mt-0.5 truncate">
                   {connectivity.runtimeState}
                 </div>
               </div>
               <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)]">Weights</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'น้ำหนักโมเดล' : 'Weights'}
+                </div>
                 <div
                   className={`font-bold mt-0.5 ${
                     connectivity.weightsLoaded ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'
                   }`}
                 >
-                  {connectivity.weightsLoaded ? 'LOADED' : 'UNLOADED'}
+                  {connectivity.weightsLoaded
+                    ? lang === 'th'
+                      ? 'โหลดแล้ว'
+                      : 'LOADED'
+                    : lang === 'th'
+                      ? 'ยังไม่โหลด'
+                      : 'UNLOADED'}
                 </div>
               </div>
               <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
-                <div className="text-[10px] text-[var(--app-text-secondary)]">Python Bridge</div>
+                <div className="text-[10px] text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'ตัวเชื่อมต่อ Python' : 'Python Bridge'}
+                </div>
                 <div
                   className={`font-bold mt-0.5 flex items-center gap-1 ${
                     connectivity.pythonBridgeReachable ? 'text-[var(--z-ok)]' : 'text-[var(--z-warn)]'
@@ -431,8 +478,10 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
                   <Cpu className="w-3 h-3 shrink-0" />
                   <span className="truncate">
                     {connectivity.pythonBridgeReachable
-                      ? connectivity.bridgeLifecycle || 'Connected'
-                      : 'Down'}
+                      ? connectivity.bridgeLifecycle || (lang === 'th' ? 'เชื่อมต่อแล้ว' : 'Connected')
+                      : lang === 'th'
+                        ? 'ไม่ทำงาน'
+                        : 'Down'}
                   </span>
                 </div>
               </div>
@@ -440,7 +489,9 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
 
             <div className="p-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] font-mono text-[11px] space-y-1">
               <div className="flex justify-between gap-2">
-                <span className="text-[var(--app-text-secondary)]">Exec Proof:</span>
+                <span className="text-[var(--app-text-secondary)]">
+                  {lang === 'th' ? 'หลักฐานการรัน:' : 'Exec Proof:'}
+                </span>
                 <span className={connectivity.executionVerified ? 'text-[var(--z-ok)] font-bold' : 'text-[var(--z-danger)] font-bold'}>
                   {connectivity.executionVerified ? 'VERIFIED' : 'BLOCKED'}
                 </span>
@@ -450,7 +501,9 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
                 <span className="text-[var(--app-text-primary)] break-all text-right">
                   {connectivity.checkpointSha256
                     ? `${connectivity.checkpointSha256.slice(0, 16)}…`
-                    : 'Not loaded'}
+                    : lang === 'th'
+                      ? 'ยังไม่โหลด'
+                      : 'Not loaded'}
                 </span>
               </div>
             </div>
@@ -469,14 +522,20 @@ export const CloudConnectivityDiagnostics: React.FC<CloudConnectivityDiagnostics
               {lang === 'th' ? 'บันทึกการเชื่อมต่องานเบื้องหลัง (Reconnection Service)' : 'Reconnection Service Event Stream'}
             </span>
             <span>
-              {lastHealthPingAt ? `Last /api/health ping: ${new Date(lastHealthPingAt).toLocaleTimeString()}` : 'Pending ping'}
+              {lastHealthPingAt
+                ? `${lang === 'th' ? 'ตรวจ /api/health ล่าสุด:' : 'Last /api/health ping:'} ${new Date(lastHealthPingAt).toLocaleTimeString()}`
+                : lang === 'th'
+                  ? 'รอตรวจครั้งแรก'
+                  : 'Pending ping'}
               {lastReconnectOutcome ? ` · ${lastReconnectOutcome}` : ''}
             </span>
           </div>
 
           {recentEvents.length === 0 ? (
             <div className="text-[11px] font-mono text-[var(--app-text-secondary)]">
-              Waiting for initial health & Cloud Runtime probe...
+              {lang === 'th'
+                ? 'รอลองเชื่อมและการตรวจสถานะ Cloud Runtime รอบแรก...'
+                : 'Waiting for initial health & Cloud Runtime probe...'}
             </div>
           ) : (
             <div className="space-y-1 max-h-28 overflow-y-auto font-mono text-[11px]">

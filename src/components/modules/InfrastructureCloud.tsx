@@ -95,22 +95,28 @@ export const InfrastructureCloud: React.FC<InfrastructureCloudProps> = ({
   }> = [
     {
       id: 'bucket_connection',
-      title: '1. Cloud Bucket Connection (S3 / R2)',
+      title: lang === 'th' ? '1. การเชื่อมต่อ Cloud Bucket (S3 / R2)' : '1. Cloud Bucket Connection (S3 / R2)',
       state: !connectivity?.cloudStorageConfigured
         ? 'NOT_CONFIGURED'
         : connectivity.cloudStorageReachable
           ? 'VERIFIED'
           : 'BLOCKED',
       summary: connectivity?.cloudStorageConfigured
-        ? `${connectivity.cloudConfigProvider || 's3'} · ${preflight?.bucket || 'bucket configured'}`
-        : 'Bucket env vars not configured',
-      detail: connectivity?.cloudSourceUri || 'Connecting a bucket alone does not mark Target Checkpoint as ready.',
+        ? `${connectivity.cloudConfigProvider || 's3'} · ${preflight?.bucket || (lang === 'th' ? 'ตั้งค่า Bucket แล้ว' : 'bucket configured')}`
+        : lang === 'th'
+          ? 'ยังไม่ได้ตั้งค่าตัวแปร Bucket'
+          : 'Bucket env vars not configured',
+      detail:
+        connectivity?.cloudSourceUri ||
+        (lang === 'th'
+          ? 'การต่อ Bucket ได้เพียงอย่างเดียวไม่ได้แปลว่า Target Checkpoint พร้อมทำงาน'
+          : 'Connecting a bucket alone does not mark Target Checkpoint as ready.'),
       icon: <HardDrive className="w-4 h-4 text-[var(--app-accent)]" />,
       rawJson: { connectivity, preflight },
     },
     {
       id: 'target_checkpoint_exists',
-      title: '2. Target Checkpoint Exists (41.5M)',
+      title: lang === 'th' ? '2. ตรวจพบ Target Checkpoint (41.5M)' : '2. Target Checkpoint Exists (41.5M)',
       state: !connectivity?.cloudStorageConfigured
         ? 'NOT_CONFIGURED'
         : preflight?.checks?.checkpointExists
@@ -119,58 +125,84 @@ export const InfrastructureCloud: React.FC<InfrastructureCloudProps> = ({
       summary: preflight?.checkpointKey || 'checkpoints/model_checkpoint_target_41m.pt',
       detail:
         preflight?.checks?.checkpointExists
-          ? `Found (${preflight.checkpointSizeBytes ?? '—'} bytes · header=${preflight.headerMagicValid ? 'VALID' : 'UNKNOWN'})`
-          : preflight?.error || 'Target checkpoint presence not verified in bucket.',
+          ? `${lang === 'th' ? 'พบไฟล์' : 'Found'} (${preflight.checkpointSizeBytes ?? '—'} bytes · header=${preflight.headerMagicValid ? 'VALID' : 'UNKNOWN'})`
+          : preflight?.error ||
+            (lang === 'th'
+              ? 'ยังไม่ยืนยันการมีอยู่ของ Target Checkpoint ใน Bucket'
+              : 'Target checkpoint presence not verified in bucket.'),
       icon: <ShieldCheck className="w-4 h-4 text-[var(--app-magenta)]" />,
       rawJson: preflight,
     },
     {
       id: 'rw_verification',
-      title: '3. Bucket Read / Write Verification',
+      title: lang === 'th' ? '3. ทดสอบสิทธิ์อ่าน/เขียน Bucket' : '3. Bucket Read / Write Verification',
       state: preflight?.checks?.readWriteVerified
         ? 'VERIFIED'
         : connectivity?.cloudStorageConfigured
           ? 'UNVERIFIED'
           : 'NOT_CONFIGURED',
-      summary: preflight?.checks?.readWriteVerified ? 'Round-trip R/W SHA-256 matched' : 'R/W probe not verified',
-      detail: 'Verifies live PUT/GET roundtrip hash integrity against Cloud Object Storage.',
+      summary: preflight?.checks?.readWriteVerified
+        ? lang === 'th'
+          ? 'ทดสอบเขียน-อ่านไปกลับ SHA-256 ตรงกัน'
+          : 'Round-trip R/W SHA-256 matched'
+        : lang === 'th'
+          ? 'ยังไม่ผ่านการทดสอบ Read/Write'
+          : 'R/W probe not verified',
+      detail:
+        lang === 'th'
+          ? 'ตรวจสอบความสมบูรณ์ของแฮชเมื่ออัปโหลด/ดาวน์โหลดจริงบน Cloud Object Storage'
+          : 'Verifies live PUT/GET roundtrip hash integrity against Cloud Object Storage.',
       icon: <CheckCircle2 className="w-4 h-4 text-[var(--z-ok)]" />,
       rawJson: preflight?.checks,
     },
     {
       id: 'cloud_sql',
-      title: '4. Cloud SQL (PostgreSQL) Persistence',
+      title: lang === 'th' ? '4. ฐานข้อมูลถาวร Cloud SQL (PostgreSQL)' : '4. Cloud SQL (PostgreSQL) Persistence',
       state: cloudSqlConfigured ? 'VERIFIED' : 'NOT_CONFIGURED',
-      summary: cloudSqlConfigured ? 'DATABASE_URL configured' : 'DATABASE_URL / PGHOST unset',
-      detail: cloudDepsItem?.detail || 'Uses fail-safe local encrypted append-only stores until Cloud SQL is configured.',
+      summary: cloudSqlConfigured
+        ? lang === 'th'
+          ? 'ตั้งค่า DATABASE_URL แล้ว'
+          : 'DATABASE_URL configured'
+        : lang === 'th'
+          ? 'ยังไม่ได้ตั้งค่า DATABASE_URL / PGHOST'
+          : 'DATABASE_URL / PGHOST unset',
+      detail:
+        cloudDepsItem?.detail ||
+        (lang === 'th'
+          ? 'ใช้ระบบจัดเก็บเข้ารหัสแบบ Append-Only ในเครื่องชั่วคราวจนกว่าจะตั้งค่า Cloud SQL'
+          : 'Uses fail-safe local encrypted append-only stores until Cloud SQL is configured.'),
       icon: <Database className="w-4 h-4 text-[var(--app-amber)]" />,
       rawJson: cloudDepsItem,
     },
     {
       id: 'storage_integrity',
-      title: '5. Local & Artifact Storage Integrity',
+      title: lang === 'th' ? '5. ความสมบูรณ์ของพื้นที่จัดเก็บและ Artifact' : '5. Local & Artifact Storage Integrity',
       state: ckptSave?.storageWritable ? 'VERIFIED' : ckptSave ? 'BLOCKED' : 'UNVERIFIED',
       summary: ckptSave
-        ? `${ckptSave.storageWritable ? 'WRITABLE' : 'READ_ONLY'} · ${ckptSave.localPtCount} local .pt bundle(s)`
-        : 'Pending probe',
+        ? `${ckptSave.storageWritable ? (lang === 'th' ? 'เขียนได้' : 'WRITABLE') : (lang === 'th' ? 'อ่านได้อย่างเดียว' : 'READ_ONLY')} · ${ckptSave.localPtCount} ${lang === 'th' ? 'ไฟล์ .pt ในเครื่อง' : 'local .pt bundle(s)'}`
+        : lang === 'th'
+          ? 'รอการตรวจสอบ'
+          : 'Pending probe',
       detail: ckptSave?.targetCheckpointPath || 'checkpoints / native_data directories',
       icon: <HardDrive className="w-4 h-4 text-[var(--app-accent)]" />,
       rawJson: ckptSave,
     },
     {
       id: 'express_server',
-      title: '6. Express API Server (/api/health)',
+      title: lang === 'th' ? '6. เซิร์ฟเวอร์ Express API (/api/health)' : '6. Express API Server (/api/health)',
       state: healthProbe?.ok ? 'VERIFIED' : healthProbe ? 'BLOCKED' : 'CHECKING',
       summary: healthProbe
         ? `HTTP ${healthProbe.httpStatus} · ${healthProbe.latencyMs}ms · uptime ${statusData?.uptimeSeconds ?? 0}s`
-        : 'Probing /api/health…',
+        : lang === 'th'
+          ? 'กำลังตรวจสอบ /api/health…'
+          : 'Probing /api/health…',
       detail: healthProbe?.payload ? JSON.stringify(healthProbe.payload) : 'Express + WebSocket /ws/runtime server',
       icon: <Server className="w-4 h-4 text-[var(--z-ok)]" />,
       rawJson: healthProbe,
     },
     {
       id: 'python_bridge',
-      title: '7. Python Native Bridge & NumPy Engine',
+      title: lang === 'th' ? '7. Python Native Bridge & เอนจิน NumPy' : '7. Python Native Bridge & NumPy Engine',
       state:
         connectivity?.pythonBridgeReachable && py?.numpyAvailable
           ? 'VERIFIED'
@@ -180,11 +212,17 @@ export const InfrastructureCloud: React.FC<InfrastructureCloudProps> = ({
       summary: py
         ? `Python ${py.pythonVersion || '—'} · ${py.backendMode || 'UNKNOWN'}`
         : connectivity?.pythonBridgeReachable
-          ? 'Bridge Connected'
-          : 'Bridge Unreachable',
+          ? lang === 'th'
+            ? 'เชื่อมต่อ Bridge แล้ว'
+            : 'Bridge Connected'
+          : lang === 'th'
+            ? 'เชื่อมต่อ Bridge ไม่ได้'
+            : 'Bridge Unreachable',
       detail: py?.numpyAvailable
-        ? `NumPy v${py.numpyVersion} ready for 41.5M tensors`
-        : 'Bridge process is live, but native C-extension NumPy is blocked (np_compat fallback only).',
+        ? `NumPy v${py.numpyVersion} ${lang === 'th' ? 'พร้อมประมวลผล Tensor 41.5M' : 'ready for 41.5M tensors'}`
+        : lang === 'th'
+          ? 'โปรเซส Bridge ทำงานอยู่ แต่ขาด C-extension NumPy (ใช้ได้เฉพาะโหมดสำรอง np_compat)'
+          : 'Bridge process is live, but native C-extension NumPy is blocked (np_compat fallback only).',
       icon: <Cpu className="w-4 h-4 text-[var(--app-accent)]" />,
       rawJson: { pythonBackend: py, bridgeLifecycle: connectivity?.bridgeLifecycle },
     },
@@ -255,17 +293,18 @@ export const InfrastructureCloud: React.FC<InfrastructureCloudProps> = ({
                       status: row.state,
                       source: 'InfrastructureCloud Matrix',
                       details: [
-                        { label: 'State', value: row.state },
-                        { label: 'Summary', value: row.summary },
-                        { label: 'Diagnostic Detail', value: row.detail },
+                        { label: lang === 'th' ? 'สถานะ' : 'State', value: row.state },
+                        { label: lang === 'th' ? 'สรุป' : 'Summary', value: row.summary },
+                        { label: lang === 'th' ? 'รายละเอียดการตรวจ' : 'Diagnostic Detail', value: row.detail },
                       ],
                       rawJson: row.rawJson,
                       targetModule: 'user_settings',
-                      targetLabel: 'Open Settings > Secrets',
+                      targetLabel: lang === 'th' ? 'เปิดหน้า Settings > Secrets' : 'Open Settings > Secrets',
                     })
                   }
-                  className="p-2 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer"
-                  title="Inspect evidence"
+                  className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center p-2 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer"
+                  title={lang === 'th' ? 'ดูหลักฐานเชิงลึก' : 'Inspect evidence'}
+                  aria-label={lang === 'th' ? 'ดูหลักฐานเชิงลึก' : 'Inspect evidence'}
                 >
                   <Eye className="w-3.5 h-3.5" />
                 </button>
@@ -281,18 +320,26 @@ export const InfrastructureCloud: React.FC<InfrastructureCloudProps> = ({
         <Cloud41MCheckpointModule onAfterRuntimeLoad={onRefreshAll} />
       ) : (
         <VividCard
-          title="41.5M Cloud Checkpoint Operations"
-          subtitle="Requires Developer or Administrator role to run live Bucket R/W probes and load runtime weights."
+          title={lang === 'th' ? 'ปฏิบัติการ Cloud Checkpoint 41.5M' : '41.5M Cloud Checkpoint Operations'}
+          subtitle={
+            lang === 'th'
+              ? 'ต้องใช้สิทธิ์ Developer หรือ Administrator เพื่อทดสอบอ่าน/เขียน Bucket จริงและโหลดน้ำหนักเข้า Runtime'
+              : 'Requires Developer or Administrator role to run live Bucket R/W probes and load runtime weights.'
+          }
           gradientAccent="purple"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--app-text-secondary)]">
-            <span>Sign in as Developer or Administrator in Settings to execute R/W bucket probes and fetch 41.5M checkpoints.</span>
+            <span>
+              {lang === 'th'
+                ? 'กรุณาเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator ในหน้า Settings เพื่อรัน Probe และดึง Checkpoint 41.5M'
+                : 'Sign in as Developer or Administrator in Settings to execute R/W bucket probes and fetch 41.5M checkpoints.'}
+            </span>
             <button
               type="button"
               onClick={() => onNavigate('user_settings')}
-              className="px-3.5 py-2 rounded-xl font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer"
+              className="min-h-[40px] px-3.5 py-2 rounded-xl font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer"
             >
-              Open Settings &amp; Role Session
+              {lang === 'th' ? 'เปิดหน้า Settings และเลือกบทบาท' : 'Open Settings & Role Session'}
             </button>
           </div>
         </VividCard>

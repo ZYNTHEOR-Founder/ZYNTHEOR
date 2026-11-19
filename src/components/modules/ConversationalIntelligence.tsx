@@ -462,8 +462,8 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
         <img className="intelligence-hero-art" src="/assets/zyntheor-rainbow-neural.svg" alt="" aria-hidden="true" />
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl vivid-gradient-brand flex items-center justify-center text-[var(--app-text-primary)] font-black shadow-md ">
-              <Brain className="w-5 h-5 text-[var(--z-ok)]" />
+            <div className="w-10 h-10 rounded-2xl vivid-gradient-brand flex items-center justify-center text-white font-black shadow-md ">
+              <Brain className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -510,7 +510,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
           <button
             type="button"
             onClick={handleCreateNewChat}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer touch-manipulation"
+            className="min-h-[40px] w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white vivid-gradient-brand rounded-xl shadow-sm hover:opacity-95 transition-all cursor-pointer touch-manipulation"
           >
             <Plus className="w-4 h-4" />
             <span>{lang === 'th' ? 'บทสนทนาใหม่' : 'New Chat'}</span>
@@ -555,7 +555,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
         </div>
 
         {/* Right: Active Chat Viewport (9 cols) */}
-        <div className="lg:col-span-9 bg-[var(--app-surface)] rounded-3xl border border-[var(--app-card-border)] shadow-sm overflow-hidden flex flex-col h-[calc(100dvh-15rem)] min-h-[460px] max-h-[720px]">
+        <div className="lg:col-span-9 bg-[var(--app-surface)] rounded-2xl border border-[var(--app-card-border)] shadow-sm overflow-hidden flex flex-col h-[calc(100dvh-15rem)] min-h-[460px] max-h-[720px]">
           {/* Pre-Send Sign-in / Runtime Status Bar (always informs user BEFORE typing/sending) */}
           {!isAuthenticated ? (
             <div
@@ -581,7 +581,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                   type="button"
                   data-testid="chat-signin-btn"
                   onClick={() => onNavigate('user_settings')}
-                  className="inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-[var(--app-accent)] text-slate-950 text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer whitespace-nowrap shrink-0"
+                  className="min-h-[40px] inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-[var(--app-accent-deep)] text-white text-xs font-bold hover:brightness-110 transition-all cursor-pointer whitespace-nowrap shrink-0"
                 >
                   {lang === 'th' ? 'เข้าสู่ระบบ' : 'Sign in'}
                 </button>
@@ -609,7 +609,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                   type="button"
                   data-testid="chat-dispatch-action-driven-banner-btn"
                   onClick={() => dispatchActionDrivenPrompt()}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--app-accent)] text-black text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer whitespace-nowrap"
+                  className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--app-accent-deep)] text-white text-xs font-bold hover:brightness-110 transition-all cursor-pointer whitespace-nowrap"
                 >
                   <Play className="w-3.5 h-3.5 shrink-0" />
                   <span>
@@ -663,8 +663,8 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                 }`}
               >
                 {msg.sender === 'assistant' && (
-                  <div className="w-8 h-8 rounded-xl vivid-gradient-brand flex items-center justify-center text-[var(--app-text-primary)] shrink-0 mt-0.5 shadow-sm">
-                    <Brain className="w-4 h-4 text-[var(--z-ok)]" />
+                  <div className="w-8 h-8 rounded-xl vivid-gradient-brand flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm">
+                    <Brain className="w-4 h-4 text-white" />
                   </div>
                 )}
 
@@ -713,7 +713,9 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                           <BookOpen className="w-3.5 h-3.5 text-[var(--z-ok)]" />
                           {lang === 'th' ? `แหล่งข้อมูลอ้างอิงจริง (${msg.citations.length})` : `Verified Knowledge Citations (${msg.citations.length})`}
                         </span>
-                        <span className="text-[10px] text-[var(--z-ok)] font-mono">GROUNDED</span>
+                        <span className="text-[10px] text-[var(--z-ok)] font-mono">
+                          {lang === 'th' ? 'มีแหล่งอ้างอิง' : 'GROUNDED'}
+                        </span>
                       </div>
                       <div className="grid grid-cols-1 gap-2">
                         {msg.citations.map((cite, cIdx) => (
@@ -755,7 +757,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                         <button
                           type="button"
                           onClick={() => setFeedbackGiven((prev) => ({ ...prev, [msg.id]: 'up' }))}
-                          aria-label="Helpful"
+                          aria-label={lang === 'th' ? 'มีประโยชน์' : 'Helpful'}
                           className={`hover:text-[var(--app-text-primary)] cursor-pointer transition-colors ${
                             feedbackGiven[msg.id] === 'up' ? 'text-[var(--z-ok)] font-bold' : ''
                           }`}
@@ -765,7 +767,7 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                         <button
                           type="button"
                           onClick={() => setFeedbackGiven((prev) => ({ ...prev, [msg.id]: 'down' }))}
-                          aria-label="Not helpful"
+                          aria-label={lang === 'th' ? 'ไม่เป็นประโยชน์' : 'Not helpful'}
                           className={`hover:text-[var(--app-text-primary)] cursor-pointer transition-colors ${
                             feedbackGiven[msg.id] === 'down' ? 'text-[var(--z-danger)] font-bold' : ''
                           }`}
@@ -787,9 +789,13 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
 
             {/* Live Streaming Token Preview */}
             {isStreaming && (
-              <div className="flex gap-3 text-xs leading-relaxed justify-start" aria-live="polite" aria-label="Streaming native response">
-                <div className="w-8 h-8 rounded-xl vivid-gradient-brand flex items-center justify-center text-[var(--app-text-primary)] shrink-0 mt-0.5 animate-pulse">
-                  <Brain className="w-4 h-4" />
+              <div
+                className="flex gap-3 text-xs leading-relaxed justify-start"
+                aria-live="polite"
+                aria-label={lang === 'th' ? 'กำลังสตรีมคำตอบจากรันไทม์' : 'Streaming native response'}
+              >
+                <div className="w-8 h-8 rounded-xl vivid-gradient-brand flex items-center justify-center text-white shrink-0 mt-0.5">
+                  <Brain className="w-4 h-4 text-white" />
                 </div>
                 <div className="max-w-3xl flex-1">
                   <StreamingTokenDisplay
@@ -889,9 +895,13 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
             <div className="chat-composer-meta">
               <span>
                 {isStreaming
-                  ? `Active stream · ${liveTokenCount} chunks`
+                  ? lang === 'th'
+                    ? `กำลังสตรีมคำตอบ · ${liveTokenCount} ส่วน`
+                    : `Active stream · ${liveTokenCount} chunks`
                   : runtimeStatus === 'VERIFIED'
-                    ? 'Enter to send · Shift + Enter for a new line'
+                    ? lang === 'th'
+                      ? 'กด Enter เพื่อส่ง · Shift + Enter ขึ้นบรรทัดใหม่'
+                      : 'Enter to send · Shift + Enter for a new line'
                     : lang === 'th'
                       ? 'กดส่งเป็นงาน Action-Driven หรือกดลองแชทได้'
                       : 'Use Action-Driven Engine while model setup finishes'}
@@ -900,7 +910,9 @@ export const ConversationalIntelligence: React.FC<ConversationalIntelligenceProp
                 {isStreaming
                   ? `TTFT ${ttftMs > 0 ? `${ttftMs} ms` : '—'} · ${liveThroughput > 0 ? `${liveThroughput.toLocaleString()} tok/s` : 'streaming'}`
                   : runtimeStatus === 'VERIFIED'
-                    ? 'Cloud Runtime ready'
+                    ? lang === 'th'
+                      ? 'Cloud Runtime พร้อมใช้งาน'
+                      : 'Cloud Runtime ready'
                     : (
                       <button
                         type="button"

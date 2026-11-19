@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EvidenceDrawerItem, ModuleId } from '../types';
 import { StatusDot } from './ui/StatusBadge';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,6 +17,17 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
 }) => {
   const { lang } = useLanguage();
   const [copiedHash, setCopiedHash] = useState(false);
+
+  useEffect(() => {
+    if (!item) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [item, onClose]);
 
   if (!item) return null;
 
@@ -62,8 +73,8 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close evidence viewer"
-            className="p-2 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer shrink-0"
+            aria-label={lang === 'th' ? 'ปิดตัวตรวจสอบหลักฐาน' : 'Close evidence viewer'}
+            className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -73,7 +84,11 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)]">
             <StatusDot status={item.status} />
             <div className="text-[11px] font-mono text-[var(--app-text-secondary)] tabular-nums text-right">
-              {item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Live runtime telemetry'}
+              {item.timestamp
+                ? new Date(item.timestamp).toLocaleString()
+                : lang === 'th'
+                ? 'ข้อมูล Telemetry สด'
+                : 'Live runtime telemetry'}
             </div>
           </div>
 
@@ -89,7 +104,11 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[var(--app-card-border)] text-[10px] font-mono text-[var(--app-accent)] hover:border-[var(--app-accent)] cursor-pointer"
                 >
                   {copiedHash ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                  <span>{copiedHash ? 'Copied' : 'Copy'}</span>
+                  <span>
+                    {copiedHash
+                      ? lang === 'th' ? 'คัดลอกแล้ว' : 'Copied'
+                      : lang === 'th' ? 'คัดลอก' : 'Copy'}
+                  </span>
                 </button>
               </div>
               <div className="font-mono text-[11px] text-[var(--app-text-primary)] break-all select-all">
@@ -100,7 +119,8 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
 
           {item.source && (
             <div className="font-mono text-[11px] text-[var(--app-text-secondary)] break-all">
-              Source: <span className="text-[var(--app-text-primary)]">{item.source}</span>
+              {lang === 'th' ? 'แหล่งที่มา: ' : 'Source: '}
+              <span className="text-[var(--app-text-primary)]">{item.source}</span>
             </div>
           )}
 
@@ -140,7 +160,7 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[var(--app-text-secondary)]">
                 <FileCode2 className="w-3.5 h-3.5" />
-                <span>Raw Inspection Payload</span>
+                <span>{lang === 'th' ? 'ข้อมูลดิบสำหรับตรวจสอบ (JSON)' : 'Raw Inspection Payload'}</span>
               </div>
               <pre className="p-3 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] font-mono text-[10px] text-[var(--app-text-secondary)] overflow-x-auto max-h-60">
                 {JSON.stringify(item.rawJson, null, 2)}
@@ -153,7 +173,7 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+            className="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
           >
             {lang === 'th' ? 'ปิด (Esc)' : 'Close'}
           </button>
@@ -164,7 +184,7 @@ export const EvidenceViewerDrawer: React.FC<EvidenceViewerDrawerProps> = ({
                 onNavigate(item.targetModule!);
                 onClose();
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer"
+              className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white hover:brightness-110 transition-all cursor-pointer"
             >
               <span>{item.targetLabel || (lang === 'th' ? 'เปิดพื้นที่ควบคุม' : 'Open Workspace')}</span>
               <ArrowRight className="w-3.5 h-3.5" />

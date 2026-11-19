@@ -824,7 +824,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
                 disabled={messages.length === 0 || isStreaming}
                 title={lang === 'th' ? 'ล้างหน่วยความจำสนทนาเซสชันนี้' : 'Clear session memory'}
                 aria-label={lang === 'th' ? 'ล้างหน่วยความจำสนทนาเซสชันนี้' : 'Clear session memory'}
-                className="min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center p-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] hover:border-[var(--z-danger)] disabled:opacity-40 cursor-pointer transition-colors"
+                className="min-h-[36px] min-w-[36px] flex items-center justify-center p-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] hover:border-[var(--z-danger)] disabled:opacity-40 cursor-pointer transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -832,7 +832,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label={lang === 'th' ? 'ปิดผู้ช่วย AI' : 'Close AI Assistant'}
-                className="min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center p-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer transition-colors"
+                className="min-h-[36px] min-w-[36px] flex items-center justify-center p-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -851,7 +851,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
                   disabled={isStreaming}
                   className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
                     thinkingMode === mode
-                      ? 'bg-[var(--app-accent)] text-black font-bold'
+                      ? 'bg-[var(--app-accent-deep)] text-white font-bold'
                       : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
                   }`}
                 >
@@ -1194,7 +1194,8 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
               <button
                 type="button"
                 onClick={() => setAttachError(null)}
-                className="cursor-pointer hover:opacity-80"
+                aria-label={lang === 'th' ? 'ปิดข้อความแจ้งเตือน' : 'Dismiss attachment error'}
+                className="min-h-[28px] min-w-[28px] inline-flex items-center justify-center cursor-pointer hover:opacity-80"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -1220,7 +1221,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
                       setAttachments((prev) => prev.filter((_, itemIdx) => itemIdx !== idx))
                     }
                     className="text-[var(--app-text-secondary)] hover:text-[var(--z-danger)] cursor-pointer"
-                    aria-label={`Remove ${att.name}`}
+                    aria-label={lang === 'th' ? `นำไฟล์ ${att.name} ออก` : `Remove ${att.name}`}
                   >
                     <X className="w-3 h-3" />
                   </button>

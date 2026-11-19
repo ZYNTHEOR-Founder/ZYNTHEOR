@@ -559,12 +559,12 @@ export const KnowledgeHub: React.FC = () => {
 
       {/* Tab Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-1.5 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setActiveTab('documents')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'documents'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
@@ -577,9 +577,9 @@ export const KnowledgeHub: React.FC = () => {
               setActiveTab('retrieval');
               if (retrievalResults.length === 0) handleRunRetrieval();
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'retrieval'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
@@ -589,9 +589,9 @@ export const KnowledgeHub: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('curation')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'curation'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
@@ -602,9 +602,9 @@ export const KnowledgeHub: React.FC = () => {
           <button
             data-testid="tab-dataset-provenance"
             onClick={() => setActiveTab('provenance')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'provenance'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
@@ -614,13 +614,13 @@ export const KnowledgeHub: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('architecture')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'architecture'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
-            <ShieldCheck className="w-4 h-4 text-[var(--app-amber)]" />
+            <ShieldCheck className="w-4 h-4" />
             <span>{lang === 'th' ? 'โครงสร้างแยกความจำ 5 ระดับ' : 'Memory Constitution'}</span>
           </button>
 
@@ -651,9 +651,9 @@ export const KnowledgeHub: React.FC = () => {
                 rebuiltAt: new Date().toISOString()
               });
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'graph'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
@@ -663,22 +663,23 @@ export const KnowledgeHub: React.FC = () => {
 
           <button
             onClick={() => { setActiveTab('intelligence'); refreshJobs(); loadParserCaps(); }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            className={`min-h-[38px] px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'intelligence'
-                ? 'bg-[var(--app-accent)] text-[var(--app-bg)] shadow-md '
+                ? 'bg-[var(--app-accent-deep)] text-white shadow-sm'
                 : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)]'
             }`}
           >
             <Cpu className="w-4 h-4" />
-            <span>{lang === 'th' ? 'Intelligence Engine' : 'Intelligence Engine'}</span>
+            <span>{lang === 'th' ? 'เอนจินวิเคราะห์ความรู้' : 'Intelligence Engine'}</span>
           </button>
         </div>
 
         <button
           onClick={fetchKnowledgeData}
           disabled={isLoading}
-          className="p-2 rounded-xl text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)] transition-colors cursor-pointer"
-          title="Refresh Knowledge Store"
+          className="min-h-[38px] min-w-[38px] inline-flex items-center justify-center p-2 rounded-xl text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:bg-[var(--app-bg-secondary)] transition-colors cursor-pointer"
+          title={lang === 'th' ? 'รีเฟรชคลังความรู้' : 'Refresh Knowledge Store'}
+          aria-label={lang === 'th' ? 'รีเฟรชคลังความรู้' : 'Refresh Knowledge Store'}
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[var(--app-accent)]' : ''}`} />
         </button>
@@ -719,7 +720,7 @@ export const KnowledgeHub: React.FC = () => {
 
             <button
               onClick={() => setIsNewDocOpen(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-emerald shadow-md  hover:opacity-95 transition-all cursor-pointer"
+              className="min-h-[40px] w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white vivid-gradient-emerald shadow-sm hover:opacity-95 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>{lang === 'th' ? 'เพิ่มเอกสาร / บันทึกความรู้ใหม่' : 'Create Knowledge Document'}</span>
@@ -816,7 +817,7 @@ export const KnowledgeHub: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-emerald shadow-md  hover:opacity-95 transition-all cursor-pointer"
+                    className="min-h-[40px] px-5 py-2 rounded-xl text-xs font-bold text-white vivid-gradient-emerald shadow-sm hover:opacity-95 transition-all cursor-pointer"
                   >
                     {isSubmitting ? (lang === 'th' ? 'กำลังประมวลผล...' : 'Processing...') : (lang === 'th' ? 'บันทึกและทำดัชนี' : 'Save & Index Document')}
                   </button>
@@ -837,7 +838,7 @@ export const KnowledgeHub: React.FC = () => {
                     <>
                       <button
                         onClick={handleUpdateDocument}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#07101E] bg-[var(--z-ok)] hover:opacity-90 transition-colors cursor-pointer"
+                        className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--app-accent-deep)] hover:brightness-110 transition-colors cursor-pointer"
                       >
                         {lang === 'th' ? 'บันทึกการแก้ไข' : 'Save Changes'}
                       </button>
@@ -951,7 +952,7 @@ export const KnowledgeHub: React.FC = () => {
                         setDeleteDocError(null);
                         setPendingDeleteDoc(doc);
                       }}
-                      className="p-1.5 rounded-xl text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] transition-colors cursor-pointer"
+                      className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center p-1.5 rounded-xl text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_10%,transparent)] transition-colors cursor-pointer"
                       title={lang === 'th' ? 'ลบเอกสาร' : 'Delete document'}
                       aria-label={lang === 'th' ? `ลบเอกสาร ${doc.title}` : `Delete ${doc.title}`}
                     >
@@ -1000,7 +1001,7 @@ export const KnowledgeHub: React.FC = () => {
                 <button
                   onClick={handleRunRetrieval}
                   disabled={isRetrieving}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-emerald shadow-md  hover:opacity-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="min-h-[40px] px-5 py-2.5 rounded-xl text-xs font-bold text-white vivid-gradient-emerald shadow-sm hover:opacity-95 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <Search className="w-4 h-4" />
                   <span>{isRetrieving ? (lang === 'th' ? 'กำลังค้น...' : 'Searching...') : (lang === 'th' ? 'ค้นคืนข้อมูล' : 'Retrieve Chunks')}</span>
@@ -1149,7 +1150,7 @@ export const KnowledgeHub: React.FC = () => {
                 <button
                   onClick={handleCurateDataset}
                   disabled={isCurating || selectedDocIds.length === 0}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-emerald shadow-md  hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                  className="min-h-[40px] px-6 py-2.5 rounded-xl text-xs font-bold text-white vivid-gradient-emerald shadow-sm hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                 >
                   {isCurating ? (lang === 'th' ? 'กำลังคัดกรอง...' : 'Curating...') : (lang === 'th' ? 'ประมวลผลและสร้าง Dataset' : 'Curate & Split Dataset')}
                 </button>
@@ -1501,9 +1502,15 @@ export const KnowledgeHub: React.FC = () => {
                 type="button"
                 disabled={isBulkImporting}
                 onClick={() => setIsMetadataModalOpen(true)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand cursor-pointer disabled:opacity-50"
+                className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold text-white vivid-gradient-brand cursor-pointer disabled:opacity-50"
               >
-                {isBulkImporting ? 'Committing Chunks...' : 'Review & Confirm Metadata'}
+                {isBulkImporting
+                  ? lang === 'th'
+                    ? 'กำลังบันทึก Chunks...'
+                    : 'Committing Chunks...'
+                  : lang === 'th'
+                    ? 'ตรวจสอบและยืนยัน Metadata'
+                    : 'Review & Confirm Metadata'}
               </button>
             </div>
           )}
@@ -1512,11 +1519,20 @@ export const KnowledgeHub: React.FC = () => {
 
       {/* Mandatory Metadata Verification Modal */}
       {isMetadataModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={lang === 'th' ? 'ตรวจสอบ Metadata ก่อนนำเข้า' : 'Metadata Verification'}
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+        >
           <div className="w-full max-w-lg rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] shadow-2xl overflow-hidden">
             <div className="px-5 py-4 border-b border-[var(--app-card-border)] bg-[var(--app-surface-elevated)] flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[var(--app-text-primary)]">Metadata Verification</h3>
-              <span className="text-[10px] font-mono text-[var(--app-amber)]">{bulkFiles.length} file(s)</span>
+              <h3 className="text-sm font-bold text-[var(--app-text-primary)]">
+                {lang === 'th' ? 'ตรวจสอบความถูกต้องของ Metadata' : 'Metadata Verification'}
+              </h3>
+              <span className="text-[10px] font-mono text-[var(--app-amber)]">
+                {bulkFiles.length} {lang === 'th' ? 'ไฟล์' : 'file(s)'}
+              </span>
             </div>
             <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto text-xs font-mono">
               {bulkFiles.map((bf, i) => (
@@ -1531,9 +1547,9 @@ export const KnowledgeHub: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsMetadataModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--app-text-secondary)] cursor-pointer"
+                className="min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--app-text-secondary)] cursor-pointer"
               >
-                Cancel
+                {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
               </button>
               <button
                 type="button"
@@ -1564,9 +1580,9 @@ export const KnowledgeHub: React.FC = () => {
                   }
                   setIsBulkImporting(false);
                 }}
-                className="px-4 py-1.5 rounded-lg text-xs font-bold text-[var(--app-text-primary)] vivid-gradient-brand cursor-pointer"
+                className="min-h-[36px] px-4 py-1.5 rounded-lg text-xs font-bold text-white vivid-gradient-brand cursor-pointer"
               >
-                Confirm Accuracy & Index
+                {lang === 'th' ? 'ยืนยันความถูกต้องและทำดัชนี' : 'Confirm Accuracy & Index'}
               </button>
             </div>
           </div>
@@ -1586,8 +1602,9 @@ export const KnowledgeHub: React.FC = () => {
                   {lang === 'th' ? 'แดชบอร์ดตรวจสอบกราฟความรู้' : 'Graph Verification Dashboard'}
                 </h3>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--app-text-secondary)' }}>
-                  Real counts from persistent knowledge storage — no mocked cluster metadata.
-                  Semantic clusters are derived from document collections and chunk provenance.
+                  {lang === 'th'
+                    ? 'นับจำนวนจริงจากคลังความรู้ถาวร (ไม่มีข้อมูลจำลอง) — กลุ่มความหมายคำนวณจากหมวดหมู่เอกสารและที่มาของ Chunk'
+                    : 'Real counts from persistent knowledge storage — no mocked cluster metadata. Semantic clusters are derived from document collections and chunk provenance.'}
                 </p>
               </div>
               <button
@@ -1622,43 +1639,53 @@ export const KnowledgeHub: React.FC = () => {
                     setIsRebuilding(false);
                   }
                 }}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] cursor-pointer flex items-center gap-1.5"
+                className="min-h-[36px] px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)] cursor-pointer flex items-center gap-1.5"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRebuilding ? 'animate-spin' : ''}`} />
-                Rebuild Index
+                {lang === 'th' ? 'สร้างดัชนีกราฟใหม่' : 'Rebuild Index'}
               </button>
             </div>
 
             {graphReport ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                 <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                  <div className="text-[10px] opacity-70">Nodes (Documents)</div>
+                  <div className="text-[10px] text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'โหนด (เอกสาร)' : 'Nodes (Documents)'}
+                  </div>
                   <div className="text-xl font-mono font-bold text-[var(--app-accent)]">{graphReport.nodeCount}</div>
                 </div>
                 <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                  <div className="text-[10px] opacity-70">Edges (Co-collection)</div>
+                  <div className="text-[10px] text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'เส้นเชื่อม (ร่วมหมวดหมู่)' : 'Edges (Co-collection)'}
+                  </div>
                   <div className="text-xl font-mono font-bold text-[var(--app-amber)]">{graphReport.edgeCount}</div>
                 </div>
                 <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                  <div className="text-[10px] opacity-70">Provenance OK</div>
+                  <div className="text-[10px] text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'ที่มาข้อมูลครบถ้วน' : 'Provenance OK'}
+                  </div>
                   <div className="text-xl font-mono font-bold text-[var(--z-ok)]">{graphReport.provenanceOk}</div>
                 </div>
                 <div className="p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
-                  <div className="text-[10px] opacity-70">Ungrounded</div>
+                  <div className="text-[10px] text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'ขาดหลักฐานอ้างอิง' : 'Ungrounded'}
+                  </div>
                   <div className={`text-xl font-mono font-bold ${graphReport.ungrounded > 0 ? 'text-[var(--z-danger)]' : 'text-[var(--z-ok)]'}`}>
                     {graphReport.ungrounded}
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-xs opacity-70 mb-4">Open this tab or press Rebuild Index to compute verification from live storage.</p>
+              <p className="text-xs text-[var(--app-text-secondary)] mb-4">
+                {lang === 'th' ? 'เปิดแท็บนี้หรือกด สร้างดัชนีกราฟใหม่ เพื่อคำนวณผลจากคลังข้อมูลจริง' : 'Open this tab or press Rebuild Index to compute verification from live storage.'}
+              </p>
             )}
 
             {graphReport && (
               <>
                 <div className="mb-3">
                   <div className="text-[11px] font-bold mb-1.5" style={{ color: 'var(--app-text-primary)' }}>
-                    Collection Clusters (real, not 128 fabricated)
+                    {lang === 'th' ? 'กลุ่มคลังตามหมวดหมู่ (นับจากข้อมูลจริง)' : 'Collection Clusters (real, not 128 fabricated)'}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(graphReport.collections).map(([name, count]) => (
@@ -1666,17 +1693,19 @@ export const KnowledgeHub: React.FC = () => {
                         key={name}
                         className="px-2 py-1 rounded-md text-[10px] font-mono border border-[var(--app-card-border)] bg-[var(--app-surface)]"
                       >
-                        {name}: {count} node{count === 1 ? '' : 's'}
+                        {name}: {count} {lang === 'th' ? 'โหนด' : `node${count === 1 ? '' : 's'}`}
                       </span>
                     ))}
                     {Object.keys(graphReport.collections).length === 0 && (
-                      <span className="text-[11px] text-[var(--z-danger)]">No collections present in storage.</span>
+                      <span className="text-[11px] text-[var(--z-danger)]">
+                        {lang === 'th' ? 'ไม่พบหมวดหมู่เอกสารในคลัง' : 'No collections present in storage.'}
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {graphReport.ungrounded > 0 && (
-                  <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-[11px] font-mono flex items-start gap-2">
+                  <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-[11px] font-mono flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                     <span>
                       {graphReport.ungrounded} document(s) lack complete provenance (missing provenance string,
@@ -1686,15 +1715,17 @@ export const KnowledgeHub: React.FC = () => {
                 )}
 
                 {graphReport.ungrounded === 0 && graphReport.nodeCount > 0 && (
-                  <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] border border-[color-mix(in_srgb,var(--z-ok)_30%,transparent)] text-[var(--z-ok)] text-[11px] font-mono flex items-center gap-2">
+                  <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-ok)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-ok)_35%,transparent)] text-[var(--z-ok)] text-[11px] font-mono flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    All indexed documents carry provenance + contentHash + chunk coverage. Index integrity OK.
+                    {lang === 'th'
+                      ? 'เอกสารทั้งหมดมีหลักฐานที่มา, Content Hash และ Chunk Index ครบถ้วนสมบูรณ์'
+                      : 'All indexed documents carry provenance + contentHash + chunk coverage. Index integrity OK.'}
                   </div>
                 )}
 
                 {graphReport.rebuiltAt && (
-                  <div className="mt-3 text-[10px] font-mono opacity-60">
-                    Last rebuild: {graphReport.rebuiltAt}
+                  <div className="mt-3 text-[10px] font-mono text-[var(--app-text-secondary)]">
+                    {lang === 'th' ? 'สร้างดัชนีล่าสุด:' : 'Last rebuild:'} {graphReport.rebuiltAt}
                   </div>
                 )}
               </>
@@ -1706,19 +1737,21 @@ export const KnowledgeHub: React.FC = () => {
       {activeTab === 'intelligence' && (
         <div className="space-y-4 mt-4">
           {!isAuthenticated && (
-            <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
-              Authentication required. Waiting for server session…
+            <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[color-mix(in_srgb,var(--z-danger)_40%,transparent)] text-[var(--z-danger)] text-xs font-mono">
+              {lang === 'th' ? 'ต้องเข้าสู่ระบบก่อนจึงจะใช้งานเอนจินนี้ได้…' : 'Authentication required. Waiting for server session…'}
             </div>
           )}
           <div className="p-5 rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] space-y-3">
-            <h3 className="text-sm font-bold">Hybrid Retrieval + Grounded Citations</h3>
+            <h3 className="text-sm font-bold">
+              {lang === 'th' ? 'ค้นคืนแบบไฮบริด + แหล่งอ้างอิงจริง' : 'Hybrid Retrieval + Grounded Citations'}
+            </h3>
             <div className="flex gap-2">
               <input value={hybridQuery} onChange={(e) => setHybridQuery(e.target.value)}
                 className="flex-1 px-3 py-2 rounded-lg text-xs bg-[var(--app-surface)] border border-[var(--app-card-border)]"
-                placeholder="Query (Thai or English)" />
+                placeholder={lang === 'th' ? 'คำค้นหา (ไทยหรืออังกฤษ)' : 'Query (Thai or English)'} />
               <button type="button" disabled={hybridLoading || !isAuthenticated} onClick={runHybridRetrieve}
-                className="px-3 py-2 rounded-lg text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer">
-                {hybridLoading ? 'Searching…' : 'Search'}
+                className="min-h-[36px] px-3.5 py-2 rounded-lg text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer">
+                {hybridLoading ? (lang === 'th' ? 'กำลังค้น…' : 'Searching…') : (lang === 'th' ? 'ค้นหา' : 'Search')}
               </button>
             </div>
             {hybridError && <div className="text-xs text-[var(--z-danger)] font-mono">{hybridError}</div>}
@@ -1740,7 +1773,7 @@ export const KnowledgeHub: React.FC = () => {
             )}
           </div>
           <div className="p-5 rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] space-y-3">
-            <h3 className="text-sm font-bold">Binary PDF/DOCX Upload</h3>
+            <h3 className="text-sm font-bold">{lang === 'th' ? 'อัปโหลด PDF/DOCX' : 'Binary PDF/DOCX Upload'}</h3>
             <input
               type="file"
               accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -1751,12 +1784,12 @@ export const KnowledgeHub: React.FC = () => {
               }}
               className="block w-full text-xs"
             />
-            {binaryParsing && <div className="text-xs text-[var(--app-amber)] font-mono">Parsing binary document…</div>}
+            {binaryParsing && <div className="text-xs text-[var(--app-amber)] font-mono">{lang === 'th' ? 'กำลังแปลงไฟล์เอกสาร…' : 'Parsing binary document…'}</div>}
             {binaryError && <div className="text-xs text-[var(--z-danger)] font-mono">{binaryError}</div>}
             {showBinaryModal && binaryPreview && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+              <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
                 <div className="max-w-lg w-full rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] p-5 space-y-3 shadow-xl">
-                  <h4 className="text-sm font-bold">Parsed document preview</h4>
+                  <h4 className="text-sm font-bold">{lang === 'th' ? 'พรีวิวข้อความที่แปลงได้' : 'Parsed document preview'}</h4>
                   <div className="text-[11px] font-mono opacity-80">
                     status={binaryPreview.status} pages={binaryPreview.pageCount} chars={binaryPreview.textLength}
                   </div>
@@ -1765,37 +1798,43 @@ export const KnowledgeHub: React.FC = () => {
                   </pre>
                   <div className="flex gap-2 justify-end">
                     <button type="button" onClick={() => { setShowBinaryModal(false); }}
-                      className="px-3 py-1.5 rounded-lg text-xs border border-[var(--app-card-border)] cursor-pointer">Cancel</button>
+                      className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs border border-[var(--app-card-border)] cursor-pointer">
+                      {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+                    </button>
                     <button type="button" disabled={binaryParsing} onClick={confirmBinaryIngest}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] cursor-pointer disabled:opacity-50">
-                      Confirm Index
+                      className="min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50">
+                      {lang === 'th' ? 'ยืนยันทำดัชนี' : 'Confirm Index'}
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            <h3 className="text-sm font-bold">Bulk Ingestion + Job Monitor</h3>
+            <h3 className="text-sm font-bold">{lang === 'th' ? 'นำเข้าเป็นชุด + ติดตามงาน' : 'Bulk Ingestion + Job Monitor'}</h3>
             <textarea value={ingestText} onChange={(e) => setIngestText(e.target.value)} rows={4}
               className="w-full px-3 py-2 rounded-lg text-xs font-mono bg-[var(--app-surface)] border border-[var(--app-card-border)]" />
             <div className="flex gap-2 flex-wrap">
               <button type="button" disabled={ingestBusy || !isAuthenticated} onClick={runBulkIngest}
-                className="px-3 py-2 rounded-lg text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer">
-                {ingestBusy ? 'Ingesting…' : 'Run Bulk Ingest'}
+                className="min-h-[36px] px-3 py-2 rounded-lg text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer">
+                {ingestBusy ? (lang === 'th' ? 'กำลังนำเข้า…' : 'Ingesting…') : (lang === 'th' ? 'เริ่มนำเข้าเป็นชุด' : 'Run Bulk Ingest')}
               </button>
               <button type="button" onClick={refreshJobs}
-                className="px-3 py-2 rounded-lg text-xs font-bold border border-[var(--app-card-border)] cursor-pointer">Refresh Jobs</button>
+                className="min-h-[36px] px-3 py-2 rounded-lg text-xs font-bold border border-[var(--app-card-border)] cursor-pointer">
+                {lang === 'th' ? 'รีเฟรชงาน' : 'Refresh Jobs'}
+              </button>
             </div>
             {ingestError && <div className="text-xs text-[var(--z-danger)] font-mono">{ingestError}</div>}
             {ingestJobs.slice(0, 5).map((j) => (
               <div key={j.jobId} className="flex items-center justify-between text-[11px] font-mono p-2 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)]">
                 <span>{j.jobId.slice(0, 20)} {j.status} {j.succeeded}/{j.totalItems}</span>
-                <button type="button" onClick={() => resumeJob(j.jobId)} className="text-[var(--app-accent)] cursor-pointer">Resume</button>
+                <button type="button" onClick={() => resumeJob(j.jobId)} className="text-[var(--app-accent)] cursor-pointer">
+                  {lang === 'th' ? 'ทำต่อ' : 'Resume'}
+                </button>
               </div>
             ))}
           </div>
           <div className="p-5 rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] space-y-3">
-            <h3 className="text-sm font-bold">Parsers / Parse Preview</h3>
+            <h3 className="text-sm font-bold">{lang === 'th' ? 'ตรวจสอบรูปแบบไฟล์ (Parse Preview)' : 'Parsers / Parse Preview'}</h3>
             <div className="text-[11px] font-mono">
               {parserCaps ? (
                 <span>
@@ -1804,12 +1843,14 @@ export const KnowledgeHub: React.FC = () => {
                   {' '}ocr={String(parserCaps.parsers?.ocr)} — OCR scanned PDFs: not implemented
                 </span>
               ) : (
-                <span className="opacity-60">Load Intelligence tab to probe parser capabilities from server.</span>
+                <span className="opacity-60">
+                  {lang === 'th' ? 'เปิดแท็บนี้เพื่อตรวจความสามารถ Parser จากเซิร์ฟเวอร์' : 'Load Intelligence tab to probe parser capabilities from server.'}
+                </span>
               )}
             </div>
             <button type="button" onClick={runParsePreview}
-              className="px-3 py-2 rounded-lg text-xs font-bold border border-[var(--app-card-border)] cursor-pointer">
-              Parse Preview (text formats)
+              className="min-h-[36px] px-3 py-2 rounded-lg text-xs font-bold border border-[var(--app-card-border)] cursor-pointer">
+              {lang === 'th' ? 'ทดสอบพรีวิวไฟล์ข้อความ' : 'Parse Preview (text formats)'}
             </button>
             {parsePreviewOut && (
               <pre className="text-[10px] font-mono p-2 rounded-lg bg-[var(--app-surface)] border border-[var(--app-card-border)] overflow-auto max-h-40 whitespace-pre-wrap">{parsePreviewOut}</pre>
@@ -1817,14 +1858,16 @@ export const KnowledgeHub: React.FC = () => {
           </div>
 
           <div className="p-5 rounded-2xl border border-[var(--app-card-border)] bg-[var(--app-card)] space-y-3">
-            <h3 className="text-sm font-bold">Corpus Analysis / Summary</h3>
+            <h3 className="text-sm font-bold">{lang === 'th' ? 'วิเคราะห์และสรุปคลังความรู้' : 'Corpus Analysis / Summary'}</h3>
             <div className="flex gap-2">
               <button type="button" disabled={analysisBusy} onClick={runAnalysis}
-                className="px-3 py-2 rounded-lg text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer">
-                {analysisBusy ? 'Analyzing…' : 'Run Analysis'}
+                className="min-h-[36px] px-3 py-2 rounded-lg text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer">
+                {analysisBusy ? (lang === 'th' ? 'กำลังวิเคราะห์…' : 'Analyzing…') : (lang === 'th' ? 'รันการวิเคราะห์' : 'Run Analysis')}
               </button>
               <button type="button" onClick={runSummary}
-                className="px-3 py-2 rounded-lg text-xs font-bold border border-[var(--app-card-border)] cursor-pointer">Summarize</button>
+                className="min-h-[36px] px-3 py-2 rounded-lg text-xs font-bold border border-[var(--app-card-border)] cursor-pointer">
+                {lang === 'th' ? 'สรุปคลังความรู้' : 'Summarize'}
+              </button>
             </div>
             {analysis && (
               <div className="text-[11px] font-mono">

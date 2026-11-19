@@ -1,0 +1,11 @@
+{
+  "userId": "user_rbac",
+  "tenantId": "tenant_a",
+  "currentHash": "d121be3103007b41edf96f8262925f8c7d61894afe9a041843b631f69445bc57",
+  "currentLogs": [
+    "TAMPERED LINE"
+  ],
+  "sealId": "9b060e12-fda2-4bfe-bae0-2fce06ad15d9",
+  "sealContentHash": "215a1852ac75a0415ad03242dadeb78a0c0753fa48e73c97b010e84e747af48c",
+  "backedUpAt": "2026-11-19T14:37:56.010Z"
+}

@@ -264,7 +264,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
                 disabled={saving}
                 title={lang === 'th' ? `ล้างค่า ${cfg.key}` : `Clear ${cfg.key}`}
                 aria-label={lang === 'th' ? `ล้างค่า ${cfg.key}` : `Clear ${cfg.key}`}
-                className="p-1 rounded-md text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] cursor-pointer disabled:opacity-40"
+                className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center rounded-md text-[var(--z-danger)] hover:bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] cursor-pointer disabled:opacity-40"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -307,7 +307,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
     return (
       <VividCard
         title={lang === 'th' ? 'Settings > Secrets (ตัวแปรระบบคลาวด์)' : 'Settings > Secrets (Cloud Environment)'}
-        subtitle="Developer or Administrator session required"
+        subtitle={lang === 'th' ? 'ต้องใช้สิทธิ์ Developer หรือ Administrator' : 'Developer or Administrator session required'}
         gradientAccent="coral"
       >
         <div className="flex items-start gap-2.5 text-xs text-[var(--app-text-secondary)] p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
@@ -338,7 +338,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
           <div className="flex flex-wrap items-center gap-2">
             <KeyRound className="w-4 h-4 text-[var(--app-amber)]" />
             <span className="font-semibold text-[var(--app-text-primary)]">
-              Config Status:
+              {lang === 'th' ? 'สถานะการตั้งค่า:' : 'Config Status:'}
             </span>
             <StatusBadge
               status={
@@ -350,17 +350,17 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
               }
             />
             <span className="font-mono text-[11px] text-[var(--app-text-secondary)]">
-              Provider: {snapshot?.provider || 'none'} · Store: {snapshot?.storagePath || '.env.local'}
+              {lang === 'th' ? 'ผู้ให้บริการ' : 'Provider'}: {snapshot?.provider || 'none'} · {lang === 'th' ? 'จัดเก็บ' : 'Store'}: {snapshot?.storagePath || '.env.local'}
             </span>
           </div>
           <button
             type="button"
             disabled={loading}
             onClick={() => void loadSecrets()}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-bg)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
+            className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-bg)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-            <span>Reload</span>
+            <span>{lang === 'th' ? 'โหลดใหม่' : 'Reload'}</span>
           </button>
         </div>
 
@@ -368,7 +368,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
         <div className="p-4 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[var(--app-text-primary)]">
             <Cloud className="w-4 h-4 text-[var(--app-accent)]" />
-            <span>1. Native Cloud Runtime Endpoint</span>
+            <span>{lang === 'th' ? '1. จุดเชื่อมต่อ Native Cloud Runtime' : '1. Native Cloud Runtime Endpoint'}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {renderInputField({
@@ -392,7 +392,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
         <div className="p-4 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[var(--app-text-primary)]">
             <HardDrive className="w-4 h-4 text-[var(--app-accent)]" />
-            <span>2. Cloud Object Storage (S3 / Cloudflare R2 / Supabase S3 / MinIO)</span>
+            <span>{lang === 'th' ? '2. คลังข้อมูลคลาวด์ (S3 / Cloudflare R2 / Supabase S3 / MinIO)' : '2. Cloud Object Storage (S3 / Cloudflare R2 / Supabase S3 / MinIO)'}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {renderInputField({
@@ -449,7 +449,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
         <div className="p-4 rounded-2xl bg-[var(--app-surface)] border border-[var(--app-card-border)] space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[var(--app-text-primary)]">
             <KeyRound className="w-4 h-4 text-[var(--app-amber)]" />
-            <span>3. Presigned Checkpoint URLs (Optional Direct Stream)</span>
+            <span>{lang === 'th' ? '3. ลิงก์ Presigned URL สำหรับ Checkpoint (ไม่บังคับ)' : '3. Presigned Checkpoint URLs (Optional Direct Stream)'}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {renderInputField({
@@ -500,7 +500,7 @@ export const CloudSecretsConfig: React.FC<CloudSecretsConfigProps> = ({ onAuditM
             type="submit"
             data-testid="save-secrets-btn"
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>

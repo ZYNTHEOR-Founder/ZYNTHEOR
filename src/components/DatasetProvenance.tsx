@@ -221,20 +221,28 @@ export const DatasetProvenance: React.FC = () => {
               type="button"
               onClick={() => void fetchAudit()}
               disabled={loading || !isAuthenticated}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              className="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>Reload JSON</span>
+              <span>{lang === 'th' ? 'โหลด JSON ใหม่' : 'Reload JSON'}</span>
             </button>
             {isDevOrAdmin && (
               <button
                 type="button"
                 onClick={() => void handleRerunAudit()}
                 disabled={refreshing}
-                className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                className="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{refreshing ? 'Auditing…' : 'Re-run Python Audit'}</span>
+                <span>
+                  {refreshing
+                    ? lang === 'th'
+                      ? 'กำลังตรวจสอบ…'
+                      : 'Auditing…'
+                    : lang === 'th'
+                    ? 'รัน Python Audit ใหม่'
+                    : 'Re-run Python Audit'}
+                </span>
               </button>
             )}
           </div>
@@ -242,7 +250,9 @@ export const DatasetProvenance: React.FC = () => {
       >
         {!isAuthenticated ? (
           <div className="p-4 rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-secondary)]">
-            Sign in to inspect the local dataset governance audit manifest.
+            {lang === 'th'
+              ? 'กรุณาเข้าสู่ระบบเพื่อตรวจสอบบัญชีแหล่งที่มาของชุดข้อมูล'
+              : 'Sign in to inspect the local dataset governance audit manifest.'}
           </div>
         ) : error ? (
           <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--z-danger)_12%,transparent)] border border-[var(--z-danger)] text-xs font-mono text-[var(--z-danger)]">
@@ -250,7 +260,7 @@ export const DatasetProvenance: React.FC = () => {
           </div>
         ) : loading && !audit ? (
           <div className="p-6 text-center text-xs text-[var(--app-text-secondary)] font-mono">
-            Loading artifacts/dataset-governance-audit.json…
+            {lang === 'th' ? 'กำลังโหลด artifacts/dataset-governance-audit.json…' : 'Loading artifacts/dataset-governance-audit.json…'}
           </div>
         ) : audit ? (
           <div className="space-y-5">
@@ -417,7 +427,11 @@ export const DatasetProvenance: React.FC = () => {
                       setSearchQuery(e.target.value);
                       setPageLimit(50);
                     }}
-                    placeholder="Filter by dataset path, SHA-256, license, or issue…"
+                    placeholder={
+                      lang === 'th'
+                        ? 'กรองตาม path ชุดข้อมูล, SHA-256, ไลเซนส์ หรือปัญหา…'
+                        : 'Filter by dataset path, SHA-256, license, or issue…'
+                    }
                     className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                   />
                 </div>
@@ -428,7 +442,7 @@ export const DatasetProvenance: React.FC = () => {
                     onChange={(e) => setSplitFilter(e.target.value as any)}
                     className="px-2.5 py-1.5 rounded-lg text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
                   >
-                    <option value="ALL">All Splits</option>
+                    <option value="ALL">{lang === 'th' ? 'ทุก Split' : 'All Splits'}</option>
                     <option value="train">train</option>
                     <option value="validation">validation</option>
                     <option value="test">test</option>
@@ -437,7 +451,9 @@ export const DatasetProvenance: React.FC = () => {
                 </div>
               </div>
               <div className="text-[11px] font-mono text-[var(--app-text-secondary)] shrink-0">
-                Showing {visibleEntries.length} of {filteredEntries.length} in{' '}
+                {lang === 'th'
+                  ? `แสดง ${visibleEntries.length} จาก ${filteredEntries.length} ในหมวด `
+                  : `Showing ${visibleEntries.length} of ${filteredEntries.length} in `}
                 <span className="font-bold text-[var(--app-text-primary)]">{selectedBucket}</span>
               </div>
             </div>
@@ -445,20 +461,22 @@ export const DatasetProvenance: React.FC = () => {
             {/* Structured Manifest Table */}
             {filteredEntries.length === 0 ? (
               <div className="p-8 text-center rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)] text-xs text-[var(--app-text-secondary)]">
-                No datasets in category <span className="font-mono font-bold">{selectedBucket}</span> matching the current filters.
+                {lang === 'th' ? 'ไม่พบชุดข้อมูลในหมวด ' : 'No datasets in category '}
+                <span className="font-mono font-bold">{selectedBucket}</span>
+                {lang === 'th' ? ' ที่ตรงกับตัวกรอง' : ' matching the current filters.'}
               </div>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-[var(--app-card-border)]">
                 <table className="w-full text-left text-xs font-mono">
                   <thead className="bg-[var(--app-surface-elevated)] text-[var(--app-text-secondary)] border-b border-[var(--app-card-border)]">
                     <tr>
-                      <th className="p-3">Dataset / Document ID</th>
-                      <th className="p-3">Category</th>
+                      <th className="p-3">{lang === 'th' ? 'ชุดข้อมูล / รหัสเอกสาร' : 'Dataset / Document ID'}</th>
+                      <th className="p-3">{lang === 'th' ? 'หมวดหมู่' : 'Category'}</th>
                       <th className="p-3">Split / Kind</th>
-                      <th className="p-3">Chars</th>
+                      <th className="p-3">{lang === 'th' ? 'อักขระ' : 'Chars'}</th>
                       <th className="p-3">SHA-256 Digest</th>
-                      <th className="p-3">Source & License</th>
-                      <th className="p-3">Governance Issues</th>
+                      <th className="p-3">{lang === 'th' ? 'แหล่งที่มาและไลเซนส์' : 'Source & License'}</th>
+                      <th className="p-3">{lang === 'th' ? 'ประเด็นธรรมาภิบาล' : 'Governance Issues'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--app-card-border)] bg-[var(--app-bg)]">

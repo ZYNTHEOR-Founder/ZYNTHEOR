@@ -222,20 +222,20 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
             <AreaChart data={chartData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#d97706" stopOpacity={0.28} />
-                  <stop offset="95%" stopColor="#d97706" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="var(--app-amber)" stopOpacity={0.28} />
+                  <stop offset="95%" stopColor="var(--app-amber)" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorHeap" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.28} />
-                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="var(--app-accent)" stopOpacity={0.28} />
+                  <stop offset="95%" stopColor="var(--app-accent)" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorRss" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="var(--z-ok)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--z-ok)" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="colorRam" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#e11d48" stopOpacity={0.28} />
-                  <stop offset="95%" stopColor="#e11d48" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="var(--z-danger)" stopOpacity={0.28} />
+                  <stop offset="95%" stopColor="var(--z-danger)" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
@@ -244,14 +244,14 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                 dataKey="timeLabel"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: '#94A3B8' }}
+                tick={{ fontSize: 10, fill: 'var(--app-text-secondary)' }}
               />
               <YAxis
                 yAxisId="mb"
                 width={42}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: '#94A3B8' }}
+                tick={{ fontSize: 10, fill: 'var(--app-text-secondary)' }}
               />
               {activeMetric === 'all' && (
                 <YAxis
@@ -261,7 +261,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   tickLine={false}
                   axisLine={false}
                   domain={[0, (max: number) => Math.max(cpuCores, Math.ceil((max || 0) * 1.2))]}
-                  tick={{ fontSize: 10, fill: '#d97706' }}
+                  tick={{ fontSize: 10, fill: 'var(--app-amber)' }}
                 />
               )}
               <Tooltip content={<CustomTooltip />} />
@@ -269,7 +269,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                 verticalAlign="top"
                 align="right"
                 iconType="circle"
-                wrapperStyle={{ fontSize: 11, paddingBottom: 8 }}
+                wrapperStyle={{ fontSize: 11, paddingBottom: 8, color: 'var(--app-text-secondary)' }}
               />
 
               {(activeMetric === 'all' || activeMetric === 'load') && (
@@ -277,8 +277,8 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   yAxisId={activeMetric === 'all' ? 'load' : 'mb'}
                   type="monotone"
                   dataKey="loadAvg1m"
-                  name="Load Avg (1m)"
-                  stroke="#d97706"
+                  name={th ? 'โหลดระบบ (1 นาที)' : 'Load Avg (1m)'}
+                  stroke="var(--app-amber)"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
@@ -292,7 +292,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   type="monotone"
                   dataKey="processHeapUsedMb"
                   name={th ? 'Heap ใช้งาน (MB)' : 'Heap Used (MB)'}
-                  stroke="#0ea5e9"
+                  stroke="var(--app-accent)"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
@@ -305,8 +305,8 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   yAxisId="mb"
                   type="monotone"
                   dataKey="processRssMb"
-                  name="Process RSS (MB)"
-                  stroke="#10b981"
+                  name={th ? 'Process RSS (MB)' : 'Process RSS (MB)'}
+                  stroke="var(--z-ok)"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}
@@ -320,7 +320,7 @@ export const ResourceMonitor: React.FC<ResourceMonitorProps> = ({ history = [], 
                   type="monotone"
                   dataKey="systemRamUsedMb"
                   name={th ? 'RAM เครื่องที่ใช้ (MB)' : 'Host RAM Used (MB)'}
-                  stroke="#e11d48"
+                  stroke="var(--z-danger)"
                   strokeWidth={2}
                   isAnimationActive={false}
                   fillOpacity={1}

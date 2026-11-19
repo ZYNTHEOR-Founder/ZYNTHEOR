@@ -1,6 +1,6 @@
 {
   "version": "ZYNTHEOR_KG_V1",
-  "updatedAt": "2026-11-19T14:21:06.700Z",
+  "updatedAt": "2026-11-19T14:37:42.046Z",
   "nodes": [
     {
       "nodeId": "kgn_5ffa5f870b8d",
@@ -1176,7 +1176,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-19T10:56:13.567Z",
       "updatedAt": "2026-11-19T10:56:13.567Z",
-      "freshnessScore": 0.998,
+      "freshnessScore": 0.997,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795085773561' (RBAC)"
     },
@@ -1194,7 +1194,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-19T10:46:50.248Z",
       "updatedAt": "2026-11-19T10:46:50.248Z",
-      "freshnessScore": 0.998,
+      "freshnessScore": 0.997,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795085210244' (RBAC)"
     },
@@ -1354,7 +1354,7 @@
       "confidence": 0.75,
       "validFrom": "2026-11-18T13:01:22.320Z",
       "updatedAt": "2026-11-18T13:01:22.320Z",
-      "freshnessScore": 0.983,
+      "freshnessScore": 0.982,
       "tenantId": "tenant_a",
       "snippet": "Document 'TenantA Secret 1795006882313' (RBAC)"
     },

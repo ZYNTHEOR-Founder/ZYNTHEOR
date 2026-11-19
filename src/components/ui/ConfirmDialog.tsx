@@ -152,7 +152,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               onClick={onCancel}
               disabled={busy}
               aria-label={th ? 'ปิดหน้าต่างยืนยัน' : 'Close confirmation dialog'}
-              className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] disabled:opacity-40 cursor-pointer shrink-0 transition-colors"
+              className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg border border-[var(--app-card-border)] bg-[var(--app-surface)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] hover:border-[var(--app-accent)] disabled:opacity-40 cursor-pointer shrink-0 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>

@@ -107,7 +107,7 @@
 .context-rail-header { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: 0 12px; border-bottom: 1px solid var(--app-card-border); }
 .context-rail-closed .context-rail-header { justify-content: center; }
 .context-rail-body { padding: 16px 14px; display: grid; gap: 14px; }
-.icon-button { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--app-card-border); border-radius: 8px; background: var(--app-card); color: var(--app-text-secondary); cursor: pointer; }
+.icon-button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--app-card-border); border-radius: 8px; background: var(--app-card); color: var(--app-text-secondary); cursor: pointer; }
 .icon-button:hover { color: var(--app-text-primary); border-color: var(--app-accent); }
 .context-identity { display: flex; align-items: center; gap: 10px; }
 .context-identity strong, .context-identity span { display: block; }
@@ -134,7 +134,7 @@
 .context-action:hover { color: var(--app-accent); }
 .context-action-disabled { cursor: not-allowed; color: var(--app-text-secondary); opacity: .6; }
 .context-action-disabled:hover { color: var(--app-text-secondary); }
-.context-note { padding: 10px; border-left: 2px solid var(--app-card-border); background: var(--app-surface); color: var(--app-text-secondary); font-size: 10.5px; line-height: 1.5; }
+.context-note { padding: 10px; border: 1px solid var(--app-card-border); border-radius: 8px; background: var(--app-surface); color: var(--app-text-secondary); font-size: 10.5px; line-height: 1.5; }
 
 /* Minimal Brand Header & Chat Composer */
 .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 14px 16px; min-height: 56px; border-bottom: 1px solid var(--app-card-border); background: transparent; }

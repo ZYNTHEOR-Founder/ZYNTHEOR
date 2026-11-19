@@ -601,42 +601,62 @@ export const ModelLaboratory: React.FC = () => {
       {/* Top Runtime Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard
-          title="Active parameters"
+          title={lang === 'th' ? 'พารามิเตอร์ที่ใช้งานอยู่' : 'Active parameters'}
           value={ready ? count(activeParams) : '—'}
           subtitle={
             ready
               ? typeof activeParams === 'number' && activeParams < TARGET_PARAMS
-                ? 'Partial Trained Subgraph · not full 41.5M Core'
+                ? lang === 'th'
+                  ? 'ซับกราฟฝึกบางส่วน · ยังไม่ใช่ Core 41.5M เต็ม'
+                  : 'Partial Trained Subgraph · not full 41.5M Core'
+                : lang === 'th'
+                ? 'ยืนยันและโหลดบน Cloud Runtime แล้ว'
                 : 'Cloud Runtime verified & loaded'
+              : lang === 'th'
+              ? 'รอการยืนยันและโหลด Checkpoint ก่อนแสดงผล'
               : 'Hidden until checkpoint verified & loaded'
           }
           icon={<BrainCircuit className="w-5 h-5" />}
           accentColor="cyan"
         />
         <MetricCard
-          title="Target architecture"
+          title={lang === 'th' ? 'สถาปัตยกรรมเป้าหมาย' : 'Target architecture'}
           value={count(runtime?.targetParams ?? TARGET_PARAMS)}
-          subtitle="Specification only · not active"
+          subtitle={lang === 'th' ? 'ข้อมูลสเปกเป้าหมาย · ยังไม่ Active' : 'Specification only · not active'}
           icon={<Cloud className="w-5 h-5" />}
           accentColor="purple"
         />
         <MetricCard
-          title="Local pipeline runs"
-          value={phaseSummary ? `${phaseSummary.trainedCount}/${phaseSummary.totalPhases} phases` : `${runs.length} runs`}
-          subtitle={checkpoints.length > 0 ? `${checkpoints.length} verified .pt bundle(s) on disk` : 'No local .pt candidates yet'}
+          title={lang === 'th' ? 'รอบฝึกใน Pipeline เครื่อง' : 'Local pipeline runs'}
+          value={
+            phaseSummary
+              ? `${phaseSummary.trainedCount}/${phaseSummary.totalPhases} ${lang === 'th' ? 'ระยะ' : 'phases'}`
+              : `${runs.length} ${lang === 'th' ? 'รอบ' : 'runs'}`
+          }
+          subtitle={
+            checkpoints.length > 0
+              ? lang === 'th'
+                ? `พบชุดไฟล์ .pt ที่ตรวจสอบแล้ว ${checkpoints.length} ชุดบนดิสก์`
+                : `${checkpoints.length} verified .pt bundle(s) on disk`
+              : lang === 'th'
+              ? 'ยังไม่มีไฟล์ .pt ในเครื่อง'
+              : 'No local .pt candidates yet'
+          }
           icon={<Layers className="w-5 h-5" />}
           accentColor="emerald"
         />
         <MetricCard
-          title="Checkpoint integrity"
+          title={lang === 'th' ? 'ความสมบูรณ์ Checkpoint' : 'Checkpoint integrity'}
           value={digestVerified ? 'VERIFIED' : inspectionResult?.valid ? 'CANDIDATE OK' : 'UNVERIFIED'}
           subtitle={
             hash
               ? `${hash.slice(0, 16)}…`
               : inspectionResult?.sha256
-              ? `Candidate ${inspectionResult.sha256.slice(0, 12)}…`
+              ? `${lang === 'th' ? 'ตัวเลือก' : 'Candidate'} ${inspectionResult.sha256.slice(0, 12)}…`
               : typeof payloadBytes === 'number'
               ? `${(payloadBytes / (1024 * 1024)).toFixed(2)} MB`
+              : lang === 'th'
+              ? 'ยังไม่มีการปิดผนึก Cloud ที่ใช้งานอยู่'
               : 'No active cloud seal'
           }
           icon={<FileCheck className="w-5 h-5" />}
@@ -819,8 +839,12 @@ export const ModelLaboratory: React.FC = () => {
 
       {/* Runtime & Checkpoint Evidence + Internet vs Model Connectivity */}
       <VividCard
-        title="Runtime, Connectivity & Checkpoint Evidence"
-        subtitle="Separates public Internet reachability from Cloud Storage & Native Runtime checkpoint verification."
+        title={lang === 'th' ? 'หลักฐานรันไทม์ การเชื่อมต่อ และ Checkpoint' : 'Runtime, Connectivity & Checkpoint Evidence'}
+        subtitle={
+          lang === 'th'
+            ? 'แยกการตรวจสอบเครือข่ายอินเทอร์เน็ตออกจากการยืนยัน Cloud Storage และ Checkpoint ของ Native Runtime'
+            : 'Separates public Internet reachability from Cloud Storage & Native Runtime checkpoint verification.'
+        }
         gradientAccent="cyan"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -855,16 +879,20 @@ export const ModelLaboratory: React.FC = () => {
         {/* Two-Track Connectivity Breakdown */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
           <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
-            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">1. Internet Connectivity</div>
+            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">
+              {lang === 'th' ? '1. การเชื่อมต่ออินเทอร์เน็ต' : '1. Internet Connectivity'}
+            </div>
             <div className={`mt-1 font-bold ${internetReachable ? 'text-[var(--z-ok)]' : 'text-[var(--z-danger)]'}`}>
               {internetReachable ? 'ONLINE' : 'OFFLINE'}
             </div>
             <div className="mt-1 text-[11px] text-[var(--app-text-secondary)] break-words">
-              {connectivity?.internetProbeDetail || 'Checking public network reachability…'}
+              {connectivity?.internetProbeDetail || (lang === 'th' ? 'กำลังตรวจสอบเครือข่ายสาธารณะ…' : 'Checking public network reachability…')}
             </div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
-            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">2. Cloud Storage</div>
+            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">
+              {lang === 'th' ? '2. พื้นที่จัดเก็บ Cloud' : '2. Cloud Storage'}
+            </div>
             <div
               className={`mt-1 font-bold ${
                 cloudConfigured && cloudReachable
@@ -879,12 +907,16 @@ export const ModelLaboratory: React.FC = () => {
             <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)] break-all">
               {connectivity?.cloudSourceUri ||
                 (connectivity?.cloudConfigMissingKeys?.length
-                  ? `Missing: ${connectivity.cloudConfigMissingKeys.join(', ')}`
+                  ? `${lang === 'th' ? 'ขาดค่า' : 'Missing'}: ${connectivity.cloudConfigMissingKeys.join(', ')}`
+                  : lang === 'th'
+                  ? 'ตั้งค่า CHECKPOINT_PRESIGNED_URL หรือ S3_BUCKET'
                   : 'Set CHECKPOINT_PRESIGNED_URL or S3_BUCKET')}
             </div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] p-3">
-            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">3. Native Bridge & Weights</div>
+            <div className="text-[10px] font-mono uppercase text-[var(--app-text-secondary)]">
+              {lang === 'th' ? '3. Native Bridge & น้ำหนักโมเดล' : '3. Native Bridge & Weights'}
+            </div>
             <div
               className={`mt-1 font-bold ${
                 ready ? 'text-[var(--z-ok)]' : bridgeReachable ? 'text-[var(--z-warn)]' : 'text-[var(--z-danger)]'
@@ -895,6 +927,8 @@ export const ModelLaboratory: React.FC = () => {
             <div className="mt-1 text-[11px] font-mono text-[var(--app-text-secondary)]">
               {ready
                 ? `Active Params: ${count(activeParams)}`
+                : lang === 'th'
+                ? 'สงวน Active Params จนกว่าจะตรวจ SHA-256 และ Forward-Pass ผ่าน'
                 : 'Active Params withheld until SHA-256 & forward-pass verified'}
             </div>
           </div>
@@ -903,8 +937,10 @@ export const ModelLaboratory: React.FC = () => {
         <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
           {lastError ||
             (ready
-              ? 'Cloud checkpoint is loaded, SHA-256 verified, and forward-pass execution passed on the active bridge.'
-              : connectivity?.reason || 'Cloud checkpoint is not yet connected or loaded.')}
+              ? lang === 'th'
+                ? 'โหลด Cloud Checkpoint ตรวจ SHA-256 และผ่านการทดสอบ Forward-Pass บน Bridge ที่ใช้งานอยู่เรียบร้อยแล้ว'
+                : 'Cloud checkpoint is loaded, SHA-256 verified, and forward-pass execution passed on the active bridge.'
+              : connectivity?.reason || (lang === 'th' ? 'ยังไม่ได้เชื่อมต่อหรือโหลด Cloud Checkpoint' : 'Cloud checkpoint is not yet connected or loaded.'))}
         </p>
 
         {!ready && remediationSteps.length > 0 && (
@@ -931,30 +967,46 @@ export const ModelLaboratory: React.FC = () => {
               type="url"
               value={cloudUrlInput}
               onChange={(e) => setCloudUrlInput(e.target.value)}
-              placeholder="Download Presigned URL — CHECKPOINT_PRESIGNED_URL (https://.../model_checkpoint.pt)"
+              placeholder={
+                lang === 'th'
+                  ? 'URL สำหรับดาวน์โหลด — CHECKPOINT_PRESIGNED_URL (https://.../model_checkpoint.pt)'
+                  : 'Download Presigned URL — CHECKPOINT_PRESIGNED_URL (https://.../model_checkpoint.pt)'
+              }
               className="flex-1 px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
             />
             <input
               type="text"
               value={cloudKeyInput}
               onChange={(e) => setCloudKeyInput(e.target.value)}
-              placeholder="Optional S3 Key"
+              placeholder={lang === 'th' ? 'S3 Key (ไม่บังคับ)' : 'Optional S3 Key'}
               className="sm:w-44 px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
             />
             <button
               type="submit"
               disabled={reconnectBusy}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 disabled:opacity-50 inline-flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+              className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
             >
               <Cloud className="w-3.5 h-3.5" />
-              <span>{reconnectBusy ? 'Connecting…' : 'Connect & Load Checkpoint'}</span>
+              <span>
+                {reconnectBusy
+                  ? lang === 'th'
+                    ? 'กำลังเชื่อมต่อ…'
+                    : 'Connecting…'
+                  : lang === 'th'
+                  ? 'เชื่อมต่อและโหลด Checkpoint'
+                  : 'Connect & Load Checkpoint'}
+              </span>
             </button>
           </div>
           <input
             type="url"
             value={cloudUploadUrlInput}
             onChange={(e) => setCloudUploadUrlInput(e.target.value)}
-            placeholder="Optional Upload Presigned URL — CHECKPOINT_UPLOAD_URL for Publish to Cloud Storage (https://...)"
+            placeholder={
+              lang === 'th'
+                ? 'URL สำหรับอัปโหลด (ไม่บังคับ) — CHECKPOINT_UPLOAD_URL เพื่อเผยแพร่ขึ้น Cloud Storage'
+                : 'Optional Upload Presigned URL — CHECKPOINT_UPLOAD_URL for Publish to Cloud Storage (https://...)'
+            }
             className="w-full px-3 py-2 rounded-xl text-xs font-mono bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
           />
         </form>
@@ -962,19 +1014,19 @@ export const ModelLaboratory: React.FC = () => {
         {hash && <p className="mt-3 text-[11px] break-all font-mono text-[var(--app-text-secondary)]">Verified SHA-256: {hash}</p>}
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="rounded-xl bg-[var(--app-surface-elevated)] p-3">
-            <div className="text-[var(--app-text-secondary)]">Target width</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ความกว้างเวกเตอร์' : 'Target width'}</div>
             <div className="mt-1 font-semibold text-[var(--app-text-primary)]">512</div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] p-3">
-            <div className="text-[var(--app-text-secondary)]">Target layers</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'จำนวนชั้นเลเยอร์' : 'Target layers'}</div>
             <div className="mt-1 font-semibold text-[var(--app-text-primary)]">10</div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] p-3">
-            <div className="text-[var(--app-text-secondary)]">Target heads</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'จำนวน Attention Heads' : 'Target heads'}</div>
             <div className="mt-1 font-semibold text-[var(--app-text-primary)]">8</div>
           </div>
           <div className="rounded-xl bg-[var(--app-surface-elevated)] p-3">
-            <div className="text-[var(--app-text-secondary)]">Knowledge datasets</div>
+            <div className="text-[var(--app-text-secondary)]">{lang === 'th' ? 'ชุดข้อมูลความรู้' : 'Knowledge datasets'}</div>
             <div className="mt-1 font-semibold text-[var(--app-text-primary)]">{datasets.length}</div>
           </div>
         </div>
@@ -1191,10 +1243,18 @@ export const ModelLaboratory: React.FC = () => {
                     type="button"
                     disabled={!selectedCheckpointPath || inspectBusy}
                     onClick={() => void handleInspectCheckpoint()}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer shrink-0"
+                    className="min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer shrink-0"
                   >
                     <Search className="w-3.5 h-3.5" />
-                    <span>{inspectBusy ? 'Inspecting...' : 'Inspect State'}</span>
+                    <span>
+                      {inspectBusy
+                        ? lang === 'th'
+                          ? 'กำลังตรวจสอบ...'
+                          : 'Inspecting...'
+                        : lang === 'th'
+                        ? 'ตรวจสอบสถานะ'
+                        : 'Inspect State'}
+                    </span>
                   </button>
                 </div>
 
@@ -1444,10 +1504,18 @@ export const ModelLaboratory: React.FC = () => {
                     type="button"
                     disabled={trainBusy || (continueMode === 'exact_resume' && !selectedResumeRunId)}
                     onClick={() => void handleRunPhaseTraining()}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] hover:brightness-105 cursor-pointer disabled:opacity-50"
+                    className="min-h-[40px] flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white hover:brightness-105 cursor-pointer disabled:opacity-50"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>{trainBusy ? 'Training PureSeqLM...' : 'Execute Real Training & Verify'}</span>
+                    <span>
+                      {trainBusy
+                        ? lang === 'th'
+                          ? 'กำลังฝึก PureSeqLM...'
+                          : 'Training PureSeqLM...'
+                        : lang === 'th'
+                        ? 'เริ่มการฝึกจริงและตรวจสอบ'
+                        : 'Execute Real Training & Verify'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1635,10 +1703,10 @@ export const ModelLaboratory: React.FC = () => {
                                 type="button"
                                 disabled={busy}
                                 onClick={() => void handlePublishCloud(run.runId)}
-                                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1"
+                                className="min-h-[34px] px-3 py-1 rounded-lg text-[11px] font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50 inline-flex items-center gap-1"
                               >
                                 <Cloud className="w-3 h-3" />
-                                Publish to Cloud Storage
+                                {lang === 'th' ? 'เผยแพร่ขึ้น Cloud Storage' : 'Publish to Cloud Storage'}
                               </button>
                             )}
                           </div>

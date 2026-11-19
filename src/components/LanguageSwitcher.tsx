@@ -50,7 +50,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   // Compact variant (default for Header)
   return (
     <div
-      className={`flex items-center bg-[var(--app-card)] p-0.5 rounded-lg border border-[var(--app-card-border)] text-[11px] font-medium shrink-0 ${className}`}
+      className={`flex items-center min-h-[40px] sm:min-h-[36px] bg-[var(--app-card)] p-0.5 rounded-lg border border-[var(--app-card-border)] text-[11px] font-medium shrink-0 ${className}`}
       role="group"
       aria-label={lang === 'th' ? 'เลือกภาษา' : 'Select language'}
     >
@@ -58,7 +58,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         type="button"
         onClick={() => setLang('th')}
         aria-pressed={lang === 'th'}
-        className={`flex items-center justify-center px-2 py-1 rounded-md transition-colors cursor-pointer ${
+        className={`flex items-center justify-center min-h-[34px] sm:min-h-[30px] min-w-[32px] px-2 py-1 rounded-md transition-colors cursor-pointer ${
           lang === 'th'
             ? 'bg-[var(--app-surface-elevated)] text-[var(--app-accent)] font-semibold'
             : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'
@@ -71,7 +71,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         type="button"
         onClick={() => setLang('en')}
         aria-pressed={lang === 'en'}
-        className={`flex items-center justify-center px-2 py-1 rounded-md transition-colors cursor-pointer ${
+        className={`flex items-center justify-center min-h-[34px] sm:min-h-[30px] min-w-[32px] px-2 py-1 rounded-md transition-colors cursor-pointer ${
           lang === 'en'
             ? 'bg-[var(--app-surface-elevated)] text-[var(--app-accent)] font-semibold'
             : 'text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)]'

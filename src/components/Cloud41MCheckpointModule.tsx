@@ -318,70 +318,100 @@ export const Cloud41MCheckpointModule: React.FC<Cloud41MCheckpointModuleProps> =
             <div className="flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-[var(--app-accent)] shrink-0" />
               <span className="font-bold text-[var(--app-text-primary)]">
-                Cloud Object Storage Service (Read / Write Artifact Probe)
+                {lang === 'th'
+                  ? 'บริการ Cloud Object Storage (ทดสอบอ่าน/เขียนจริง)'
+                  : 'Cloud Object Storage Service (Read / Write Artifact Probe)'}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => void loadStorageConfig()}
-                className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer inline-flex items-center gap-1"
+                className="min-h-[36px] px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer inline-flex items-center gap-1"
               >
                 <RefreshCw className="w-3 h-3" />
-                Refresh Env
+                {lang === 'th' ? 'รีเฟรชค่า env' : 'Refresh Env'}
               </button>
               <button
                 type="button"
                 data-testid="run-cloud-preflight-btn"
                 disabled={runningPreflight}
                 onClick={() => void handleRunCloudPreflight()}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[var(--app-surface-elevated)] border border-[var(--app-accent)]/60 hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="min-h-[36px] px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[var(--app-surface-elevated)] border border-[var(--app-accent)]/60 hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 {runningPreflight ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
-                <span>{runningPreflight ? 'Running Preflight…' : 'Run Cloud Preflight'}</span>
+                <span>
+                  {runningPreflight
+                    ? lang === 'th'
+                      ? 'กำลังรัน Preflight…'
+                      : 'Running Preflight…'
+                    : lang === 'th'
+                      ? 'รัน Cloud Preflight'
+                      : 'Run Cloud Preflight'}
+                </span>
               </button>
               <button
                 type="button"
                 data-testid="test-storage-rw-btn"
                 disabled={testingStorage}
                 onClick={() => void handleTestBucketRW()}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="min-h-[36px] px-3 py-1.5 rounded-lg text-[11px] font-bold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 {testingStorage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
-                <span>{testingStorage ? 'Testing Bucket R/W…' : 'Test Bucket Read/Write'}</span>
+                <span>
+                  {testingStorage
+                    ? lang === 'th'
+                      ? 'กำลังทดสอบ Bucket…'
+                      : 'Testing Bucket R/W…'
+                    : lang === 'th'
+                      ? 'ทดสอบอ่าน/เขียน Bucket'
+                      : 'Test Bucket Read/Write'}
+                </span>
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono tabular-nums text-[11px]">
             <div>
-              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Bucket</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                {lang === 'th' ? 'Bucket' : 'Bucket'}
+              </div>
               <div className="mt-0.5 font-semibold text-[var(--app-text-primary)] truncate">
-                {storageStatus?.bucket || 'NOT_CONFIGURED'}
+                {storageStatus?.bucket || (lang === 'th' ? 'ยังไม่ตั้งค่า' : 'NOT_CONFIGURED')}
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Endpoint / Region</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                {lang === 'th' ? 'Endpoint / ภูมิภาค' : 'Endpoint / Region'}
+              </div>
               <div className="mt-0.5 font-semibold text-[var(--app-text-primary)] truncate">
                 {storageStatus?.endpoint || (storageStatus?.bucket ? `AWS (${storageStatus.region})` : '—')}
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Credentials</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                {lang === 'th' ? 'กุญแจยืนยันตัวตน' : 'Credentials'}
+              </div>
               <div
                 className={`mt-0.5 font-semibold ${
                   storageStatus?.s3Configured ? 'text-[var(--z-ok)]' : 'text-[var(--z-warn)]'
                 }`}
               >
                 {storageStatus?.s3Configured
-                  ? 'S3 KEYS SET'
+                  ? lang === 'th'
+                    ? 'ตั้งค่า S3 แล้ว'
+                    : 'S3 KEYS SET'
                   : storageStatus?.missingKeys?.length
-                  ? `MISSING (${storageStatus.missingKeys.join(', ')})`
-                  : 'NOT_CONFIGURED'}
+                  ? `${lang === 'th' ? 'ขาด:' : 'MISSING'} (${storageStatus.missingKeys.join(', ')})`
+                  : lang === 'th'
+                    ? 'ยังไม่ตั้งค่า'
+                    : 'NOT_CONFIGURED'}
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">Preflight &amp; R/W Probe</div>
+              <div className="text-[10px] text-[var(--app-text-secondary)] uppercase">
+                {lang === 'th' ? 'ผล Preflight & R/W' : 'Preflight & R/W Probe'}
+              </div>
               <div
                 className={`mt-0.5 font-semibold ${
                   testResult?.preflightReady
@@ -476,7 +506,7 @@ export const Cloud41MCheckpointModule: React.FC<Cloud41MCheckpointModuleProps> =
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">
-                S3 Checkpoint Object Key
+                {lang === 'th' ? 'คีย์ Checkpoint ใน S3' : 'S3 Checkpoint Object Key'}
               </label>
               <input
                 type="text"
@@ -488,25 +518,25 @@ export const Cloud41MCheckpointModule: React.FC<Cloud41MCheckpointModuleProps> =
             </div>
             <div>
               <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">
-                Optional Presigned Download URL
+                {lang === 'th' ? 'ลิงก์ Presigned URL (ไม่บังคับ)' : 'Optional Presigned Download URL'}
               </label>
               <input
                 type="url"
                 value={presignedUrlInput}
                 onChange={(e) => setPresignedUrlInput(e.target.value)}
-                placeholder="https://... (leave empty to use S3 env)"
+                placeholder={lang === 'th' ? 'https://... (เว้นว่างเพื่อใช้ค่า S3)' : 'https://... (leave empty to use S3 env)'}
                 className="w-full px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
               />
             </div>
             <div>
               <label className="block text-[11px] font-bold text-[var(--app-text-secondary)] mb-1">
-                Optional Expected SHA-256 Digest
+                {lang === 'th' ? 'ค่าแฮช SHA-256 ที่คาดหวัง (ไม่บังคับ)' : 'Optional Expected SHA-256 Digest'}
               </label>
               <input
                 type="text"
                 value={expectedShaInput}
                 onChange={(e) => setExpectedShaInput(e.target.value)}
-                placeholder="64-char hex digest (optional pin)"
+                placeholder={lang === 'th' ? 'รหัสแฮช 64 ตัวอักษร (สำหรับยึดค่า)' : '64-char hex digest (optional pin)'}
                 className="w-full px-3 py-2 rounded-xl font-mono text-xs bg-[var(--app-input-bg)] border border-[var(--app-card-border)] text-[var(--app-text-primary)]"
               />
             </div>
@@ -514,7 +544,8 @@ export const Cloud41MCheckpointModule: React.FC<Cloud41MCheckpointModuleProps> =
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-[11px] font-mono text-[var(--app-text-secondary)] tabular-nums">
-              Required Parameter Target: <strong className="text-[var(--app-text-primary)]">{EXPECTED_41M_PARAMS.toLocaleString()}</strong> (Float32)
+              {lang === 'th' ? 'เป้าหมายพารามิเตอร์ที่ต้องครบ:' : 'Required Parameter Target:'}{' '}
+              <strong className="text-[var(--app-text-primary)]">{EXPECTED_41M_PARAMS.toLocaleString()}</strong> (Float32)
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -522,20 +553,28 @@ export const Cloud41MCheckpointModule: React.FC<Cloud41MCheckpointModuleProps> =
                 data-testid="verify-41m-cloud-only-btn"
                 disabled={busyMode !== null}
                 onClick={() => void handleFetchAndVerify(true)}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 {busyMode === 'verify' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5 text-[var(--app-accent)]" />}
-                <span>Fetch &amp; Verify Only</span>
+                <span>{lang === 'th' ? 'ดึงและตรวจสอบเท่านั้น' : 'Fetch & Verify Only'}</span>
               </button>
               <button
                 type="button"
                 data-testid="fetch-verify-load-41m-btn"
                 disabled={busyMode !== null}
                 onClick={() => void handleFetchAndVerify(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-slate-950 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 {busyMode === 'load' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Cloud className="w-3.5 h-3.5" />}
-                <span>{busyMode === 'load' ? 'Verifying & Loading…' : 'Fetch, Verify SHA-256 & Load Runtime'}</span>
+                <span>
+                  {busyMode === 'load'
+                    ? lang === 'th'
+                      ? 'กำลังตรวจและโหลด…'
+                      : 'Verifying & Loading…'
+                    : lang === 'th'
+                      ? 'ดึง ตรวจ SHA-256 และโหลดเข้า Runtime'
+                      : 'Fetch, Verify SHA-256 & Load Runtime'}
+                </span>
               </button>
             </div>
           </div>
@@ -544,27 +583,41 @@ export const Cloud41MCheckpointModule: React.FC<Cloud41MCheckpointModuleProps> =
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
             {[
               {
-                label: '1. Cloud Fetch',
+                label: lang === 'th' ? '1. ดึงจาก Cloud' : '1. Cloud Fetch',
                 state: fetchGateState,
-                detail: outcome?.fetchLatencyMs ? `${outcome.fetchLatencyMs} ms` : 'Cloud Object Storage GET',
+                detail: outcome?.fetchLatencyMs
+                  ? `${outcome.fetchLatencyMs} ms`
+                  : lang === 'th'
+                    ? 'ดึงไฟล์จาก Cloud Storage'
+                    : 'Cloud Object Storage GET',
               },
               {
-                label: '2. SHA-256 Hash',
+                label: lang === 'th' ? '2. แฮช SHA-256' : '2. SHA-256 Hash',
                 state: shaGateState,
-                detail: v?.containerSha256 ? `${v.containerSha256.slice(0, 14)}…` : 'Container + Payload',
+                detail: v?.containerSha256
+                  ? `${v.containerSha256.slice(0, 14)}…`
+                  : lang === 'th'
+                    ? 'ตรวจไฟล์และน้ำหนักโมเดล'
+                    : 'Container + Payload',
               },
               {
-                label: '3. Param Count (41.5M)',
+                label: lang === 'th' ? '3. นับพารามิเตอร์ 41.5M' : '3. Param Count (41.5M)',
                 state: paramGateState,
-                detail: v ? `${v.actualParams.toLocaleString()} / ${v.expectedParams.toLocaleString()}` : '41,527,808 required',
+                detail: v
+                  ? `${v.actualParams.toLocaleString()} / ${v.expectedParams.toLocaleString()}`
+                  : lang === 'th'
+                    ? 'ต้องครบ 41,527,808'
+                    : '41,527,808 required',
               },
               {
-                label: '4. Native Runtime Load',
+                label: lang === 'th' ? '4. โหลดเข้า Native Runtime' : '4. Native Runtime Load',
                 state: loadGateState,
                 detail:
                   outcome?.runtimeLoaded && outcome?.runtimeActivation?.activated
                     ? `ACTIVE · SHA MATCH (${outcome.loadLatencyMs ?? '—'} ms)`
-                    : 'Blocked until verified',
+                    : lang === 'th'
+                      ? 'ล็อกไว้จนกว่าจะตรวจผ่าน'
+                      : 'Blocked until verified',
               },
             ].map((gate) => (
               <div

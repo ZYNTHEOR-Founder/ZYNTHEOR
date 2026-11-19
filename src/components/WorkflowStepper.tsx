@@ -279,12 +279,14 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       <div className="flex flex-col gap-3 border-b border-[var(--app-card-border)] pb-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5 text-[11px] font-mono font-semibold tracking-wider">
-            <span className="text-[var(--app-text-secondary)]">AUTONOMOUS WORKFLOW</span>
+            <span className="text-[var(--app-text-secondary)]">
+              {lang === 'th' ? 'เวิร์กโฟลว์อัตโนมัติ' : 'AUTONOMOUS WORKFLOW'}
+            </span>
             <span aria-hidden="true" className="text-[var(--app-text-secondary)]">·</span>
             <span className={`inline-flex items-center gap-1.5 ${headerStatusColor}`}>
               {isStreaming && (
                 <span
-                  className="h-2 w-2 rounded-full bg-[var(--app-accent)] animate-pulse motion-reduce:animate-none"
+                  className="h-2 w-2 rounded-full bg-[var(--app-accent)]"
                   aria-hidden="true"
                 />
               )}
@@ -296,7 +298,7 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               {lang === 'th' ? '7 ขั้นตอนการทำงาน' : '7-Stage Execution Workflow'}
             </h2>
             <span className="text-xs text-[var(--app-text-secondary)]">
-              Task lifecycle · Evidence-based progress
+              {lang === 'th' ? 'วงจรการทำงาน · ติดตามความคืบหน้าจากหลักฐานจริง' : 'Task lifecycle · Evidence-based progress'}
             </span>
           </div>
         </div>

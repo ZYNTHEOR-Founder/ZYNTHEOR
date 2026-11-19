@@ -246,12 +246,20 @@ export const AdminConsole: React.FC = () => {
         <div className="h-48 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={healthHistory}>
-              <XAxis dataKey="time" stroke="#A7BDB2" fontSize={10} />
-              <YAxis stroke="#A7BDB2" fontSize={10} />
-              <Tooltip />
+              <XAxis dataKey="time" stroke="var(--app-text-secondary)" fontSize={10} tickLine={false} />
+              <YAxis stroke="var(--app-text-secondary)" fontSize={10} tickLine={false} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'var(--app-surface)',
+                  borderColor: 'var(--app-card-border)',
+                  color: 'var(--app-text-primary)',
+                  borderRadius: '0.75rem',
+                  fontSize: '11px',
+                }}
+              />
               <Area type="monotone" dataKey="cpu" stroke="var(--app-accent)" fill="var(--app-accent)" fillOpacity={0.2} name="CPU %" />
               <Area type="monotone" dataKey="ram" stroke="var(--app-amber)" fill="var(--app-amber)" fillOpacity={0.15} name="RSS (×10MB)" />
-              <Area type="monotone" dataKey="vram" stroke="var(--app-accent)" fill="var(--app-accent)" fillOpacity={0.15} name="Heap (×10MB)" />
+              <Area type="monotone" dataKey="vram" stroke="var(--z-ok)" fill="var(--z-ok)" fillOpacity={0.15} name="Heap (×10MB)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -314,7 +322,7 @@ export const AdminConsole: React.FC = () => {
                   [{entry.role || entry.actor || 'SYSTEM'}] {entry.action}
                 </span>
                 <span className="text-[var(--app-text-secondary)] shrink-0">
-                  {entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : ''}
+                  {entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString(th ? 'th-TH' : 'en-US') : ''}
                 </span>
               </div>
             ))

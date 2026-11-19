@@ -220,7 +220,7 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
     return (
       <VividCard
         title={lang === 'th' ? 'AWS S3 Credentials & ตรวจสอบ Bucket' : 'AWS S3 Credentials & Bucket Reachability'}
-        subtitle="Developer or Administrator session required"
+        subtitle={lang === 'th' ? 'ต้องเข้าสู่ระบบด้วยสิทธิ์ Developer หรือ Administrator' : 'Developer or Administrator session required'}
         gradientAccent="coral"
       >
         <div className="flex items-start gap-2.5 text-xs text-[var(--app-text-secondary)] p-3 rounded-xl bg-[var(--app-surface)] border border-[var(--app-card-border)]">
@@ -274,10 +274,10 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
             type="button"
             disabled={loading}
             onClick={() => void loadCurrentSettings()}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-bg)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] cursor-pointer disabled:opacity-50"
+            className="min-h-[34px] inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold bg-[var(--app-bg)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-            <span>Reload</span>
+            <span>{lang === 'th' ? 'โหลดใหม่' : 'Reload'}</span>
           </button>
         </div>
 
@@ -556,9 +556,13 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
             data-testid="verify-s3-reachability-btn"
             disabled={verifying || saving}
             onClick={() => void runReachabilityCheck()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] disabled:opacity-50 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--app-surface-elevated)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-[var(--app-text-primary)] disabled:opacity-50 cursor-pointer"
           >
-            <ShieldCheck className={`w-3.5 h-3.5 ${verifying ? 'animate-pulse' : ''}`} />
+            {verifying ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <ShieldCheck className="w-3.5 h-3.5" />
+            )}
             <span>
               {verifying
                 ? lang === 'th'
@@ -574,7 +578,7 @@ export const S3CredentialsValidator: React.FC<S3CredentialsValidatorProps> = ({
             type="submit"
             data-testid="save-s3-credentials-btn"
             disabled={saving || verifying}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent)] text-[var(--app-bg)] disabled:opacity-50 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--app-accent-deep)] text-white disabled:opacity-50 cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>

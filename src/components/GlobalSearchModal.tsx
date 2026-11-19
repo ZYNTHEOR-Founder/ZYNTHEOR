@@ -30,25 +30,26 @@ interface GlobalSearchModalProps {
 
 interface SearchModuleEntry {
   id: ModuleId;
-  title: string;
+  titleEn: string;
+  titleTh: string;
   keywords: string;
   minRole?: 'Developer' | 'Administrator';
 }
 
 const MODULES: SearchModuleEntry[] = [
-  { id: 'command_center', title: 'Intelligence Center (Command Center)', keywords: 'overview control brain truth workflow status blockers' },
-  { id: 'intelligence_core', title: 'Model Core (Native Runtime & Weights)', keywords: '41.5m weights checkpoint sha256 tokenizer inference bridge parity' },
-  { id: 'proof_of_intelligence', title: 'Proof of Intelligence & Benchmark', keywords: 'proof software engineering research autonomous execution benchmark' },
-  { id: 'research_lab', title: 'Training & Research Lab (5,800 Steps)', keywords: 'training numpy perplexity provenance dataset 5800 eval' },
-  { id: 'model_laboratory', title: 'ModelLaboratory (Activation & 7-Phase)', keywords: 'load model weights verification 7-phase activation', minRole: 'Developer' },
-  { id: 'conversational_intelligence', title: 'Reasoning Lab (Bilingual Chat)', keywords: 'chat reasoning inference thai english' },
-  { id: 'knowledge_hub', title: 'Knowledge & Memory', keywords: 'documents ingest knowledge graph episodic memory citations' },
-  { id: 'automation_center', title: 'Autonomous Execution', keywords: 'tasks agent missions jobs workflow' },
-  { id: 'infrastructure_cloud', title: 'Infrastructure (S3/R2, Cloud SQL, Bridge)', keywords: 's3 r2 bucket cloud sql storage health python bridge' },
-  { id: 'analytics_bi', title: 'Execution Insights', keywords: 'insights metrics recovery benchmark success rate' },
-  { id: 'governance_security', title: 'Evidence & Audit Ledger', keywords: 'audit ledger sha256 tamper approval governance', minRole: 'Developer' },
-  { id: 'dev_studio', title: 'Creation Studio (Dev Studio)', keywords: 'code sandbox projects build test repair', minRole: 'Developer' },
-  { id: 'user_settings', title: 'Settings & Cloud Secrets', keywords: 'settings secrets auth role token' },
+  { id: 'command_center', titleEn: 'Intelligence Center (Command Center)', titleTh: 'ศูนย์บัญชาการหลัก (Command Center)', keywords: 'overview control brain truth workflow status blockers ภาพรวม สั่งงาน' },
+  { id: 'intelligence_core', titleEn: 'Model Core (Native Runtime & Weights)', titleTh: 'แกนโมเดล & น้ำหนัก (Model Core)', keywords: '41.5m weights checkpoint sha256 tokenizer inference bridge parity โมเดล พารามิเตอร์' },
+  { id: 'proof_of_intelligence', titleEn: 'Proof of Intelligence & Benchmark', titleTh: 'หลักฐานความสามารถ & Benchmark', keywords: 'proof software engineering research autonomous execution benchmark ทดสอบ หลักฐาน' },
+  { id: 'research_lab', titleEn: 'Training & Research Lab (5,800 Steps)', titleTh: 'ห้องปฏิบัติการวิจัยและฝึกโมเดล', keywords: 'training numpy perplexity provenance dataset 5800 eval ฝึกโมเดล วิจัย' },
+  { id: 'model_laboratory', titleEn: 'ModelLaboratory (Activation & 7-Phase)', titleTh: 'ห้องทดลองโมเดล (เปิดใช้งาน 7 ขั้นตอน)', keywords: 'load model weights verification 7-phase activation โหลดโมเดล', minRole: 'Developer' },
+  { id: 'conversational_intelligence', titleEn: 'Reasoning Lab (Bilingual Chat)', titleTh: 'ห้องสนทนาและวิเคราะห์เหตุผล (Chat)', keywords: 'chat reasoning inference thai english สนทนา แชท' },
+  { id: 'knowledge_hub', titleEn: 'Knowledge & Memory', titleTh: 'คลังความรู้และหน่วยความจำ', keywords: 'documents ingest knowledge graph episodic memory citations เอกสาร ความรู้' },
+  { id: 'automation_center', titleEn: 'Autonomous Execution', titleTh: 'ศูนย์ทำงานอัตโนมัติ (Automation)', keywords: 'tasks agent missions jobs workflow อัตโนมัติ งาน' },
+  { id: 'infrastructure_cloud', titleEn: 'Infrastructure (S3/R2, Cloud SQL, Bridge)', titleTh: 'โครงสร้างพื้นฐานและคลาวด์ (S3/R2 & Bridge)', keywords: 's3 r2 bucket cloud sql storage health python bridge คลาวด์', minRole: undefined },
+  { id: 'analytics_bi', titleEn: 'Execution Insights', titleTh: 'วิเคราะห์ประสิทธิภาพ (Insights)', keywords: 'insights metrics recovery benchmark success rate วิเคราะห์ สถิติ' },
+  { id: 'governance_security', titleEn: 'Evidence & Audit Ledger', titleTh: 'ธรรมาภิบาลและบัญชี Audit SHA-256', keywords: 'audit ledger sha256 tamper approval governance ตรวจสอบ ความปลอดภัย', minRole: 'Developer' },
+  { id: 'dev_studio', titleEn: 'Creation Studio (Dev Studio)', titleTh: 'สตูดิโอพัฒนาซอฟต์แวร์ (Dev Studio)', keywords: 'code sandbox projects build test repair โค้ด ซอฟต์แวร์', minRole: 'Developer' },
+  { id: 'user_settings', titleEn: 'Settings & Cloud Secrets', titleTh: 'การตั้งค่า บัญชี และ Secrets', keywords: 'settings secrets auth role token ตั้งค่า บัญชี' },
 ];
 
 export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
@@ -123,7 +124,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       if (m.minRole === 'Developer' && role === 'User') return false;
       if (m.minRole === 'Administrator' && role !== 'Administrator') return false;
       if (!q) return true;
-      return `${m.title} ${m.keywords}`.toLowerCase().includes(q);
+      return `${m.titleEn} ${m.titleTh} ${m.keywords}`.toLowerCase().includes(q);
     }).slice(0, 6);
   }, [q, role]);
 
@@ -160,7 +161,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       className="fixed inset-0 z-[80] bg-black/65 backdrop-blur-sm flex items-start justify-center p-4 pt-[10vh]"
       role="dialog"
       aria-modal="true"
-      aria-label="Global Search"
+      aria-label={lang === 'th' ? 'ค้นหาทั้งระบบ' : 'Global Search'}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -183,8 +184,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close global search"
-            className="p-1.5 rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer"
+            aria-label={lang === 'th' ? 'ปิดหน้าต่างค้นหา' : 'Close global search'}
+            className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg border border-[var(--app-card-border)] text-[var(--app-text-secondary)] hover:text-[var(--app-text-primary)] cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -207,7 +208,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     }}
                     className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-[var(--app-bg)] border border-[var(--app-card-border)] hover:border-[var(--app-accent)] text-left cursor-pointer"
                   >
-                    <span className="font-semibold text-[var(--app-text-primary)] truncate">{m.title}</span>
+                    <span className="font-semibold text-[var(--app-text-primary)] truncate">
+                      {lang === 'th' ? m.titleTh : m.titleEn}
+                    </span>
                     <ArrowRight className="w-3.5 h-3.5 text-[var(--app-accent)] shrink-0" />
                   </button>
                 ))}
@@ -233,8 +236,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                           status: b.currentState,
                           source: 'TruthDashboard / ActiveBlockers',
                           details: [
-                            { label: 'State', value: b.currentState },
-                            { label: 'Required Dependency', value: b.requiredDependency },
+                            { label: lang === 'th' ? 'สถานะ' : 'State', value: b.currentState },
+                            { label: lang === 'th' ? 'สิ่งที่ต้องพึ่งพา' : 'Required Dependency', value: b.requiredDependency },
                           ],
                           remediation: [b.requiredDependency],
                           targetModule: b.id.includes('cloud') || b.id.includes('bridge') ? 'infrastructure_cloud' : 'intelligence_core',
@@ -301,16 +304,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     onClick={() => {
                       if (onInspectEvidence) {
                         onInspectEvidence({
-                          title: `Audit Record #${a.index}: ${a.action}`,
-                          subtitle: `Actor role: ${a.role}`,
+                          title: lang === 'th' ? `บันทึก Audit #${a.index}: ${a.action}` : `Audit Record #${a.index}: ${a.action}`,
+                          subtitle: lang === 'th' ? `บทบาทผู้ดำเนินการ: ${a.role}` : `Actor role: ${a.role}`,
                           status: 'VERIFIED',
                           hash: a.entry_hash,
                           timestamp: a.timestamp,
                           source: 'AuditLedger SHA-256 Chain',
                           details: [
-                            { label: 'Record Index', value: String(a.index) },
-                            { label: 'Role', value: a.role },
-                            { label: 'Action', value: a.action },
+                            { label: lang === 'th' ? 'ลำดับบันทึก' : 'Record Index', value: String(a.index) },
+                            { label: lang === 'th' ? 'บทบาท' : 'Role', value: a.role },
+                            { label: lang === 'th' ? 'การดำเนินการ' : 'Action', value: a.action },
                           ],
                           targetModule: 'governance_security',
                           targetLabel: lang === 'th' ? 'เปิด Evidence Ledger' : 'Open Evidence Ledger',

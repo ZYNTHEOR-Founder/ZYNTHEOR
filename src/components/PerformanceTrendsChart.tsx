@@ -279,7 +279,7 @@ export const PerformanceTrendsChart: React.FC<PerformanceTrendsChartProps> = ({
               </h4>
               {isRunning && (
                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold bg-[color-mix(in_srgb,var(--z-ok)_18%,transparent)] text-[var(--z-ok)] border border-[color-mix(in_srgb,var(--z-ok)_40%,transparent)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--z-ok)] animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--z-ok)]" />
                   LIVE
                 </span>
               )}
@@ -376,7 +376,7 @@ export const PerformanceTrendsChart: React.FC<PerformanceTrendsChartProps> = ({
               <button
                 type="button"
                 onClick={onNavigateCommandCenter || onOpenQuickTask}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--app-accent)] text-slate-950 text-xs font-bold hover:opacity-95 cursor-pointer"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--app-accent-deep)] text-white text-xs font-bold hover:opacity-95 cursor-pointer"
               >
                 <Play className="w-3 h-3" />
                 <span>{lang === 'th' ? 'ไปที่ Command Center' : 'Go to Command Center'}</span>

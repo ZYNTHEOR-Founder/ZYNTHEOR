@@ -143,7 +143,7 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
             <span
               className={`w-2 h-2 rounded-full ${
                 isStreaming
-                  ? 'bg-[var(--app-accent)] animate-ping'
+                  ? 'bg-[var(--app-accent)]'
                   : 'bg-[var(--z-ok)]'
               }`}
             />
@@ -153,9 +153,9 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
           </div>
 
           {isStreaming && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[var(--app-accent)] font-semibold animate-pulse">
+            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[var(--app-accent)] font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-[var(--app-accent)]" />
-              GENERATING OUTPUT
+              {lang === 'th' ? 'กำลังสร้างคำตอบ' : 'GENERATING OUTPUT'}
             </span>
           )}
         </div>
@@ -191,10 +191,10 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
 
       {/* Structured Reasoning Chain Display (Replacing raw thought dump) */}
       {reasoningSteps.length > 0 && (
-        <div className="border-b border-[var(--app-accent)] dark:border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] bg-[color-mix(in_srgb,var(--app-accent)_30%,transparent)] dark:bg-[color-mix(in_srgb,var(--app-accent)_20%,transparent)]">
+        <div className="border-b border-[var(--app-card-border)] bg-[color-mix(in_srgb,var(--app-accent)_8%,var(--app-surface-elevated))]">
           <button
             onClick={() => setShowReasoningChain(!showReasoningChain)}
-            className="w-full px-4 py-2.5 flex items-center justify-between text-left text-xs font-semibold text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] transition-colors cursor-pointer"
+            className="w-full px-4 py-2.5 flex items-center justify-between text-left text-xs font-semibold text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_14%,var(--app-surface-elevated))] transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-[color-mix(in_srgb,var(--app-accent)_15%,transparent)] text-[var(--app-accent)] flex items-center justify-center font-bold">
@@ -208,14 +208,14 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-[11px] text-[color-mix(in_srgb,var(--app-accent)_80%,transparent)]">
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--app-text-secondary)]">
               <span>{showReasoningChain ? (lang === 'th' ? 'ย่อสรุป' : 'Collapse') : (lang === 'th' ? 'ดูขั้นตอนคิด' : 'Expand')}</span>
               {showReasoningChain ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </div>
           </button>
 
           {showReasoningChain && (
-            <div className="px-4 py-3 bg-[color-mix(in_srgb,var(--app-surface)_70%,transparent)] border-t border-[color-mix(in_srgb,var(--app-accent)_60%,transparent)] dark:border-[color-mix(in_srgb,var(--app-accent)_40%,transparent)] space-y-2.5">
+            <div className="px-4 py-3 bg-[color-mix(in_srgb,var(--app-surface)_70%,transparent)] border-t border-[var(--app-card-border)] space-y-2.5">
               <div className="grid grid-cols-1 gap-2">
                 {reasoningSteps.map((step) => (
                   <div
@@ -277,7 +277,9 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
         className="p-4 md:p-6 text-sm text-[var(--app-text-primary)] leading-relaxed font-sans max-h-[500px] overflow-y-auto space-y-3"
       >
         {formattedSections.length === 0 && !isStreaming ? (
-          <div className="text-[var(--app-text-secondary)] italic text-xs">Waiting for model input...</div>
+          <div className="text-[var(--app-text-secondary)] italic text-xs">
+            {lang === 'th' ? 'รอรับคำสั่งจากผู้ใช้...' : 'Waiting for model input...'}
+          </div>
         ) : (
           formattedSections.map((section) => {
             if (section.type === 'code') {
@@ -313,10 +315,10 @@ export const StreamingTokenDisplay: React.FC<StreamingTokenDisplayProps> = ({
           })
         )}
 
-        {/* Dynamic Vivid Streaming Cursor */}
+        {/* Streaming Cursor */}
         {isStreaming && (
           <span className="inline-flex items-center ml-1">
-            <span className="w-2.5 h-4 rounded-sm bg-[var(--app-accent)] animate-pulse inline-block shadow-sm shadow-[var(--app-accent)]" />
+            <span className="w-2 h-4 rounded-sm bg-[var(--app-accent)] inline-block" />
           </span>
         )}
       </div>
